@@ -22,8 +22,8 @@ class FindOrCreateUserAction
         $this->character_user = CharacterUser::where('character_id', $eve_user->character_id)->first();
 
         // If user is known and character_owner_hash didn't change return the user
-        if (! empty($character_user) && $character_user->character_owner_hash === $eve_user->character_owner_hash)
-            return $character_user->user;
+        if (! empty($this->character_user) && $this->character_user->character_owner_hash === $eve_user->character_owner_hash)
+            return $this->character_user->user;
 
         /*
          * If user is known and character_owner_hash changed it means that the
@@ -65,9 +65,7 @@ class FindOrCreateUserAction
 
 
         // Delete character_user relationship
-        //CharacterUser::where('character_id', $this->eve_user->character_id)->first()->delete();
-        $this->character_user->delete();
-
+        CharacterUser::where('character_id', $this->eve_user->character_id)->delete();
 
     }
 }

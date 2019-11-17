@@ -55,7 +55,7 @@ class FindOrCreateUserActionTest extends TestCase
 
     }
 
-
+    /** @test */
     public function createNewUser()
     {
 
@@ -77,25 +77,31 @@ class FindOrCreateUserActionTest extends TestCase
         ]);
     }
 
-
+    /** @test */
     public function findExistingUserWithTwoCharacter()
     {
 
+        // add 3 characters to test_user
+        $this->test_user->characters()->createMany(
+            factory(CharacterUser::class, 3)->make()->toArray()
+        );
 
-        // 2. add second character to test_user
+        $this->assertEquals(4, $this->test_user->characters->count());
 
-        $this->test_user->characters()->save(factory(CharacterUser::class)->create());
+        // select last character to login
 
-        // 3. find user
+        $secondary_character = $this->test_user->characters->last();
 
-        $second_character = $this->test_user->characters->last();
 
-        $socialiteUser = $this->createMock(SocialiteUser::class);
-        $socialiteUser->character_id = $second_character->character_id;
-        $socialiteUser->name = 'SocialiteUserName';
-        $socialiteUser->character_owner_hash = $second_character->character_owner_hash;
+        $socialiteUser = $this->createSocialUserMock(
+            $secondary_character->character_id,
+            'SocialiteUserName',
+            $secondary_character->character_owner_hash
+        );
 
         $user = (new FindOrCreateUserAction)->execute($socialiteUser);
+
+        $this->assertEquals($this->test_user->id, $user->id);
 
         $this->assertDatabaseMissing('users', [
             'name' => $socialiteUser->name,
@@ -103,7 +109,7 @@ class FindOrCreateUserActionTest extends TestCase
 
         $this->assertDatabaseHas('character_users', [
             'user_id' => $this->test_user->id,
-            'character_id' => $user->id,
+            'character_id' => $secondary_character->character_id,
         ]);
     }
 
@@ -143,58 +149,55 @@ class FindOrCreateUserActionTest extends TestCase
         ]);
     }
 
-
+    /** @test */
     public function dealWithTwoCharactersWithOneChangedOwnerHash()
     {
 
-        // 1. create a user
-        $test_user = factory(User::class)->create();
+        // 1. Create secondary character
+        $secondary_user = factory(CharacterUser::class)->make();
 
-        // 2. create character_users entry for characters
-        factory(CharacterUser::class)->create([
-            'user_id' => $test_user->id,
-            'character_id' => $test_user->id,
-            'character_owner_hash' => $test_user->character_owner_hash
-        ]);
+        // 2. assign secondary user to test_user
+        $this->test_user->characters()->save($secondary_user);
 
-        $secondary_user = factory(CharacterUser::class)->create([
-            'user_id' => $test_user->id,
-        ]);
+        $this->assertEquals(2, $this->test_user->characters->count());
 
         // 3. find user
 
-
-        $socialiteUser = $this->createMock(SocialiteUser::class);
-        $socialiteUser->character_id = $secondary_user->id;
-        $socialiteUser->name = $secondary_user->name;
-        $socialiteUser->character_owner_hash = 'anotherHashValue';
+        $socialiteUser = $this->createSocialUserMock(
+            $secondary_user->character_id,
+            null,
+            'anotherHashValue'
+        );
 
         $user = (new FindOrCreateUserAction)->execute($socialiteUser);
 
         // 4. assert that two users exist
+
+        //dd($secondary_user->character_id,User::first()->characters);
+
+        $this->assertEquals(1, $user->characters->count());
+
+        $this->assertEquals(2, CharacterUser::all()->count());
+
+
         $this->assertDatabaseHas('users', [
-            'id' => $socialiteUser->character_id,
+            'id' => $this->test_user->id,
         ]);
 
         $this->assertDatabaseHas('users', [
-            'id' => $secondary_user->character_id,
+            'id' => $user->id,
         ]);
 
         //5. assert that secondary character is not affiliated to first user
 
         $this->assertDatabaseMissing('character_users', [
-            'user_id' => $test_user->id,
-            'character_id' => $secondary_user->id,
+            'user_id' => $this->test_user->id,
+            'character_id' => $secondary_user->character_id,
         ]);
 
-        $this->assertDatabasHas('character_users', [
-            'user_id' => $test_user->id,
-            'character_id' => $test_user->id,
-        ]);
-
-        $this->assertDatabasHas('character_users', [
-            'user_id' => $secondary_user->id,
-            'character_id' => $secondary_user->id,
+        $this->assertDatabaseHas('character_users', [
+            'user_id' => $user->id,
+            'character_id' => $secondary_user->character_id,
         ]);
     }
 
