@@ -1,0 +1,46 @@
+{
+    "name": "seatplus/auth",
+    "description": "SeAT plus package that handles authentication acognistic to SeAT plus usage as pure API or Web",
+    "type": "seatplus package",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Herpaderp Aldent",
+            "email": "felix.a.huber@gmx.net"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Seatplus\\Auth\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Seatplus\\Auth\\Tests\\": "tests/"
+        }
+    },
+    "minimum-stability": "alpha",
+    "prefer-stable": true,
+    "require": {
+        "php": ">=7.2",
+        "laravel/framework": "^6.0",
+        "laravel/socialite": "^4.1",
+        "seatplus/eseye": "^2.0",
+        "seatplus/eveapi": "dev-develop",
+        "spatie/laravel-permission": "^3.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^4.0",
+        "spatie/phpunit-watcher": "^1.11"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Seatplus\\Auth\\AuthenticationServiceProvider"
+            ]
+        }
+    },
+    "scripts": {
+        "watch": "vendor/bin/phpunit-watcher watch"
+    }
+}
