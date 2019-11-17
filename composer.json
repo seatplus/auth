@@ -1,7 +1,7 @@
 {
     "name": "seatplus/auth",
     "description": "SeAT plus package that handles authentication acognistic to SeAT plus usage as pure API or Web",
-    "type": "seatplus package",
+    "type": "seatplus-package",
     "license": "MIT",
     "authors": [
         {
