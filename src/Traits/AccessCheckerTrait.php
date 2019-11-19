@@ -6,6 +6,7 @@ use Spatie\Permission\Models\Role;
 
 trait AccessCheckerTrait
 {
+    //TODO: as this trait is not being reused maybe include in original user model
     public function hasAccessTo($permission, int $id) : bool
     {
         // start by asserting if id to check belongs to the users characters

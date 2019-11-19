@@ -6,12 +6,12 @@ class GetSsoScopesAction
 {
     public function execute()
     {
-        $scopes = setting('sso_scopes', true);
+        $scopes = config('eveapi.scopes.selected');
 
-        if(is_array($scopes))
+        if(is_array($scopes) && ! empty($scopes))
             return $scopes;
 
         //return ['publicData', 'esi-characters.read_titles.v1'];
-        return config('eveapi.scopes.maximum');
+        return config('eveapi.scopes.minimum');
     }
 }
