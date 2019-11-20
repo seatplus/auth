@@ -10,7 +10,6 @@ use Seatplus\Auth\Models\Permissions\Role;
 use Seatplus\Auth\Tests\TestCase;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
-
 class HasPermissionAndAffiliationMiddlewareTest extends TestCase
 {
     protected $role;
@@ -19,7 +18,6 @@ class HasPermissionAndAffiliationMiddlewareTest extends TestCase
 
     protected function setUp(): void
     {
-
         parent::setUp();
 
         $this->role = Role::create(['name' => 'writer']);
@@ -27,7 +25,6 @@ class HasPermissionAndAffiliationMiddlewareTest extends TestCase
 
         $this->role->givePermissionTo($this->permission);
         $this->test_user->assignRole($this->role);
-
     }
 
     /** @test */
@@ -38,9 +35,10 @@ class HasPermissionAndAffiliationMiddlewareTest extends TestCase
 
         $request = Request::create('/test');
 
-        $middleware = new CheckPermissionAndAffiliation;
+        $middleware = new CheckPermissionAndAffiliation();
 
-        $response = $middleware->handle($request, function ($req) {},'test_permission');
+        $response = $middleware->handle($request, function ($req) {
+        }, 'test_permission');
     }
 
     /** @test */
@@ -48,8 +46,8 @@ class HasPermissionAndAffiliationMiddlewareTest extends TestCase
     {
         $this->role->affiliations()->create([
             'allowed' => collect([
-                'character_ids' => [12345]
-            ])
+                'character_ids' => [12345],
+            ]),
         ]);
 
         $this->actingAs($this->test_user);
@@ -63,12 +61,13 @@ class HasPermissionAndAffiliationMiddlewareTest extends TestCase
             return (new Route('GET', 'testing/{character_id}', []))->bind($request);
         });
 
-        $middleware = new CheckPermissionAndAffiliation;
+        $middleware = new CheckPermissionAndAffiliation();
 
         $this->expectException(HttpException::class);
-        $this->expectExceptionMessage('Missing Permission: ' . $this->permission->name);
+        $this->expectExceptionMessage('Missing Permission: '.$this->permission->name);
 
-        $response = $middleware->handle($request, function () {}, $this->permission->name);
+        $response = $middleware->handle($request, function () {
+        }, $this->permission->name);
     }
 
     /** @test */
@@ -76,8 +75,8 @@ class HasPermissionAndAffiliationMiddlewareTest extends TestCase
     {
         $this->role->affiliations()->create([
             'allowed' => collect([
-                'character_ids' => [12345]
-            ])
+                'character_ids' => [12345],
+            ]),
         ]);
 
         $this->actingAs($this->test_user);
@@ -88,9 +87,10 @@ class HasPermissionAndAffiliationMiddlewareTest extends TestCase
             return (new Route('GET', 'testing/{character_id}', []))->bind($request);
         });
 
-        $middleware = new CheckPermissionAndAffiliation;
+        $middleware = new CheckPermissionAndAffiliation();
 
-        $response = $middleware->handle($request, function () {}, $this->permission->name);
+        $response = $middleware->handle($request, function () {
+        }, $this->permission->name);
 
         $this->assertNull($response);
     }
@@ -101,24 +101,23 @@ class HasPermissionAndAffiliationMiddlewareTest extends TestCase
         // For testing create a forbidden affiliation
         $this->role->affiliations()->create([
             'forbidden' => collect([
-                'character_ids' => [$this->test_user->characters->first()->character_id]
-            ])
+                'character_ids' => [$this->test_user->characters->first()->character_id],
+            ]),
         ]);
 
         $this->actingAs($this->test_user);
 
-        $request = new Request([], [], [], [], [], ['REQUEST_URI' => 'testing/' . $this->test_user->characters->first()->character_id ]);
+        $request = new Request([], [], [], [], [], ['REQUEST_URI' => 'testing/'.$this->test_user->characters->first()->character_id]);
 
         $request->setRouteResolver(function () use ($request) {
             return (new Route('GET', 'testing/{character_id}', []))->bind($request);
         });
 
-        $middleware = new CheckPermissionAndAffiliation;
+        $middleware = new CheckPermissionAndAffiliation();
 
-        $response = $middleware->handle($request, function () {}, $this->permission->name);
+        $response = $middleware->handle($request, function () {
+        }, $this->permission->name);
 
         $this->assertNull($response);
-
     }
-
 }

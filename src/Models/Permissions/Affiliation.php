@@ -17,8 +17,8 @@ class Affiliation extends Model
      * @var array
      */
     protected $casts = [
-        'allowed' => 'array',
-        'inverse' => 'array',
+        'allowed'   => 'array',
+        'inverse'   => 'array',
         'forbidden' => 'array',
     ];
 
@@ -30,5 +30,4 @@ class Affiliation extends Model
     protected $fillable = [
         'allowed', 'inverse', 'forbidden',
     ];
-
 }

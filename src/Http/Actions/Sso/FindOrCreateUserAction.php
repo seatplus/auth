@@ -22,31 +22,31 @@ class FindOrCreateUserAction
         $this->character_user = CharacterUser::where('character_id', $eve_user->character_id)->first();
 
         // If user is known and character_owner_hash didn't change return the user
-        if (! empty($this->character_user) && $this->character_user->character_owner_hash === $eve_user->character_owner_hash)
+        if (!empty($this->character_user) && $this->character_user->character_owner_hash === $eve_user->character_owner_hash) {
             return $this->character_user->user;
+        }
 
         /*
          * If user is known and character_owner_hash changed it means that the
          * character might have been transferred. We create a new user and
          * return the new user
          */
-        if (! empty($this->character_user) && $this->character_user->character_owner_hash !== $this->eve_user->character_owner_hash)
+        if (!empty($this->character_user) && $this->character_user->character_owner_hash !== $this->eve_user->character_owner_hash) {
             $this->handleChangedOwnerHash();
+        }
 
         $user = User::create([
             'main_character' => $eve_user->name,
-            'active'     => true
+            'active'         => true,
         ]);
 
         $this->createCharacterUserEntry($user->id, $eve_user);
 
         return $user;
-
     }
 
     private function createCharacterUserEntry(int $user_id, EveUser $eve_user)
     {
-
         CharacterUser::create([
             'user_id'              => $user_id,
             'character_id'         => $eve_user->character_id,
@@ -63,9 +63,7 @@ class FindOrCreateUserAction
             $this->character_user->user->save();
         }
 
-
         // Delete character_user relationship
         CharacterUser::where('character_id', $this->eve_user->character_id)->delete();
-
     }
 }
