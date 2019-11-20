@@ -3,11 +3,11 @@
 namespace Seatplus\Auth\Http\Controllers\Auth;
 
 use Laravel\Socialite\Contracts\Factory as Socialite;
-use Seatplus\Web\Http\Actions\Sso\FindOrCreateUserAction;
-use Seatplus\Web\Http\Actions\Sso\GetSsoScopesAction;
-use Seatplus\Web\Http\Actions\Sso\UpdateRefreshTokenAction;
-use Seatplus\Web\Http\Controllers\Controller;
-use Seatplus\Web\Models\User;
+use Seatplus\Auth\Http\Actions\Sso\FindOrCreateUserAction;
+use Seatplus\Auth\Http\Actions\Sso\GetSsoScopesAction;
+use Seatplus\Auth\Http\Actions\Sso\UpdateRefreshTokenAction;
+use Seatplus\Auth\Http\Controllers\Controller;
+use Seatplus\Auth\Models\User;
 
 class SsoController extends Controller
 {

@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::namespace('Seatplus\Auth\Http\Controllers\Auth')
     ->prefix('auth')
+    ->middleware('web')
     ->group(function () {
 
         // Authc
