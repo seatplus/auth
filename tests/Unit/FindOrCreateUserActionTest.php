@@ -1,16 +1,13 @@
 <?php
 
-
 namespace Seatplus\Auth\Tests;
-
 
 use Faker\Factory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Socialite\Two\User as SocialiteUser;
 use Seatplus\Auth\Http\Actions\Sso\FindOrCreateUserAction;
 use Seatplus\Auth\Models\CharacterUser;
 use Seatplus\Auth\Models\User;
-use Laravel\Socialite\Two\User as SocialiteUser;
-
 
 class FindOrCreateUserActionTest extends TestCase
 {
@@ -48,31 +45,28 @@ class FindOrCreateUserActionTest extends TestCase
 
     public function setUp(): void
     {
-
         parent::setUp();
 
         $this->faker = Factory::create();
-
     }
 
     /** @test */
     public function createNewUser()
     {
-
         $socialiteUser = $this->createSocialUserMock();
 
         $this->assertDatabaseMissing('users', [
             'main_character' => $socialiteUser->name,
         ]);
 
-        $user = (new FindOrCreateUserAction)->execute($socialiteUser);
+        $user = (new FindOrCreateUserAction())->execute($socialiteUser);
 
         $this->assertDatabaseHas('users', [
             'main_character' => $socialiteUser->name,
         ]);
 
         $this->assertDatabaseHas('character_users', [
-            'user_id' => $user->id,
+            'user_id'      => $user->id,
             'character_id' => $socialiteUser->character_id,
         ]);
     }
@@ -92,14 +86,13 @@ class FindOrCreateUserActionTest extends TestCase
 
         $secondary_character = $this->test_user->characters->last();
 
-
         $socialiteUser = $this->createSocialUserMock(
             $secondary_character->character_id,
             'SocialiteUserName',
             $secondary_character->character_owner_hash
         );
 
-        $user = (new FindOrCreateUserAction)->execute($socialiteUser);
+        $user = (new FindOrCreateUserAction())->execute($socialiteUser);
 
         $this->assertEquals($this->test_user->id, $user->id);
 
@@ -108,7 +101,7 @@ class FindOrCreateUserActionTest extends TestCase
         ]);
 
         $this->assertDatabaseHas('character_users', [
-            'user_id' => $this->test_user->id,
+            'user_id'      => $this->test_user->id,
             'character_id' => $secondary_character->character_id,
         ]);
     }
@@ -116,8 +109,7 @@ class FindOrCreateUserActionTest extends TestCase
     /** @test */
     public function dealWithChangedOwnerHash()
     {
-
-        $this->assertEquals($this->test_user->characters->count(),1);
+        $this->assertEquals($this->test_user->characters->count(), 1);
 
         // 2. create character_users entry
         /*factory(CharacterUser::class)->create([
@@ -133,7 +125,7 @@ class FindOrCreateUserActionTest extends TestCase
 
         // 3. find user
 
-        $user = (new FindOrCreateUserAction)->execute($socialiteUser);
+        $user = (new FindOrCreateUserAction())->execute($socialiteUser);
 
         $this->assertDatabaseHas('users', [
             'id' => $user->id,
@@ -144,7 +136,7 @@ class FindOrCreateUserActionTest extends TestCase
         ]);
 
         $this->assertDatabaseMissing('character_users', [
-            'user_id' => $this->test_user->id,
+            'user_id'      => $this->test_user->id,
             'character_id' => $user->id,
         ]);
     }
@@ -169,7 +161,7 @@ class FindOrCreateUserActionTest extends TestCase
             'anotherHashValue'
         );
 
-        $user = (new FindOrCreateUserAction)->execute($socialiteUser);
+        $user = (new FindOrCreateUserAction())->execute($socialiteUser);
 
         // 4. assert that two users exist
 
@@ -178,7 +170,6 @@ class FindOrCreateUserActionTest extends TestCase
         $this->assertEquals(1, $user->characters->count());
 
         $this->assertEquals(2, CharacterUser::all()->count());
-
 
         $this->assertDatabaseHas('users', [
             'id' => $this->test_user->id,
@@ -191,12 +182,12 @@ class FindOrCreateUserActionTest extends TestCase
         //5. assert that secondary character is not affiliated to first user
 
         $this->assertDatabaseMissing('character_users', [
-            'user_id' => $this->test_user->id,
+            'user_id'      => $this->test_user->id,
             'character_id' => $secondary_user->character_id,
         ]);
 
         $this->assertDatabaseHas('character_users', [
-            'user_id' => $user->id,
+            'user_id'      => $user->id,
             'character_id' => $secondary_user->character_id,
         ]);
     }
@@ -210,7 +201,5 @@ class FindOrCreateUserActionTest extends TestCase
         $socialiteUser->character_owner_hash = $character_owner_hash ?? sha1($this->faker->text);
 
         return $socialiteUser;
-
     }
-
 }

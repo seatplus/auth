@@ -10,12 +10,14 @@ trait AccessCheckerTrait
     public function hasAccessTo($permission, int $id) : bool
     {
         // start by asserting if id to check belongs to the users characters
-        if (in_array($id, $this->characters->pluck('character_id')->toArray()))
+        if (in_array($id, $this->characters->pluck('character_id')->toArray())) {
             return true;
+        }
 
         // start by asserting that the user has the required permission and id is set
-        if(! $this->hasPermissionTo($permission))
+        if (!$this->hasPermissionTo($permission)) {
             return false;
+        }
 
         /*
         * If we think about corporation roles such as director or accountant we should check directPermissions
@@ -25,7 +27,6 @@ trait AccessCheckerTrait
 
         // Check a users roles and only take the ones into account which have a certain permission
         $users_roles_with_permission = $this->roles->filter(function (Role $role) use ($permission) {
-
             return $role->hasPermissionTo($permission);
         });
 
@@ -39,8 +40,9 @@ trait AccessCheckerTrait
                  * the first id is taken from the parameters array and converted to an integer.
                  */
 
-                if (is_integer($id))
+                if (is_int($id)) {
                     return $role->isAffiliated($id);
+                }
 
                 return false;
             })

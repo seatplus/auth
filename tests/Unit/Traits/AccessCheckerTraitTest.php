@@ -16,7 +16,6 @@ class AccessCheckerTraitTest extends TestCase
 
     protected function setUp(): void
     {
-
         parent::setUp();
 
         $this->role = Role::create(['name' => 'writer']);
@@ -26,7 +25,6 @@ class AccessCheckerTraitTest extends TestCase
         $this->test_user->assignRole($this->role);
 
         $this->test_character = $this->test_user->characters->first();
-
     }
 
     /** @test */
@@ -34,10 +32,9 @@ class AccessCheckerTraitTest extends TestCase
     {
         $this->role->affiliations()->create([
             'allowed' => collect([
-                'character_ids' => [12345]
-            ])
+                'character_ids' => [12345],
+            ]),
         ]);
-
 
         $this->assertTrue($this->test_user->hasAccessTo($this->permission->name, 12345));
     }
@@ -47,8 +44,8 @@ class AccessCheckerTraitTest extends TestCase
     {
         $this->role->affiliations()->create([
             'allowed' => collect([
-                'character_ids' => [12345]
-            ])
+                'character_ids' => [12345],
+            ]),
         ]);
 
         $this->assertFalse($this->test_user->hasAccessTo($this->permission->name, 54321));
@@ -59,8 +56,8 @@ class AccessCheckerTraitTest extends TestCase
     {
         $this->role->affiliations()->create([
             'forbidden' => collect([
-                'character_ids' => [$this->test_character->character_id]
-            ])
+                'character_ids' => [$this->test_character->character_id],
+            ]),
         ]);
 
         $this->assertTrue($this->test_user->hasAccessTo($this->permission->name, $this->test_character->character_id));
@@ -71,8 +68,8 @@ class AccessCheckerTraitTest extends TestCase
     {
         $this->role->affiliations()->create([
             'inverse' => collect([
-                'character_ids' => [54321]
-            ])
+                'character_ids' => [54321],
+            ]),
         ]);
 
         $this->assertTrue($this->test_user->hasAccessTo($this->permission->name, $this->test_character->character_id));
@@ -83,8 +80,8 @@ class AccessCheckerTraitTest extends TestCase
     {
         $this->role->affiliations()->create([
             'inverse' => collect([
-                'character_ids' => [54321]
-            ])
+                'character_ids' => [54321],
+            ]),
         ]);
 
         $this->assertFalse($this->test_user->hasAccessTo($this->permission->name, 54321));
@@ -95,8 +92,8 @@ class AccessCheckerTraitTest extends TestCase
     {
         $this->role->affiliations()->create([
             'inverse' => collect([
-                'corporation_ids' => [12345]
-            ])
+                'corporation_ids' => [12345],
+            ]),
         ]);
 
         $this->assertTrue($this->test_user->hasAccessTo($this->permission->name, 98547));
@@ -107,12 +104,11 @@ class AccessCheckerTraitTest extends TestCase
     {
         $this->role->affiliations()->create([
             'inverse' => collect([
-                'corporation_ids' => [$this->test_character->corporation_id]
-            ])
+                'corporation_ids' => [$this->test_character->corporation_id],
+            ]),
         ]);
 
         // asserting true because it is an owned recource and therefore one always has access to data that is gained through user
         $this->assertTrue($this->test_user->hasAccessTo($this->permission->name, $this->test_character->character_id));
     }
-
 }

@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::namespace('Seatplus\Auth\Http\Controllers\Auth')
     ->prefix('auth')
+    ->middleware('web')
     ->group(function () {
 
         // Authc
@@ -27,5 +28,4 @@ Route::namespace('Seatplus\Auth\Http\Controllers\Auth')
             'as'   => 'auth.eve.callback',
             'uses' => 'SsoController@handleProviderCallback',
         ]);
-
     });

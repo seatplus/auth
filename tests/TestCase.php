@@ -1,12 +1,11 @@
 <?php
 
-
 namespace Seatplus\Auth\Tests;
 
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
 use Seatplus\Auth\AuthenticationServiceProvider;
-use Seatplus\Eveapi\EveapiServiceProvider;
 use Seatplus\Auth\Models\User;
+use Seatplus\Eveapi\EveapiServiceProvider;
 
 abstract class TestCase extends OrchestraTestCase
 {
@@ -14,23 +13,21 @@ abstract class TestCase extends OrchestraTestCase
 
     protected function setUp(): void
     {
-
         parent::setUp();
 
         // setup database
         $this->setupDatabase($this->app);
 
         // setup factories
-        $this->withFactories(__DIR__ . '/database/factories');
+        $this->withFactories(__DIR__.'/database/factories');
 
         $this->test_user = factory(User::class)->create();
-
     }
 
     /**
      * Get application providers.
      *
-     * @param  \Illuminate\Foundation\Application  $app
+     * @param \Illuminate\Foundation\Application $app
      *
      * @return array
      */
@@ -38,12 +35,12 @@ abstract class TestCase extends OrchestraTestCase
     {
         return [
             AuthenticationServiceProvider::class,
-            EveapiServiceProvider::class
+            EveapiServiceProvider::class,
         ];
     }
 
     /**
-     * @param \Illuminate\Foundation\Application  $app
+     * @param \Illuminate\Foundation\Application $app
      */
     private function setupDatabase($app)
     {
@@ -55,7 +52,8 @@ abstract class TestCase extends OrchestraTestCase
     /**
      * Define environment setup.
      *
-     * @param  \Illuminate\Foundation\Application  $app
+     * @param \Illuminate\Foundation\Application $app
+     *
      * @return void
      */
     protected function getEnvironmentSetUp($app)
@@ -75,5 +73,4 @@ abstract class TestCase extends OrchestraTestCase
 
         $app['config']->set('cache.prefix', 'seatplus_tests---');
     }
-
 }

@@ -3,12 +3,13 @@
 namespace Seatplus\Auth\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Laravel\Passport\HasApiTokens;
 use Seatplus\Auth\Traits\AccessCheckerTrait;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasRoles, AccessCheckerTrait;
+    use HasRoles, HasApiTokens, AccessCheckerTrait;
 
     /**
      * The primary key associated with the table.
@@ -56,7 +57,6 @@ class User extends Authenticatable
      */
     public function characters()
     {
-
         return $this->hasMany(CharacterUser::class, 'user_id', 'id');
     }
 }

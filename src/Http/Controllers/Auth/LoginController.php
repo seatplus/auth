@@ -45,11 +45,12 @@ class LoginController extends Controller
     {
 
         // Warn if SSO has not been configured yet.
-        if (strlen(config('web.config.EVE_CLIENT_ID')) < 5 || strlen(config('web.config.EVE_CLIENT_SECRET')) < 5)
+        if (strlen(config('web.config.EVE_CLIENT_ID')) < 5 || strlen(config('web.config.EVE_CLIENT_SECRET')) < 5) {
             session()->flash('warning', trans('web::auth.sso_config_warning'));
+        }
 
         return Inertia::render('Auth/Login', [
-            'login_welcome' => trans('web::auth.login_welcome'),
+            'login_welcome'  => trans('web::auth.login_welcome'),
             'evesso_img_src' => asset('img/evesso.png'),
         ]);
     }

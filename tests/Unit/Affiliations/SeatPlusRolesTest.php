@@ -8,14 +8,12 @@ use Seatplus\Auth\Tests\TestCase;
 
 class SeatPlusRolesTest extends TestCase
 {
-
     /** @test */
     public function userHasNoRolesTest()
     {
         //dd('userHasNoRole',$this->test_user->characters->first()->user);
 
         $this->assertTrue($this->test_user->roles->isEmpty());
-
     }
 
     /** @test */
@@ -53,8 +51,8 @@ class SeatPlusRolesTest extends TestCase
 
         $role->affiliations()->create([
             'allowed' => collect([
-                'character_ids' => $this->test_user->id
-            ])
+                'character_ids' => $this->test_user->id,
+            ]),
         ]);
 
         $this->assertTrue($role->isAffiliated($this->test_user->id));
@@ -67,8 +65,8 @@ class SeatPlusRolesTest extends TestCase
 
         $role->affiliations()->create([
             'allowed' => collect([
-                'character_ids' => [$this->test_user->id, 12345]
-            ])
+                'character_ids' => [$this->test_user->id, 12345],
+            ]),
         ]);
 
         //dd(Arr::flatten($role->affiliations->allowed));
@@ -83,8 +81,8 @@ class SeatPlusRolesTest extends TestCase
 
         $role->affiliations()->create([
             'inverse' => collect([
-                'character_ids' => [$this->test_user->id, 12345]
-            ])
+                'character_ids' => [$this->test_user->id, 12345],
+            ]),
         ]);
 
         $this->assertFalse($role->isAffiliated($this->test_user->id));
@@ -97,8 +95,8 @@ class SeatPlusRolesTest extends TestCase
 
         $role->affiliations()->create([
             'forbidden' => collect([
-                'character_ids' => [$this->test_user->id, 12345]
-            ])
+                'character_ids' => [$this->test_user->id, 12345],
+            ]),
         ]);
 
         $this->assertFalse($role->isAffiliated($this->test_user->id));
@@ -117,8 +115,8 @@ class SeatPlusRolesTest extends TestCase
             'allowed' => collect([
                 'corporation_ids' => Arr::flatten([$this->test_user->characters->map(function ($char) {
                     return optional($char->character)->corporation_id;
-                }), 12345])
-            ])
+                }), 12345]),
+            ]),
         ]);
 
         $this->assertTrue($role->isAffiliated(12345));
@@ -133,8 +131,8 @@ class SeatPlusRolesTest extends TestCase
             'inverse' => collect([
                 'corporation_ids' => Arr::flatten([$this->test_user->characters->map(function ($char) {
                     return optional($char->character)->corporation_id;
-                }), 12345])
-            ])
+                }), 12345]),
+            ]),
         ]);
 
         $this->assertFalse($role->isAffiliated(12345));
@@ -149,30 +147,29 @@ class SeatPlusRolesTest extends TestCase
             'forbidden' => collect([
                 'corporation_ids' => Arr::flatten([$this->test_user->characters->map(function ($char) {
                     return optional($char->character)->corporation_id;
-                }), 12345])
-            ])
+                }), 12345]),
+            ]),
         ]);
 
         $this->assertFalse($role->isAffiliated(12345));
     }
 
     // Alliance
+
     /** @test */
     public function characterIsInAllianceAllowedAffiliationTest()
     {
-
         $role = Role::create(['name' => 'derp']);
 
         $role->affiliations()->create([
             'allowed' => collect([
                 'alliance_ids' => Arr::flatten([$this->test_user->characters->map(function ($char) {
                     return optional($char->character)->alliance_id;
-                }), 12345])
-            ])
+                }), 12345]),
+            ]),
         ]);
 
         $this->assertTrue($role->isAffiliated(12345));
-
     }
 
     /** @test */
@@ -184,8 +181,8 @@ class SeatPlusRolesTest extends TestCase
             'inverse' => collect([
                 'alliance_ids' => Arr::flatten([$this->test_user->characters->map(function ($char) {
                     return optional($char->character)->alliance_id;
-                }), 12345])
-            ])
+                }), 12345]),
+            ]),
         ]);
 
         $this->assertFalse($role->isAffiliated(12345));
@@ -201,12 +198,10 @@ class SeatPlusRolesTest extends TestCase
             'forbidden' => collect([
                 'alliance_ids' => Arr::flatten([$this->test_user->characters->map(function ($char) {
                     return optional($char->character)->alliance_id;
-                }), 12345])
-            ])
+                }), 12345]),
+            ]),
         ]);
 
         $this->assertFalse($role->isAffiliated(12345));
     }
-
-
 }
