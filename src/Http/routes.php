@@ -28,5 +28,4 @@ Route::namespace('Seatplus\Auth\Http\Controllers\Auth')
             'as'   => 'auth.eve.callback',
             'uses' => 'SsoController@handleProviderCallback',
         ]);
-
     });

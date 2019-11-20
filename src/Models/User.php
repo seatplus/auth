@@ -57,7 +57,6 @@ class User extends Authenticatable
      */
     public function characters()
     {
-
         return $this->hasMany(CharacterUser::class, 'user_id', 'id');
     }
 }
