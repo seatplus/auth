@@ -2,7 +2,6 @@
 
 use Faker\Generator as Faker;
 use Seatplus\Auth\Models\CharacterUser;
-use Seatplus\Eveapi\Models\Character\CharacterInfo;
 
 $factory->define(CharacterUser::class, function (Faker $faker) {
     return [

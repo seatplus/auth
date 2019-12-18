@@ -18,14 +18,13 @@ $factory->define(CharacterInfo::class, function (Faker $faker) {
 });
 
 $factory->afterCreating(CharacterInfo::class, function ($character_info, $faker) {
-
     $character_affiliation = $character_info->character_affiliation()->save(factory(CharacterAffiliation::class)->states('with_alliance')->create());
 
     $character_affiliation->corporation()->associate(factory(CorporationInfo::class)->create([
-        'corporation_id' => $character_affiliation->corporation_id
+        'corporation_id' => $character_affiliation->corporation_id,
     ]));
 
     $character_affiliation->alliance()->associate(factory(AllianceInfo::class)->create([
-        'alliance_id' => $character_affiliation->alliance_id
+        'alliance_id' => $character_affiliation->alliance_id,
     ]));
 });
