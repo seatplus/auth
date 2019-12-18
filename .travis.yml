@@ -6,7 +6,7 @@ language: php
 
 php:
   - '7.3'
-  - 7.2.4
+  - 7.2.5
 
 services:
   - redis-server
@@ -15,14 +15,16 @@ addons:
   hosts:
     - redis
 
-install:
-  - npm install
-
-before_script:
+before_install:
   - composer self-update
+  - echo "extension = redis.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+
+install:
   - composer install --no-interaction
   - composer dump-autoload
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+
+before_script:
   - chmod +x ./cc-test-reporter
   - ./cc-test-reporter before-build
 
