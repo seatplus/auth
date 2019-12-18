@@ -12,6 +12,5 @@ class GetSsoScopesAction
             return $scopes;*/
 
         return config('eveapi.scopes.maximum');
-
     }
 }
