@@ -11,7 +11,3 @@ $factory->define(CharacterUser::class, function (Faker $faker) {
         'character_owner_hash'  => sha1($faker->text),
     ];
 });
-
-$factory->afterCreating(CharacterUser::class, function ($character_user, $faker) {
-    $character_user->character()->associate(factory(CharacterInfo::class)->make())->toArray();
-});

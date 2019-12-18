@@ -6,13 +6,12 @@ class GetSsoScopesAction
 {
     public function execute()
     {
-        $scopes = config('eveapi.scopes.selected');
 
-        if (is_array($scopes) && !empty($scopes)) {
-            return $scopes;
-        }
+        // TODO: Refactor this using session boolean which scopes to provide
+        /*if(is_array($scopes) && ! empty($scopes))
+            return $scopes;*/
 
-        //return ['publicData', 'esi-characters.read_titles.v1'];
-        return config('eveapi.scopes.minimum');
+        return config('eveapi.scopes.maximum');
+
     }
 }

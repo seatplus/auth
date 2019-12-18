@@ -17,9 +17,9 @@ class Affiliation extends Model
      * @var array
      */
     protected $casts = [
-        'allowed'   => 'array',
-        'inverse'   => 'array',
-        'forbidden' => 'array',
+        'allowed'   => 'object',
+        'inverse'   => 'object',
+        'forbidden' => 'object',
     ];
 
     /**

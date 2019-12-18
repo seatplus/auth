@@ -64,7 +64,7 @@ class Role extends SpatieRole
      *
      * @return bool
      */
-    private function isInAffiliatedArray(?array $affiliation_ids) : bool
+    private function isInAffiliatedArray(?object $affiliation_ids) : bool
     {
         $resut = empty($affiliation_ids) ?
             null :
