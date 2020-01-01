@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateAffiliationTable extends Migration
+class CreateAffiliationsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -14,12 +14,14 @@ class CreateAffiliationTable extends Migration
     public function up()
     {
         Schema::create('affiliations', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->bigInteger('role_id');
-            $table->json('allowed')->nullable()->default(null);
-            $table->json('inverse')->nullable()->default(null);
-            $table->json('forbidden')->nullable()->default(null);
+            $table->bigInteger('role_id')->unsigned();
+            $table->bigInteger('character_id')->nullable();
+            $table->bigInteger('corporation_id')->nullable();
+            $table->bigInteger('alliance_id')->nullable();
+            $table->enum('type', ['allowed','inverse', 'forbidden']);
             $table->timestamps();
+
+            $table->foreign('role_id')->references('id')->on('roles')->onDelete('cascade');
         });
     }
 

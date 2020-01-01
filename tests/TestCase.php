@@ -6,10 +6,13 @@ use Orchestra\Testbench\TestCase as OrchestraTestCase;
 use Seatplus\Auth\AuthenticationServiceProvider;
 use Seatplus\Auth\Models\User;
 use Seatplus\Eveapi\EveapiServiceProvider;
+use Seatplus\Eveapi\Models\Character\CharacterInfo;
 
 abstract class TestCase extends OrchestraTestCase
 {
     protected $test_user;
+
+    protected $test_character;
 
     protected function setUp(): void
     {
@@ -22,6 +25,8 @@ abstract class TestCase extends OrchestraTestCase
         $this->withFactories(__DIR__.'/database/factories');
 
         $this->test_user = factory(User::class)->create();
+
+        $this->test_character = factory(CharacterInfo::class)->create();
     }
 
     /**
