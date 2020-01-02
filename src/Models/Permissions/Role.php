@@ -27,11 +27,9 @@ class Role extends SpatieRole
      */
     public function isAffiliated(int $affiliation_id) : bool
     {
-
         $affiliated_ids = $this->buildAffiliatedIds()->getAffiliatedIds();
 
         return in_array($affiliation_id, $affiliated_ids->toArray());
-
     }
 
     private function buildAffiliatedCharacterIds() : void
@@ -40,11 +38,9 @@ class Role extends SpatieRole
             ->get()
             ->filter()
             ->pipe(function ($collection) {
-
                 $collection->filter(function (Affiliation $affiliation) {
                     return $affiliation->type === 'inverse';
                 })->each(function (Affiliation $affiliation) {
-
                     $affiliation->characterAffiliations->each(function (CharacterAffiliation $character_affiliation) {
                         $this->affiliated_ids->push($character_affiliation->character_id);
                         $this->ids_to_remove->push($character_affiliation->id_to_remove);
@@ -54,11 +50,9 @@ class Role extends SpatieRole
                 return $collection;
             })
             ->pipe(function ($collection) {
-
                 $collection->filter(function (Affiliation $affiliation) {
                     return $affiliation->type === 'allowed';
                 })->each(function (Affiliation $affiliation) {
-
                     $affiliation->characterAffiliations->each(function (CharacterAffiliation $character_affiliation) {
                         $this->affiliated_ids->push($character_affiliation->character_id);
                     });
@@ -67,11 +61,9 @@ class Role extends SpatieRole
                 return $collection;
             })
             ->pipe(function ($collection) {
-
                 $collection->filter(function (Affiliation $affiliation) {
                     return $affiliation->type === 'forbidden';
                 })->each(function (Affiliation $affiliation) {
-
                     $affiliation->characterAffiliations->each(function (CharacterAffiliation $character_affiliation) {
                         $this->ids_to_remove->push($character_affiliation->character_id);
                     });
@@ -100,9 +92,6 @@ class Role extends SpatieRole
      */
     public function getAffiliatedIds() : Collection
     {
-
         return $this->affiliated_ids;
     }
-
-
 }

@@ -3,7 +3,6 @@
 namespace Seatplus\Auth;
 
 use Illuminate\Support\ServiceProvider;
-use Laravel\Passport\Http\Middleware\CreateFreshApiToken;
 use Laravel\Socialite\SocialiteManager;
 use Seatplus\Auth\Extentions\EveOnlineProvider;
 

@@ -10,26 +10,22 @@ use Seatplus\Eveapi\Models\Character\CharacterInfo;
 
 class SeatPlusRolesTest extends TestCase
 {
-
     private $secondary_character;
 
     private $tertiary_character;
 
     public function setUp(): void
     {
-
         parent::setUp();
 
         $this->secondary_character = factory(CharacterInfo::class)->create();
 
         $this->tertiary_character = factory(CharacterInfo::class)->create();
-
     }
 
     /** @test */
     public function userHasNoRolesTest()
     {
-
         $this->assertTrue($this->test_user->roles->isEmpty());
     }
 
@@ -57,7 +53,7 @@ class SeatPlusRolesTest extends TestCase
         $role = Role::create(['name' => 'derp']);
 
         $role->affiliations()->create([
-            'type' => 'allowed'
+            'type' => 'allowed',
         ]);
 
         $this->assertNotNUll($role->affiliations);
@@ -70,7 +66,7 @@ class SeatPlusRolesTest extends TestCase
 
         $role->affiliations()->create([
             'character_id' => $this->test_character->character_id,
-            'type' => 'allowed',
+            'type'         => 'allowed',
         ]);
 
         $this->assertTrue($role->isAffiliated($this->test_character->character_id));
@@ -86,12 +82,12 @@ class SeatPlusRolesTest extends TestCase
         $role->affiliations()->createMany([
             [
                 'character_id' => $this->test_character->character_id,
-                'type' => 'allowed',
+                'type'         => 'allowed',
             ],
             [
                 'character_id' => $secondary_character->character_id,
-                'type' => 'allowed',
-            ]
+                'type'         => 'allowed',
+            ],
 
         ]);
 
@@ -107,12 +103,12 @@ class SeatPlusRolesTest extends TestCase
         $role->affiliations()->createMany([
             [
                 'character_id' => $this->test_character->character_id,
-                'type' => 'inverse',
+                'type'         => 'inverse',
             ],
             [
                 'character_id' => 1234,
-                'type' => 'inverse',
-            ]
+                'type'         => 'inverse',
+            ],
         ]);
 
         $this->assertFalse($role->isAffiliated($this->test_character->character_id));
@@ -126,12 +122,12 @@ class SeatPlusRolesTest extends TestCase
         $role->affiliations()->createMany([
             [
                 'character_id' => $this->secondary_character->character_id,
-                'type' => 'inverse',
+                'type'         => 'inverse',
             ],
             [
                 'character_id' => $this->tertiary_character->character_id,
-                'type' => 'inverse',
-            ]
+                'type'         => 'inverse',
+            ],
         ]);
 
         $this->assertTrue($role->isAffiliated($this->test_character->character_id));
@@ -147,18 +143,17 @@ class SeatPlusRolesTest extends TestCase
         $role->affiliations()->createMany([
             [
                 'character_id' => $this->test_character->character_id,
-                'type' => 'forbidden',
+                'type'         => 'forbidden',
             ],
             [
                 'character_id' => $this->secondary_character->character_id,
-                'type' => 'forbidden',
-            ]
+                'type'         => 'forbidden',
+            ],
         ]);
 
         $this->assertFalse($role->isAffiliated($this->test_character->character_id));
         $this->assertFalse($role->isAffiliated($this->secondary_character->character_id));
         $this->assertFalse($role->isAffiliated($this->tertiary_character->character_id));
-
     }
 
     //TODO: Assertion that checks combination of forbidden character and allowed/inverse corporation
@@ -172,13 +167,12 @@ class SeatPlusRolesTest extends TestCase
 
         $role->affiliations()->create([
             'corporation_id' => $this->test_character->corporation_id,
-            'type' => 'allowed',
+            'type'           => 'allowed',
         ]);
 
         $this->assertTrue($role->isAffiliated($this->test_character->character_id));
         $this->assertFalse($role->isAffiliated($this->secondary_character->character_id));
         $this->assertFalse($role->isAffiliated($this->tertiary_character->character_id));
-
     }
 
     /** @test */
@@ -189,12 +183,12 @@ class SeatPlusRolesTest extends TestCase
         $role->affiliations()->createMany([
             [
                 'corporation_id' => $this->test_character->corporation_id,
-                'type' => 'inverse',
+                'type'           => 'inverse',
             ],
             [
                 'corporation_id' => $this->secondary_character->corporation_id,
-                'type' => 'inverse',
-            ]
+                'type'           => 'inverse',
+            ],
         ]);
 
         //dump('-----------------------------');
@@ -204,8 +198,6 @@ class SeatPlusRolesTest extends TestCase
         $this->assertFalse($role->isAffiliated($this->test_character->character_id));
         $this->assertFalse($role->isAffiliated($this->secondary_character->character_id));
         $this->assertTrue($role->isAffiliated($this->tertiary_character->character_id));
-
-
     }
 
     /** @test */
@@ -216,12 +208,12 @@ class SeatPlusRolesTest extends TestCase
         $role->affiliations()->createMany([
             [
                 'corporation_id' => $this->test_character->corporation_id,
-                'type' => 'forbidden',
+                'type'           => 'forbidden',
             ],
             [
                 'corporation_id' => $this->secondary_character->corporation_id,
-                'type' => 'forbidden',
-            ]
+                'type'           => 'forbidden',
+            ],
         ]);
 
         $this->assertFalse($role->isAffiliated($this->test_character->character_id));
@@ -239,18 +231,17 @@ class SeatPlusRolesTest extends TestCase
         $role->affiliations()->createMany([
             [
                 'alliance_id' => $this->test_character->alliance_id,
-                'type' => 'allowed',
+                'type'        => 'allowed',
             ],
             [
                 'alliance_id' => $this->secondary_character->alliance_id,
-                'type' => 'allowed',
-            ]
+                'type'        => 'allowed',
+            ],
         ]);
 
         $this->assertTrue($role->isAffiliated($this->test_character->character_id));
         $this->assertTrue($role->isAffiliated($this->secondary_character->character_id));
         $this->assertFalse($role->isAffiliated($this->tertiary_character->character_id));
-
     }
 
     /** @test */
@@ -261,12 +252,12 @@ class SeatPlusRolesTest extends TestCase
         $role->affiliations()->createMany([
             [
                 'alliance_id' => $this->test_character->alliance_id,
-                'type' => 'inverse',
+                'type'        => 'inverse',
             ],
             [
                 'alliance_id' => $this->secondary_character->alliance_id,
-                'type' => 'inverse',
-            ]
+                'type'        => 'inverse',
+            ],
         ]);
 
         $this->assertFalse($role->isAffiliated($this->test_character->character_id));
@@ -282,12 +273,12 @@ class SeatPlusRolesTest extends TestCase
         $role->affiliations()->createMany([
             [
                 'alliance_id' => $this->test_character->alliance_id,
-                'type' => 'forbidden',
+                'type'        => 'forbidden',
             ],
             [
                 'alliance_id' => $this->secondary_character->alliance_id,
-                'type' => 'forbidden',
-            ]
+                'type'        => 'forbidden',
+            ],
         ]);
 
         $this->assertFalse($role->isAffiliated($this->test_character->character_id));
