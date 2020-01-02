@@ -2,9 +2,7 @@
 
 namespace Seatplus\Auth\Actions;
 
-use Illuminate\Support\Str;
 use Seatplus\Auth\Models\Permissions\Role;
-use Seatplus\Eveapi\Models\Character\CharacterAffiliation;
 
 class GetAffiliatedCharactersIdsByPermissionArray
 {
@@ -30,7 +28,6 @@ class GetAffiliatedCharactersIdsByPermissionArray
      */
     public function getCacheKey(): string
     {
-
         return $this->cache_key;
     }
 
@@ -74,20 +71,16 @@ class GetAffiliatedCharactersIdsByPermissionArray
         // start by asserting that the user has the required permission and id is set
         if ($this->user->hasPermissionTo($this->permission)) {
             $this->user->roles->filter(function (Role $role) {
-
                 return $role->hasPermissionTo($this->permission);
             })->map(function (Role $role) {
-
                 return $role->buildAffiliatedIds()->getAffiliatedIds()->all();
             })->flatten()->filter()->each(function ($affiliated_id) {
-
                 $this->result->push($affiliated_id);
             });
         }
 
         return $this;
     }
-
 
     private function addOwnedCharacterIds()
     {
