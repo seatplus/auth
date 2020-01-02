@@ -27,7 +27,7 @@ class HasPermissionAndAffiliationMiddlewareTest extends TestCase
         $this->test_user->assignRole($this->role);
     }
 
-    /** @test */
+
     public function actingAsGuestTest()
     {
         $this->expectException(HttpException::class);
@@ -41,7 +41,7 @@ class HasPermissionAndAffiliationMiddlewareTest extends TestCase
         }, 'test_permission');
     }
 
-    /** @test */
+
     public function missingPermissionTest()
     {
         $this->role->affiliations()->create([
@@ -70,7 +70,7 @@ class HasPermissionAndAffiliationMiddlewareTest extends TestCase
         }, $this->permission->name);
     }
 
-    /** @test */
+
     public function hasPermissionTest()
     {
         $this->role->affiliations()->create([
@@ -95,7 +95,7 @@ class HasPermissionAndAffiliationMiddlewareTest extends TestCase
         $this->assertNull($response);
     }
 
-    /** @test */
+
     public function accessOwnedCharactersTest()
     {
         // For testing create a forbidden affiliation

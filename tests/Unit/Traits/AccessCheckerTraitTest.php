@@ -27,7 +27,7 @@ class AccessCheckerTraitTest extends TestCase
         $this->test_character = $this->test_user->characters->first();
     }
 
-    /** @test */
+
     public function haveAccessToCharacterTest()
     {
         $this->role->affiliations()->create([
@@ -39,7 +39,7 @@ class AccessCheckerTraitTest extends TestCase
         $this->assertTrue($this->test_user->hasAccessTo($this->permission->name, 12345));
     }
 
-    /** @test */
+
     public function haveNoAccessToCharacterTest()
     {
         $this->role->affiliations()->create([
@@ -51,7 +51,7 @@ class AccessCheckerTraitTest extends TestCase
         $this->assertFalse($this->test_user->hasAccessTo($this->permission->name, 54321));
     }
 
-    /** @test */
+
     public function haveAccessToOwnedCharacterTest()
     {
         $this->role->affiliations()->create([
@@ -63,7 +63,7 @@ class AccessCheckerTraitTest extends TestCase
         $this->assertTrue($this->test_user->hasAccessTo($this->permission->name, $this->test_character->character_id));
     }
 
-    /** @test */
+
     public function haveAccessToInverseCharacterTest()
     {
         $this->role->affiliations()->create([
@@ -75,7 +75,7 @@ class AccessCheckerTraitTest extends TestCase
         $this->assertTrue($this->test_user->hasAccessTo($this->permission->name, $this->test_character->character_id));
     }
 
-    /** @test */
+
     public function haveNotAccessToInverseCharacterTest()
     {
         $this->role->affiliations()->create([
@@ -87,7 +87,7 @@ class AccessCheckerTraitTest extends TestCase
         $this->assertFalse($this->test_user->hasAccessTo($this->permission->name, 54321));
     }
 
-    /** @test */
+
     public function haveAccessToInverseCorporationTest()
     {
         $this->role->affiliations()->create([
@@ -99,7 +99,7 @@ class AccessCheckerTraitTest extends TestCase
         $this->assertTrue($this->test_user->hasAccessTo($this->permission->name, 98547));
     }
 
-    /** @test */
+
     public function haveNotAccessToInverseCorporationTest()
     {
         $this->role->affiliations()->create([

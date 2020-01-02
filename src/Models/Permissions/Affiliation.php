@@ -32,7 +32,7 @@ class Affiliation extends Model
         return $this->belongsTo(Role::class, 'id', 'role_id');
     }
 
-    public function scopeAllowedAffiliatedCharacterIds(Builder $query)
+   /* public function scopeAllowedAffiliatedCharacterIds(Builder $query)
     {
         return $query
             ->addSelect(['affiliated_character_ids_through_allowed' => CharacterAffiliation::select('character_id')
@@ -106,7 +106,57 @@ class Affiliation extends Model
                     ['affiliations.type','forbidden']
                 ])
             ]);
-    }
+    }*/
 
+    public function characterAffiliations()
+    {
+
+        $relation = $this->hasMany(CharacterAffiliation::class,'character_id','character_id');
+
+        if ($this->corporation_id)
+            $relation = $this->hasMany(CharacterAffiliation::class,'corporation_id','corporation_id');
+
+        if ($this->alliance_id)
+            $relation = $this->hasMany(CharacterAffiliation::class,'alliance_id','alliance_id');
+
+        $relation->setQuery(
+            CharacterAffiliation::select('character_id')
+                ->when($this->type === 'inverse', function ($query) {
+
+                    $query->when(isset($this->character_id), function ($query) {
+                        $query->where('character_id', '<>', $this->character_id);
+                    })->when(isset($this->corporation_id), function ($query) {
+                            $query->where('corporation_id', '<>', $this->character_id);
+                    })->when(isset($this->alliance_id), function ($query) {
+                            $query->where('alliance_id', '<>', $this->character_id);
+                    })->addSelect(['id_to_remove' => CharacterAffiliation::select('character_id')
+                        ->when(isset($this->character_id), function ($query) {
+                            $query->where('character_id', $this->character_id);
+                        })
+                        ->when(isset($this->corporation_id), function ($query) {
+                            $query->where('corporation_id', $this->corporation_id);
+                        })
+                        ->when(isset($this->alliance_id), function ($query) {
+                            $query->where('alliance_id', $this->alliance_id);
+                        })
+                    ]);
+
+                }, function ($query) {
+
+                    $query->when(isset($this->character_id), function ($query) {
+                        $query->where('character_id', $this->character_id);
+                    })
+                        ->when(isset($this->corporation_id), function ($query) {
+                            $query->where('corporation_id', $this->corporation_id);
+                        })
+                        ->when(isset($this->alliance_id), function ($query) {
+                            $query->where('alliance_id', $this->alliance_id);
+                        });
+                })
+                ->getQuery()
+        );
+
+        return $relation;
+    }
 
 }
