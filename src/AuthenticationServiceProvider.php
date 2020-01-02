@@ -16,9 +16,6 @@ class AuthenticationServiceProvider extends ServiceProvider
 
         // Add routes
         $this->loadRoutesFrom(__DIR__.'/Http/routes.php');
-
-        // Add Middleware
-        $this->addMiddleware();
     }
 
     public function register()
@@ -43,13 +40,5 @@ class AuthenticationServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(
             __DIR__.'/config/permission.php', 'permission'
         );
-    }
-
-    private function addMiddleware()
-    {
-        $router = $this->app['router'];
-
-        // Add create fresh api token
-        $router->pushMiddlewareToGroup('web', CreateFreshApiToken::class);
     }
 }

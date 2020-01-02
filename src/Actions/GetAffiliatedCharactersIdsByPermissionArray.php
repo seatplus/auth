@@ -25,6 +25,15 @@ class GetAffiliatedCharactersIdsByPermissionArray
      */
     private $cache_key;
 
+    /**
+     * @return string
+     */
+    public function getCacheKey(): string
+    {
+
+        return $this->cache_key;
+    }
+
     public function __construct($permission)
     {
         $this->permission = $permission;
@@ -69,7 +78,7 @@ class GetAffiliatedCharactersIdsByPermissionArray
                 return $role->hasPermissionTo($this->permission);
             })->map(function (Role $role) {
 
-                return $role->buildAffiliatedIds()->getAffiliatedIds()->dd()->all();
+                return $role->buildAffiliatedIds()->getAffiliatedIds()->all();
             })->flatten()->filter()->each(function ($affiliated_id) {
 
                 $this->result->push($affiliated_id);

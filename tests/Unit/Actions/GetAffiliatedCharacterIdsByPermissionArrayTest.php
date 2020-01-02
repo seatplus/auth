@@ -342,4 +342,27 @@ class GetAffiliatedCharacterIdsByPermissionArrayTest extends TestCase
         // Assert that ids from any other third party is not present
         $this->assertFalse(in_array($this->tertiary_character->character_id, $ids));
     }
+
+    /** @test */
+    public function it_caches_results()
+    {
+        $this->role->affiliations()->createMany([
+            [
+                'alliance_id' => $this->secondary_character->alliance->alliance_id,
+                'type' => 'allowed',
+            ],
+            [
+                'alliance_id' => $this->secondary_character->alliance->alliance_id,
+                'type' => 'forbidden',
+            ]
+        ]);
+
+        $action = new GetAffiliatedCharactersIdsByPermissionArray($this->permission->name);
+
+        $this->assertFalse(cache()->has($action->getCacheKey()));
+
+        $ids = $action->execute();
+
+        $this->assertTrue(cache()->has($action->getCacheKey()));
+    }
 }

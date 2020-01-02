@@ -5,12 +5,11 @@ namespace Seatplus\Auth\Models;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Passport\HasApiTokens;
 use Seatplus\Auth\Actions\GetAffiliatedCharactersIdsByPermissionArray;
-use Seatplus\Auth\Traits\AccessCheckerTrait;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasRoles, HasApiTokens, AccessCheckerTrait;
+    use HasRoles, HasApiTokens;
 
     /**
      * The primary key associated with the table.
