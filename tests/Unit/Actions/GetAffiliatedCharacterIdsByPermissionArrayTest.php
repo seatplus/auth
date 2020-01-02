@@ -48,7 +48,7 @@ class GetAffiliatedCharacterIdsByPermissionArrayTest extends TestCase
     }
 
     /**
-     * @
+     * @test
      *
      * @throws \Exception
      */
@@ -64,7 +64,7 @@ class GetAffiliatedCharacterIdsByPermissionArrayTest extends TestCase
         $this->assertTrue(in_array($this->test_character_user->character_id, $ids));
     }
 
-    /** @ */
+    /** @test */
     public function it_returns_other_and_own_character_id_for_inverted()
     {
         $this->role->affiliations()->create([
@@ -78,7 +78,7 @@ class GetAffiliatedCharacterIdsByPermissionArrayTest extends TestCase
         $this->assertTrue(in_array($this->secondary_character->character_id, $ids));
     }
 
-    /**  */
+    /** @test */
     public function it_does_not_return_secondary_character_id_if_secondary_character_is_inverted()
     {
         $this->role->affiliations()->create([
@@ -86,16 +86,6 @@ class GetAffiliatedCharacterIdsByPermissionArrayTest extends TestCase
             'type' => 'inverse',
         ]);
 
-        dd(Affiliation::first()->test);
-
-        dd('stop');
-
-        dump(CharacterAffiliation::select('character_id')->orWhereColumn([
-            ['character_id', '<>', $this->secondary_character->character_id]
-        ])->pluck('character_id'));
-
-        dd($this->role->affiliations()->affiliatedCharacterIdsThroughInverse()->get());
-
         $ids = (new GetAffiliatedCharactersIdsByPermissionArray($this->permission->name))->execute();
 
         // Assert that the owned character_ids are present
@@ -108,13 +98,12 @@ class GetAffiliatedCharacterIdsByPermissionArrayTest extends TestCase
         $this->assertTrue(in_array($this->tertiary_character->character_id, $ids));
     }
 
-    /**  */
+    /** @test */
     public function it_does_not_return_secondary_character_id_if_secondary_corporation_is_inverted()
     {
         $this->role->affiliations()->create([
-            'inverse' => collect([
-                'corporation_ids' => [$this->secondary_character->corporation->corporation_id],
-            ]),
+            'corporation_id' => $this->secondary_character->corporation->corporation_id,
+            'type' => 'inverse',
         ]);
 
         $ids = (new GetAffiliatedCharactersIdsByPermissionArray($this->permission->name))->execute();
@@ -132,13 +121,12 @@ class GetAffiliatedCharacterIdsByPermissionArrayTest extends TestCase
         $this->assertTrue(in_array($this->tertiary_character->character_id, $ids));
     }
 
-    /**  */
+    /** @test */
     public function it_does_not_return_secondary_character_id_if_secondary_alliance_is_inverted()
     {
         $this->role->affiliations()->create([
-            'inverse' => collect([
-                'alliance_ids' => [$this->secondary_character->alliance->alliance_id],
-            ]),
+            'alliance_id' => $this->secondary_character->alliance->alliance_id,
+            'type' => 'inverse',
         ]);
 
         $ids = (new GetAffiliatedCharactersIdsByPermissionArray($this->permission->name))->execute();
@@ -156,13 +144,12 @@ class GetAffiliatedCharacterIdsByPermissionArrayTest extends TestCase
         $this->assertTrue(in_array($this->tertiary_character->character_id, $ids));
     }
 
-    /**  */
+    /** @test */
     public function it_does_return_secondary_character_id_if_secondary_character_is_allowed()
     {
         $this->role->affiliations()->create([
-            'allowed' => collect([
-                'character_ids' => [$this->secondary_character->character_id],
-            ]),
+            'character_id' => $this->secondary_character->character_id,
+            'type' => 'allowed',
         ]);
 
         $ids = (new GetAffiliatedCharactersIdsByPermissionArray($this->permission->name))->execute();
@@ -180,13 +167,12 @@ class GetAffiliatedCharacterIdsByPermissionArrayTest extends TestCase
         $this->assertFalse(in_array($this->tertiary_character->character_id, $ids));
     }
 
-    /**  */
+    /** @test */
     public function it_does_return_secondary_character_id_if_secondary_corporation_is_allowed()
     {
         $this->role->affiliations()->create([
-            'allowed' => collect([
-                'corporation_ids' => [$this->secondary_character->corporation->corporation_id],
-            ]),
+            'corporation_id' => $this->secondary_character->corporation->corporation_id,
+            'type' => 'allowed',
         ]);
 
         $ids = (new GetAffiliatedCharactersIdsByPermissionArray($this->permission->name))->execute();
@@ -204,13 +190,12 @@ class GetAffiliatedCharacterIdsByPermissionArrayTest extends TestCase
         $this->assertFalse(in_array($this->tertiary_character->character_id, $ids));
     }
 
-    /**  */
+    /** @test */
     public function it_does_return_secondary_character_id_if_secondary_alliance_is_allowed()
     {
         $this->role->affiliations()->create([
-            'allowed' => collect([
-                'alliance_ids' => [$this->secondary_character->alliance->alliance_id],
-            ]),
+            'alliance_id' => $this->secondary_character->alliance->alliance_id,
+            'type' => 'allowed',
         ]);
 
         $ids = (new GetAffiliatedCharactersIdsByPermissionArray($this->permission->name))->execute();
@@ -228,13 +213,12 @@ class GetAffiliatedCharacterIdsByPermissionArrayTest extends TestCase
         $this->assertFalse(in_array($this->tertiary_character->character_id, $ids));
     }
 
-    /**  */
+    /** @test  */
     public function it_does_return_own_character_even_if_listed_as_forbidden()
     {
         $this->role->affiliations()->create([
-            'forbidden' => collect([
-                'character_ids' => [$this->test_character_user->character_id],
-            ]),
+            'character_id' => $this->secondary_character->character_id,
+            'type' => 'forbidden',
         ]);
 
         $ids = (new GetAffiliatedCharactersIdsByPermissionArray($this->permission->name))->execute();
@@ -243,16 +227,18 @@ class GetAffiliatedCharacterIdsByPermissionArrayTest extends TestCase
         $this->assertTrue(in_array($this->test_character_user->character_id, $ids));
     }
 
-    /**  */
+    /** @test */
     public function it_does_not_return_secondary_character_id_if_secondary_character_is_forbidden()
     {
-        $this->role->affiliations()->create([
-            'allowed' => collect([
-                'character_ids' => [$this->secondary_character->character_id],
-            ]),
-            'forbidden' => collect([
-                'character_ids' => [$this->secondary_character->character_id],
-            ]),
+        $this->role->affiliations()->createMany([
+            [
+                'character_id' => $this->secondary_character->character_id,
+                'type' => 'allowed',
+            ],
+            [
+                'character_id' => $this->secondary_character->character_id,
+                'type' => 'forbidden',
+            ]
         ]);
 
         $ids = (new GetAffiliatedCharactersIdsByPermissionArray($this->permission->name))->execute();
@@ -270,17 +256,19 @@ class GetAffiliatedCharacterIdsByPermissionArrayTest extends TestCase
         $this->assertFalse(in_array($this->tertiary_character->character_id, $ids));
     }
 
-    /**  */
+    /** @test */
     public function it_does_not_return_secondary_character_id_if_secondary_corporation_is_forbidden()
     {
-        $this->role->affiliations()->create([
-        'allowed' => collect([
-            'corporation_ids' => [$this->secondary_character->corporation->corporation_id],
-        ]),
-        'forbidden' => collect([
-            'corporation_ids' => [$this->secondary_character->corporation->corporation_id],
-        ]),
-    ]);
+        $this->role->affiliations()->createMany([
+            [
+                'corporation_id' => $this->secondary_character->corporation->corporation_id,
+                'type' => 'allowed',
+            ],
+            [
+                'corporation_id' => $this->secondary_character->corporation->corporation_id,
+                'type' => 'forbidden',
+            ]
+        ]);
 
         $ids = (new GetAffiliatedCharactersIdsByPermissionArray($this->permission->name))->execute();
 
@@ -297,16 +285,18 @@ class GetAffiliatedCharacterIdsByPermissionArrayTest extends TestCase
         $this->assertFalse(in_array($this->tertiary_character->character_id, $ids));
     }
 
-    /**  */
+    /** @test */
     public function it_does_not_return_secondary_character_id_if_secondary_alliance_is_forbidden()
     {
-        $this->role->affiliations()->create([
-            'allowed' => collect([
-                'alliance_ids' => [$this->secondary_character->alliance->alliance_id],
-            ]),
-            'forbidden' => collect([
-                'alliance_ids' => [$this->secondary_character->alliance->alliance_id],
-            ]),
+        $this->role->affiliations()->createMany([
+            [
+                'alliance_id' => $this->secondary_character->alliance->alliance_id,
+                'type' => 'allowed',
+            ],
+            [
+                'alliance_id' => $this->secondary_character->alliance->alliance_id,
+                'type' => 'forbidden',
+            ]
         ]);
 
         $ids = (new GetAffiliatedCharactersIdsByPermissionArray($this->permission->name))->execute();
@@ -324,16 +314,18 @@ class GetAffiliatedCharacterIdsByPermissionArrayTest extends TestCase
         $this->assertFalse(in_array($this->tertiary_character->character_id, $ids));
     }
 
-    /**  */
+    /** @test */
     public function it_does_work_with_model_method()
     {
-        $this->role->affiliations()->create([
-            'allowed' => collect([
-                'alliance_ids' => [$this->secondary_character->alliance->alliance_id],
-            ]),
-            'forbidden' => collect([
-                'alliance_ids' => [$this->secondary_character->alliance->alliance_id],
-            ]),
+        $this->role->affiliations()->createMany([
+            [
+                'alliance_id' => $this->secondary_character->alliance->alliance_id,
+                'type' => 'allowed',
+            ],
+            [
+                'alliance_id' => $this->secondary_character->alliance->alliance_id,
+                'type' => 'forbidden',
+            ]
         ]);
 
         $ids = $this->test_user->getAffiliatedCharacterIdsByPermission($this->permission);
