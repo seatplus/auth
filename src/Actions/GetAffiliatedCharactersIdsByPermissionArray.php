@@ -2,7 +2,9 @@
 
 namespace Seatplus\Auth\Actions;
 
+use Seatplus\Auth\Models\Permissions\Permission;
 use Seatplus\Auth\Models\Permissions\Role;
+use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 
 class GetAffiliatedCharactersIdsByPermissionArray
 {
@@ -68,15 +70,21 @@ class GetAffiliatedCharactersIdsByPermissionArray
 
     private function getAffiliatedCharacterIds()
     {
-        // start by asserting that the user has the required permission and id is set
-        if ($this->user->hasPermissionTo($this->permission)) {
-            $this->user->roles->filter(function (Role $role) {
-                return $role->hasPermissionTo($this->permission);
-            })->map(function (Role $role) {
-                return $role->buildAffiliatedIds()->getAffiliatedIds()->all();
-            })->flatten()->filter()->each(function ($affiliated_id) {
-                $this->result->push($affiliated_id);
-            });
+        try {
+            // start by asserting that the user has the required permission and id is set
+            if ($this->user->hasPermissionTo($this->permission)) {
+                $this->user->roles->filter(function (Role $role) {
+                    return $role->hasPermissionTo($this->permission);
+                })->map(function (Role $role) {
+                    return $role->buildAffiliatedIds()->getAffiliatedIds()->all();
+                })->flatten()->filter()->each(function ($affiliated_id) {
+                    $this->result->push($affiliated_id);
+                });
+            }
+        } catch (PermissionDoesNotExist $permission_does_not_exist) {
+
+            Permission::create(['name' => $this->permission]);
+            return $this->getAffiliatedCharacterIds();
         }
 
         return $this;

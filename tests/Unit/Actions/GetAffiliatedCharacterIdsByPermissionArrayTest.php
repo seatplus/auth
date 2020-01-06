@@ -363,4 +363,12 @@ class GetAffiliatedCharacterIdsByPermissionArrayTest extends TestCase
 
         $this->assertTrue(cache()->has($action->getCacheKey()));
     }
+
+    /** @test */
+    public function it_creates_permission_if_not_existing()
+    {
+        $action = new GetAffiliatedCharactersIdsByPermissionArray($this->permission->name);
+
+        $this->assertNotNull(Permission::findByName($this->permission->name));
+    }
 }
