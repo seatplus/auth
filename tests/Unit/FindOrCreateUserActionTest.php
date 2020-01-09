@@ -62,7 +62,7 @@ class FindOrCreateUserActionTest extends TestCase
         $user = (new FindOrCreateUserAction())->execute($socialiteUser);
 
         $this->assertDatabaseHas('users', [
-            'main_character' => $socialiteUser->name,
+            'main_character' => $socialiteUser->character_id,
         ]);
 
         $this->assertDatabaseHas('character_users', [
@@ -157,7 +157,7 @@ class FindOrCreateUserActionTest extends TestCase
 
         $socialiteUser = $this->createSocialUserMock(
             $secondary_user->character_id,
-            null,
+            'someName',
             'anotherHashValue'
         );
 

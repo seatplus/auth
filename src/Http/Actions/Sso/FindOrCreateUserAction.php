@@ -36,7 +36,7 @@ class FindOrCreateUserAction
         }
 
         $user = User::create([
-            'main_character' => $eve_user->name,
+            'main_character' => $eve_user->character_id,
             'active'         => true,
         ]);
 

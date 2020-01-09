@@ -6,7 +6,7 @@ use Seatplus\Auth\Models\User;
 
 $factory->define(User::class, function (Faker $faker) {
     return [
-        'main_character'          => $faker->name,
+        'main_character'          => $faker->numberBetween(9000000, 98000000),
         'active'                  => true,
     ];
 });
