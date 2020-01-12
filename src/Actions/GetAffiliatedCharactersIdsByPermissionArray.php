@@ -41,7 +41,7 @@ class GetAffiliatedCharactersIdsByPermissionArray
         $this->cache_key = 'affiliated_character_ids_by_permission:'.$this->permission;
     }
 
-    public function execute() :array
+    public function execute(): array
     {
         try {
             return cache($this->cache_key) ?? $this->getAffiliatedCharacterIds()
@@ -82,8 +82,8 @@ class GetAffiliatedCharactersIdsByPermissionArray
                 });
             }
         } catch (PermissionDoesNotExist $permission_does_not_exist) {
-
             Permission::create(['name' => $this->permission]);
+
             return $this->getAffiliatedCharacterIds();
         }
 
