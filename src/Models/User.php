@@ -10,8 +10,8 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasRoles, HasApiTokens;
-
+    use HasRoles;
+    use HasApiTokens;
     /**
      * The primary key associated with the table.
      *
@@ -63,10 +63,10 @@ class User extends Authenticatable
 
     public function main_character()
     {
-        return $this->hasOne(CharacterInfo::class,'character_id', 'main_character_id');
+        return $this->hasOne(CharacterInfo::class, 'character_id', 'main_character_id');
     }
 
-    public function getAffiliatedCharacterIdsByPermission($permission) :array
+    public function getAffiliatedCharacterIdsByPermission($permission): array
     {
         return (new GetAffiliatedCharactersIdsByPermissionArray($permission))->execute();
     }
