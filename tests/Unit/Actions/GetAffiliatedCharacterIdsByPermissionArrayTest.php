@@ -2,6 +2,7 @@
 
 namespace Seatplus\Auth\Tests\Unit\Actions;
 
+use Faker\Factory;
 use Seatplus\Auth\Actions\GetAffiliatedCharactersIdsByPermissionArray;
 use Seatplus\Auth\Models\Permissions\Permission;
 use Seatplus\Auth\Models\Permissions\Role;
@@ -362,5 +363,19 @@ class GetAffiliatedCharacterIdsByPermissionArrayTest extends TestCase
         $ids = $action->execute();
 
         $this->assertTrue(cache()->has($action->getCacheKey()));
+    }
+
+    /** @test */
+    public function it_creates_permission_if_not_existing()
+    {
+        $faker = Factory::create();
+
+        $permission_name = $faker->name;
+
+        $action = new GetAffiliatedCharactersIdsByPermissionArray($permission_name);
+
+        $action->execute();
+
+        $this->assertNotNull(Permission::findByName($permission_name));
     }
 }

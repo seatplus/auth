@@ -56,13 +56,13 @@ class FindOrCreateUserActionTest extends TestCase
         $socialiteUser = $this->createSocialUserMock();
 
         $this->assertDatabaseMissing('users', [
-            'main_character' => $socialiteUser->name,
+            'main_character_id' => $socialiteUser->character_id,
         ]);
 
         $user = (new FindOrCreateUserAction())->execute($socialiteUser);
 
         $this->assertDatabaseHas('users', [
-            'main_character' => $socialiteUser->name,
+            'main_character_id' => $socialiteUser->character_id,
         ]);
 
         $this->assertDatabaseHas('character_users', [
@@ -157,7 +157,7 @@ class FindOrCreateUserActionTest extends TestCase
 
         $socialiteUser = $this->createSocialUserMock(
             $secondary_user->character_id,
-            null,
+            'someName',
             'anotherHashValue'
         );
 
@@ -192,7 +192,7 @@ class FindOrCreateUserActionTest extends TestCase
         ]);
     }
 
-    private function createSocialUserMock(int $character_id = null, string $name = null, string $character_owner_hash = null) : SocialiteUser
+    private function createSocialUserMock(int $character_id = null, string $name = null, string $character_owner_hash = null): SocialiteUser
     {
         $socialiteUser = $this->createMock(SocialiteUser::class);
 

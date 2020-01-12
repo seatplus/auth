@@ -5,12 +5,13 @@ namespace Seatplus\Auth\Models;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Passport\HasApiTokens;
 use Seatplus\Auth\Actions\GetAffiliatedCharactersIdsByPermissionArray;
+use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasRoles, HasApiTokens;
-
+    use HasRoles;
+    use HasApiTokens;
     /**
      * The primary key associated with the table.
      *
@@ -31,7 +32,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'main_character', 'character_owner_hash',
+        'main_character_id', 'character_owner_hash',
     ];
 
     /**
@@ -60,7 +61,12 @@ class User extends Authenticatable
         return $this->hasMany(CharacterUser::class, 'user_id', 'id');
     }
 
-    public function getAffiliatedCharacterIdsByPermission($permission) :array
+    public function main_character()
+    {
+        return $this->hasOne(CharacterInfo::class, 'character_id', 'main_character_id');
+    }
+
+    public function getAffiliatedCharacterIdsByPermission($permission): array
     {
         return (new GetAffiliatedCharactersIdsByPermissionArray($permission))->execute();
     }

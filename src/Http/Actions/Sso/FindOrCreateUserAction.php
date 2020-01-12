@@ -36,8 +36,8 @@ class FindOrCreateUserAction
         }
 
         $user = User::create([
-            'main_character' => $eve_user->name,
-            'active'         => true,
+            'main_character_id' => $eve_user->character_id,
+            'active'            => true,
         ]);
 
         $this->createCharacterUserEntry($user->id, $eve_user);
@@ -59,7 +59,7 @@ class FindOrCreateUserAction
         // First let's check if this is the only character within the user group
         if ($this->character_user->user->characters->count() < 2) {
             // reset main_character name as this single user account went stale
-            $this->character_user->user->main_character = null;
+            $this->character_user->user->main_character_id = null;
             $this->character_user->user->save();
         }
 

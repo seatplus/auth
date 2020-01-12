@@ -25,14 +25,14 @@ class Role extends SpatieRole
      *
      * @return bool
      */
-    public function isAffiliated(int $affiliation_id) : bool
+    public function isAffiliated(int $affiliation_id): bool
     {
         $affiliated_ids = $this->buildAffiliatedIds()->getAffiliatedIds();
 
         return in_array($affiliation_id, $affiliated_ids->toArray());
     }
 
-    private function buildAffiliatedCharacterIds() : void
+    private function buildAffiliatedCharacterIds(): void
     {
         $this->affiliations()
             ->get()
@@ -90,7 +90,7 @@ class Role extends SpatieRole
     /**
      * @return mixed
      */
-    public function getAffiliatedIds() : Collection
+    public function getAffiliatedIds(): Collection
     {
         return $this->affiliated_ids;
     }
