@@ -192,7 +192,7 @@ class FindOrCreateUserActionTest extends TestCase
         ]);
     }
 
-    private function createSocialUserMock(int $character_id = null, string $name = null, string $character_owner_hash = null) : SocialiteUser
+    private function createSocialUserMock(int $character_id = null, string $name = null, string $character_owner_hash = null): SocialiteUser
     {
         $socialiteUser = $this->createMock(SocialiteUser::class);
 

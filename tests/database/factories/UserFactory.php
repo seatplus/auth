@@ -7,7 +7,7 @@ use Seatplus\Eveapi\Models\Character\CharacterInfo;
 
 $factory->define(User::class, function (Faker $faker) {
     return [
-        'main_character_id'  => factory(CharacterInfo::class),
+        'main_character_id'       => factory(CharacterInfo::class),
         'active'                  => true,
     ];
 });
