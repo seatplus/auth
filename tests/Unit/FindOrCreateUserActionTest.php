@@ -56,13 +56,13 @@ class FindOrCreateUserActionTest extends TestCase
         $socialiteUser = $this->createSocialUserMock();
 
         $this->assertDatabaseMissing('users', [
-            'main_character' => $socialiteUser->name,
+            'main_character_id' => $socialiteUser->character_id,
         ]);
 
         $user = (new FindOrCreateUserAction())->execute($socialiteUser);
 
         $this->assertDatabaseHas('users', [
-            'main_character' => $socialiteUser->character_id,
+            'main_character_id' => $socialiteUser->character_id,
         ]);
 
         $this->assertDatabaseHas('character_users', [

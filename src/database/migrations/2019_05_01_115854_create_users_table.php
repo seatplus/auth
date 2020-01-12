@@ -15,7 +15,7 @@ class CreateUsersTable extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->bigInteger('main_character')->unique()->nullable();
+            $table->bigInteger('main_character_id')->unique()->nullable();
             $table->boolean('active')->default(true);
             $table->dateTime('last_login')->nullable();
             $table->string('last_login_source')->nullable();
