@@ -38,7 +38,7 @@ class GetAffiliatedCharactersIdsByPermissionArray
         $this->permission = $permission;
         $this->user = auth()->user();
         $this->result = collect();
-        $this->cache_key = 'user:'. $this->user->id .'|affiliated_character_ids_by_permission:'.$this->permission;
+        $this->cache_key = 'user:'.$this->user->id.'|affiliated_character_ids_by_permission:'.$this->permission;
     }
 
     public function execute(): array
