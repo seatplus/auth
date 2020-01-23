@@ -118,4 +118,11 @@ class Role extends SpatieRole
     {
         return $this->affiliated_ids;
     }
+
+    public function delete()
+    {
+        $this->affiliations()->delete();
+
+        return parent::delete();
+    }
 }

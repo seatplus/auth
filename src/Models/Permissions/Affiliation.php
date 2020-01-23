@@ -32,6 +32,8 @@ use Seatplus\Eveapi\Models\Character\CharacterAffiliation;
 
 class Affiliation extends Model
 {
+    protected $primaryKey = null;
+
     /**
      * @var bool
      */

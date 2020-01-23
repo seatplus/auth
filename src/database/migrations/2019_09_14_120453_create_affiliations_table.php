@@ -44,8 +44,6 @@ class CreateAffiliationsTable extends Migration
             $table->bigInteger('alliance_id')->nullable();
             $table->enum('type', ['allowed', 'inverse', 'forbidden']);
             $table->timestamps();
-
-            $table->foreign('role_id')->references('id')->on('roles')->onDelete('cascade');
         });
     }
 
