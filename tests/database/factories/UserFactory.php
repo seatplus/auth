@@ -37,5 +37,5 @@ $factory->define(User::class, function (Faker $faker) {
 });
 
 $factory->afterCreating(User::class, function ($user, $faker) {
-    $user->characters()->save(factory(CharacterUser::class)->make());
+    $user->character_users()->save(factory(CharacterUser::class)->make());
 });

@@ -57,7 +57,7 @@ class GetAffiliatedCharacterIdsByPermissionArrayTest extends TestCase
         $this->role->givePermissionTo($this->permission);
         $this->test_user->assignRole($this->role);
 
-        $this->test_character_user = $this->test_user->characters->first();
+        $this->test_character_user = $this->test_user->character_users->first();
 
         $this->actingAs($this->test_user);
 

@@ -26,6 +26,8 @@
 
 namespace Seatplus\Auth\Models;
 
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Passport\HasApiTokens;
 use Seatplus\Auth\Actions\GetAffiliatedCharactersIdsByPermissionArray;
@@ -77,12 +79,22 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function characters()
+    public function character_users() : HasMany
     {
         return $this->hasMany(CharacterUser::class, 'user_id', 'id');
+    }
+
+    public function characters() : HasManyThrough
+    {
+
+        return $this->hasManyThrough(
+            CharacterInfo::class,
+            CharacterUser::class,
+            'user_id',
+            'character_id',
+            'id',
+            'character_id'
+            );
     }
 
     public function main_character()
