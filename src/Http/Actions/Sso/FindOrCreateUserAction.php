@@ -45,7 +45,10 @@ class FindOrCreateUserAction
 
         $this->character_user = CharacterUser::where('character_id', $eve_user->character_id)->first();
 
-        // If user is known and character_owner_hash didn't change return the user
+        /*
+         * If user is known and character_owner_hash didn't change return the user. This might cause an exploit
+         *  if the character is shared with other users, which is not allowed according to CCP.
+        */
         if (!empty($this->character_user) && $this->character_user->character_owner_hash === $eve_user->character_owner_hash) {
             return $this->character_user->user;
         }
@@ -59,7 +62,7 @@ class FindOrCreateUserAction
             $this->handleChangedOwnerHash();
         }
 
-        $user = User::create([
+        $user = auth()->user() ?? User::create([
             'main_character_id' => $eve_user->character_id,
             'active'            => true,
         ]);
