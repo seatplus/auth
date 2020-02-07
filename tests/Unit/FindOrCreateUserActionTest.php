@@ -243,7 +243,6 @@ class FindOrCreateUserActionTest extends TestCase
         ]);
 
         $this->assertEquals(2, $this->test_user->character_users->count());
-
     }
 
     private function createSocialUserMock(int $character_id = null, string $name = null, string $character_owner_hash = null): SocialiteUser

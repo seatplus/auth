@@ -46,15 +46,15 @@ class UserTest extends TestCase
         $test_user = factory(User::class)->create();
 
         $this->assertDatabaseHas('character_users', [
-            'character_id' => $test_user->character_users->first()->character_id
+            'character_id' => $test_user->character_users->first()->character_id,
         ]);
 
         factory(CharacterInfo::class)->create([
-            'character_id' => $test_user->character_users->first()->character_id
+            'character_id' => $test_user->character_users->first()->character_id,
         ]);
 
         $this->assertDatabaseHas('character_infos', [
-            'character_id' => $test_user->character_users->first()->character_id
+            'character_id' => $test_user->character_users->first()->character_id,
         ]);
 
         $this->assertInstanceOf(CharacterInfo::class, $test_user->characters->first());
