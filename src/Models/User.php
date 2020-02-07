@@ -79,14 +79,13 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function character_users() : HasMany
+    public function character_users(): HasMany
     {
         return $this->hasMany(CharacterUser::class, 'user_id', 'id');
     }
 
-    public function characters() : HasManyThrough
+    public function characters(): HasManyThrough
     {
-
         return $this->hasManyThrough(
             CharacterInfo::class,
             CharacterUser::class,

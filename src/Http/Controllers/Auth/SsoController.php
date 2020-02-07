@@ -59,7 +59,6 @@ class SsoController extends Controller
      * @param \Seatplus\Auth\Http\Actions\Sso\FindOrCreateUserAction   $find_or_create_user_action
      * @param \Seatplus\Auth\Http\Actions\Sso\UpdateRefreshTokenAction $update_refresh_token_action
      *
-     *
      * @return \Illuminate\Http\RedirectResponse
      */
     public function handleProviderCallback(
