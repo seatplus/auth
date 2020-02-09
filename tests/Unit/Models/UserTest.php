@@ -33,10 +33,30 @@ use Seatplus\Eveapi\Models\Character\CharacterInfo;
 class UserTest extends TestCase
 {
     /** @test */
-    public function it_has_owner_relationship()
+    public function it_has_main_character_relationship()
     {
         $test_user = factory(User::class)->create();
 
         $this->assertInstanceOf(CharacterInfo::class, $test_user->main_character);
+    }
+
+    /** @test */
+    public function it_has_characters_relationship()
+    {
+        $test_user = factory(User::class)->create();
+
+        $this->assertDatabaseHas('character_users', [
+            'character_id' => $test_user->character_users->first()->character_id,
+        ]);
+
+        factory(CharacterInfo::class)->create([
+            'character_id' => $test_user->character_users->first()->character_id,
+        ]);
+
+        $this->assertDatabaseHas('character_infos', [
+            'character_id' => $test_user->character_users->first()->character_id,
+        ]);
+
+        $this->assertInstanceOf(CharacterInfo::class, $test_user->characters->first());
     }
 }

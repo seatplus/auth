@@ -55,11 +55,11 @@ class SsoController extends Controller
     /**
      * Obtain the user information from Eve Online.
      *
-     * @param \Laravel\Socialite\Contracts\Factory                    $social
-     * @param \Seatplus\Web\Http\Actions\Sso\FindOrCreateUserAction   $find_or_create_user_action
-     * @param \Seatplus\Web\Http\Actions\Sso\UpdateRefreshTokenAction $update_refresh_token_action
+     * @param \Laravel\Socialite\Contracts\Factory                     $social
+     * @param \Seatplus\Auth\Http\Actions\Sso\FindOrCreateUserAction   $find_or_create_user_action
+     * @param \Seatplus\Auth\Http\Actions\Sso\UpdateRefreshTokenAction $update_refresh_token_action
      *
-     * @return \Seatplus\Web\Http\Controllers\Auth\Response
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function handleProviderCallback(
         Socialite $social,

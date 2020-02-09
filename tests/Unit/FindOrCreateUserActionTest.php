@@ -100,15 +100,15 @@ class FindOrCreateUserActionTest extends TestCase
     {
 
         // add 3 characters to test_user
-        $this->test_user->characters()->createMany(
+        $this->test_user->character_users()->createMany(
             factory(CharacterUser::class, 3)->make()->toArray()
         );
 
-        $this->assertEquals(4, $this->test_user->characters->count());
+        $this->assertEquals(4, $this->test_user->character_users->count());
 
         // select last character to login
 
-        $secondary_character = $this->test_user->characters->last();
+        $secondary_character = $this->test_user->character_users->last();
 
         $socialiteUser = $this->createSocialUserMock(
             $secondary_character->character_id,
@@ -133,7 +133,7 @@ class FindOrCreateUserActionTest extends TestCase
     /** @test */
     public function dealWithChangedOwnerHash()
     {
-        $this->assertEquals($this->test_user->characters->count(), 1);
+        $this->assertEquals($this->test_user->character_users->count(), 1);
 
         // 2. create character_users entry
         /*factory(CharacterUser::class)->create([
@@ -143,7 +143,7 @@ class FindOrCreateUserActionTest extends TestCase
         ]);*/
 
         $socialiteUser = $this->createSocialUserMock(
-            $this->test_user->characters->first()->character_id,
+            $this->test_user->character_users->first()->character_id,
             $this->test_user->main_character,
             'anotherHashValue');
 
@@ -173,9 +173,9 @@ class FindOrCreateUserActionTest extends TestCase
         $secondary_user = factory(CharacterUser::class)->make();
 
         // 2. assign secondary user to test_user
-        $this->test_user->characters()->save($secondary_user);
+        $this->test_user->character_users()->save($secondary_user);
 
-        $this->assertEquals(2, $this->test_user->characters->count());
+        $this->assertEquals(2, $this->test_user->character_users->count());
 
         // 3. find user
 
@@ -191,7 +191,7 @@ class FindOrCreateUserActionTest extends TestCase
 
         //dd($secondary_user->character_id,User::first()->characters);
 
-        $this->assertEquals(1, $user->characters->count());
+        $this->assertEquals(1, $user->character_users->count());
 
         $this->assertEquals(2, CharacterUser::all()->count());
 
@@ -214,6 +214,35 @@ class FindOrCreateUserActionTest extends TestCase
             'user_id'      => $user->id,
             'character_id' => $secondary_user->character_id,
         ]);
+    }
+
+    /** @test */
+    public function it_returns_authed_user()
+    {
+        // 1. Create secondary character
+        $secondary_user = factory(CharacterUser::class)->make();
+
+        $socialiteUser = $this->createSocialUserMock(
+            $secondary_user->character_id,
+            'someName',
+            'anotherHashValue'
+        );
+
+        // act as test user
+        $this->actingAs($this->test_user);
+
+        $user = (new FindOrCreateUserAction())->execute($socialiteUser);
+
+        // Assert that test user id and the returned user id is equal
+        $this->assertEquals($this->test_user->id, $user->id);
+
+        // assert that character user relation has been set
+        $this->assertDatabaseHas('character_users', [
+            'user_id'      => $this->test_user->id,
+            'character_id' => $secondary_user->character_id,
+        ]);
+
+        $this->assertEquals(2, $this->test_user->character_users->count());
     }
 
     private function createSocialUserMock(int $character_id = null, string $name = null, string $character_owner_hash = null): SocialiteUser
