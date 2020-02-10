@@ -38,14 +38,16 @@ class SsoController extends Controller
     /**
      * Redirect the user to the Eve Online authentication page.
      *
-     * @param \Laravel\Socialite\Contracts\Factory              $social
-     * @param \Seatplus\Web\Http\Actions\Sso\GetSsoScopesAction $get_sso_scopes_action
+     * @param \Laravel\Socialite\Contracts\Factory               $social
+     * @param \Seatplus\Auth\Http\Actions\Sso\GetSsoScopesAction $get_sso_scopes_action
      *
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
     public function redirectToProvider(Socialite $social, GetSsoScopesAction $get_sso_scopes_action)
     {
         $scopes = $get_sso_scopes_action->execute();
+
+        session(['rurl' => session()->previousUrl()]);
 
         return $social->driver('eveonline')
             ->scopes($scopes)
@@ -80,7 +82,9 @@ class SsoController extends Controller
                 ->with('error', 'Login failed. Please contact your administrator.');
         }
 
-        return redirect()->intended();
+        $return_url = session('rurl');
+
+        return $return_url ? redirect($return_url) : redirect()->intended();
     }
 
     /**
@@ -90,7 +94,7 @@ class SsoController extends Controller
      * login routine. If a false is returned, it might mean
      * that that account is not allowed to sign in.
      *
-     * @param \Seatplus\Web\Models\User $user
+     * @param \Seatplus\Auth\Models\User $user
      *
      * @return bool
      */
