@@ -59,4 +59,20 @@ class UserTest extends TestCase
 
         $this->assertInstanceOf(CharacterInfo::class, $test_user->characters->first());
     }
+
+    /** @test */
+    public function it_has_search_scope()
+    {
+        $test_user = factory(User::class)->create();
+
+        factory(CharacterInfo::class)->create([
+            'character_id' => $test_user->character_users->first()->character_id,
+        ]);
+
+        $character = $test_user->characters->first();
+
+        $user = User::search($character->name)->first();
+
+        $this->assertEquals($test_user->id, $user->id);
+    }
 }
