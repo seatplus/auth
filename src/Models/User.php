@@ -26,6 +26,7 @@
 
 namespace Seatplus\Auth\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -104,5 +105,12 @@ class User extends Authenticatable
     public function getAffiliatedCharacterIdsByPermission($permission): array
     {
         return (new GetAffiliatedCharactersIdsByPermissionArray($permission))->execute();
+    }
+
+    public function scopeSearch(Builder $query, string $query_string): Builder
+    {
+        return $query->whereHas('characters', function (Builder $query) use ($query_string) {
+            $query->where('name', 'like', '%'.$query_string.'%');
+        });
     }
 }
