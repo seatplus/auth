@@ -41,7 +41,7 @@ class GetAffiliatedCharacterIdsByPermissionArrayTest extends TestCase
 
     protected $test_character_user;
 
-    protected $test_character;
+    public $test_character;
 
     private $secondary_character;
 
