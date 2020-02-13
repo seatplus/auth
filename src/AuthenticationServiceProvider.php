@@ -26,6 +26,7 @@
 
 namespace Seatplus\Auth;
 
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Socialite\SocialiteManager;
 use Seatplus\Auth\Extentions\EveOnlineProvider;
@@ -34,11 +35,17 @@ class AuthenticationServiceProvider extends ServiceProvider
 {
     public function boot()
     {
+
         //Add Migrations
         $this->loadMigrationsFrom(__DIR__.'/database/migrations/');
 
         // Add routes
         $this->loadRoutesFrom(__DIR__.'/Http/routes.php');
+
+        // Add GateLogic
+        Gate::before(function ($user, $ability) {
+            return $user->hasPermissionTo('superuser') ? true : null;
+        });
     }
 
     public function register()
