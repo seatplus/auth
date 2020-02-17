@@ -36,32 +36,33 @@ class GetSsoScopesAction
     {
         $this->scopes_to_add = $scopes_to_add;
 
-        if($this->plausibilityCheck($character_id))
+        if ($this->plausibilityCheck($character_id)) {
             return $this->addScopesForCharacter($character_id);
+        }
 
         return config('eveapi.scopes.minimum');
     }
 
-    private function plausibilityCheck(?int $character_id) : bool
+    private function plausibilityCheck(?int $character_id): bool
     {
-        if(is_null($character_id))
+        if (is_null($character_id)) {
             return false;
+        }
 
-        if(auth()->user() && $this->scopes_to_add && $this->characterIsInUserGroup($character_id))
+        if (auth()->user() && $this->scopes_to_add && $this->characterIsInUserGroup($character_id)) {
             return true;
+        }
 
         return false;
     }
 
-    private function addScopesForCharacter(int $character_id) : array
+    private function addScopesForCharacter(int $character_id): array
     {
-
         return array_merge(RefreshToken::find($character_id)->scopes, $this->scopes_to_add);
     }
 
-    private function characterIsInUserGroup(int $character_id) : bool
+    private function characterIsInUserGroup(int $character_id): bool
     {
-
         return in_array($character_id, auth()->user()->characters->pluck('character_id')->toArray());
     }
 }
