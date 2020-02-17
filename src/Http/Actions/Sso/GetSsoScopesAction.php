@@ -26,15 +26,42 @@
 
 namespace Seatplus\Auth\Http\Actions\Sso;
 
+use Seatplus\Eveapi\Models\RefreshToken;
+
 class GetSsoScopesAction
 {
-    public function execute()
+    private $scopes_to_add;
+
+    public function execute(?int $character_id = null, ?array $scopes_to_add = [])
+    {
+        $this->scopes_to_add = $scopes_to_add;
+
+        if($this->plausibilityCheck($character_id))
+            return $this->addScopesForCharacter($character_id);
+
+        return config('eveapi.scopes.minimum');
+    }
+
+    private function plausibilityCheck(?int $character_id) : bool
+    {
+        if(is_null($character_id))
+            return false;
+
+        if(auth()->user() && $this->scopes_to_add && $this->characterIsInUserGroup($character_id))
+            return true;
+
+        return false;
+    }
+
+    private function addScopesForCharacter(int $character_id) : array
     {
 
-        // TODO: Refactor this using session boolean which scopes to provide
-        /*if(is_array($scopes) && ! empty($scopes))
-            return $scopes;*/
+        return array_merge(RefreshToken::find($character_id)->scopes, $this->scopes_to_add);
+    }
 
-        return config('eveapi.scopes.maximum');
+    private function characterIsInUserGroup(int $character_id) : bool
+    {
+
+        return in_array($character_id, auth()->user()->characters->pluck('character_id')->toArray());
     }
 }
