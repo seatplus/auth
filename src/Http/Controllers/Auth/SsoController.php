@@ -38,14 +38,15 @@ class SsoController extends Controller
     /**
      * Redirect the user to the Eve Online authentication page.
      *
+     * @param int|null                                           $character_id
      * @param \Laravel\Socialite\Contracts\Factory               $social
      * @param \Seatplus\Auth\Http\Actions\Sso\GetSsoScopesAction $get_sso_scopes_action
      *
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
-    public function redirectToProvider(Socialite $social, GetSsoScopesAction $get_sso_scopes_action)
+    public function redirectToProvider(Socialite $social, GetSsoScopesAction $get_sso_scopes_action, ?int $character_id = null)
     {
-        $scopes = $get_sso_scopes_action->execute();
+        $scopes = $get_sso_scopes_action->execute($character_id, request()->query('add_scopes'));
 
         session(['rurl' => session()->previousUrl()]);
 

@@ -25,6 +25,7 @@
  */
 
 use Illuminate\Support\Facades\Route;
+use Seatplus\Auth\Http\Controllers\Auth\SsoController;
 
 Route::namespace('Seatplus\Auth\Http\Controllers\Auth')
     ->prefix('auth')
@@ -43,10 +44,7 @@ Route::namespace('Seatplus\Auth\Http\Controllers\Auth')
         ]);
 
         // SSO
-        Route::get('/eve', [
-            'as'   => 'auth.eve',
-            'uses' => 'SsoController@redirectToProvider',
-        ]);
+        Route::get('/eve/{character_id?}', [SsoController::class, 'redirectToProvider'])->name('auth.eve');
 
         Route::get('/eve/callback', [
             'as'   => 'auth.eve.callback',

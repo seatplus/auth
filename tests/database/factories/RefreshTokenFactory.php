@@ -24,45 +24,16 @@
  * SOFTWARE.
  */
 
-namespace Seatplus\Auth\Http\Actions\Sso;
-
+use Faker\Generator as Faker;
+use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\RefreshToken;
 
-class GetSsoScopesAction
-{
-    private $scopes_to_add;
-
-    public function execute(?int $character_id = null, ?array $scopes_to_add = [])
-    {
-        $this->scopes_to_add = $scopes_to_add;
-
-        if ($this->plausibilityCheck($character_id)) {
-            return $this->addScopesForCharacter($character_id);
-        }
-
-        return config('eveapi.scopes.minimum');
-    }
-
-    private function plausibilityCheck(?int $character_id): bool
-    {
-        if (is_null($character_id)) {
-            return false;
-        }
-
-        if (auth()->user() && $this->scopes_to_add && $this->characterIsInUserGroup($character_id)) {
-            return true;
-        }
-
-        return false;
-    }
-
-    private function addScopesForCharacter(int $character_id): array
-    {
-        return array_merge(RefreshToken::find($character_id)->scopes, $this->scopes_to_add);
-    }
-
-    private function characterIsInUserGroup(int $character_id): bool
-    {
-        return in_array($character_id, auth()->user()->characters->pluck('character_id')->toArray());
-    }
-}
+$factory->define(RefreshToken::class, function (Faker $faker) {
+    return [
+        'character_id'             => factory(CharacterInfo::class)->create(),
+        'refresh_token'            => 'MmLZC2vwExCby2vbdgEVpOxXPUG3mIGfkQM5gl9IPtA',
+        'scopes'                   => config('eveapi.scopes.minimum'),
+        'expires_on'               => now()->addMinutes(10),
+        'token'                    => '1|CfDJ8O+5Z0aH+aBNj61BXVSPWfj8DD6qBe5+pX4wW3xbFK7HHkOj+iGMNK77msOP0MvPSE/2h4v8AypOYxL9g+yUeiCixwOnY7arXZ+y0koNeujlyl9V5Zp1ju1Vr1/JZASzK6r/d16UMj4CVma/FqPYwjFtP0WpO24jokw1X4A2LQXm',
+    ];
+});
