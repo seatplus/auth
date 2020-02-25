@@ -32,7 +32,7 @@ class GetSsoScopesAction
 {
     private $scopes_to_add;
 
-    public function execute(?int $character_id = null, ?array $scopes_to_add = [])
+    public function execute(?int $character_id = null, array $scopes_to_add = [])
     {
         $this->scopes_to_add = $scopes_to_add;
 
@@ -40,7 +40,7 @@ class GetSsoScopesAction
             return $this->addScopesForCharacter($character_id);
         }
 
-        return config('eveapi.scopes.minimum');
+        return array_merge(config('eveapi.scopes.minimum'), $this->scopes_to_add);
     }
 
     private function plausibilityCheck(?int $character_id): bool

@@ -44,7 +44,7 @@ Route::namespace('Seatplus\Auth\Http\Controllers\Auth')
         ]);
 
         // SSO
-        Route::get('/eve/{character_id?}', [SsoController::class, 'redirectToProvider'])->name('auth.eve');
+        Route::get('/eve/sso/{character_id?}', [SsoController::class, 'redirectToProvider'])->name('auth.eve');
 
         Route::get('/eve/callback', [
             'as'   => 'auth.eve.callback',

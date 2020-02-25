@@ -27,6 +27,7 @@
 namespace Seatplus\Auth\Http\Controllers\Auth;
 
 use Laravel\Socialite\Contracts\Factory as Socialite;
+use Laravel\Socialite\Two\User as EveData;
 use Seatplus\Auth\Http\Actions\Sso\FindOrCreateUserAction;
 use Seatplus\Auth\Http\Actions\Sso\GetSsoScopesAction;
 use Seatplus\Auth\Http\Actions\Sso\UpdateRefreshTokenAction;
@@ -46,9 +47,15 @@ class SsoController extends Controller
      */
     public function redirectToProvider(Socialite $social, GetSsoScopesAction $get_sso_scopes_action, ?int $character_id = null)
     {
-        $scopes = $get_sso_scopes_action->execute($character_id, request()->query('add_scopes'));
+        $add_scopes = explode(',', request()->query('add_scopes'));
 
-        session(['rurl' => session()->previousUrl()]);
+        $scopes = $get_sso_scopes_action->execute($character_id, $add_scopes);
+
+        session([
+            'rurl'             => session()->previousUrl(),
+            'sso_scopes'       => $scopes,
+            'sso_character_id' => $character_id,
+        ]);
 
         return $social->driver('eveonline')
             ->scopes($scopes)
@@ -71,14 +78,20 @@ class SsoController extends Controller
     {
         $eve_data = $social->driver('eveonline')->user();
 
+        if (auth()->user()) {
+            if ($this->isInvalidProviderCallback($eve_data)) {
+                return redirect(session('rurl'));
+            }
+        }
+
         // Get or create the User bound to this login.
         $user = $find_or_create_user_action->execute($eve_data);
 
         // Update the refresh token for this character.
-
         $update_refresh_token_action->execute($eve_data);
 
         if (!$this->loginUser($user)) {
+            //TODO
             return redirect()->route('auth.login')
                 ->with('error', 'Login failed. Please contact your administrator.');
         }
@@ -104,6 +117,24 @@ class SsoController extends Controller
 
         // Login and "remember" the given user...
         auth()->login($user, true);
+
+        return true;
+    }
+
+    /**
+     * @param \Laravel\Socialite\Two\User $eve_data
+     *
+     * @return bool
+     */
+    private function isInvalidProviderCallback(EveData $eve_data): bool
+    {
+        $missing_scopes = array_diff(session('sso_scopes'), explode(' ', $eve_data->scopes));
+
+        if (empty($missing_scopes)) {
+            return false;
+        }
+
+        session()->flash('error', 'Something might have gone wrong. You might have changed the requested scopes on esi, please refer from doing so.');
 
         return true;
     }

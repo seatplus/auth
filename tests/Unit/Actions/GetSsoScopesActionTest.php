@@ -73,11 +73,13 @@ class GetSsoScopesActionTest extends TestCase
     }
 
     /** @test */
-    public function it_does_not_add_scopes_to_unauthed()
+    public function it_does_not_add_scopes_to_minimal_if_unauthed()
     {
         $scopes = $this->action->execute($this->character->character_id, ['test scope']);
 
-        $this->assertEquals($scopes, config('eveapi.scopes.minimum'));
+        $scopes_expected = array_merge(config('eveapi.scopes.minimum'), ['test scope']);
+
+        $this->assertEmpty(array_diff($scopes_expected, $scopes));
     }
 
     /** @test */
@@ -85,22 +87,13 @@ class GetSsoScopesActionTest extends TestCase
     {
         $this->actingAs($this->test_user);
 
+        $this->character->refresh_token->scopes = ['publicData', 'another already assigned scope'];
+        $this->character->refresh_token->save();
+
         $scopes = $this->action->execute($this->character->character_id, ['test scope']);
 
         $this->assertNotEquals($scopes, config('eveapi.scopes.minimum'));
 
         $this->assertTrue(in_array('test scope', $scopes));
-    }
-
-    /** @test */
-    public function it_does_not_add_scopes_if_character_does_not_belong_to_user()
-    {
-        $this->actingAs($this->test_user);
-
-        $scopes = $this->action->execute($this->character->character_id + 1, ['test scope']);
-
-        $this->assertEquals($scopes, config('eveapi.scopes.minimum'));
-
-        $this->assertFalse(in_array('test scope', $scopes));
     }
 }
