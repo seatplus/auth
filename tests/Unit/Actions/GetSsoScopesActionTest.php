@@ -87,7 +87,7 @@ class GetSsoScopesActionTest extends TestCase
     {
         $this->actingAs($this->test_user);
 
-        $this->character->refresh_token->scopes = ['publicData','another already assigned scope'];
+        $this->character->refresh_token->scopes = ['publicData', 'another already assigned scope'];
         $this->character->refresh_token->save();
 
         $scopes = $this->action->execute($this->character->character_id, ['test scope']);
