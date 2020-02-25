@@ -27,12 +27,12 @@
 namespace Seatplus\Auth\Http\Controllers\Auth;
 
 use Laravel\Socialite\Contracts\Factory as Socialite;
+use Laravel\Socialite\Two\User as EveData;
 use Seatplus\Auth\Http\Actions\Sso\FindOrCreateUserAction;
 use Seatplus\Auth\Http\Actions\Sso\GetSsoScopesAction;
 use Seatplus\Auth\Http\Actions\Sso\UpdateRefreshTokenAction;
 use Seatplus\Auth\Http\Controllers\Controller;
 use Seatplus\Auth\Models\User;
-use Laravel\Socialite\Two\User as EveData;
 
 class SsoController extends Controller
 {
@@ -52,9 +52,9 @@ class SsoController extends Controller
         $scopes = $get_sso_scopes_action->execute($character_id, $add_scopes);
 
         session([
-            'rurl' => session()->previousUrl(),
-            'sso_scopes' => $scopes,
-            'sso_character_id' => $character_id
+            'rurl'             => session()->previousUrl(),
+            'sso_scopes'       => $scopes,
+            'sso_character_id' => $character_id,
         ]);
 
         return $social->driver('eveonline')
@@ -78,9 +78,11 @@ class SsoController extends Controller
     {
         $eve_data = $social->driver('eveonline')->user();
 
-        if(auth()->user())
-            if($this->isInvalidProviderCallback($eve_data))
+        if (auth()->user()) {
+            if ($this->isInvalidProviderCallback($eve_data)) {
                 return redirect(session('rurl'));
+            }
+        }
 
         // Get or create the User bound to this login.
         $user = $find_or_create_user_action->execute($eve_data);
@@ -124,14 +126,16 @@ class SsoController extends Controller
      *
      * @return bool
      */
-    private function isInvalidProviderCallback(EveData $eve_data) : bool
+    private function isInvalidProviderCallback(EveData $eve_data): bool
     {
-        $missing_scopes = array_diff(session('sso_scopes'),explode(' ', $eve_data->scopes));
+        $missing_scopes = array_diff(session('sso_scopes'), explode(' ', $eve_data->scopes));
 
-        if(empty($missing_scopes))
+        if (empty($missing_scopes)) {
             return false;
+        }
 
         session()->flash('error', 'Something might have gone wrong. You might have changed the requested scopes on esi, please refer from doing so.');
+
         return true;
     }
 }
