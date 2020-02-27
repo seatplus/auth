@@ -26,6 +26,7 @@
 
 namespace Seatplus\Auth\Tests\Feature\Auth;
 
+use Illuminate\Support\Facades\Event;
 use Laravel\Socialite\Contracts\Provider;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\User as SocialiteUser;
@@ -50,9 +51,12 @@ class SsoControllerTest extends TestCase
     {
         parent::setUp();
 
-        $this->refresh_token = factory(RefreshToken::class)->create([
-            'character_id' => $this->test_user->character_users->first()->character_id,
-        ]);
+        Event::fakeFor(function () {
+
+            $this->refresh_token = factory(RefreshToken::class)->create([
+                'character_id' => $this->test_user->character_users->first()->character_id,
+            ]);
+        });
 
         $this->character = factory(CharacterInfo::class)->create([
             'character_id' => $this->test_user->character_users->first()->character_id,
@@ -77,8 +81,11 @@ class SsoControllerTest extends TestCase
             'character_id' => $character_id,
         ]);
 
-        $response = $this->get(route('auth.eve.callback'))
+        Event::fakeFor(function () {
+
+            $response = $this->get(route('auth.eve.callback'))
             ->assertRedirect();
+        });
 
         $this->assertDatabaseHas('refresh_tokens', [
             'character_id' => $character_id,

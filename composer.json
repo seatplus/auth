@@ -21,6 +21,9 @@
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
+    "replace": {
+        "seatplus/auth": "self.version"
+    },
     "require": {
         "php": "^7.4",
         "laravel/framework": "^6.0",
