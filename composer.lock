@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "4e61caa92f7700c44b1d83a409e4e86f",
+    "content-hash": "3a51dad977a7ccc081fc388738143b1d",
     "packages": [
         {
             "name": "cakephp/chronos",
@@ -2209,19 +2209,20 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/seatplus/eveapi.git",
-                "reference": "1c7bebb039da637b710b0edfbf938a4f9499df56"
+                "reference": "20f2d58551d3fa98d09c41be2e367da1937139ae"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/seatplus/eveapi/zipball/1c7bebb039da637b710b0edfbf938a4f9499df56",
-                "reference": "1c7bebb039da637b710b0edfbf938a4f9499df56",
+                "url": "https://api.github.com/repos/seatplus/eveapi/zipball/20f2d58551d3fa98d09c41be2e367da1937139ae",
+                "reference": "20f2d58551d3fa98d09c41be2e367da1937139ae",
                 "shasum": ""
             },
             "require": {
                 "ext-redis": "*",
                 "laravel/framework": "^6.0",
                 "laravel/horizon": "^3.2",
-                "php": ">=7.1",
+                "php": "^7.4",
+                "seatplus/auth": "dev-develop",
                 "seatplus/eseye": "^2.0",
                 "spatie/laravel-queueable-action": "^2.1"
             },
@@ -6342,7 +6343,7 @@
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=7.2"
+        "php": "^7.4"
     },
     "platform-dev": []
 }
