@@ -30,6 +30,7 @@
         "laravel/socialite": "^4.1",
         "seatplus/eseye": "^2.0",
         "seatplus/eveapi": "dev-develop",
+        "seatplus/auth": "@dev",
         "spatie/laravel-permission": "^3.0",
         "laravel/passport": "^8.0"
     },

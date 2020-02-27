@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "d1778717a46c62326eab3b0b7fca514b",
+    "content-hash": "bd9f134a2b901f6887c97d050c8439b8",
     "packages": [
         {
             "name": "cakephp/chronos",
@@ -6504,7 +6504,8 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "seatplus/eveapi": 20
+        "seatplus/eveapi": 20,
+        "seatplus/auth": 20
     },
     "prefer-stable": true,
     "prefer-lowest": false,
