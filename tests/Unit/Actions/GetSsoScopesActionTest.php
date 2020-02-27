@@ -26,6 +26,7 @@
 
 namespace Seatplus\Auth\Tests\Unit\Actions;
 
+use Illuminate\Support\Facades\Event;
 use Seatplus\Auth\Http\Actions\Sso\GetSsoScopesAction;
 use Seatplus\Auth\Tests\TestCase;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
@@ -53,9 +54,12 @@ class GetSsoScopesActionTest extends TestCase
         parent::setUp();
 
         $this->action = new GetSsoScopesAction();
-        $this->refresh_token = factory(RefreshToken::class)->create([
-            'character_id' => $this->test_user->character_users->first()->character_id,
-        ]);
+
+        Event::fakeFor(function () {
+            $this->refresh_token = factory(RefreshToken::class)->create([
+                'character_id' => $this->test_user->character_users->first()->character_id,
+            ]);
+        });
 
         $this->character = factory(CharacterInfo::class)->create([
             'character_id' => $this->test_user->character_users->first()->character_id,

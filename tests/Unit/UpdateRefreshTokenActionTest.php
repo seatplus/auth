@@ -26,6 +26,7 @@
 
 namespace Seatplus\Auth\Tests\Unit;
 
+use Illuminate\Support\Facades\Event;
 use Laravel\Socialite\Two\User as SocialiteUser;
 use Seatplus\Auth\Http\Actions\Sso\UpdateRefreshTokenAction;
 use Seatplus\Auth\Tests\TestCase;
@@ -38,7 +39,9 @@ class UpdateRefreshTokenActionTest extends TestCase
     {
         $eve_data = $this->createSocialiteUser($this->test_user->id);
 
-        (new UpdateRefreshTokenAction())->execute($eve_data);
+        Event::fakeFor(function () use ($eve_data) {
+            (new UpdateRefreshTokenAction())->execute($eve_data);
+        });
 
         $this->assertDatabaseHas('refresh_tokens', [
             'character_id' => $this->test_user->id,
@@ -51,7 +54,9 @@ class UpdateRefreshTokenActionTest extends TestCase
         // create RefreshToken
         $eve_data = $this->createSocialiteUser($this->test_user->id);
 
-        (new UpdateRefreshTokenAction())->execute($eve_data);
+        Event::fakeFor(function () use ($eve_data) {
+            (new UpdateRefreshTokenAction())->execute($eve_data);
+        });
 
         $this->assertDatabaseHas('refresh_tokens', [
             'character_id'  => $this->test_user->id,
@@ -76,7 +81,9 @@ class UpdateRefreshTokenActionTest extends TestCase
         // create RefreshToken
         $eve_data = $this->createSocialiteUser($this->test_user->id);
 
-        (new UpdateRefreshTokenAction())->execute($eve_data);
+        Event::fakeFor(function () use ($eve_data) {
+            (new UpdateRefreshTokenAction())->execute($eve_data);
+        });
 
         $this->assertDatabaseHas('refresh_tokens', [
             'character_id' => $this->test_user->id,

@@ -19,7 +19,7 @@ before_install:
   - echo "extension = redis.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
 
 install:
-  - composer install --no-interaction
+  - COMPOSER_ROOT_VERSION=dev-develop composer install --no-interaction
   - composer dump-autoload
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
 
