@@ -52,7 +52,6 @@ class SsoControllerTest extends TestCase
         parent::setUp();
 
         Event::fakeFor(function () {
-
             $this->refresh_token = factory(RefreshToken::class)->create([
                 'character_id' => $this->test_user->character_users->first()->character_id,
             ]);
@@ -82,7 +81,6 @@ class SsoControllerTest extends TestCase
         ]);
 
         Event::fakeFor(function () {
-
             $response = $this->get(route('auth.eve.callback'))
             ->assertRedirect();
         });
