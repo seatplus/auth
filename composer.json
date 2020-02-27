@@ -21,15 +21,12 @@
     },
     "minimum-stability": "alpha",
     "prefer-stable": true,
-    "replace": {
-        "seatplus/auth": "self.version"
-    },
     "require": {
         "php": "^7.4",
         "laravel/framework": "^6.0",
         "laravel/socialite": "^4.1",
         "seatplus/eseye": "^2.0",
-        "seatplus/eveapi": "dev-develop@dev",
+        "seatplus/eveapi": "dev-develop",
         "spatie/laravel-permission": "^3.0",
         "laravel/passport": "^8.0"
     },
