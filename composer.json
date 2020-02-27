@@ -19,7 +19,7 @@
             "Seatplus\\Auth\\Tests\\": "tests/"
         }
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "alpha",
     "prefer-stable": true,
     "replace": {
         "seatplus/auth": "self.version"
