@@ -102,7 +102,7 @@ class UpdateRefreshTokenActionTest extends TestCase
 
         $eve_data = $this->createSocialiteUser($this->test_user->id, 'new_refreshToken');
 
-        (new UpdateRefreshTokenAction)->execute($eve_data);
+        (new UpdateRefreshTokenAction())->execute($eve_data);
 
         $this->assertDatabaseMissing('refresh_tokens', [
             'character_id'  => $this->test_user->id,

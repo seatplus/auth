@@ -96,7 +96,8 @@ class CheckRequiredScopes
     {
         return auth()->user()->characters()->has('alliance.ssoScopes')
             ->orHas('corporation.ssoScopes')
-            ->with('alliance.ssoScopes',
+            ->with(
+                'alliance.ssoScopes',
                 'corporation.ssoScopes',
                 'application.corporation.ssoScopes',
                 'application.corporation.alliance.ssoScopes'
