@@ -75,8 +75,7 @@ class SsoController extends Controller
         Socialite $social,
         FindOrCreateUserAction $find_or_create_user_action,
         UpdateRefreshTokenAction $update_refresh_token_action
-    )
-    {
+    ) {
         $eve_data = $social->driver('eveonline')->user();
 
         if (auth()->user()) {
