@@ -49,8 +49,10 @@ class UpdateRefreshTokenActionTest extends TestCase
     }
 
     /** @test */
-    public function UpdateRefreshToken()
+    public function it_does_update_refresh_token_active_sessions()
     {
+        $this->actingAs($this->test_user);
+
         // create RefreshToken
         $eve_data = $this->createSocialiteUser($this->test_user->id);
 
@@ -63,6 +65,7 @@ class UpdateRefreshTokenActionTest extends TestCase
             'refresh_token' => 'refresh_token',
         ]);
 
+        $this->actingAs($this->test_user);
         // Change RefreshToken
 
         $eve_data = $this->createSocialiteUser($this->test_user->id, 'new_refreshToken');
@@ -70,6 +73,38 @@ class UpdateRefreshTokenActionTest extends TestCase
         (new UpdateRefreshTokenAction())->execute($eve_data);
 
         $this->assertDatabaseHas('refresh_tokens', [
+            'character_id'  => $this->test_user->id,
+            'refresh_token' => 'new_refreshToken',
+        ]);
+    }
+
+    /** @test */
+    public function it_does_not_update_refresh_token_for_new_session_of_a_valid_refresh_token_user()
+    {
+        // create RefreshToken
+        $eve_data = $this->createSocialiteUser($this->test_user->id);
+
+        Event::fakeFor(function () use ($eve_data) {
+            factory(RefreshToken::class)->create([
+                'character_id'  => $this->test_user->id,
+                'refresh_token' => 'refresh_token',
+            ]);
+
+            (new UpdateRefreshTokenAction())->execute($eve_data);
+        });
+
+        $this->assertDatabaseHas('refresh_tokens', [
+            'character_id'  => $this->test_user->id,
+            'refresh_token' => 'refresh_token',
+        ]);
+
+        // Change RefreshToken
+
+        $eve_data = $this->createSocialiteUser($this->test_user->id, 'new_refreshToken');
+
+        (new UpdateRefreshTokenAction)->execute($eve_data);
+
+        $this->assertDatabaseMissing('refresh_tokens', [
             'character_id'  => $this->test_user->id,
             'refresh_token' => 'new_refreshToken',
         ]);
