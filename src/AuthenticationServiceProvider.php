@@ -59,7 +59,8 @@ class AuthenticationServiceProvider extends ServiceProvider
         // Slap in the Eveonline Socialite Provider
         $eveonline = $this->app->make('Laravel\Socialite\Contracts\Factory');
 
-        $eveonline->extend('eveonline',
+        $eveonline->extend(
+            'eveonline',
             function ($app) use ($eveonline) {
                 $config = $app['config']['services.eveonline'];
 
@@ -68,7 +69,8 @@ class AuthenticationServiceProvider extends ServiceProvider
         );
 
         $this->mergeConfigFrom(
-            __DIR__.'/config/permission.php', 'permission'
+            __DIR__.'/config/permission.php',
+            'permission'
         );
     }
 }

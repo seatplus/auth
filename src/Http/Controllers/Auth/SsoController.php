@@ -74,7 +74,8 @@ class SsoController extends Controller
     public function handleProviderCallback(
         Socialite $social,
         FindOrCreateUserAction $find_or_create_user_action,
-        UpdateRefreshTokenAction $update_refresh_token_action)
+        UpdateRefreshTokenAction $update_refresh_token_action
+    )
     {
         $eve_data = $social->driver('eveonline')->user();
 

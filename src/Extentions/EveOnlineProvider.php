@@ -64,7 +64,8 @@ class EveOnlineProvider extends AbstractProvider implements ProviderInterface
 
         $user = $this->mapUserToObject(
             array_merge(
-                $this->getUserByToken($tokens['access_token']), [
+                $this->getUserByToken($tokens['access_token']),
+                [
                     'RefreshToken' => $tokens['refresh_token'],
                 ]
             )
@@ -122,7 +123,9 @@ class EveOnlineProvider extends AbstractProvider implements ProviderInterface
     protected function getAuthUrl($state)
     {
         return $this->buildAuthUrlFromBase(
-            'https://login.eveonline.com/oauth/authorize', $state);
+            'https://login.eveonline.com/oauth/authorize',
+            $state
+        );
     }
 
     /**
