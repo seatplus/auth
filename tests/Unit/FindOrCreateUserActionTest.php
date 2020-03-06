@@ -145,7 +145,8 @@ class FindOrCreateUserActionTest extends TestCase
         $socialiteUser = $this->createSocialUserMock(
             $this->test_user->character_users->first()->character_id,
             $this->test_user->main_character,
-            'anotherHashValue');
+            'anotherHashValue'
+        );
 
         // 3. find user
 

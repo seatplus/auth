@@ -94,7 +94,7 @@ class User extends Authenticatable
             'character_id',
             'id',
             'character_id'
-            );
+        );
     }
 
     public function main_character()

@@ -114,7 +114,7 @@ class SsoControllerTest extends TestCase
         $this->assertEquals(
             'Something might have gone wrong. You might have changed the requested scopes on esi, please refer from doing so.',
             session('error')
-            );
+        );
     }
 
     private function createSocialiteUser($character_id, $refresh_token = 'refresh_token', $scopes = '1 2', $token = 'qq3dpeTMpDkjNasdasdewva3Be658eVVkox_1Ikodc')

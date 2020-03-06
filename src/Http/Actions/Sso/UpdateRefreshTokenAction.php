@@ -35,8 +35,9 @@ class UpdateRefreshTokenAction
     {
         // To prevent overwriting a perfectly fine refresh_token of users without a valid session
         // simply ignore the returned refresh_token as it would only contain public_data scope
-        if(auth()->guest() && RefreshToken::where('character_id',$eve_data->character_id)->get()->isNotEmpty())
+        if (auth()->guest() && RefreshToken::where('character_id', $eve_data->character_id)->get()->isNotEmpty()) {
             return;
+        }
 
         RefreshToken::withTrashed()->firstOrNew(['character_id' => $eve_data->character_id])
             ->fill([
