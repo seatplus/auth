@@ -27,8 +27,7 @@
         "laravel/socialite": "^4.1",
         "seatplus/eseye": "^2.0",
         "seatplus/eveapi": "dev-develop",
-        "spatie/laravel-permission": "^3.0",
-        "laravel/passport": "^8.0"
+        "spatie/laravel-permission": "^3.0"
     },
     "require-dev": {
         "orchestra/testbench": "^4.0",
