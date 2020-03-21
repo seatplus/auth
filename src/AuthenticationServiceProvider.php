@@ -30,6 +30,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Socialite\SocialiteManager;
 use Seatplus\Auth\Extentions\EveOnlineProvider;
+use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 
 class AuthenticationServiceProvider extends ServiceProvider
 {
@@ -44,7 +45,11 @@ class AuthenticationServiceProvider extends ServiceProvider
 
         // Add GateLogic
         Gate::before(function ($user, $ability) {
-            return $user->hasPermissionTo('superuser') ? true : null;
+            try {
+                return $user->hasPermissionTo('superuser') ? true : null;
+            } catch (PermissionDoesNotExist $exception) {
+                return null;
+            }
         });
     }
 
