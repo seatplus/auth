@@ -45,13 +45,11 @@ class AuthenticationServiceProvider extends ServiceProvider
 
         // Add GateLogic
         Gate::before(function ($user, $ability) {
-
             try {
                 return $user->hasPermissionTo('superuser') ? true : null;
             } catch (PermissionDoesNotExist $exception) {
                 return null;
             }
-
         });
     }
 
