@@ -24,34 +24,22 @@
  * SOFTWARE.
  */
 
-namespace Seatplus\Auth\Models;
+namespace Seatplus\Auth\Tests\Feature\Permissions;
 
-use Illuminate\Database\Eloquent\Model;
-use Seatplus\Eveapi\Models\Character\CharacterInfo;
+use Seatplus\Auth\Models\Permissions\Permission;
+use Seatplus\Auth\Tests\TestCase;
 
-class CharacterUser extends Model
+class SuperuserTest extends TestCase
 {
-    /**
-     * @var bool
-     */
-    public $incrementing = false;
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
-    protected $fillable = [
-        'character_id', 'user_id', 'character_owner_hash',
-    ];
-
-    public function user()
+    /** @test */
+    public function superuser_got_any_permission()
     {
-        return $this->belongsTo(User::class);
-    }
+        $superuser_permission = Permission::create(['name' => 'superuser']);
 
-    public function character()
-    {
-        return $this->belongsTo(CharacterInfo::class, 'character_id');
+        $this->test_user->givePermissionTo('superuser');
+
+        $another_permission = Permission::create(['name' => 'another permission']);
+
+        $this->assertTrue($this->test_user->can($another_permission->name));
     }
 }

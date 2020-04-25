@@ -1,12 +1,36 @@
 <?php
 
+/*
+ * MIT License
+ *
+ * Copyright (c) 2019, 2020 Felix Huber
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 
 namespace Seatplus\Auth\Tests\Unit;
 
+use Illuminate\Support\Facades\Event;
 use Laravel\Socialite\Two\User as SocialiteUser;
+use Seatplus\Auth\Http\Actions\Sso\UpdateRefreshTokenAction;
 use Seatplus\Auth\Tests\TestCase;
 use Seatplus\Eveapi\Models\RefreshToken;
-use Seatplus\Auth\Http\Actions\Sso\UpdateRefreshTokenAction;
 
 class UpdateRefreshTokenActionTest extends TestCase
 {
@@ -15,38 +39,75 @@ class UpdateRefreshTokenActionTest extends TestCase
     {
         $eve_data = $this->createSocialiteUser($this->test_user->id);
 
-        (new UpdateRefreshTokenAction)->execute($eve_data);
+        Event::fakeFor(function () use ($eve_data) {
+            (new UpdateRefreshTokenAction())->execute($eve_data);
+        });
 
         $this->assertDatabaseHas('refresh_tokens', [
-            'character_id' => $this->test_user->id
+            'character_id' => $this->test_user->id,
         ]);
-
     }
 
     /** @test */
-    public function UpdateRefreshToken()
+    public function it_does_update_refresh_token_active_sessions()
+    {
+        $this->actingAs($this->test_user);
+
+        // create RefreshToken
+        $eve_data = $this->createSocialiteUser($this->test_user->id);
+
+        Event::fakeFor(function () use ($eve_data) {
+            (new UpdateRefreshTokenAction())->execute($eve_data);
+        });
+
+        $this->assertDatabaseHas('refresh_tokens', [
+            'character_id'  => $this->test_user->id,
+            'refresh_token' => 'refresh_token',
+        ]);
+
+        $this->actingAs($this->test_user);
+        // Change RefreshToken
+
+        $eve_data = $this->createSocialiteUser($this->test_user->id, 'new_refreshToken');
+
+        (new UpdateRefreshTokenAction())->execute($eve_data);
+
+        $this->assertDatabaseHas('refresh_tokens', [
+            'character_id'  => $this->test_user->id,
+            'refresh_token' => 'new_refreshToken',
+        ]);
+    }
+
+    /** @test */
+    public function it_does_not_update_refresh_token_for_new_session_of_a_valid_refresh_token_user()
     {
         // create RefreshToken
         $eve_data = $this->createSocialiteUser($this->test_user->id);
 
-        (new UpdateRefreshTokenAction)->execute($eve_data);
+        Event::fakeFor(function () use ($eve_data) {
+            factory(RefreshToken::class)->create([
+                'character_id'  => $this->test_user->id,
+                'refresh_token' => 'refresh_token',
+            ]);
+
+            (new UpdateRefreshTokenAction())->execute($eve_data);
+        });
 
         $this->assertDatabaseHas('refresh_tokens', [
-            'character_id' => $this->test_user->id,
-            'refresh_token' => 'refresh_token'
+            'character_id'  => $this->test_user->id,
+            'refresh_token' => 'refresh_token',
         ]);
 
         // Change RefreshToken
 
-        $eve_data = $this->createSocialiteUser($this->test_user->id,'new_refreshToken');
+        $eve_data = $this->createSocialiteUser($this->test_user->id, 'new_refreshToken');
 
-        (new UpdateRefreshTokenAction)->execute($eve_data);
+        (new UpdateRefreshTokenAction())->execute($eve_data);
 
-        $this->assertDatabaseHas('refresh_tokens', [
-            'character_id' => $this->test_user->id,
-            'refresh_token' => 'new_refreshToken'
+        $this->assertDatabaseMissing('refresh_tokens', [
+            'character_id'  => $this->test_user->id,
+            'refresh_token' => 'new_refreshToken',
         ]);
-
     }
 
     /** @test */
@@ -55,10 +116,12 @@ class UpdateRefreshTokenActionTest extends TestCase
         // create RefreshToken
         $eve_data = $this->createSocialiteUser($this->test_user->id);
 
-        (new UpdateRefreshTokenAction)->execute($eve_data);
+        Event::fakeFor(function () use ($eve_data) {
+            (new UpdateRefreshTokenAction())->execute($eve_data);
+        });
 
         $this->assertDatabaseHas('refresh_tokens', [
-            'character_id' => $this->test_user->id
+            'character_id' => $this->test_user->id,
         ]);
 
         // Assert if RefreshToken was created
@@ -73,13 +136,12 @@ class UpdateRefreshTokenActionTest extends TestCase
 
         // Recreate RefreshToken
         $eve_data = $this->createSocialiteUser($this->test_user->id, 'newRefreshToken');
-        (new UpdateRefreshTokenAction)->execute($eve_data);
+        (new UpdateRefreshTokenAction())->execute($eve_data);
         $this->assertNotEmpty(RefreshToken::find($this->test_user->id));
         $this->assertDatabaseHas('refresh_tokens', [
-            'character_id' => $this->test_user->id,
-            'refresh_token' => 'newRefreshToken'
+            'character_id'  => $this->test_user->id,
+            'refresh_token' => 'newRefreshToken',
         ]);
-
     }
 
     private function createSocialiteUser($character_id, $refresh_token = 'refresh_token', $scopes = '1 2', $token = 'qq3dpeTMpDkjNasdasdewva3Be658eVVkox_1Ikodc')
@@ -91,8 +153,6 @@ class UpdateRefreshTokenActionTest extends TestCase
         $socialiteUser->token = $token;
         $socialiteUser->expires_on = carbon('now')->addMinutes(15);
 
-
         return $socialiteUser;
     }
-
 }

@@ -1,16 +1,37 @@
 <?php
 
+/*
+ * MIT License
+ *
+ * Copyright (c) 2019, 2020 Felix Huber
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 
 namespace Seatplus\Auth\Tests;
 
-
 use Faker\Factory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Socialite\Two\User as SocialiteUser;
 use Seatplus\Auth\Http\Actions\Sso\FindOrCreateUserAction;
 use Seatplus\Auth\Models\CharacterUser;
 use Seatplus\Auth\Models\User;
-use Laravel\Socialite\Two\User as SocialiteUser;
-
 
 class FindOrCreateUserActionTest extends TestCase
 {
@@ -48,31 +69,28 @@ class FindOrCreateUserActionTest extends TestCase
 
     public function setUp(): void
     {
-
         parent::setUp();
 
         $this->faker = Factory::create();
-
     }
 
     /** @test */
     public function createNewUser()
     {
-
         $socialiteUser = $this->createSocialUserMock();
 
         $this->assertDatabaseMissing('users', [
-            'main_character' => $socialiteUser->name,
+            'main_character_id' => $socialiteUser->character_id,
         ]);
 
-        $user = (new FindOrCreateUserAction)->execute($socialiteUser);
+        $user = (new FindOrCreateUserAction())->execute($socialiteUser);
 
         $this->assertDatabaseHas('users', [
-            'main_character' => $socialiteUser->name,
+            'main_character_id' => $socialiteUser->character_id,
         ]);
 
         $this->assertDatabaseHas('character_users', [
-            'user_id' => $user->id,
+            'user_id'      => $user->id,
             'character_id' => $socialiteUser->character_id,
         ]);
     }
@@ -82,16 +100,15 @@ class FindOrCreateUserActionTest extends TestCase
     {
 
         // add 3 characters to test_user
-        $this->test_user->characters()->createMany(
+        $this->test_user->character_users()->createMany(
             factory(CharacterUser::class, 3)->make()->toArray()
         );
 
-        $this->assertEquals(4, $this->test_user->characters->count());
+        $this->assertEquals(4, $this->test_user->character_users->count());
 
         // select last character to login
 
-        $secondary_character = $this->test_user->characters->last();
-
+        $secondary_character = $this->test_user->character_users->last();
 
         $socialiteUser = $this->createSocialUserMock(
             $secondary_character->character_id,
@@ -99,7 +116,7 @@ class FindOrCreateUserActionTest extends TestCase
             $secondary_character->character_owner_hash
         );
 
-        $user = (new FindOrCreateUserAction)->execute($socialiteUser);
+        $user = (new FindOrCreateUserAction())->execute($socialiteUser);
 
         $this->assertEquals($this->test_user->id, $user->id);
 
@@ -108,7 +125,7 @@ class FindOrCreateUserActionTest extends TestCase
         ]);
 
         $this->assertDatabaseHas('character_users', [
-            'user_id' => $this->test_user->id,
+            'user_id'      => $this->test_user->id,
             'character_id' => $secondary_character->character_id,
         ]);
     }
@@ -116,8 +133,7 @@ class FindOrCreateUserActionTest extends TestCase
     /** @test */
     public function dealWithChangedOwnerHash()
     {
-
-        $this->assertEquals($this->test_user->characters->count(),1);
+        $this->assertEquals($this->test_user->character_users->count(), 1);
 
         // 2. create character_users entry
         /*factory(CharacterUser::class)->create([
@@ -127,13 +143,14 @@ class FindOrCreateUserActionTest extends TestCase
         ]);*/
 
         $socialiteUser = $this->createSocialUserMock(
-            $this->test_user->characters->first()->character_id,
+            $this->test_user->character_users->first()->character_id,
             $this->test_user->main_character,
-            'anotherHashValue');
+            'anotherHashValue'
+        );
 
         // 3. find user
 
-        $user = (new FindOrCreateUserAction)->execute($socialiteUser);
+        $user = (new FindOrCreateUserAction())->execute($socialiteUser);
 
         $this->assertDatabaseHas('users', [
             'id' => $user->id,
@@ -144,7 +161,7 @@ class FindOrCreateUserActionTest extends TestCase
         ]);
 
         $this->assertDatabaseMissing('character_users', [
-            'user_id' => $this->test_user->id,
+            'user_id'      => $this->test_user->id,
             'character_id' => $user->id,
         ]);
     }
@@ -157,28 +174,27 @@ class FindOrCreateUserActionTest extends TestCase
         $secondary_user = factory(CharacterUser::class)->make();
 
         // 2. assign secondary user to test_user
-        $this->test_user->characters()->save($secondary_user);
+        $this->test_user->character_users()->save($secondary_user);
 
-        $this->assertEquals(2, $this->test_user->characters->count());
+        $this->assertEquals(2, $this->test_user->character_users->count());
 
         // 3. find user
 
         $socialiteUser = $this->createSocialUserMock(
             $secondary_user->character_id,
-            null,
+            'someName',
             'anotherHashValue'
         );
 
-        $user = (new FindOrCreateUserAction)->execute($socialiteUser);
+        $user = (new FindOrCreateUserAction())->execute($socialiteUser);
 
         // 4. assert that two users exist
 
         //dd($secondary_user->character_id,User::first()->characters);
 
-        $this->assertEquals(1, $user->characters->count());
+        $this->assertEquals(1, $user->character_users->count());
 
         $this->assertEquals(2, CharacterUser::all()->count());
-
 
         $this->assertDatabaseHas('users', [
             'id' => $this->test_user->id,
@@ -191,17 +207,46 @@ class FindOrCreateUserActionTest extends TestCase
         //5. assert that secondary character is not affiliated to first user
 
         $this->assertDatabaseMissing('character_users', [
-            'user_id' => $this->test_user->id,
+            'user_id'      => $this->test_user->id,
             'character_id' => $secondary_user->character_id,
         ]);
 
         $this->assertDatabaseHas('character_users', [
-            'user_id' => $user->id,
+            'user_id'      => $user->id,
             'character_id' => $secondary_user->character_id,
         ]);
     }
 
-    private function createSocialUserMock(int $character_id = null, string $name = null, string $character_owner_hash = null) : SocialiteUser
+    /** @test */
+    public function it_returns_authed_user()
+    {
+        // 1. Create secondary character
+        $secondary_user = factory(CharacterUser::class)->make();
+
+        $socialiteUser = $this->createSocialUserMock(
+            $secondary_user->character_id,
+            'someName',
+            'anotherHashValue'
+        );
+
+        // act as test user
+        $this->actingAs($this->test_user);
+
+        $user = (new FindOrCreateUserAction())->execute($socialiteUser);
+
+        // Assert that test user id and the returned user id is equal
+        $this->assertEquals($this->test_user->id, $user->id);
+
+        // assert that character user relation has been set
+        $this->assertDatabaseHas('character_users', [
+            'user_id'      => $this->test_user->id,
+            'character_id' => $secondary_user->character_id,
+        ]);
+
+        $this->assertEquals(2, $this->test_user->character_users->count());
+    }
+
+    private function createSocialUserMock(int $character_id = null, string $name = null, string $character_owner_hash = null): SocialiteUser
     {
         $socialiteUser = $this->createMock(SocialiteUser::class);
 
@@ -210,7 +255,5 @@ class FindOrCreateUserActionTest extends TestCase
         $socialiteUser->character_owner_hash = $character_owner_hash ?? sha1($this->faker->text);
 
         return $socialiteUser;
-
     }
-
 }

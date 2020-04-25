@@ -24,34 +24,16 @@
  * SOFTWARE.
  */
 
-namespace Seatplus\Auth\Models;
-
-use Illuminate\Database\Eloquent\Model;
+use Faker\Generator as Faker;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
+use Seatplus\Eveapi\Models\RefreshToken;
 
-class CharacterUser extends Model
-{
-    /**
-     * @var bool
-     */
-    public $incrementing = false;
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
-    protected $fillable = [
-        'character_id', 'user_id', 'character_owner_hash',
+$factory->define(RefreshToken::class, function (Faker $faker) {
+    return [
+        'character_id'             => factory(CharacterInfo::class)->create(),
+        'refresh_token'            => 'MmLZC2vwExCby2vbdgEVpOxXPUG3mIGfkQM5gl9IPtA',
+        'scopes'                   => config('eveapi.scopes.minimum'),
+        'expires_on'               => now()->addMinutes(10),
+        'token'                    => '1|CfDJ8O+5Z0aH+aBNj61BXVSPWfj8DD6qBe5+pX4wW3xbFK7HHkOj+iGMNK77msOP0MvPSE/2h4v8AypOYxL9g+yUeiCixwOnY7arXZ+y0koNeujlyl9V5Zp1ju1Vr1/JZASzK6r/d16UMj4CVma/FqPYwjFtP0WpO24jokw1X4A2LQXm',
     ];
-
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
-
-    public function character()
-    {
-        return $this->belongsTo(CharacterInfo::class, 'character_id');
-    }
-}
+});

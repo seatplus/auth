@@ -24,34 +24,15 @@
  * SOFTWARE.
  */
 
-namespace Seatplus\Auth\Models;
+use Faker\Generator as Faker;
+use Seatplus\Eveapi\Models\Alliance\AllianceInfo;
+use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
+use Seatplus\Eveapi\Models\SsoScopes;
 
-use Illuminate\Database\Eloquent\Model;
-use Seatplus\Eveapi\Models\Character\CharacterInfo;
-
-class CharacterUser extends Model
-{
-    /**
-     * @var bool
-     */
-    public $incrementing = false;
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
-    protected $fillable = [
-        'character_id', 'user_id', 'character_owner_hash',
+$factory->define(SsoScopes::class, function (Faker $faker) {
+    return [
+        'selected_scopes' => collect()->toArray(),
+        'morphable_id'    => 1,
+        'morphable_type'  => $faker->randomElement([AllianceInfo::class, CorporationInfo::class]),
     ];
-
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
-
-    public function character()
-    {
-        return $this->belongsTo(CharacterInfo::class, 'character_id');
-    }
-}
+});

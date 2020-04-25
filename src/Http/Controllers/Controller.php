@@ -24,34 +24,12 @@
  * SOFTWARE.
  */
 
-namespace Seatplus\Auth\Models;
+namespace Seatplus\Auth\Http\Controllers;
 
-use Illuminate\Database\Eloquent\Model;
-use Seatplus\Eveapi\Models\Character\CharacterInfo;
+use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Routing\Controller as BaseController;
 
-class CharacterUser extends Model
+class Controller extends BaseController
 {
-    /**
-     * @var bool
-     */
-    public $incrementing = false;
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
-    protected $fillable = [
-        'character_id', 'user_id', 'character_owner_hash',
-    ];
-
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
-
-    public function character()
-    {
-        return $this->belongsTo(CharacterInfo::class, 'character_id');
-    }
+    use ValidatesRequests;
 }

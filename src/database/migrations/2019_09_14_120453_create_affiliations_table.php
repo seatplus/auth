@@ -24,34 +24,36 @@
  * SOFTWARE.
  */
 
-namespace Seatplus\Auth\Models;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-use Illuminate\Database\Eloquent\Model;
-use Seatplus\Eveapi\Models\Character\CharacterInfo;
-
-class CharacterUser extends Model
+class CreateAffiliationsTable extends Migration
 {
     /**
-     * @var bool
-     */
-    public $incrementing = false;
-
-    /**
-     * The attributes that are mass assignable.
+     * Run the migrations.
      *
-     * @var array
+     * @return void
      */
-    protected $fillable = [
-        'character_id', 'user_id', 'character_owner_hash',
-    ];
-
-    public function user()
+    public function up()
     {
-        return $this->belongsTo(User::class);
+        Schema::create('affiliations', function (Blueprint $table) {
+            $table->bigInteger('role_id')->unsigned();
+            $table->bigInteger('character_id')->nullable();
+            $table->bigInteger('corporation_id')->nullable();
+            $table->bigInteger('alliance_id')->nullable();
+            $table->enum('type', ['allowed', 'inverse', 'forbidden']);
+            $table->timestamps();
+        });
     }
 
-    public function character()
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
     {
-        return $this->belongsTo(CharacterInfo::class, 'character_id');
+        Schema::dropIfExists('affiliations');
     }
 }
