@@ -49,7 +49,7 @@ class SsoController extends Controller
     {
         $add_scopes = explode(',', request()->query('add_scopes'));
 
-        $scopes = $get_sso_scopes_action->execute($character_id, $add_scopes);
+        $scopes = array_filter($get_sso_scopes_action->execute($character_id, $add_scopes));
 
         session([
             'rurl'             => session()->previousUrl(),
