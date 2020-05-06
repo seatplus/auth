@@ -32,7 +32,7 @@ class GetSsoScopesAction
 {
     private $scopes_to_add;
 
-    public function execute(?int $character_id = null, array $scopes_to_add = [])
+    public function execute(?int $character_id = null, array $scopes_to_add = []): array
     {
         $this->scopes_to_add = $scopes_to_add;
 
