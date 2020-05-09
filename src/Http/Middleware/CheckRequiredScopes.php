@@ -94,9 +94,8 @@ class CheckRequiredScopes
 
     private function charactersWithRequiredSsoScopes(): Collection
     {
-
         return auth()->user()->characters->filter(function ($character) {
-            return (($character->alliance->ssoScopes ?? false) || ($character->corporation->ssoScopes ?? false));
+            return ($character->alliance->ssoScopes ?? false) || ($character->corporation->ssoScopes ?? false);
         })->isNotEmpty() ? auth()->user()->characters : collect();
     }
 
