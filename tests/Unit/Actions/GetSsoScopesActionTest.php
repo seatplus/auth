@@ -65,8 +65,6 @@ class GetSsoScopesActionTest extends TestCase
             ]);
         });
 
-
-
         $this->test_user = $this->test_user->refresh();
     }
 

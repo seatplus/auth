@@ -52,7 +52,6 @@ class GetAffiliatedCharacterIdsByPermissionArrayTest extends TestCase
     {
         parent::setUp();
 
-
         $this->role = Role::create(['name' => 'writer']);
         $this->permission = Permission::create(['name' => 'edit articles']);
 
@@ -72,8 +71,6 @@ class GetAffiliatedCharacterIdsByPermissionArrayTest extends TestCase
 
             $this->tertiary_character = factory(CharacterInfo::class)->create();
         });
-
-
     }
 
     /**
