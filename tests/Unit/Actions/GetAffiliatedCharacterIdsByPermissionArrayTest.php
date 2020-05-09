@@ -27,6 +27,7 @@
 namespace Seatplus\Auth\Tests\Unit\Actions;
 
 use Faker\Factory;
+use Illuminate\Support\Facades\Event;
 use Seatplus\Auth\Actions\GetAffiliatedCharactersIdsByPermissionArray;
 use Seatplus\Auth\Models\Permissions\Permission;
 use Seatplus\Auth\Models\Permissions\Role;
@@ -51,6 +52,7 @@ class GetAffiliatedCharacterIdsByPermissionArrayTest extends TestCase
     {
         parent::setUp();
 
+
         $this->role = Role::create(['name' => 'writer']);
         $this->permission = Permission::create(['name' => 'edit articles']);
 
@@ -61,13 +63,17 @@ class GetAffiliatedCharacterIdsByPermissionArrayTest extends TestCase
 
         $this->actingAs($this->test_user);
 
-        $this->test_character = factory(CharacterInfo::class)->create([
-            'character_id' => $this->test_character_user->character_id,
-        ]);
+        Event::fakeFor(function () {
+            $this->test_character = factory(CharacterInfo::class)->create([
+                'character_id' => $this->test_character_user->character_id,
+            ]);
 
-        $this->secondary_character = factory(CharacterInfo::class)->create();
+            $this->secondary_character = factory(CharacterInfo::class)->create();
 
-        $this->tertiary_character = factory(CharacterInfo::class)->create();
+            $this->tertiary_character = factory(CharacterInfo::class)->create();
+        });
+
+
     }
 
     /**

@@ -59,11 +59,13 @@ class GetSsoScopesActionTest extends TestCase
             $this->refresh_token = factory(RefreshToken::class)->create([
                 'character_id' => $this->test_user->character_users->first()->character_id,
             ]);
+
+            $this->character = factory(CharacterInfo::class)->create([
+                'character_id' => $this->test_user->character_users->first()->character_id,
+            ]);
         });
 
-        $this->character = factory(CharacterInfo::class)->create([
-            'character_id' => $this->test_user->character_users->first()->character_id,
-        ]);
+
 
         $this->test_user = $this->test_user->refresh();
     }
@@ -92,6 +94,7 @@ class GetSsoScopesActionTest extends TestCase
         $this->actingAs($this->test_user);
 
         $this->character->refresh_token->scopes = ['publicData', 'another already assigned scope'];
+        Event::fake();
         $this->character->refresh_token->save();
 
         $scopes = $this->action->execute($this->character->character_id, ['test scope']);

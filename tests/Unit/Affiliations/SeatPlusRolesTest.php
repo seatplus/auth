@@ -26,6 +26,7 @@
 
 namespace Seatplus\Auth\Tests\Unit\Affiliations;
 
+use Illuminate\Support\Facades\Event;
 use Seatplus\Auth\Models\Permissions\Affiliation;
 use Seatplus\Auth\Models\Permissions\Role;
 use Seatplus\Auth\Tests\TestCase;
@@ -41,6 +42,8 @@ class SeatPlusRolesTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
+
+        Event::fake();
 
         $this->secondary_character = factory(CharacterInfo::class)->create();
 
