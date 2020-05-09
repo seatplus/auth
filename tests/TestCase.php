@@ -26,6 +26,7 @@
 
 namespace Seatplus\Auth\Tests;
 
+use Illuminate\Support\Facades\Event;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
 use Seatplus\Auth\AuthenticationServiceProvider;
 use Seatplus\Auth\Models\User;
@@ -48,9 +49,11 @@ abstract class TestCase extends OrchestraTestCase
         // setup factories
         $this->withFactories(__DIR__.'/database/factories');
 
-        $this->test_user = factory(User::class)->create();
+        Event::fakeFor(function () {
+            $this->test_user = factory(User::class)->create();
 
-        $this->test_character = factory(CharacterInfo::class)->create();
+            $this->test_character = factory(CharacterInfo::class)->create();
+        });
     }
 
     /**
