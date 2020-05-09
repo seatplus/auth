@@ -55,11 +55,10 @@ class SsoControllerTest extends TestCase
             $this->refresh_token = factory(RefreshToken::class)->create([
                 'character_id' => $this->test_user->character_users->first()->character_id,
             ]);
+            $this->character = factory(CharacterInfo::class)->create([
+                'character_id' => $this->test_user->character_users->first()->character_id,
+            ]);
         });
-
-        $this->character = factory(CharacterInfo::class)->create([
-            'character_id' => $this->test_user->character_users->first()->character_id,
-        ]);
 
         $this->test_user = $this->test_user->refresh();
     }
@@ -93,7 +92,7 @@ class SsoControllerTest extends TestCase
     /** @test */
     public function it_returns_error_if_scopes_changed()
     {
-        $character_id = factory(CharacterInfo::class)->make()->character_id;
+        $character_id = Event::fakeFor(fn () => factory(CharacterInfo::class)->make()->character_id);
 
         $abstractUser = $this->createSocialiteUser($character_id);
 

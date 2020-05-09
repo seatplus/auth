@@ -27,9 +27,9 @@
 namespace Seatplus\Auth\Http\Middleware;
 
 use Closure;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 
 class CheckRequiredScopes
 {
@@ -79,7 +79,7 @@ class CheckRequiredScopes
     /**
      * @return \Illuminate\Support\Collection
      */
-    public function getMissingcharacterscopes(): \Illuminate\Support\Collection
+    public function getMissingcharacterscopes(): Collection
     {
         return $this->missing_character_scopes;
     }
@@ -87,22 +87,16 @@ class CheckRequiredScopes
     /**
      * @return \Illuminate\Support\Collection
      */
-    public function getRequiredScopes(): \Illuminate\Support\Collection
+    public function getRequiredScopes(): Collection
     {
         return $this->required_scopes->unique();
     }
 
     private function charactersWithRequiredSsoScopes(): Collection
     {
-        return auth()->user()->characters()->has('alliance.ssoScopes')
-            ->orHas('corporation.ssoScopes')
-            ->with(
-                'alliance.ssoScopes',
-                'corporation.ssoScopes',
-                'application.corporation.ssoScopes',
-                'application.corporation.alliance.ssoScopes'
-            )
-            ->get();
+        return auth()->user()->characters->filter(function ($character) {
+            return ($character->alliance->ssoScopes ?? false) || ($character->corporation->ssoScopes ?? false);
+        })->isNotEmpty() ? auth()->user()->characters : collect();
     }
 
     private function buildRequiredScopes(Collection $characters)
@@ -141,7 +135,7 @@ class CheckRequiredScopes
     /*
      * This method should return the user to a view where he needs to handle the addition of required scopes
      */
-    protected function redirectTo(\Illuminate\Support\Collection $missing_character_scopes)
+    protected function redirectTo(Collection $missing_character_scopes)
     {
         //TODO: extend this with default view.
     }
