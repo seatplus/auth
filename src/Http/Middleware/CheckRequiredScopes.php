@@ -28,7 +28,6 @@ namespace Seatplus\Auth\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Seatplus\Auth\Models\User;
 use Seatplus\Auth\Services\GetCharactersWithRequiredSsoScopes;
@@ -97,15 +96,13 @@ class CheckRequiredScopes
 
     private function charactersWithRequiredSsoScopes(): Collection
     {
-
-        return (new GetCharactersWithRequiredSsoScopes)->execute();
+        return (new GetCharactersWithRequiredSsoScopes())->execute();
     }
 
     private function buildRequiredScopes(Collection $characters)
     {
-
-        $required_scopes = (new GetRequiredScopesFromCharacters)->execute($characters);
-        $this->required_scopes= $required_scopes;
+        $required_scopes = (new GetRequiredScopesFromCharacters())->execute($characters);
+        $this->required_scopes = $required_scopes;
     }
 
     private function buildDifferences()
