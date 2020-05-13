@@ -46,7 +46,6 @@ class SsoController extends Controller
      */
     public function redirectToProvider(Socialite $social, GetSRequiredScopes $required_scopes)
     {
-
         $scopes = $required_scopes->execute()->toArray();
 
         session([
@@ -77,7 +76,7 @@ class SsoController extends Controller
 
         // check if the requested scopes matches the provided scopes
         if (auth()->user()) {
-            if($this->isInvalidProviderCallback($eve_data)) {
+            if ($this->isInvalidProviderCallback($eve_data)) {
                 return redirect(session('rurl'));
             }
 
@@ -96,7 +95,6 @@ class SsoController extends Controller
         $update_refresh_token_action->execute($eve_data);
 
         if (!$this->loginUser($user)) {
-
             return redirect()->route('auth.login')
                 ->with('error', 'Login failed. Please contact your administrator.');
         }
@@ -153,9 +151,9 @@ class SsoController extends Controller
     {
         $character_id_has_changed = session('step_up') !== $eve_data->character_id;
 
-        if($character_id_has_changed)
+        if ($character_id_has_changed) {
             session()->flash('error', 'Please make sure to select the same character to step up on CCP as on seatplus.');
-
+        }
 
         return $character_id_has_changed;
     }

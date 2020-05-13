@@ -42,5 +42,5 @@ Route::prefix('auth')
         Route::get('/eve/sso/', [SsoController::class, 'redirectToProvider'])->name('auth.eve');
         Route::get('/eve/sso/{character_id}/step_up', StepUpController::class)->name('auth.eve.step_up');
 
-        Route::get('/eve/callback', [SsoController::class,'handleProviderCallback'])->name('auth.eve.callback');
+        Route::get('/eve/callback', [SsoController::class, 'handleProviderCallback'])->name('auth.eve.callback');
     });
