@@ -29,32 +29,28 @@ namespace Seatplus\Auth\Http\Controllers\Auth;
 use Laravel\Socialite\Contracts\Factory as Socialite;
 use Laravel\Socialite\Two\User as EveData;
 use Seatplus\Auth\Http\Actions\Sso\FindOrCreateUserAction;
-use Seatplus\Auth\Http\Actions\Sso\GetSsoScopesAction;
 use Seatplus\Auth\Http\Actions\Sso\UpdateRefreshTokenAction;
 use Seatplus\Auth\Http\Controllers\Controller;
 use Seatplus\Auth\Models\User;
+use Seatplus\Auth\Services\GetSRequiredScopes;
 
 class SsoController extends Controller
 {
     /**
      * Redirect the user to the Eve Online authentication page.
      *
-     * @param int|null                                           $character_id
-     * @param \Laravel\Socialite\Contracts\Factory               $social
-     * @param \Seatplus\Auth\Http\Actions\Sso\GetSsoScopesAction $get_sso_scopes_action
+     * @param \Laravel\Socialite\Contracts\Factory       $social
+     * @param \Seatplus\Auth\Services\GetSRequiredScopes $required_scopes
      *
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
-    public function redirectToProvider(Socialite $social, GetSsoScopesAction $get_sso_scopes_action, ?int $character_id = null)
+    public function redirectToProvider(Socialite $social, GetSRequiredScopes $required_scopes)
     {
-        $add_scopes = explode(',', request()->query('add_scopes'));
-
-        $scopes = array_filter($get_sso_scopes_action->execute($character_id, $add_scopes));
+        $scopes = $required_scopes->execute()->toArray();
 
         session([
             'rurl'             => session()->previousUrl(),
             'sso_scopes'       => $scopes,
-            'sso_character_id' => $character_id,
         ]);
 
         return $social->driver('eveonline')
@@ -78,8 +74,14 @@ class SsoController extends Controller
     ) {
         $eve_data = $social->driver('eveonline')->user();
 
+        // check if the requested scopes matches the provided scopes
         if (auth()->user()) {
             if ($this->isInvalidProviderCallback($eve_data)) {
+                return redirect(session('rurl'));
+            }
+
+            // check if step up character_id is the same as provided
+            if ($this->differentCharacterIdHasBeenProvided($eve_data)) {
                 return redirect(session('rurl'));
             }
         }
@@ -87,11 +89,12 @@ class SsoController extends Controller
         // Get or create the User bound to this login.
         $user = $find_or_create_user_action->execute($eve_data);
 
-        // Update the refresh token for this character.
+        /*
+         * Update the refresh token for this character.
+         */
         $update_refresh_token_action->execute($eve_data);
 
         if (!$this->loginUser($user)) {
-            //TODO
             return redirect()->route('auth.login')
                 ->with('error', 'Login failed. Please contact your administrator.');
         }
@@ -137,5 +140,21 @@ class SsoController extends Controller
         session()->flash('error', 'Something might have gone wrong. You might have changed the requested scopes on esi, please refer from doing so.');
 
         return true;
+    }
+
+    /**
+     * @param \Laravel\Socialite\Two\User $eve_data
+     *
+     * @return bool
+     */
+    private function differentCharacterIdHasBeenProvided(EveData $eve_data): bool
+    {
+        $character_id_has_changed = session('step_up') !== $eve_data->character_id;
+
+        if ($character_id_has_changed) {
+            session()->flash('error', 'Please make sure to select the same character to step up on CCP as on seatplus.');
+        }
+
+        return $character_id_has_changed;
     }
 }

@@ -24,45 +24,38 @@
  * SOFTWARE.
  */
 
-namespace Seatplus\Auth\Http\Actions\Sso;
+namespace Seatplus\Auth\Services;
 
-use Seatplus\Eveapi\Models\RefreshToken;
+use Illuminate\Support\Collection;
 
-class GetSsoScopesAction
+class GetSRequiredScopes
 {
-    private $scopes_to_add;
+    /**
+     * @var \Illuminate\Support\Collection
+     */
+    private Collection $scopes;
 
-    public function execute(?int $character_id = null, array $scopes_to_add = []): array
+    /**
+     * @var \Illuminate\Support\Collection
+     */
+    private Collection $characters;
+
+    public function __construct()
     {
-        $this->scopes_to_add = $scopes_to_add;
-
-        if ($this->plausibilityCheck($character_id)) {
-            return $this->addScopesForCharacter($character_id);
-        }
-
-        return array_merge(config('eveapi.scopes.minimum'), $this->scopes_to_add);
+        $this->scopes = collect(config('eveapi.scopes.minimum'));
     }
 
-    private function plausibilityCheck(?int $character_id): bool
+    public function execute()
     {
-        if (is_null($character_id)) {
-            return false;
+        if (auth()->guest()) {
+            return $this->scopes;
         }
 
-        if (auth()->user() && $this->scopes_to_add && $this->characterIsInUserGroup($character_id)) {
-            return true;
-        }
+        $this->characters = (new GetCharactersWithRequiredSsoScopes())->execute();
 
-        return false;
-    }
-
-    private function addScopesForCharacter(int $character_id): array
-    {
-        return array_merge(RefreshToken::find($character_id)->scopes, $this->scopes_to_add);
-    }
-
-    private function characterIsInUserGroup(int $character_id): bool
-    {
-        return in_array($character_id, auth()->user()->characters->pluck('character_id')->toArray());
+        return $this->scopes
+            ->merge((new GetRequiredScopesFromCharacters())->execute($this->characters))
+            ->unique()
+            ->filter();
     }
 }

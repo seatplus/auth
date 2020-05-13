@@ -81,7 +81,7 @@ class SsoControllerTest extends TestCase
 
         Event::fakeFor(function () {
             $response = $this->get(route('auth.eve.callback'))
-            ->assertRedirect();
+                ->assertRedirect();
         });
 
         $this->assertDatabaseHas('refresh_tokens', [

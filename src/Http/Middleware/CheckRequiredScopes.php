@@ -28,8 +28,10 @@ namespace Seatplus\Auth\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Seatplus\Auth\Models\User;
+use Seatplus\Auth\Services\GetCharactersWithRequiredSsoScopes;
+use Seatplus\Auth\Services\GetRequiredScopesFromCharacters;
 
 class CheckRequiredScopes
 {
@@ -94,34 +96,13 @@ class CheckRequiredScopes
 
     private function charactersWithRequiredSsoScopes(): Collection
     {
-        return auth()->user()->characters->filter(function ($character) {
-            return ($character->alliance->ssoScopes ?? false) || ($character->corporation->ssoScopes ?? false);
-        })->isNotEmpty() ? auth()->user()->characters : collect();
+        return (new GetCharactersWithRequiredSsoScopes())->execute();
     }
 
     private function buildRequiredScopes(Collection $characters)
     {
-        $characters->map(function ($character) {
-            return [
-                'corporation_scopes'             => $character->corporation->ssoScopes->selected_scopes ?? [],
-                'alliance_scopes'                => $character->alliance->ssoScopes->selected_scopes ?? [],
-                'application_corporation_scopes' => $character->application->corporation->ssoScopes->selected_scopes ?? [],
-                'application_alliance_scopes'    => $character->application->corporation->alliance->ssoScopes->selected_scopes ?? [],
-            ];
-        })
-        ->flatten(1)
-        ->filter()
-        ->each(function ($scope_array) {
-            collect($scope_array)
-                ->flatten()
-                ->map(fn ($scope) => explode(',', $scope))
-                ->flatten()
-                ->each(fn ($scope) => $this->required_scopes->push($scope));
-
-            if (Arr::get($scope_array, 'corporation')) {
-                $this->required_scopes->push('esi-characters.read_corporation_roles.v1');
-            }
-        });
+        $required_scopes = (new GetRequiredScopesFromCharacters())->execute($characters);
+        $this->required_scopes = $required_scopes;
     }
 
     private function buildDifferences()

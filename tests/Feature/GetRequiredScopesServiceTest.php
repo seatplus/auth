@@ -24,43 +24,36 @@
  * SOFTWARE.
  */
 
-namespace Seatplus\Auth\Tests\Unit\Actions;
+namespace Seatplus\Auth\Tests\Feature;
 
 use Illuminate\Support\Facades\Event;
-use Seatplus\Auth\Http\Actions\Sso\GetSsoScopesAction;
+use Seatplus\Auth\Services\GetSRequiredScopes;
 use Seatplus\Auth\Tests\TestCase;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
+use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 use Seatplus\Eveapi\Models\RefreshToken;
+use Seatplus\Eveapi\Models\SsoScopes;
 
-class GetSsoScopesActionTest extends TestCase
+class GetRequiredScopesServiceTest extends TestCase
 {
     /**
-     * @var \Seatplus\Auth\Http\Actions\Sso\GetSsoScopesAction
+     * @var \Illuminate\Database\Eloquent\Collection|\Illuminate\Database\Eloquent\Model
      */
-    private GetSsoScopesAction $action;
+    private $character;
 
     /**
-     * @var \Seatplus\Eveapi\Models\RefreshToken
+     * @var \Seatplus\Auth\Services\GetSRequiredScopes
      */
-    private RefreshToken $refresh_token;
-
-    /**
-     * @var \Seatplus\Eveapi\Models\Character\CharacterInfo
-     */
-    private CharacterInfo $character;
+    private GetSRequiredScopes $action;
 
     public function setUp(): void
     {
         parent::setUp();
 
-        $this->action = new GetSsoScopesAction();
+        $this->action = new GetSRequiredScopes();
 
         Event::fakeFor(function () {
-            $this->refresh_token = factory(RefreshToken::class)->create([
-                'character_id' => $this->test_user->character_users->first()->character_id,
-            ]);
-
-            $this->character = factory(CharacterInfo::class)->create([
+            $this->test_character = factory(CharacterInfo::class)->create([
                 'character_id' => $this->test_user->character_users->first()->character_id,
             ]);
         });
@@ -71,34 +64,43 @@ class GetSsoScopesActionTest extends TestCase
     /** @test */
     public function it_returns_minimal_scope()
     {
-        $scopes = $this->action->execute();
+        $scopes = $this->action->execute()->toArray();
 
         $this->assertEquals($scopes, config('eveapi.scopes.minimum'));
     }
 
     /** @test */
-    public function it_does_not_add_scopes_to_minimal_if_unauthed()
+    public function it_returns_setup_scopes()
     {
-        $scopes = $this->action->execute($this->character->character_id, ['test scope']);
+        // 2. Create SsoScope (Corporation)
+        $this->createCorporationSsoScope([
+            'character'   => ['b'],
+            'corporation' => [],
+        ]);
 
-        $scopes_expected = array_merge(config('eveapi.scopes.minimum'), ['test scope']);
-
-        $this->assertEmpty(array_diff($scopes_expected, $scopes));
-    }
-
-    /** @test */
-    public function it_does_add_scopes()
-    {
         $this->actingAs($this->test_user);
 
-        $this->character->refresh_token->scopes = ['publicData', 'another already assigned scope'];
-        Event::fake();
-        $this->character->refresh_token->save();
+        $scopes = $this->action->execute()->toArray();
 
-        $scopes = $this->action->execute($this->character->character_id, ['test scope']);
+        $this->assertEquals($scopes, array_merge(config('eveapi.scopes.minimum'), ['b']));
+    }
 
-        $this->assertNotEquals($scopes, config('eveapi.scopes.minimum'));
+    private function createCorporationSsoScope(array $array)
+    {
+        factory(SsoScopes::class)->create([
+            'selected_scopes' => $array,
+            'morphable_id'    => $this->test_character->corporation->corporation_id,
+            'morphable_type'  => CorporationInfo::class,
+        ]);
+    }
 
-        $this->assertTrue(in_array('test scope', $scopes));
+    private function createRefreshTokenWithScopes(array $array)
+    {
+        Event::fakeFor(function () use ($array) {
+            factory(RefreshToken::class)->create([
+                'character_id' => $this->test_character->character_id,
+                'scopes'       => $array,
+            ]);
+        });
     }
 }

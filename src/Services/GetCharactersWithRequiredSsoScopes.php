@@ -24,23 +24,34 @@
  * SOFTWARE.
  */
 
-use Illuminate\Support\Facades\Route;
-use Seatplus\Auth\Http\Controllers\Auth\LoginController;
-use Seatplus\Auth\Http\Controllers\Auth\SsoController;
-use Seatplus\Auth\Http\Controllers\Auth\StepUpController;
+namespace Seatplus\Auth\Services;
 
-Route::prefix('auth')
-    ->middleware('web')
-    ->group(function () {
+use Illuminate\Support\Collection;
+use Seatplus\Auth\Models\User;
 
-        // Auth
-        Route::get('login', [LoginController::class, 'showLoginForm'])->name('auth.login');
+class GetCharactersWithRequiredSsoScopes
+{
+    /**
+     * @var \Seatplus\Auth\Models\User
+     */
+    private User $user;
 
-        Route::get('logout', [LoginController::class, 'logout'])->name('auth.logout');
+    public function __construct()
+    {
+        $this->user = User::with(
+            'characters.alliance.ssoScopes',
+            'characters.corporation.ssoScopes',
+            'characters.application.corporation.ssoScopes',
+            'characters.application.corporation.alliance.ssoScopes'
+        )
+            ->where('id', auth()->user()->id)
+            ->first();
+    }
 
-        // SSO
-        Route::get('/eve/sso/', [SsoController::class, 'redirectToProvider'])->name('auth.eve');
-        Route::get('/eve/sso/{character_id}/step_up', StepUpController::class)->name('auth.eve.step_up');
-
-        Route::get('/eve/callback', [SsoController::class, 'handleProviderCallback'])->name('auth.eve.callback');
-    });
+    public function execute(): Collection
+    {
+        return $this->user->characters->filter(function ($character) {
+            return ($character->alliance->ssoScopes ?? false) || ($character->corporation->ssoScopes ?? false);
+        })->isNotEmpty() ? $this->user->characters : collect();
+    }
+}
