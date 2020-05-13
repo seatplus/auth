@@ -25,29 +25,22 @@
  */
 
 use Illuminate\Support\Facades\Route;
+use Seatplus\Auth\Http\Controllers\Auth\LoginController;
 use Seatplus\Auth\Http\Controllers\Auth\SsoController;
+use Seatplus\Auth\Http\Controllers\Auth\StepUpController;
 
-Route::namespace('Seatplus\Auth\Http\Controllers\Auth')
-    ->prefix('auth')
+Route::prefix('auth')
     ->middleware('web')
     ->group(function () {
 
-        // Authc
-        Route::get('login', [
-            'as'   => 'auth.login',
-            'uses' => 'LoginController@showLoginForm',
-        ]);
+        // Auth
+        Route::get('login', [LoginController::class, 'showLoginForm'])->name('auth.login');
 
-        Route::get('logout', [
-            'as'   => 'auth.logout',
-            'uses' => 'LoginController@logout',
-        ]);
+        Route::get('logout', [LoginController::class, 'logout'])->name('auth.logout');
 
         // SSO
-        Route::get('/eve/sso/{character_id?}', [SsoController::class, 'redirectToProvider'])->name('auth.eve');
+        Route::get('/eve/sso/', [SsoController::class, 'redirectToProvider'])->name('auth.eve');
+        Route::get('/eve/sso/{character_id}/step_up', StepUpController::class)->name('auth.eve.step_up');
 
-        Route::get('/eve/callback', [
-            'as'   => 'auth.eve.callback',
-            'uses' => 'SsoController@handleProviderCallback',
-        ]);
+        Route::get('/eve/callback', [SsoController::class,'handleProviderCallback'])->name('auth.eve.callback');
     });
