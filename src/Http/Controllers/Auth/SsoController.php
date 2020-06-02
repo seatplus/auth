@@ -101,6 +101,8 @@ class SsoController extends Controller
 
         $return_url = session('rurl');
 
+        session(['success' => 'Character added/updated successfully']);
+
         return $return_url ? redirect($return_url) : redirect()->intended();
     }
 
@@ -149,6 +151,11 @@ class SsoController extends Controller
      */
     private function differentCharacterIdHasBeenProvided(EveData $eve_data): bool
     {
+        $step_up_character_id = session('step_up');
+
+        if(!$step_up_character_id)
+            return false;
+
         $character_id_has_changed = session('step_up') !== $eve_data->character_id;
 
         if ($character_id_has_changed) {

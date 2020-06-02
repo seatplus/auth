@@ -116,6 +116,40 @@ class SsoControllerTest extends TestCase
         );
     }
 
+    /** @test */
+    public function one_can_add_another_character()
+    {
+        // Setup character user
+        $character_id = Event::fakeFor(fn () => factory(CharacterInfo::class)->make()->character_id);
+
+        $abstractUser = $this->createSocialiteUser($character_id,'refresh_token', implode(" ", config('eveapi.scopes.minimum')));
+
+        $provider = Mockery::mock(Provider::class);
+        $provider->shouldReceive('user')->andReturn($abstractUser);
+
+        Socialite::shouldReceive('driver')->with('eveonline')->andReturn($provider);
+
+        // Mock Esi Response
+
+
+        $this->actingAs($this->test_user);
+
+        session([
+            'sso_scopes' => config('eveapi.scopes.minimum'),
+            'rurl'       => '/home',
+        ]);
+
+        $result = $this->get(route('auth.eve.callback'));
+
+        $this->assertNull(session('error'));
+
+        $this->assertEquals(
+            'Character added/updated successfully',
+            session('success')
+        );
+
+    }
+
     private function createSocialiteUser($character_id, $refresh_token = 'refresh_token', $scopes = '1 2', $token = 'qq3dpeTMpDkjNasdasdewva3Be658eVVkox_1Ikodc')
     {
         $socialiteUser = $this->createMock(SocialiteUser::class);
