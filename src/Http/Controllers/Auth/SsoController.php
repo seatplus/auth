@@ -153,8 +153,9 @@ class SsoController extends Controller
     {
         $step_up_character_id = session('step_up');
 
-        if(!$step_up_character_id)
+        if (!$step_up_character_id) {
             return false;
+        }
 
         $character_id_has_changed = session('step_up') !== $eve_data->character_id;
 

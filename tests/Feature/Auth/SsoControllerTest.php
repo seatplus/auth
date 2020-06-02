@@ -122,7 +122,7 @@ class SsoControllerTest extends TestCase
         // Setup character user
         $character_id = Event::fakeFor(fn () => factory(CharacterInfo::class)->make()->character_id);
 
-        $abstractUser = $this->createSocialiteUser($character_id,'refresh_token', implode(" ", config('eveapi.scopes.minimum')));
+        $abstractUser = $this->createSocialiteUser($character_id, 'refresh_token', implode(' ', config('eveapi.scopes.minimum')));
 
         $provider = Mockery::mock(Provider::class);
         $provider->shouldReceive('user')->andReturn($abstractUser);
@@ -130,7 +130,6 @@ class SsoControllerTest extends TestCase
         Socialite::shouldReceive('driver')->with('eveonline')->andReturn($provider);
 
         // Mock Esi Response
-
 
         $this->actingAs($this->test_user);
 
@@ -147,7 +146,6 @@ class SsoControllerTest extends TestCase
             'Character added/updated successfully',
             session('success')
         );
-
     }
 
     private function createSocialiteUser($character_id, $refresh_token = 'refresh_token', $scopes = '1 2', $token = 'qq3dpeTMpDkjNasdasdewva3Be658eVVkox_1Ikodc')
