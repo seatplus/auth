@@ -76,8 +76,9 @@ class SsoController extends Controller
         $rurl = session()->pull('rurl');
 
         // if return url was set, set the intended URL
-        if($rurl)
+        if ($rurl) {
             redirect()->setIntendedUrl($rurl);
+        }
 
         // check if the requested scopes matches the provided scopes
         if (auth()->user()) {
