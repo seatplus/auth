@@ -73,16 +73,21 @@ class SsoController extends Controller
         UpdateRefreshTokenAction $update_refresh_token_action
     ) {
         $eve_data = $social->driver('eveonline')->user();
+        $rurl = session()->pull('rurl');
+
+        // if return url was set, set the intended URL
+        if($rurl)
+            redirect()->setIntendedUrl($rurl);
 
         // check if the requested scopes matches the provided scopes
         if (auth()->user()) {
             if ($this->isInvalidProviderCallback($eve_data)) {
-                return redirect(session()->pull('rurl'));
+                return redirect()->intended();
             }
 
             // check if step up character_id is the same as provided
             if ($this->differentCharacterIdHasBeenProvided($eve_data)) {
-                return redirect(session()->pull('rurl'));
+                return redirect()->intended();
             }
         }
 
@@ -99,11 +104,9 @@ class SsoController extends Controller
                 ->with('error', 'Login failed. Please contact your administrator.');
         }
 
-        $return_url = session()->pull('rurl');
-
         session()->flash('success', 'Character added/updated successfully');
 
-        return $return_url ? redirect($return_url) : redirect()->intended();
+        return redirect()->intended();
     }
 
     /**
