@@ -73,16 +73,22 @@ class SsoController extends Controller
         UpdateRefreshTokenAction $update_refresh_token_action
     ) {
         $eve_data = $social->driver('eveonline')->user();
+        $rurl = session()->pull('rurl');
+
+        // if return url was set, set the intended URL
+        if ($rurl) {
+            redirect()->setIntendedUrl($rurl);
+        }
 
         // check if the requested scopes matches the provided scopes
         if (auth()->user()) {
             if ($this->isInvalidProviderCallback($eve_data)) {
-                return redirect(session('rurl'));
+                return redirect()->intended();
             }
 
             // check if step up character_id is the same as provided
             if ($this->differentCharacterIdHasBeenProvided($eve_data)) {
-                return redirect(session('rurl'));
+                return redirect()->intended();
             }
         }
 
@@ -99,11 +105,9 @@ class SsoController extends Controller
                 ->with('error', 'Login failed. Please contact your administrator.');
         }
 
-        $return_url = session('rurl');
+        session()->flash('success', 'Character added/updated successfully');
 
-        session(['success' => 'Character added/updated successfully']);
-
-        return $return_url ? redirect($return_url) : redirect()->intended();
+        return redirect()->intended();
     }
 
     /**
@@ -133,7 +137,7 @@ class SsoController extends Controller
      */
     private function isInvalidProviderCallback(EveData $eve_data): bool
     {
-        $missing_scopes = array_diff(session('sso_scopes'), explode(' ', $eve_data->scopes));
+        $missing_scopes = array_diff(session()->pull('sso_scopes'), explode(' ', $eve_data->scopes));
 
         if (empty($missing_scopes)) {
             return false;
@@ -151,13 +155,13 @@ class SsoController extends Controller
      */
     private function differentCharacterIdHasBeenProvided(EveData $eve_data): bool
     {
-        $step_up_character_id = session('step_up');
+        $step_up_character_id = session()->pull('step_up');
 
         if (!$step_up_character_id) {
             return false;
         }
 
-        $character_id_has_changed = session('step_up') !== $eve_data->character_id;
+        $character_id_has_changed = $step_up_character_id !== $eve_data->character_id;
 
         if ($character_id_has_changed) {
             session()->flash('error', 'Please make sure to select the same character to step up on CCP as on seatplus.');
