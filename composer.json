@@ -41,6 +41,6 @@
         }
     },
     "scripts": {
-        "watch": "vendor/bin/phpunit-watcher watch"
+        "watch": "vendor/bin/phpunit-watcher watch --no-logging"
     }
 }

@@ -27,6 +27,7 @@
 namespace Seatplus\Auth\Tests;
 
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Queue;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
 use Seatplus\Auth\AuthenticationServiceProvider;
 use Seatplus\Auth\Models\User;
@@ -42,6 +43,9 @@ abstract class TestCase extends OrchestraTestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        // Make sure no jobs are being pushed to queues
+        Queue::fake();
 
         // setup database
         $this->setupDatabase($this->app);
