@@ -27,13 +27,10 @@
 namespace Seatplus\Auth\Models\Permissions;
 
 use Illuminate\Support\Collection;
-use Seatplus\Eveapi\Models\Character\CharacterAffiliation;
 use Spatie\Permission\Models\Role as SpatieRole;
-
 
 class Role extends SpatieRole
 {
-
     public function affiliations()
     {
         return $this->hasMany(Affiliation::class, 'role_id');
@@ -41,13 +38,12 @@ class Role extends SpatieRole
 
     /**
      * @return array
-     *
      */
-    public function getAffiliatedIdsAttribute() : array
+    public function getAffiliatedIdsAttribute(): array
     {
         //eager load relations for preventing n+1 queries
         $role_with_relationships = $this->loadMissing([
-            'affiliations.affiliatable.characters' => fn($query) => $query->has('characters')->select('character_infos.character_id')
+            'affiliations.affiliatable.characters' => fn ($query) => $query->has('characters')->select('character_infos.character_id'),
         ]);
 
         return $role_with_relationships->getAffiliatedIds()
@@ -58,8 +54,8 @@ class Role extends SpatieRole
     private function getAffiliatedIds(): Collection
     {
         return $this->affiliations
-            ->reject(fn($affiliation) => $affiliation->type === 'forbidden')
-            ->map(fn($affiliation) => $affiliation->type === 'allowed' ? $affiliation->character_ids : $affiliation->inverse_character_ids)
+            ->reject(fn ($affiliation) => $affiliation->type === 'forbidden')
+            ->map(fn ($affiliation)    => $affiliation->type === 'allowed' ? $affiliation->character_ids : $affiliation->inverse_character_ids)
             ->flatten()
             ->unique();
     }
@@ -68,8 +64,8 @@ class Role extends SpatieRole
     {
         return $this->affiliations
             // we are only concerned about forbidden and inverse ids
-            ->reject(fn($affiliation) => $affiliation->type === 'allowed')
-            ->map(fn($affiliation) => $affiliation->character_ids)
+            ->reject(fn ($affiliation) => $affiliation->type === 'allowed')
+            ->map(fn ($affiliation)    => $affiliation->character_ids)
             ->flatten()
             ->unique();
     }

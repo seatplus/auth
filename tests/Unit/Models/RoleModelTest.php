@@ -40,10 +40,10 @@ class RoleModelTest extends TestCase
         $role = Role::create(['name' => 'derp']);
 
         $affiliation = Affiliation::create([
-            'role_id' => $role->id,
-            'affiliatable_id' => $this->test_character->corporation_id,
+            'role_id'           => $role->id,
+            'affiliatable_id'   => $this->test_character->corporation_id,
             'affiliatable_type' => CorporationInfo::class,
-            'type' => 'allowed'
+            'type'              => 'allowed',
         ]);
 
         $this->assertDatabaseHas('affiliations', [
@@ -87,13 +87,12 @@ class RoleModelTest extends TestCase
         $role = Role::create(['name' => 'derp']);
 
         $affiliation = Affiliation::create([
-            'role_id' => $role->id,
-            'affiliatable_id' => $this->test_character->corporation_id,
+            'role_id'           => $role->id,
+            'affiliatable_id'   => $this->test_character->corporation_id,
             'affiliatable_type' => CorporationInfo::class,
-            'type' => 'allowed'
+            'type'              => 'allowed',
         ]);
 
         $this->assertEquals(CorporationInfo::class, get_class($role->affiliations->first()->affiliatable));
-
     }
 }
