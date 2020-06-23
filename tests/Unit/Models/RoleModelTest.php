@@ -26,9 +26,11 @@
 
 namespace Seatplus\Auth\Tests\Unit\Models;
 
+use Seatplus\Auth\Models\Permissions\Affiliation;
 use Seatplus\Auth\Models\Permissions\Permission;
 use Seatplus\Auth\Models\Permissions\Role;
 use Seatplus\Auth\Tests\TestCase;
+use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 
 class RoleModelTest extends TestCase
 {
@@ -37,9 +39,11 @@ class RoleModelTest extends TestCase
     {
         $role = Role::create(['name' => 'derp']);
 
-        $role->affiliations()->create([
-            'corporation_id' => $this->test_character->corporation_id,
-            'type'           => 'allowed',
+        $affiliation = Affiliation::create([
+            'role_id' => $role->id,
+            'affiliatable_id' => $this->test_character->corporation_id,
+            'affiliatable_type' => CorporationInfo::class,
+            'type' => 'allowed'
         ]);
 
         $this->assertDatabaseHas('affiliations', [
@@ -75,5 +79,21 @@ class RoleModelTest extends TestCase
             'role_id'       => $role->id,
             'permission_id' => $permission->id,
         ]);
+    }
+
+    /** @test */
+    public function it_has_polymorphic_relation()
+    {
+        $role = Role::create(['name' => 'derp']);
+
+        $affiliation = Affiliation::create([
+            'role_id' => $role->id,
+            'affiliatable_id' => $this->test_character->corporation_id,
+            'affiliatable_type' => CorporationInfo::class,
+            'type' => 'allowed'
+        ]);
+
+        $this->assertEquals(CorporationInfo::class, get_class($role->affiliations->first()->affiliatable));
+
     }
 }

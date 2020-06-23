@@ -26,9 +26,7 @@
 
 namespace Seatplus\Auth\Actions;
 
-use Seatplus\Auth\Models\Permissions\Permission;
-use Seatplus\Auth\Models\Permissions\Role;
-use Spatie\Permission\Exceptions\PermissionDoesNotExist;
+use Seatplus\Auth\Models\User;
 
 class GetAffiliatedCharactersIdsByPermissionArray
 {
@@ -38,11 +36,6 @@ class GetAffiliatedCharactersIdsByPermissionArray
      * @var \Illuminate\Contracts\Auth\Authenticatable|null
      */
     private $user;
-
-    /**
-     * @var \Illuminate\Support\Collection
-     */
-    private $result;
 
     /**
      * @var string
@@ -60,22 +53,20 @@ class GetAffiliatedCharactersIdsByPermissionArray
     public function __construct($permission)
     {
         $this->permission = $permission;
-        $this->user = auth()->user();
-        $this->result = collect();
-        $this->cache_key = 'user:'.$this->user->id.'|affiliated_character_ids_by_permission:'.$this->permission;
+        $this->user = auth()->user()->loadMissing('characters');
+        $this->cache_key = sprintf('affiliated character ids by permission %s for user wit user_id: %s',
+            $this->user->id, $this->permission);
     }
 
     public function execute(): array
     {
         try {
-            return cache($this->cache_key) ?? $this->getAffiliatedCharacterIds()
-                    ->addOwnedCharacterIds()
-                    ->getResult();
+            return cache($this->cache_key) ?? $this->getResult();
         } catch (\Exception $e) {
             report($e);
         }
 
-        return [];
+        return ['error'];
     }
 
     /**
@@ -85,41 +76,35 @@ class GetAffiliatedCharactersIdsByPermissionArray
      */
     private function getResult(): array
     {
-        cache([
-            $this->cache_key => $this->result->unique()->toArray(),
-        ], now()->addMinutes(5));
+        $affiliated_ids = $this->getAffiliatedCharacterIds()->toArray();
 
-        return cache($this->cache_key);
+        cache([$this->cache_key => $affiliated_ids], now()->addMinutes(5));
+
+        return $affiliated_ids;
     }
 
     private function getAffiliatedCharacterIds()
     {
-        try {
-            // start by asserting that the user has the required permission and id is set
-            if ($this->user->hasPermissionTo($this->permission)) {
-                $this->user->roles->filter(function (Role $role) {
-                    return $role->hasPermissionTo($this->permission);
-                })->map(function (Role $role) {
-                    return $role->buildAffiliatedIds()->getAffiliatedIds()->all();
-                })->flatten()->filter()->each(function ($affiliated_id) {
-                    $this->result->push($affiliated_id);
-                });
-            }
-        } catch (PermissionDoesNotExist $permission_does_not_exist) {
-            Permission::create(['name' => $this->permission]);
+        $authenticated_user = auth()->user();
 
-            return $this->getAffiliatedCharacterIds();
-        }
+        $user = User::with(
+            [
+                'roles.permissions',
+                'roles.affiliations.affiliatable.characters' => fn ($query) => $query->has('characters')->select('character_infos.character_id'),
+            ]
+        )->whereHas('roles.permissions', function ($query) {
+            $query->where('name', $this->permission);
+        })
+            ->where('id', $authenticated_user->id)
+            ->first();
 
-        return $this;
-    }
+        // if authenticated user has no roles, make sure to skip the roles access
+        $user = ! $user ? collect() : $user->roles->map(fn ($role) => $role->affiliated_ids);
 
-    private function addOwnedCharacterIds()
-    {
-        $this->user->characters->pluck('character_id')->each(function ($character_id) {
-            $this->result->push($character_id);
-        });
+        // before returning add the owned character ids
+        return $user->push($authenticated_user->characters->pluck('character_id'))
+            ->flatten()
+            ->unique();
 
-        return $this;
     }
 }

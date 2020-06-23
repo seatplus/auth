@@ -100,7 +100,7 @@ class SsoController extends Controller
          */
         $update_refresh_token_action->execute($eve_data);
 
-        if (!$this->loginUser($user)) {
+        if (! $this->loginUser($user)) {
             return redirect()->route('auth.login')
                 ->with('error', 'Login failed. Please contact your administrator.');
         }
@@ -157,7 +157,7 @@ class SsoController extends Controller
     {
         $step_up_character_id = session()->pull('step_up');
 
-        if (!$step_up_character_id) {
+        if (! $step_up_character_id) {
             return false;
         }
 
