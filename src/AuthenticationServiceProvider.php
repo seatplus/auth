@@ -38,10 +38,10 @@ class AuthenticationServiceProvider extends ServiceProvider
     {
 
         //Add Migrations
-        $this->loadMigrationsFrom(__DIR__.'/database/migrations/');
+        $this->loadMigrationsFrom(__DIR__ . '/database/migrations/');
 
         // Add routes
-        $this->loadRoutesFrom(__DIR__.'/Http/routes.php');
+        $this->loadRoutesFrom(__DIR__ . '/Http/routes.php');
 
         // Add GateLogic
         Gate::before(function ($user, $ability) {
@@ -74,7 +74,7 @@ class AuthenticationServiceProvider extends ServiceProvider
         );
 
         $this->mergeConfigFrom(
-            __DIR__.'/config/permission.php',
+            __DIR__ . '/config/permission.php',
             'permission'
         );
     }

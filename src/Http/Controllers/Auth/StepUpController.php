@@ -44,7 +44,7 @@ class StepUpController extends Controller
      */
     public function __invoke(Socialite $social, GetSRequiredScopes $required_scopes, int $character_id)
     {
-        if (!$this->isCharacterAssociatedToCurrentUser($character_id)) {
+        if (! $this->isCharacterAssociatedToCurrentUser($character_id)) {
             return redirect()->back()->with('error', 'character must belong to your account');
         }
 
