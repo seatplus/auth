@@ -65,15 +65,15 @@ class Affiliation extends Model
         return $this->belongsTo(Role::class, 'id', 'role_id');
     }
 
-    public function getCharacterIdsAttribute() : Collection
+    public function getCharacterIdsAttribute(): Collection
     {
-        return $this->affiliatable ? $this->affiliatable->characters->pluck('character_id') : collect() ;
+        return $this->affiliatable ? $this->affiliatable->characters->pluck('character_id') : collect();
     }
 
-    public function getInverseCharacterIdsAttribute() : Collection
+    public function getInverseCharacterIdsAttribute(): Collection
     {
         return CharacterInfo::query()
-            ->whereNotIn('character_id',$this->getCharacterIdsAttribute()->toArray())
+            ->whereNotIn('character_id', $this->getCharacterIdsAttribute()->toArray())
             ->pluck('character_id');
     }
 

@@ -49,7 +49,7 @@ class FindOrCreateUserAction
          * If user is known and character_owner_hash didn't change return the user. This might cause an exploit
          *  if the character is shared with other users, which is not allowed according to CCP.
         */
-        if (!empty($this->character_user) && $this->character_user->character_owner_hash === $eve_user->character_owner_hash) {
+        if (! empty($this->character_user) && $this->character_user->character_owner_hash === $eve_user->character_owner_hash) {
             return $this->character_user->user;
         }
 
@@ -58,7 +58,7 @@ class FindOrCreateUserAction
          * character might have been transferred. We create a new user and
          * return the new user
          */
-        if (!empty($this->character_user) && $this->character_user->character_owner_hash !== $this->eve_user->character_owner_hash) {
+        if (! empty($this->character_user) && $this->character_user->character_owner_hash !== $this->eve_user->character_owner_hash) {
             $this->handleChangedOwnerHash();
         }
 
