@@ -26,10 +26,7 @@
 
 namespace Seatplus\Auth\Actions;
 
-use Seatplus\Auth\Models\Permissions\Permission;
-use Seatplus\Auth\Models\Permissions\Role;
 use Seatplus\Auth\Models\User;
-use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 
 class GetAffiliatedCharactersIdsByPermissionArray
 {
@@ -93,7 +90,7 @@ class GetAffiliatedCharactersIdsByPermissionArray
         $user = User::with(
             [
                 'roles.permissions',
-                'roles.affiliations.affiliatable.characters' => fn($query) => $query->has('characters')->select('character_infos.character_id')
+                'roles.affiliations.affiliatable.characters' => fn ($query) => $query->has('characters')->select('character_infos.character_id'),
             ]
         )->whereHas('roles.permissions', function ($query) {
             $query->where('name', $this->permission);
@@ -102,7 +99,7 @@ class GetAffiliatedCharactersIdsByPermissionArray
             ->first();
 
         // if authenticated user has no roles, make sure to skip the roles access
-        $user = !$user ? collect() : $user->roles->map(fn($role) => $role->affiliated_ids);
+        $user = ! $user ? collect() : $user->roles->map(fn ($role) => $role->affiliated_ids);
 
         // before returning add the owned character ids
         return $user->push($authenticated_user->characters->pluck('character_id'))
@@ -110,5 +107,4 @@ class GetAffiliatedCharactersIdsByPermissionArray
             ->unique();
 
     }
-
 }

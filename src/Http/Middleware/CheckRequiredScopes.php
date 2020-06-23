@@ -110,7 +110,7 @@ class CheckRequiredScopes
         $this->missing_character_scopes = auth()->user()
             ->characters
             ->reject(fn ($character) => empty(array_diff($this->getRequiredScopes()->toArray(), $character->refresh_token->scopes)))
-            ->map(fn ($character)    => ['character' => $character, 'missing_scopes' => array_diff($this->getRequiredScopes()->toArray(), $character->refresh_token->scopes)]);
+            ->map(fn ($character) => ['character' => $character, 'missing_scopes' => array_diff($this->getRequiredScopes()->toArray(), $character->refresh_token->scopes)]);
     }
 
     /*
