@@ -39,9 +39,8 @@ class CreateAffiliationsTable extends Migration
     {
         Schema::create('affiliations', function (Blueprint $table) {
             $table->bigInteger('role_id')->unsigned();
-            $table->bigInteger('character_id')->nullable();
-            $table->bigInteger('corporation_id')->nullable();
-            $table->bigInteger('alliance_id')->nullable();
+            $table->bigInteger('affiliatable_id');
+            $table->string('affiliatable_type');
             $table->enum('type', ['allowed', 'inverse', 'forbidden']);
             $table->timestamps();
         });

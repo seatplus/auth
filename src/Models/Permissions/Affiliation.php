@@ -28,7 +28,9 @@ namespace Seatplus\Auth\Models\Permissions;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Seatplus\Eveapi\Models\Character\CharacterAffiliation;
+use Seatplus\Eveapi\Models\Character\CharacterInfo;
 
 class Affiliation extends Model
 {
@@ -53,9 +55,26 @@ class Affiliation extends Model
         'role_id' => 'integer',
     ];
 
+    public function affiliatable()
+    {
+        return $this->morphTo();
+    }
+
     public function role()
     {
         return $this->belongsTo(Role::class, 'id', 'role_id');
+    }
+
+    public function getCharacterIdsAttribute() : Collection
+    {
+        return $this->affiliatable ? $this->affiliatable->characters->pluck('character_id') : collect() ;
+    }
+
+    public function getInverseCharacterIdsAttribute() : Collection
+    {
+        return CharacterInfo::query()
+            ->whereNotIn('character_id',$this->getCharacterIdsAttribute()->toArray())
+            ->pluck('character_id');
     }
 
     /* public function scopeAllowedAffiliatedCharacterIds(Builder $query)

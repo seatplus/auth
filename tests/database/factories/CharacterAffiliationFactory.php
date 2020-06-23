@@ -26,6 +26,7 @@
 
 use Faker\Generator as Faker;
 use Seatplus\Eveapi\Models\Character\CharacterAffiliation;
+use Seatplus\Eveapi\Models\Character\CharacterInfo;
 
 $factory->define(CharacterAffiliation::class, function (Faker $faker) {
     return [
@@ -40,5 +41,11 @@ $factory->define(CharacterAffiliation::class, function (Faker $faker) {
 $factory->state(CharacterAffiliation::class, 'with_alliance', function (Faker $faker) {
     return [
         'alliance_id'     => $faker->unique()->numberBetween(99000000, 100000000),
+    ];
+});
+
+$factory->state(CharacterAffiliation::class, 'with_character', function (Faker $faker) {
+    return [
+        'character_id' => factory(CharacterInfo::class),
     ];
 });
