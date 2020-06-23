@@ -90,7 +90,7 @@ class EveOnlineProvider extends AbstractProvider implements ProviderInterface
             'scopes'               => $user['Scopes'],
             'refresh_token'        => $user['RefreshToken'],
             'expires_on'           => Carbon($user['ExpiresOn']),
-            'avatar'               => $this->imageUrl.$user['CharacterID'].'_128.jpg',
+            'avatar'               => $this->imageUrl . $user['CharacterID'] . '_128.jpg',
         ]);
     }
 
@@ -106,7 +106,7 @@ class EveOnlineProvider extends AbstractProvider implements ProviderInterface
         $response = $this->getHttpClient()
             ->get('https://login.eveonline.com/oauth/verify', [
                 'headers' => [
-                    'Authorization' => 'Bearer '.$token,
+                    'Authorization' => 'Bearer ' . $token,
                 ],
             ]);
 
