@@ -93,13 +93,12 @@ class UserRolesSync implements ShouldQueue
 
     private function handleAutomaticRoles()
     {
-        $automatic_roles = Role::whereType('automatic')->with('acl_affiliations.affiliatable.characters')->cursor();
+        $automatic_roles = Role::has('acl_affiliations')
+            ->whereType('automatic')
+            ->with('acl_affiliations.affiliatable.characters')
+            ->cursor();
 
-        foreach ($automatic_roles as $automatic_role) {
-            collect($this->character_ids)->intersect($automatic_role->acl_affiliated_ids)->isNotEmpty()
-                ? $automatic_role->activateMember($this->user)
-                : $automatic_role->pauseMember($this->user);
-        }
+        $this->handleMemberships($automatic_roles);
     }
 
     private function handleOtherRoles()
@@ -112,7 +111,13 @@ class UserRolesSync implements ShouldQueue
             )
             ->cursor();
 
+        $this->handleMemberships($roles);
 
+
+    }
+
+    private function handleMemberships($roles)
+    {
         foreach ($roles as $role)
         {
 
