@@ -42,13 +42,13 @@ class Role extends SpatieRole
     public function acl_affiliations()
     {
         return $this->hasMany(AclAffiliation::class, 'role_id')
-            ->where('can_moderate',false);
+            ->where('can_moderate', false);
     }
 
     public function moderators()
     {
         return $this->hasMany(AclAffiliation::class, 'role_id')
-            ->where('can_moderate',true);
+            ->where('can_moderate', true);
     }
 
     public function acl_members()
