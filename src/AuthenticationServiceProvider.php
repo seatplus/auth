@@ -74,6 +74,6 @@ class AuthenticationServiceProvider extends ServiceProvider
         );
 
         $this->mergeConfigFrom(__DIR__ . '/config/permission.php', 'permission');
-        $this->mergeConfigFrom(__DIR__ . '/config/seatplus.jobs.php', 'seatplus.jobs');
+        $this->mergeConfigFrom(__DIR__ . '/config/auth.updateJobs.php', 'seatplus.updateJobs');
     }
 }
