@@ -1,0 +1,125 @@
+<?php
+
+
+namespace Seatplus\Auth\Jobs;
+
+use Exception;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+use Seatplus\Auth\Models\Permissions\Role;
+use Seatplus\Auth\Models\User;
+use Seatplus\Eveapi\Jobs\Middleware\RateLimitedJobMiddleware;
+
+class UserRolesSync implements ShouldQueue
+{
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    /**
+     * The number of times the job may be attempted.
+     *
+     * @var int
+     */
+    public $tries = 1;
+
+    /**
+     * @var \Seatplus\Auth\Models\User
+     */
+    private User $user;
+
+    private array $character_ids;
+
+    /**
+     * Get the middleware the job should pass through.
+     *
+     * @return array
+     */
+    public function middleware(): array
+    {
+        $rate_limited_middleare = (new RateLimitedJobMiddleware)
+            ->setKey(self::class)
+            ->setViaCharacterId($this->user->id)
+            ->setDuration(3600);
+
+        return [
+            $rate_limited_middleare
+        ];
+    }
+
+    public function __construct(User $user)
+    {
+
+        $this->user = $user;
+        $this->character_ids = User::has('characters.refresh_token')
+            ->with(['characters.refresh_token' => fn($query) => $query->select('character_id')])
+            ->whereId($this->user->id)
+            ->get()
+            ->whenNotEmpty(function($collection) {
+                return $collection->first()->characters->map(fn($character) => $character->refresh_token->character_id);
+            })
+            ->toArray();
+    }
+
+    /**
+     * Assign this job a tag so that Horizon can categorize and allow
+     * for specific tags to be monitored.
+     *
+     * If a job specifies the tags property, that is added.
+     *
+     * @return array
+     */
+    public function tags()
+    {
+        return [
+            'Roles sync',
+            sprintf('user_id: %s', $this->user->id),
+            sprintf('main_character: %s', $this->user->main_character->name ?? '')
+        ];
+    }
+
+    public function handle()
+    {
+        try {
+
+            $this->handleAutomaticRoles();
+            $this->handleOtherRoles();
+        } catch (Exception $exception) {
+
+        }
+    }
+
+    private function handleAutomaticRoles()
+    {
+        $automatic_roles = Role::whereType('automatic')->with('acl_affiliations.affiliatable.characters')->cursor();
+
+        foreach ($automatic_roles as $automatic_role) {
+            collect($this->character_ids)->intersect($automatic_role->acl_affiliated_ids)->isNotEmpty()
+                ? $automatic_role->activateMember($this->user)
+                : $automatic_role->pauseMember($this->user);
+        }
+    }
+
+    private function handleOtherRoles()
+    {
+        $roles = Role::has('acl_affiliations')
+            ->with('acl_affiliations.affiliatable.characters')
+            ->whereNotIn('type', ['manual', 'automatic'])
+            ->whereHas('acl_members', fn(Builder $query) => $query->where('user_id', $this->user->getAuthIdentifier())
+                ->whereIn('status',['member', 'paused'])
+            )
+            ->cursor();
+
+
+        foreach ($roles as $role)
+        {
+
+            collect($this->character_ids)->intersect($role->acl_affiliated_ids)->isNotEmpty()
+                ? $role->activateMember($this->user)
+                : $role->pauseMember($this->user);
+        }
+    }
+
+}

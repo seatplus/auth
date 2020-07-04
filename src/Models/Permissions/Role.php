@@ -27,6 +27,9 @@
 namespace Seatplus\Auth\Models\Permissions;
 
 use Illuminate\Support\Collection;
+use Seatplus\Auth\Models\AccessControl\AclAffiliation;
+use Seatplus\Auth\Models\AccessControl\AclMember;
+use Seatplus\Auth\Models\User;
 use Spatie\Permission\Models\Role as SpatieRole;
 
 class Role extends SpatieRole
@@ -34,6 +37,49 @@ class Role extends SpatieRole
     public function affiliations()
     {
         return $this->hasMany(Affiliation::class, 'role_id');
+    }
+
+    public function acl_affiliations()
+    {
+        return $this->hasMany(AclAffiliation::class, 'role_id')
+            ->where('can_moderate',false);
+    }
+
+    public function moderators()
+    {
+        return $this->hasMany(AclAffiliation::class, 'role_id')
+            ->where('can_moderate',true);
+    }
+
+    public function acl_members()
+    {
+        return $this->hasMany(AclMember::class, 'role_id');
+    }
+
+    public function members()
+    {
+        return $this->acl_members()
+            ->whereStatus('member');
+    }
+
+    public function activateMember(User $user): void
+    {
+        AclMember::query()->updateOrInsert(
+            ['role_id' => $this->id, 'user_id' => $user->getAuthIdentifier()],
+            ['status' => 'member']
+        );
+
+        $user->assignRole($this);
+    }
+
+    public function pauseMember(User $user): void
+    {
+        AclMember::where('user_id', $user->getAuthIdentifier())
+            ->where('role_id', $this->id)
+            ->where('status', 'member')
+            ->update(['status' => 'paused']);
+
+        $user->removeRole($this);
     }
 
     /**
@@ -49,6 +95,23 @@ class Role extends SpatieRole
         return $role_with_relationships->getAffiliatedIds()
             ->diff($role_with_relationships->getForbiddenAndInverseIds()->toArray())
             ->all();
+    }
+
+    /**
+     * @return array
+     */
+    public function getAclAffiliatedIdsAttribute()
+    {
+        //eager load relations for preventing n+1 queries
+        $role_with_relationships = $this->loadMissing([
+            'acl_affiliations.affiliatable.characters' => fn ($query) => $query->has('characters')->select('character_infos.character_id'),
+        ]);
+
+        return $role_with_relationships->acl_affiliations
+            ->map(fn ($affiliation) => $affiliation->character_ids)
+            ->flatten()
+            ->unique()
+            ->toArray();
     }
 
     private function getAffiliatedIds(): Collection
