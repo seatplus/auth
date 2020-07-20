@@ -66,10 +66,9 @@ class Role extends SpatieRole
     public function activateMember(User $user): void
     {
 
-        if(in_array($this->type, ['automatic', 'opt-in','on-request']))
+        if(in_array($this->type, ['automatic', 'opt-in', 'on-request']))
             if($user->characters->pluck('character_id')->intersect($this->getAclAffiliatedIdsAttribute())->isEmpty())
                 throw new Exception('User is not allowed for this access control group');
-
 
         AclMember::query()->updateOrInsert(
             ['role_id' => $this->id, 'user_id' => $user->getAuthIdentifier()],
@@ -149,7 +148,7 @@ class Role extends SpatieRole
     /**
      * @return array
      */
-    public function getModeratorIdsAttribute() : array
+    public function getModeratorIdsAttribute(): array
     {
         //eager load relations for preventing n+1 queries
         $role_with_relationships = $this->loadMissing([
