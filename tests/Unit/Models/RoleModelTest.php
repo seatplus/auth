@@ -164,13 +164,25 @@ class RoleModelTest extends TestCase
     }
 
     /** @test */
-    public function one_can_delete_member()
+    public function one_can_pause_member()
     {
         $this->role->activateMember($this->test_user);
 
         $this->assertTrue($this->role->members->isNotEmpty());
 
         $this->role->pauseMember($this->test_user);
+
+        $this->assertTrue($this->role->refresh()->members->isEmpty());
+    }
+
+    /** @test */
+    public function one_can_remove_member()
+    {
+        $this->role->activateMember($this->test_user);
+
+        $this->assertTrue($this->role->members->isNotEmpty());
+
+        $this->role->removeMember($this->test_user);
 
         $this->assertTrue($this->role->refresh()->members->isEmpty());
     }
