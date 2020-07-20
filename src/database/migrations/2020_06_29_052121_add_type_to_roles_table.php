@@ -38,7 +38,7 @@ class AddTypeToRolesTable extends Migration
     public function up()
     {
         Schema::table('roles', function (Blueprint $table) {
-            $table->enum('type', ['manual', 'automatic', 'on-request', 'secret'])->default('manual');
+            $table->enum('type', ['manual', 'automatic', 'opt-in', 'on-request'])->default('manual');
         });
     }
 

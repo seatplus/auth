@@ -56,7 +56,7 @@ abstract class TestCase extends OrchestraTestCase
         Event::fakeFor(function () {
             $this->test_user = factory(User::class)->create();
 
-            $this->test_character = factory(CharacterInfo::class)->create();
+            $this->test_character = $this->test_user->characters->first();
         });
     }
 

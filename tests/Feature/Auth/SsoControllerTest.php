@@ -55,9 +55,8 @@ class SsoControllerTest extends TestCase
             $this->refresh_token = factory(RefreshToken::class)->create([
                 'character_id' => $this->test_user->character_users->first()->character_id,
             ]);
-            $this->character = factory(CharacterInfo::class)->create([
-                'character_id' => $this->test_user->character_users->first()->character_id,
-            ]);
+
+            $this->character = $this->test_user->characters->first();
         });
 
         $this->test_user = $this->test_user->refresh();

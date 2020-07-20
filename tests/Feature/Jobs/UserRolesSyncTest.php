@@ -38,9 +38,6 @@ class UserRolesSyncTest extends TestCase
 
 
         Event::fakeFor(function () {
-            $this->test_character = factory(CharacterInfo::class)->create([
-                'character_id' => $this->test_user->character_users->first()->character_id,
-            ]);
 
             factory(RefreshToken::class)->create([
                 'character_id' => $this->test_character->character_id

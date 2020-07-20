@@ -57,10 +57,6 @@ class UserTest extends TestCase
             'character_id' => $test_user->character_users->first()->character_id,
         ]);
 
-        factory(CharacterInfo::class)->create([
-            'character_id' => $test_user->character_users->first()->character_id,
-        ]);
-
         $this->assertDatabaseHas('character_infos', [
             'character_id' => $test_user->character_users->first()->character_id,
         ]);
@@ -72,10 +68,6 @@ class UserTest extends TestCase
     public function it_has_search_scope()
     {
         $test_user = factory(User::class)->create();
-
-        factory(CharacterInfo::class)->create([
-            'character_id' => $test_user->character_users->first()->character_id,
-        ]);
 
         $character = $test_user->characters->first();
 

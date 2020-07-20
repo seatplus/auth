@@ -27,6 +27,8 @@
 namespace Seatplus\Auth\Models\AccessControl;
 
 use Illuminate\Database\Eloquent\Model;
+use Seatplus\Auth\Models\Permissions\Role;
+use Seatplus\Auth\Models\User;
 
 class AclMember extends Model
 {
@@ -42,4 +44,13 @@ class AclMember extends Model
      */
     protected $guarded = [];
 
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function role()
+    {
+        return $this->belongsTo(Role::class, 'role_id');
+    }
 }

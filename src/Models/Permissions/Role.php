@@ -26,6 +26,7 @@
 
 namespace Seatplus\Auth\Models\Permissions;
 
+use Exception;
 use Illuminate\Support\Collection;
 use Seatplus\Auth\Models\AccessControl\AclAffiliation;
 use Seatplus\Auth\Models\AccessControl\AclMember;
@@ -64,12 +65,32 @@ class Role extends SpatieRole
 
     public function activateMember(User $user): void
     {
+
+        if(in_array($this->type, ['automatic', 'opt-in', 'on-request']))
+            if($user->characters->pluck('character_id')->intersect($this->getAclAffiliatedIdsAttribute())->isEmpty())
+                throw new Exception('User is not allowed for this access control group');
+
         AclMember::query()->updateOrInsert(
             ['role_id' => $this->id, 'user_id' => $user->getAuthIdentifier()],
             ['status' => 'member']
         );
 
         $user->assignRole($this);
+    }
+
+    public function joinWaitlist(User $user): void
+    {
+
+        if($this->type !== 'on-request')
+            throw new Exception('Only on-request control groups do have a waitlist');
+
+        if($user->characters->pluck('character_id')->intersect($this->getAclAffiliatedIdsAttribute())->isEmpty())
+            throw new Exception('User is not allowed for this access control group');
+
+        AclMember::query()->updateOrInsert(
+            ['role_id' => $this->id, 'user_id' => $user->getAuthIdentifier()],
+            ['status' => 'waitlist']
+        );
     }
 
     public function pauseMember(User $user): void
@@ -80,6 +101,24 @@ class Role extends SpatieRole
             ->update(['status' => 'paused']);
 
         $user->removeRole($this);
+    }
+
+    public function removeMember(User $user): void
+    {
+        AclMember::where('user_id', $user->getAuthIdentifier())
+            ->where('role_id', $this->id)
+            ->where('status', 'member')
+            ->delete();
+
+        $user->removeRole($this);
+    }
+
+    public function isModerator(User $user): bool
+    {
+        return $user->characters
+            ->pluck('character_id')
+            ->intersect($this->getModeratorIdsAttribute())
+            ->isNotEmpty();
     }
 
     /**
@@ -100,7 +139,7 @@ class Role extends SpatieRole
     /**
      * @return array
      */
-    public function getAclAffiliatedIdsAttribute()
+    public function getAclAffiliatedIdsAttribute(): array
     {
         //eager load relations for preventing n+1 queries
         $role_with_relationships = $this->loadMissing([
@@ -108,6 +147,23 @@ class Role extends SpatieRole
         ]);
 
         return $role_with_relationships->acl_affiliations
+            ->map(fn ($affiliation) => $affiliation->character_ids)
+            ->flatten()
+            ->unique()
+            ->toArray();
+    }
+
+    /**
+     * @return array
+     */
+    public function getModeratorIdsAttribute(): array
+    {
+        //eager load relations for preventing n+1 queries
+        $role_with_relationships = $this->loadMissing([
+            'moderators.affiliatable.characters' => fn ($query) => $query->has('characters')->select('character_infos.character_id'),
+        ]);
+
+        return $role_with_relationships->moderators
             ->map(fn ($affiliation) => $affiliation->character_ids)
             ->flatten()
             ->unique()
