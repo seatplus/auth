@@ -52,12 +52,6 @@ class GetRequiredScopesServiceTest extends TestCase
 
         $this->action = new GetSRequiredScopes();
 
-        Event::fakeFor(function () {
-            $this->test_character = factory(CharacterInfo::class)->create([
-                'character_id' => $this->test_user->character_users->first()->character_id,
-            ]);
-        });
-
         $this->test_user = $this->test_user->refresh();
     }
 

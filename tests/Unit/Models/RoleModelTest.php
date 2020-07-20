@@ -186,4 +186,65 @@ class RoleModelTest extends TestCase
 
         $this->assertTrue($this->role->refresh()->members->isEmpty());
     }
+
+    /** @test */
+    public function it_throws_error_if_unaffiliated_user_wants_to_join()
+    {
+        $role = Role::create(['name' => 'test', 'type' => 'on-request']);
+
+        $this->expectExceptionMessage('User is not allowed for this access control group');
+
+        $role->activateMember($this->test_user);
+    }
+
+    /** @test */
+    public function it_throws_error_if_one_tries_to_join_waitlist_on_invalid_role()
+    {
+
+        $this->expectExceptionMessage('Only on-request control groups do have a waitlist');
+
+        $this->role->joinWaitlist($this->test_user);
+    }
+
+    /** @test */
+    public function it_throws_error_if_unaffiliated_user_tries_to_join_waitlist()
+    {
+
+        $role = Role::create(['name' => 'test', 'type' => 'on-request']);
+
+        $this->expectExceptionMessage('User is not allowed for this access control group');
+
+        $role->joinWaitlist($this->test_user);
+    }
+
+    /** @test */
+    public function user_can_join_waitlist()
+    {
+
+        $role = Role::create(['name' => 'test', 'type' => 'on-request']);
+
+        $role->acl_affiliations()->create([
+            'affiliatable_id' => $this->test_character->character_id,
+            'affiliatable_type' => CharacterInfo::class
+        ]);
+
+        $role->joinWaitlist($this->test_user);
+
+        $this->assertEquals($this->test_user->id, $role->refresh()->acl_members()->whereStatus('waitlist')->first()->user_id);
+    }
+
+    /** @test */
+    public function one_can_get_moderator_ids()
+    {
+
+        $role = Role::create(['name' => 'test', 'type' => 'on-request']);
+
+        $role->acl_affiliations()->create([
+            'affiliatable_id' => $this->test_character->character_id,
+            'affiliatable_type' => CharacterInfo::class,
+            'can_moderate' => true
+        ]);
+
+        $this->assertTrue($role->refresh()->isModerator($this->test_user));
+    }
 }

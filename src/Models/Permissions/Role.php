@@ -113,6 +113,14 @@ class Role extends SpatieRole
         $user->removeRole($this);
     }
 
+    public function isModerator(User $user): bool
+    {
+        return $user->characters
+            ->pluck('character_id')
+            ->intersect($this->getModeratorIdsAttribute())
+            ->isNotEmpty();
+    }
+
     /**
      * @return array
      */

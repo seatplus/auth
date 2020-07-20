@@ -43,9 +43,7 @@ class StepUpTest extends TestCase
 
         Event::fake();
 
-        $this->test_character = factory(CharacterInfo::class)->create([
-            'character_id' => $this->test_user->character_users->first()->character_id,
-        ]);
+        //$this->test_character =
 
         //\Mockery::mock(Factory::class)->shouldReceive('driver')->andReturn('');
         Socialite::shouldReceive('driver->scopes->redirect')->andReturn('');

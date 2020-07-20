@@ -66,9 +66,6 @@ class GetAffiliatedCharacterIdsByPermissionArrayTest extends TestCase
         $this->actingAs($this->test_user);
 
         Event::fakeFor(function () {
-            $this->test_character = factory(CharacterInfo::class)->create([
-                'character_id' => $this->test_character_user->character_id,
-            ]);
 
             $this->secondary_character = factory(CharacterInfo::class)->create();
 

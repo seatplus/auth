@@ -64,10 +64,6 @@ class CheckRequiredScopesTest extends TestCase
         $this->mockRequest();
 
         Event::fake();
-
-        $this->test_character = factory(CharacterInfo::class)->create([
-            'character_id' => $this->test_user->character_users->first()->character_id,
-        ]);
     }
 
     /** @test */
