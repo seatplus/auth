@@ -27,6 +27,7 @@
 namespace Seatplus\Auth\Actions;
 
 use Seatplus\Auth\Models\User;
+use Seatplus\Eveapi\Models\Character\CharacterInfo;
 
 class GetAffiliatedCharactersIdsByPermissionArray
 {
@@ -86,6 +87,9 @@ class GetAffiliatedCharactersIdsByPermissionArray
     private function getAffiliatedCharacterIds()
     {
         $authenticated_user = auth()->user();
+
+        if($authenticated_user->can('superuser'))
+            return CharacterInfo::pluck('character_id');
 
         $user = User::with(
             [

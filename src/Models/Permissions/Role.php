@@ -192,6 +192,7 @@ class Role extends SpatieRole
     public function delete()
     {
         $this->affiliations()->delete();
+        $this->acl_affiliations()->delete();
 
         return parent::delete();
     }
