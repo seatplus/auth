@@ -28,7 +28,7 @@ namespace Seatplus\Auth\Actions;
 
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Seatplus\Auth\Models\User;
-use Seatplus\Eveapi\Jobs\Alliances\AllianceInfo;
+use Seatplus\Eveapi\Models\Alliance\AllianceInfo;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 
