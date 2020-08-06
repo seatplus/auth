@@ -71,9 +71,4 @@ class AclAffiliation extends Model
 
         return $this->affiliatable instanceof CharacterInfo ? collect($this->affiliatable->character_id) : $this->affiliatable->characters->pluck('character_id');
     }
-
-    /*public function getInverseCharacterIdsAttribute(): Collection
-    {
-        return CharacterInfo::whereNotIn('character_id', $this->character_ids->toArray());
-    }*/
 }
