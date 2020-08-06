@@ -26,8 +26,11 @@
 
 namespace Seatplus\Auth\Actions;
 
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Seatplus\Auth\Models\User;
+use Seatplus\Eveapi\Jobs\Alliances\AllianceInfo;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
+use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 
 class GetAffiliatedCharactersIdsByPermissionArray
 {
@@ -64,7 +67,7 @@ class GetAffiliatedCharactersIdsByPermissionArray
         try {
             return cache($this->cache_key) ?? $this->getResult();
         } catch (\Exception $e) {
-            report($e);
+            throw $e;
         }
 
         return ['error'];
@@ -94,7 +97,8 @@ class GetAffiliatedCharactersIdsByPermissionArray
         $user = User::with(
             [
                 'roles.permissions',
-                'roles.affiliations.affiliatable.characters' => fn ($query) => $query->has('characters')->select('character_infos.character_id'),
+                //'roles.affiliations.affiliatable.characters' => fn ($query) => $query->has('characters')->select('character_infos.character_id'),
+                'roles.affiliations.affiliatable' => fn (MorphTo $morph_to) => $morph_to->morphWith([CorporationInfo::class => 'characters', AllianceInfo::class => 'characters']),
             ]
         )->whereHas('roles.permissions', function ($query) {
             $query->where('name', $this->permission);

@@ -65,7 +65,10 @@ class Affiliation extends Model
 
     public function getCharacterIdsAttribute(): Collection
     {
-        return $this->affiliatable ? $this->affiliatable->characters->pluck('character_id') : collect();
+        if(!$this->affiliatable)
+            return collect();
+
+        return $this->affiliatable instanceof CharacterInfo ? collect($this->affiliatable->character_id) : $this->affiliatable->characters->pluck('character_id');
     }
 
     public function getInverseCharacterIdsAttribute(): Collection

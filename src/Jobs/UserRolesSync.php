@@ -110,7 +110,7 @@ class UserRolesSync implements ShouldQueue
             $this->handleAutomaticRoles();
             $this->handleOtherRoles();
         } catch (Exception $exception) {
-
+            throw $exception;
         }
     }
 
