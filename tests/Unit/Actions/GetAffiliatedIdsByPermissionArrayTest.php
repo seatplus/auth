@@ -26,18 +26,19 @@
 
 namespace Seatplus\Auth\Tests\Unit\Actions;
 
-use Faker\Factory;
 use Illuminate\Support\Facades\Event;
-use Seatplus\Auth\Actions\GetAffiliatedCharactersIdsByPermissionArray;
+use Seatplus\Auth\Actions\GetAffiliatedIdsByPermissionArray;
 use Seatplus\Auth\Models\Permissions\Permission;
 use Seatplus\Auth\Models\Permissions\Role;
-use Seatplus\Auth\Models\User;
 use Seatplus\Auth\Tests\TestCase;
 use Seatplus\Eveapi\Models\Alliance\AllianceInfo;
+use Seatplus\Eveapi\Models\Character\CharacterAffiliation;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
+use Seatplus\Eveapi\Models\Character\CharacterRole;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
+use Seatplus\Eveapi\Tests\Unit\Actions\Jobs\Alliance\AllianceInfoActionTest;
 
-class GetAffiliatedCharacterIdsByPermissionArrayTest extends TestCase
+class GetAffiliatedIdsByPermissionArrayTest extends TestCase
 {
     protected $role;
 
@@ -87,7 +88,7 @@ class GetAffiliatedCharacterIdsByPermissionArrayTest extends TestCase
             'type'         => 'allowed',
         ]);
 
-        $ids = (new GetAffiliatedCharactersIdsByPermissionArray($this->permission->name))->execute();
+        $ids = (new GetAffiliatedIdsByPermissionArray($this->permission->name))->execute();
 
         $this->assertTrue(in_array($this->test_character_user->character_id, $ids));
     }
@@ -101,7 +102,7 @@ class GetAffiliatedCharacterIdsByPermissionArrayTest extends TestCase
             'type'         => 'inverse',
         ]);
 
-        $ids = (new GetAffiliatedCharactersIdsByPermissionArray($this->permission->name))->execute();
+        $ids = (new GetAffiliatedIdsByPermissionArray($this->permission->name))->execute();
 
         $this->assertTrue(in_array($this->test_character_user->character_id, $ids));
         $this->assertTrue(in_array($this->secondary_character->character_id, $ids));
@@ -116,7 +117,7 @@ class GetAffiliatedCharacterIdsByPermissionArrayTest extends TestCase
             'type'         => 'inverse',
         ]);
 
-        $ids = (new GetAffiliatedCharactersIdsByPermissionArray($this->permission->name))->execute();
+        $ids = (new GetAffiliatedIdsByPermissionArray($this->permission->name))->execute();
 
         // Assert that the owned character_ids are present
         $this->assertTrue(in_array($this->test_character_user->character_id, $ids));
@@ -137,7 +138,7 @@ class GetAffiliatedCharacterIdsByPermissionArrayTest extends TestCase
             'type'           => 'inverse',
         ]);
 
-        $ids = (new GetAffiliatedCharactersIdsByPermissionArray($this->permission->name))->execute();
+        $ids = (new GetAffiliatedIdsByPermissionArray($this->permission->name))->execute();
 
         // Assert that second character does not share same corporation as the first character
         $this->assertNotEquals($this->secondary_character->corporation->corporation_id, $this->test_character->corporation->corporation_id);
@@ -161,7 +162,7 @@ class GetAffiliatedCharacterIdsByPermissionArrayTest extends TestCase
             'type'        => 'inverse',
         ]);
 
-        $ids = (new GetAffiliatedCharactersIdsByPermissionArray($this->permission->name))->execute();
+        $ids = (new GetAffiliatedIdsByPermissionArray($this->permission->name))->execute();
 
         // Assert that second character does not share same corporation as the first character
         $this->assertNotEquals($this->secondary_character->alliance->alliance_id, $this->test_character->alliance->alliance_id);
@@ -185,7 +186,7 @@ class GetAffiliatedCharacterIdsByPermissionArrayTest extends TestCase
             'type'         => 'allowed',
         ]);
 
-        $ids = (new GetAffiliatedCharactersIdsByPermissionArray($this->permission->name))->execute();
+        $ids = (new GetAffiliatedIdsByPermissionArray($this->permission->name))->execute();
 
         // Assert that second character does not share same corporation as the first character
         $this->assertNotEquals($this->secondary_character->character_id, $this->test_character->character_id);
@@ -209,7 +210,7 @@ class GetAffiliatedCharacterIdsByPermissionArrayTest extends TestCase
             'type'           => 'allowed',
         ]);
 
-        $ids = (new GetAffiliatedCharactersIdsByPermissionArray($this->permission->name))->execute();
+        $ids = (new GetAffiliatedIdsByPermissionArray($this->permission->name))->execute();
 
         // Assert that second character does not share same corporation as the first character
         $this->assertNotEquals($this->secondary_character->corporation->corporation_id, $this->test_character->corporation->corporation_id);
@@ -233,7 +234,7 @@ class GetAffiliatedCharacterIdsByPermissionArrayTest extends TestCase
             'type'        => 'allowed',
         ]);
 
-        $ids = (new GetAffiliatedCharactersIdsByPermissionArray($this->permission->name))->execute();
+        $ids = (new GetAffiliatedIdsByPermissionArray($this->permission->name))->execute();
 
         // Assert that second character does not share same corporation as the first character
         $this->assertNotEquals($this->secondary_character->alliance->alliance_id, $this->test_character->alliance->alliance_id);
@@ -257,7 +258,7 @@ class GetAffiliatedCharacterIdsByPermissionArrayTest extends TestCase
             'type'         => 'forbidden',
         ]);
 
-        $ids = (new GetAffiliatedCharactersIdsByPermissionArray($this->permission->name))->execute();
+        $ids = (new GetAffiliatedIdsByPermissionArray($this->permission->name))->execute();
 
         // Assert that the owned character_ids are present
         $this->assertTrue(in_array($this->test_character_user->character_id, $ids));
@@ -279,7 +280,7 @@ class GetAffiliatedCharacterIdsByPermissionArrayTest extends TestCase
             ],
         ]);
 
-        $ids = (new GetAffiliatedCharactersIdsByPermissionArray($this->permission->name))->execute();
+        $ids = (new GetAffiliatedIdsByPermissionArray($this->permission->name))->execute();
 
         // Assert that second character does not share same corporation as the first character
         $this->assertNotEquals($this->secondary_character->character_id, $this->test_character->character_id);
@@ -310,7 +311,7 @@ class GetAffiliatedCharacterIdsByPermissionArrayTest extends TestCase
             ],
         ]);
 
-        $ids = (new GetAffiliatedCharactersIdsByPermissionArray($this->permission->name))->execute();
+        $ids = (new GetAffiliatedIdsByPermissionArray($this->permission->name))->execute();
 
         // Assert that second character does not share same corporation as the first character
         $this->assertNotEquals($this->secondary_character->corporation->corporation_id, $this->test_character->corporation->corporation_id);
@@ -341,38 +342,7 @@ class GetAffiliatedCharacterIdsByPermissionArrayTest extends TestCase
             ],
         ]);
 
-        $ids = (new GetAffiliatedCharactersIdsByPermissionArray($this->permission->name))->execute();
-
-        // Assert that second character does not share same corporation as the first character
-        $this->assertNotEquals($this->secondary_character->alliance->alliance_id, $this->test_character->alliance->alliance_id);
-
-        // Assert that the owned character_ids are present
-        $this->assertTrue(in_array($this->test_character_user->character_id, $ids));
-
-        // Assert that ids from the allowed character is not present
-        $this->assertFalse(in_array($this->secondary_character->character_id, $ids));
-
-        // Assert that ids from any other third party is not present
-        $this->assertFalse(in_array($this->tertiary_character->character_id, $ids));
-    }
-
-    /** @test */
-    public function it_does_work_with_model_method()
-    {
-        $this->role->affiliations()->createMany([
-            [
-                'affiliatable_id' => $this->secondary_character->alliance->alliance_id,
-                'affiliatable_type' => AllianceInfo::class,
-                'type'        => 'allowed',
-            ],
-            [
-                'affiliatable_id' => $this->secondary_character->alliance->alliance_id,
-                'affiliatable_type' => AllianceInfo::class,
-                'type'        => 'forbidden',
-            ],
-        ]);
-
-        $ids = $this->test_user->getAffiliatedCharacterIdsByPermission($this->permission);
+        $ids = (new GetAffiliatedIdsByPermissionArray($this->permission->name))->execute();
 
         // Assert that second character does not share same corporation as the first character
         $this->assertNotEquals($this->secondary_character->alliance->alliance_id, $this->test_character->alliance->alliance_id);
@@ -403,7 +373,7 @@ class GetAffiliatedCharacterIdsByPermissionArrayTest extends TestCase
             ],
         ]);
 
-        $action = new GetAffiliatedCharactersIdsByPermissionArray($this->permission->name);
+        $action = new GetAffiliatedIdsByPermissionArray($this->permission->name);
 
         $this->assertFalse(cache()->has($action->getCacheKey()));
 
@@ -411,5 +381,35 @@ class GetAffiliatedCharacterIdsByPermissionArrayTest extends TestCase
 
         $this->assertTrue(cache()->has($action->getCacheKey()));
         $this->assertEquals($ids, cache($action->getCacheKey()));
+    }
+
+    /** @test */
+    public function it_returns_corporation_id()
+    {
+        // first make sure test_character corporation is in the alliance
+        $corporation = $this->test_character->corporation;
+        $corporation->alliance_id = $this->test_character->alliance->alliance_id;
+        $corporation->save();
+
+        // create role affiliation on alliance level
+        $this->role->affiliations()->create([
+            'affiliatable_id' => $this->test_character->alliance->alliance_id,
+            'affiliatable_type' => AllianceInfo::class,
+            'type'        => 'allowed',
+        ]);
+
+        // Create director role for corporation
+        $character_role = factory(CharacterRole::class)->make([
+            'character_id' => $this->test_character->character_id,
+            'roles' => ['Contract_Manager', 'Director']
+        ]);
+
+        $ids = (new GetAffiliatedIdsByPermissionArray($this->permission->name, 'Director'))->execute();
+
+        // Assert that the owned character_ids are present
+        $this->assertTrue(in_array($this->test_character->character_id, $ids));
+
+        // Assert that the corporation_id of test_character with director role is present
+        $this->assertTrue(in_array($this->test_character->corporation->corporation_id, $ids));
     }
 }

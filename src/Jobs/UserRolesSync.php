@@ -74,7 +74,6 @@ class UserRolesSync implements ShouldQueue
 
     public function __construct(User $user)
     {
-
         $this->user = $user;
         $this->character_ids = User::has('characters.refresh_token')
             ->with(['characters.refresh_token' => fn ($query) => $query->select('character_id')])
@@ -106,11 +105,10 @@ class UserRolesSync implements ShouldQueue
     public function handle()
     {
         try {
-
             $this->handleAutomaticRoles();
             $this->handleOtherRoles();
         } catch (Exception $exception) {
-
+            throw $exception;
         }
     }
 
@@ -135,14 +133,11 @@ class UserRolesSync implements ShouldQueue
             ->cursor();
 
         $this->handleMemberships($roles);
-
     }
 
     private function handleMemberships($roles)
     {
-        foreach ($roles as $role)
-        {
-
+        foreach ($roles as $role) {
             collect($this->character_ids)->intersect($role->acl_affiliated_ids)->isNotEmpty()
                 ? $role->activateMember($this->user)
                 : $role->pauseMember($this->user);

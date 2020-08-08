@@ -26,10 +26,15 @@
 
 namespace Seatplus\Auth\Actions;
 
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use Seatplus\Auth\Models\User;
+use Seatplus\Eveapi\Models\Alliance\AllianceInfo;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
+use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 
-class GetAffiliatedCharactersIdsByPermissionArray
+class GetAffiliatedIdsByPermissionArray
 {
     private $permission;
 
@@ -43,6 +48,8 @@ class GetAffiliatedCharactersIdsByPermissionArray
      */
     private $cache_key;
 
+    private string $corporation_role;
+
     /**
      * @return string
      */
@@ -51,12 +58,14 @@ class GetAffiliatedCharactersIdsByPermissionArray
         return $this->cache_key;
     }
 
-    public function __construct($permission)
+    public function __construct(string $permission, string $corporation_role = '')
     {
         $this->permission = $permission;
-        $this->user = auth()->user()->loadMissing('characters');
+        $this->user = auth()->user();
         $this->cache_key = sprintf('affiliated character ids by permission %s for user wit user_id: %s',
             $this->user->id, $this->permission);
+
+        $this->corporation_role = $corporation_role;
     }
 
     public function execute(): array
@@ -64,7 +73,7 @@ class GetAffiliatedCharactersIdsByPermissionArray
         try {
             return cache($this->cache_key) ?? $this->getResult();
         } catch (\Exception $e) {
-            report($e);
+            throw $e;
         }
 
         return ['error'];
@@ -77,38 +86,73 @@ class GetAffiliatedCharactersIdsByPermissionArray
      */
     private function getResult(): array
     {
-        $affiliated_ids = $this->getAffiliatedCharacterIds()->toArray();
+        $affiliated_ids = $this->getAffiliatedIds()->toArray();
 
         cache([$this->cache_key => $affiliated_ids], now()->addMinutes(5));
 
         return $affiliated_ids;
     }
 
-    private function getAffiliatedCharacterIds()
+    private function getAffiliatedIds(): Collection
     {
-        $authenticated_user = auth()->user();
-
-        if($authenticated_user->can('superuser'))
-            return CharacterInfo::pluck('character_id');
+        if ($this->user->can('superuser')) {
+            return $this->getAllCharacterAndCorporationIds();
+        }
 
         $user = User::with(
             [
                 'roles.permissions',
-                'roles.affiliations.affiliatable.characters' => fn ($query) => $query->has('characters')->select('character_infos.character_id'),
+                //'roles.affiliations.affiliatable.characters' => fn ($query) => $query->has('characters')->select('character_infos.character_id'),
+                'roles.affiliations.affiliatable' => fn (MorphTo $morph_to) => $morph_to->morphWith([CorporationInfo::class => 'characters', AllianceInfo::class => ['characters', 'corporations']]),
             ]
         )->whereHas('roles.permissions', function ($query) {
             $query->where('name', $this->permission);
         })
-            ->where('id', $authenticated_user->id)
+            ->where('id', $this->user->id)
             ->first();
 
         // if authenticated user has no roles, make sure to skip the roles access
-        $user = ! $user ? collect() : $user->roles->map(fn ($role) => $role->affiliated_ids);
+        $affiliated_ids = ! $user ? collect() : $user->roles->map(fn ($role) => $role->affiliated_ids);
 
         // before returning add the owned character ids
-        return $user->push($authenticated_user->characters->pluck('character_id'))
+        return $affiliated_ids->merge($this->buildOwnedIds())
             ->flatten()
             ->unique();
+    }
 
+    private function getAllCharacterAndCorporationIds(): Collection
+    {
+        $all_ids = collect();
+
+        CharacterInfo::query()->cursor()->each(fn ($character) => $all_ids->push($character->character_id));
+        CorporationInfo::query()->cursor()->each(fn ($corporation) => $all_ids->push($corporation->corporation_id));
+
+        return $all_ids;
+    }
+
+    private function buildOwnedIds(): Collection
+    {
+        //$this->user->characters->pluck('character_id');
+
+        return User::whereId($this->user->getAuthIdentifier())
+            ->with('characters.roles', 'characters.corporation')
+            ->get()
+            ->whenNotEmpty(fn ($collection) => $collection
+                ->first()
+                ->characters
+                ->map(fn ($character) => [$this->getCorporationId($character), $character->character_id])
+                ->flatten()
+                ->filter()
+            )
+            ->flatten()->unique();
+    }
+
+    private function getCorporationId(CharacterInfo $character)
+    {
+        if (! $this->corporation_role || ! $character->roles) {
+            return null;
+        }
+
+        return $character->roles->hasRole('roles', Str::ucfirst($this->corporation_role)) ? $character->corporation->corporation_id : null;
     }
 }

@@ -28,7 +28,9 @@ namespace Seatplus\Auth\Models\Permissions;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
+use Seatplus\Eveapi\Models\Alliance\AllianceInfo;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
+use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 
 class Affiliation extends Model
 {
@@ -63,15 +65,46 @@ class Affiliation extends Model
         return $this->belongsTo(Role::class, 'id', 'role_id');
     }
 
-    public function getCharacterIdsAttribute(): Collection
+    public function getAffiliatedIdsAttribute(): Collection
     {
-        return $this->affiliatable ? $this->affiliatable->characters->pluck('character_id') : collect();
+        return $this->getCharacterIds()->merge($this->getCorporationIds());
     }
 
-    public function getInverseCharacterIdsAttribute(): Collection
+    public function getInverseAffiliatedIdsAttribute(): Collection
+    {
+        return $this->getInverseCharacterIds()->merge($this->getInverseCorporationIds());
+    }
+
+    private function getCharacterIds(): Collection
+    {
+        if (! $this->affiliatable) {
+            return collect();
+        }
+
+        return $this->affiliatable instanceof CharacterInfo ? collect($this->affiliatable->character_id) : $this->affiliatable->characters->pluck('character_id');
+    }
+
+    private function getInverseCharacterIds(): Collection
     {
         return CharacterInfo::query()
-            ->whereNotIn('character_id', $this->getCharacterIdsAttribute()->toArray())
+            ->whereNotIn('character_id', $this->getCharacterIds()->toArray())
             ->pluck('character_id');
+    }
+
+    private function getCorporationIds(): Collection
+    {
+        if (! $this->affiliatable) {
+            return collect();
+        }
+
+        return $this->affiliatable instanceof CorporationInfo ? collect($this->affiliatable->corporation_id)
+            : ($this->affiliatable instanceof AllianceInfo ? $this->affiliatable->corporations->pluck('corporation_id') : collect());
+    }
+
+    private function getInverseCorporationIds(): Collection
+    {
+        return CorporationInfo::query()
+            ->whereNotIn('corporation_id', $this->getCorporationIds()->toArray())
+            ->pluck('corporation_id');
     }
 }

@@ -144,6 +144,7 @@ class SeatPlusRolesTest extends TestCase
         ]);
 
         $this->assertFalse(in_array($this->test_character->character_id, $this->role->affiliated_ids));
+        $this->assertTrue(in_array($this->secondary_character->character_id, $this->role->affiliated_ids));
     }
 
     /** @test */

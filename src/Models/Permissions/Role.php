@@ -27,10 +27,13 @@
 namespace Seatplus\Auth\Models\Permissions;
 
 use Exception;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Collection;
 use Seatplus\Auth\Models\AccessControl\AclAffiliation;
 use Seatplus\Auth\Models\AccessControl\AclMember;
 use Seatplus\Auth\Models\User;
+use Seatplus\Eveapi\Models\Alliance\AllianceInfo;
+use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 use Spatie\Permission\Models\Role as SpatieRole;
 
 class Role extends SpatieRole
@@ -65,10 +68,11 @@ class Role extends SpatieRole
 
     public function activateMember(User $user): void
     {
-
-        if(in_array($this->type, ['automatic', 'opt-in', 'on-request']))
-            if($user->characters->pluck('character_id')->intersect($this->getAclAffiliatedIdsAttribute())->isEmpty())
+        if (in_array($this->type, ['automatic', 'opt-in', 'on-request'])) {
+            if ($user->characters->pluck('character_id')->intersect($this->getAclAffiliatedIdsAttribute())->isEmpty()) {
                 throw new Exception('User is not allowed for this access control group');
+            }
+        }
 
         AclMember::query()->updateOrInsert(
             ['role_id' => $this->id, 'user_id' => $user->getAuthIdentifier()],
@@ -80,12 +84,13 @@ class Role extends SpatieRole
 
     public function joinWaitlist(User $user): void
     {
-
-        if($this->type !== 'on-request')
+        if ($this->type !== 'on-request') {
             throw new Exception('Only on-request control groups do have a waitlist');
+        }
 
-        if($user->characters->pluck('character_id')->intersect($this->getAclAffiliatedIdsAttribute())->isEmpty())
+        if ($user->characters->pluck('character_id')->intersect($this->getAclAffiliatedIdsAttribute())->isEmpty()) {
             throw new Exception('User is not allowed for this access control group');
+        }
 
         AclMember::query()->updateOrInsert(
             ['role_id' => $this->id, 'user_id' => $user->getAuthIdentifier()],
@@ -128,7 +133,7 @@ class Role extends SpatieRole
     {
         //eager load relations for preventing n+1 queries
         $role_with_relationships = $this->loadMissing([
-            'affiliations.affiliatable.characters' => fn ($query) => $query->has('characters')->select('character_infos.character_id'),
+            'affiliations.affiliatable' => fn (MorphTo $morph_to) => $morph_to->morphWith([CorporationInfo::class => 'characters', AllianceInfo::class => ['characters', 'corporations']]),
         ]);
 
         return $role_with_relationships->getAffiliatedIds()
@@ -141,12 +146,15 @@ class Role extends SpatieRole
      */
     public function getAclAffiliatedIdsAttribute(): array
     {
-        //eager load relations for preventing n+1 queries
-        $role_with_relationships = $this->loadMissing([
-            'acl_affiliations.affiliatable.characters' => fn ($query) => $query->has('characters')->select('character_infos.character_id'),
-        ]);
+        $acl_affiliations = $this->acl_affiliations()
+            ->with(
+                ['affiliatable' => function (MorphTo $morph_to) {
+                    $morph_to->morphWith([CorporationInfo::class => 'characters', AllianceInfo::class => 'characters']);
+                }]
+            )
+            ->cursor();
 
-        return $role_with_relationships->acl_affiliations
+        return $acl_affiliations
             ->map(fn ($affiliation) => $affiliation->character_ids)
             ->flatten()
             ->unique()
@@ -160,7 +168,7 @@ class Role extends SpatieRole
     {
         //eager load relations for preventing n+1 queries
         $role_with_relationships = $this->loadMissing([
-            'moderators.affiliatable.characters' => fn ($query) => $query->has('characters')->select('character_infos.character_id'),
+            'moderators.affiliatable' => fn (MorphTo $morph_to) => $morph_to->morphWith([CorporationInfo::class => 'characters', AllianceInfo::class => 'characters']),
         ]);
 
         return $role_with_relationships->moderators
@@ -174,7 +182,8 @@ class Role extends SpatieRole
     {
         return $this->affiliations
             ->reject(fn ($affiliation) => $affiliation->type === 'forbidden')
-            ->map(fn ($affiliation) => $affiliation->type === 'allowed' ? $affiliation->character_ids : $affiliation->inverse_character_ids)
+            // TODO get IDs instead of character_ids
+            ->map(fn ($affiliation) => $affiliation->type === 'allowed' ? $affiliation->affiliated_ids : $affiliation->inverse_affiliated_ids)
             ->flatten()
             ->unique();
     }
@@ -184,7 +193,7 @@ class Role extends SpatieRole
         return $this->affiliations
             // we are only concerned about forbidden and inverse ids
             ->reject(fn ($affiliation) => $affiliation->type === 'allowed')
-            ->map(fn ($affiliation) => $affiliation->character_ids)
+            ->map(fn ($affiliation) => $affiliation->affiliated_ids)
             ->flatten()
             ->unique();
     }
