@@ -16,7 +16,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Seatplus\\Auth\\Tests\\": "tests/"
+            "Seatplus\\Auth\\Tests\\": "tests/",
+            "Seatplus\\Eveapi\\": "../eveapi/src/"
         }
     },
     "minimum-stability": "alpha",
@@ -26,12 +27,14 @@
         "laravel/framework": "^6.0",
         "laravel/socialite": "^4.1",
         "seatplus/eseye": "^2.0",
-        "seatplus/eveapi": "^0.2",
         "spatie/laravel-permission": "^3.0"
     },
     "require-dev": {
         "orchestra/testbench": "^4.0",
-        "spatie/phpunit-watcher": "^1.11"
+        "spatie/phpunit-watcher": "^1.11",
+        "laravel/horizon": "^3.7",
+        "predis/predis": "^1.1",
+        "cakephp/chronos": "^1.3"
     },
     "extra": {
         "laravel": {

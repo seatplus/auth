@@ -32,7 +32,7 @@ use Illuminate\Support\Collection;
 use Seatplus\Auth\Models\AccessControl\AclAffiliation;
 use Seatplus\Auth\Models\AccessControl\AclMember;
 use Seatplus\Auth\Models\User;
-use Seatplus\Eveapi\Jobs\Alliances\AllianceInfo;
+use Seatplus\Eveapi\Models\Alliance\AllianceInfo;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 use Spatie\Permission\Models\Role as SpatieRole;
 
@@ -131,7 +131,7 @@ class Role extends SpatieRole
     {
         //eager load relations for preventing n+1 queries
         $role_with_relationships = $this->loadMissing([
-            'affiliations.affiliatable' => fn (MorphTo $morph_to) => $morph_to->morphWith([CorporationInfo::class => 'characters', AllianceInfo::class => 'characters']),
+            'affiliations.affiliatable' => fn (MorphTo $morph_to) => $morph_to->morphWith([CorporationInfo::class => 'characters', AllianceInfo::class => ['characters', 'corporations']]),
         ]);
 
         return $role_with_relationships->getAffiliatedIds()
@@ -182,7 +182,7 @@ class Role extends SpatieRole
         return $this->affiliations
             ->reject(fn ($affiliation) => $affiliation->type === 'forbidden')
             // TODO get IDs instead of character_ids
-            ->map(fn ($affiliation) => $affiliation->type === 'allowed' ? $affiliation->character_ids : $affiliation->inverse_character_ids)
+            ->map(fn ($affiliation) => $affiliation->type === 'allowed' ? $affiliation->affiliated_ids : $affiliation->inverse_affiliated_ids)
             ->flatten()
             ->unique();
     }
@@ -192,7 +192,7 @@ class Role extends SpatieRole
         return $this->affiliations
             // we are only concerned about forbidden and inverse ids
             ->reject(fn ($affiliation) => $affiliation->type === 'allowed')
-            ->map(fn ($affiliation) => $affiliation->character_ids)
+            ->map(fn ($affiliation) => $affiliation->affiliated_ids)
             ->flatten()
             ->unique();
     }
