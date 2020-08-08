@@ -30,7 +30,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Seatplus\Auth\Actions\GetAffiliatedIdsByPermissionArray;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Spatie\Permission\Traits\HasRoles;
 

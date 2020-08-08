@@ -52,7 +52,6 @@ class DispatchUserRoleSync implements ShouldQueue
      */
     public function middleware(): array
     {
-
         return [
             new RedisFunnelMiddleware,
         ];

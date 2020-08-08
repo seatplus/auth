@@ -93,11 +93,11 @@ class GetAffiliatedIdsByPermissionArray
         return $affiliated_ids;
     }
 
-    private function getAffiliatedIds() : Collection
+    private function getAffiliatedIds(): Collection
     {
-
-        if($this->user->can('superuser'))
+        if ($this->user->can('superuser')) {
             return $this->getAllCharacterAndCorporationIds();
+        }
 
         $user = User::with(
             [
@@ -120,39 +120,39 @@ class GetAffiliatedIdsByPermissionArray
             ->unique();
     }
 
-    private function getAllCharacterAndCorporationIds() : Collection
+    private function getAllCharacterAndCorporationIds(): Collection
     {
         $all_ids = collect();
 
-        CharacterInfo::query()->cursor()->each(fn($character) => $all_ids->push($character->character_id));
-        CorporationInfo::query()->cursor()->each(fn($corporation) => $all_ids->push($corporation->corporation_id));
+        CharacterInfo::query()->cursor()->each(fn ($character) => $all_ids->push($character->character_id));
+        CorporationInfo::query()->cursor()->each(fn ($corporation) => $all_ids->push($corporation->corporation_id));
 
         return $all_ids;
     }
 
-    private function buildOwnedIds() : Collection
+    private function buildOwnedIds(): Collection
     {
         //$this->user->characters->pluck('character_id');
 
         return User::whereId($this->user->getAuthIdentifier())
             ->with('characters.roles', 'characters.corporation')
             ->get()
-            ->whenNotEmpty(fn($collection) => $collection
+            ->whenNotEmpty(fn ($collection) => $collection
                 ->first()
                 ->characters
-                ->map(fn($character) => [$this->getCorporationId($character), $character->character_id])
+                ->map(fn ($character) => [$this->getCorporationId($character), $character->character_id])
                 ->flatten()
                 ->filter()
             )
             ->flatten()->unique();
-
     }
 
     private function getCorporationId(CharacterInfo $character)
     {
-        if(! $this->corporation_role || ! $character->roles)
+        if (! $this->corporation_role || ! $character->roles) {
             return null;
+        }
 
-        return $character->roles->hasRole('roles', Str::ucfirst($this->corporation_role)) ? $character->corporation->corporation_id: null;
+        return $character->roles->hasRole('roles', Str::ucfirst($this->corporation_role)) ? $character->corporation->corporation_id : null;
     }
 }
