@@ -12,7 +12,10 @@
     "autoload": {
         "psr-4": {
             "Seatplus\\Auth\\": "src/"
-        }
+        },
+        "files": [
+            "src/Helpers/helpers.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {
