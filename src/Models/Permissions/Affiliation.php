@@ -65,22 +65,21 @@ class Affiliation extends Model
         return $this->belongsTo(Role::class, 'id', 'role_id');
     }
 
-    public function getAffiliatedIdsAttribute() :Collection
+    public function getAffiliatedIdsAttribute(): Collection
     {
-
         return $this->getCharacterIds()->merge($this->getCorporationIds());
     }
 
-    public function getInverseAffiliatedIdsAttribute() :Collection
+    public function getInverseAffiliatedIdsAttribute(): Collection
     {
-
         return $this->getInverseCharacterIds()->merge($this->getInverseCorporationIds());
     }
 
     private function getCharacterIds(): Collection
     {
-        if(!$this->affiliatable)
+        if (! $this->affiliatable) {
             return collect();
+        }
 
         return $this->affiliatable instanceof CharacterInfo ? collect($this->affiliatable->character_id) : $this->affiliatable->characters->pluck('character_id');
     }
@@ -94,8 +93,9 @@ class Affiliation extends Model
 
     private function getCorporationIds(): Collection
     {
-        if(!$this->affiliatable)
+        if (! $this->affiliatable) {
             return collect();
+        }
 
         return $this->affiliatable instanceof CorporationInfo ? collect($this->affiliatable->corporation_id)
             : ($this->affiliatable instanceof AllianceInfo ? $this->affiliatable->corporations->pluck('corporation_id') : collect());

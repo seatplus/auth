@@ -66,8 +66,9 @@ class AclAffiliation extends Model
 
     public function getCharacterIdsAttribute(): Collection
     {
-        if(!$this->affiliatable)
+        if (! $this->affiliatable) {
             return collect();
+        }
 
         return $this->affiliatable instanceof CharacterInfo ? collect($this->affiliatable->character_id) : $this->affiliatable->characters->pluck('character_id');
     }
