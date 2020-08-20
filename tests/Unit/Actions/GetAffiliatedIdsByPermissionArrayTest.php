@@ -412,4 +412,24 @@ class GetAffiliatedIdsByPermissionArrayTest extends TestCase
         // Assert that the corporation_id of test_character with director role is present
         $this->assertTrue(in_array($this->test_character->corporation->corporation_id, $ids));
     }
+
+    /** @test */
+    public function it_returns_all_character_and_corporation_ids_for_superuser()
+    {
+        // give test user superuser
+        Permission::create(['name' => 'superuser']);
+        $this->test_user->givePermissionTo('superuser');
+
+        // collect all corporation_ids
+        $corporation_ids = CorporationInfo::all()->pluck('corporation_id')->values();
+
+        // collect all character_ids
+        $character_ids = CharacterInfo::all()->pluck('character_id')->values();
+
+        // get ids
+        $ids = (new GetAffiliatedIdsByPermissionArray($this->permission->name))->execute();
+
+        // check if ids are present
+        $this->assertTrue(collect([...$character_ids, ...$corporation_ids])->diff($ids)->isEmpty());
+    }
 }
