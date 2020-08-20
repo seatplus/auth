@@ -68,10 +68,11 @@ class Role extends SpatieRole
 
     public function activateMember(User $user): void
     {
-
-        if(in_array($this->type, ['automatic', 'opt-in', 'on-request']))
-            if($user->characters->pluck('character_id')->intersect($this->getAclAffiliatedIdsAttribute())->isEmpty())
+        if (in_array($this->type, ['automatic', 'opt-in', 'on-request'])) {
+            if ($user->characters->pluck('character_id')->intersect($this->getAclAffiliatedIdsAttribute())->isEmpty()) {
                 throw new Exception('User is not allowed for this access control group');
+            }
+        }
 
         AclMember::query()->updateOrInsert(
             ['role_id' => $this->id, 'user_id' => $user->getAuthIdentifier()],
@@ -83,12 +84,13 @@ class Role extends SpatieRole
 
     public function joinWaitlist(User $user): void
     {
-
-        if($this->type !== 'on-request')
+        if ($this->type !== 'on-request') {
             throw new Exception('Only on-request control groups do have a waitlist');
+        }
 
-        if($user->characters->pluck('character_id')->intersect($this->getAclAffiliatedIdsAttribute())->isEmpty())
+        if ($user->characters->pluck('character_id')->intersect($this->getAclAffiliatedIdsAttribute())->isEmpty()) {
             throw new Exception('User is not allowed for this access control group');
+        }
 
         AclMember::query()->updateOrInsert(
             ['role_id' => $this->id, 'user_id' => $user->getAuthIdentifier()],
@@ -144,7 +146,6 @@ class Role extends SpatieRole
      */
     public function getAclAffiliatedIdsAttribute(): array
     {
-
         $acl_affiliations = $this->acl_affiliations()
             ->with(
                 ['affiliatable' => function (MorphTo $morph_to) {

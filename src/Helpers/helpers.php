@@ -39,7 +39,6 @@ if (! function_exists('getAffiliatedIdsByClass')) {
      */
     function getAffiliatedIdsByClass(string $class, string $role = ''): array
     {
-
         $permission_name = config('eveapi.permissions.' . $class);
 
         return getAffiliatedIdsByPermission($permission_name, $role);
@@ -59,7 +58,6 @@ if (! function_exists('getAffiliatedIdsByPermission')) {
      */
     function getAffiliatedIdsByPermission(string $permission, string $role = ''): array
     {
-
         try {
             $ids = (new GetAffiliatedIdsByPermissionArray($permission, $role))->execute();
         } catch (Exception $exception) {
