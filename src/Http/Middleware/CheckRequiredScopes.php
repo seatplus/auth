@@ -96,12 +96,12 @@ class CheckRequiredScopes
 
     private function charactersWithRequiredSsoScopes(): Collection
     {
-        return (new GetCharactersWithRequiredSsoScopes())->execute();
+        return (new GetCharactersWithRequiredSsoScopes)->execute();
     }
 
     private function buildRequiredScopes(Collection $characters)
     {
-        $required_scopes = (new GetRequiredScopesFromCharacters())->execute($characters);
+        $required_scopes = (new GetRequiredScopesFromCharacters)->execute($characters);
         $this->required_scopes = $required_scopes;
     }
 

@@ -50,8 +50,12 @@ class GetCharactersWithRequiredSsoScopes
 
     public function execute(): Collection
     {
-        return $this->user->characters->filter(function ($character) {
+        $characters_with_ssoScopes = $this->user->characters->filter(function ($character) {
             return ($character->alliance->ssoScopes ?? false) || ($character->corporation->ssoScopes ?? false);
-        })->isNotEmpty() ? $this->user->characters : collect();
+        });
+
+        return setting('global_sso_scopes')
+            ? $this->user->characters
+            : ($characters_with_ssoScopes->isNotEmpty() ? $characters_with_ssoScopes : collect());
     }
 }

@@ -140,6 +140,7 @@ class GetAffiliatedIdsByPermissionArray
             ->whenNotEmpty(fn ($collection) => $collection
                 ->first()
                 ->characters
+                // for owned corporation tokens, we need to add the affiliation as long as the character has the required role
                 ->map(fn ($character) => [$this->getCorporationId($character), $character->character_id])
                 ->flatten()
                 ->filter()

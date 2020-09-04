@@ -169,6 +169,45 @@ class CheckRequiredScopesTest extends TestCase
         $this->middleware->handle($this->request, $this->next);
     }
 
+    /** @test */
+    public function it_stops_request_if_required_global_scopes_are_missing()
+    {
+        // 1. Create RefreshToken for Character
+        $this->createRefreshTokenWithScopes(['a', 'b']);
+
+        // 2. create global required sso scope
+        setting(['global_sso_scopes', ['esi-characters.read_corporation_roles.v1']]);
+
+        // TestingTime
+
+        $this->actingAs($this->test_user);
+
+        //Expect redirect
+        $this->middleware->shouldReceive('redirectTo')->times(1);
+
+        $this->middleware->handle($this->request, $this->next);
+    }
+
+    /** @test */
+    public function it_lets_request_through_if_required_global_scopes_are_present()
+    {
+
+        // 1. Create RefreshToken for Character
+        $this->createRefreshTokenWithScopes(['a', 'b']);
+
+        // 2. create global required sso scope
+        setting(['global_sso_scopes', ['a']]);
+
+        // TestingTime
+
+        $this->actingAs($this->test_user);
+
+        //Expect 1 forward
+        $this->request->shouldReceive('forward')->times(1);
+
+        $this->middleware->handle($this->request, $this->next);
+    }
+
     private function mockRequest(): void
     {
         $this->request = Mockery::mock(Request::class);
