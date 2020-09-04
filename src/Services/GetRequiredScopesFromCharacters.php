@@ -43,6 +43,7 @@ class GetRequiredScopesFromCharacters
                 'alliance_scopes'                => $character->alliance->ssoScopes->selected_scopes ?? [],
                 'application_corporation_scopes' => $character->application->corporation->ssoScopes->selected_scopes ?? [],
                 'application_alliance_scopes'    => $character->application->corporation->alliance->ssoScopes->selected_scopes ?? [],
+                'global_scopes'                  => setting('global_sso_scopes') ?? []
             ];
         })
             ->flatten(1)
