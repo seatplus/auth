@@ -27,7 +27,7 @@
     "require": {
         "php": "^7.4",
         "laravel/framework": "^6.0",
-        "laravel/socialite": "^4.1",
+        "laravel/socialite": "^5.0",
         "seatplus/eseye": "^2.0",
         "seatplus/eveapi": "^0.2.5",
         "spatie/laravel-permission": "^3.0"
