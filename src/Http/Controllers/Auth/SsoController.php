@@ -32,19 +32,19 @@ use Seatplus\Auth\Http\Actions\Sso\FindOrCreateUserAction;
 use Seatplus\Auth\Http\Actions\Sso\UpdateRefreshTokenAction;
 use Seatplus\Auth\Http\Controllers\Controller;
 use Seatplus\Auth\Models\User;
-use Seatplus\Auth\Services\GetSRequiredScopes;
+use Seatplus\Auth\Services\GetRequiredScopes;
 
 class SsoController extends Controller
 {
     /**
      * Redirect the user to the Eve Online authentication page.
      *
-     * @param \Laravel\Socialite\Contracts\Factory       $social
-     * @param \Seatplus\Auth\Services\GetSRequiredScopes $required_scopes
+     * @param \Laravel\Socialite\Contracts\Factory      $social
+     * @param \Seatplus\Auth\Services\GetRequiredScopes $required_scopes
      *
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
-    public function redirectToProvider(Socialite $social, GetSRequiredScopes $required_scopes)
+    public function redirectToProvider(Socialite $social, GetRequiredScopes $required_scopes)
     {
         $scopes = $required_scopes->execute()->toArray();
 

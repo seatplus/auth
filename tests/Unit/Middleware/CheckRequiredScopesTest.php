@@ -57,9 +57,7 @@ class CheckRequiredScopesTest extends TestCase
     {
         parent::setUp();
 
-        $this->middleware = Mockery::mock(CheckRequiredScopes::class, [])
-            ->makePartial()
-            ->shouldAllowMockingProtectedMethods();
+        //$this->actingAs($this->test_user);
 
         $this->mockRequest();
 
@@ -69,7 +67,11 @@ class CheckRequiredScopesTest extends TestCase
     /** @test */
     public function it_lets_request_through_if_no_scopes_are_required()
     {
+        $this->createRefreshTokenWithScopes(['a', 'b']);
+
         $this->actingAs($this->test_user);
+
+        $this->mockMiddleware();
 
         //$this->middleware->shouldReceive('redirectTo')->once();
         $this->request->shouldReceive('forward')->times(1);
@@ -94,6 +96,8 @@ class CheckRequiredScopesTest extends TestCase
 
         $this->actingAs($this->test_user);
 
+        $this->mockMiddleware();
+
         //Expect 1 forward
         $this->request->shouldReceive('forward')->times(1);
 
@@ -117,6 +121,8 @@ class CheckRequiredScopesTest extends TestCase
 
         $this->actingAs($this->test_user);
 
+        $this->mockMiddleware();
+
         //Expect redirect
         $this->middleware->shouldReceive('redirectTo')->times(1);
 
@@ -131,14 +137,13 @@ class CheckRequiredScopesTest extends TestCase
         $this->createRefreshTokenWithScopes(['a', 'b']);
 
         // 2. Create SsoScope (Corporation)
-        $this->createCorporationSsoScope([
-            'character'   => [],
-            'corporation' => ['b'],
-        ]);
+        $this->createCorporationSsoScope(['c']);
 
         // TestingTime
 
         $this->actingAs($this->test_user);
+
+        $this->mockMiddleware();
 
         //Expect redirect
         $this->middleware->shouldReceive('redirectTo')->times(1);
@@ -163,6 +168,8 @@ class CheckRequiredScopesTest extends TestCase
 
         $this->actingAs($this->test_user);
 
+        $this->mockMiddleware();
+
         //Expect redirect
         $this->request->shouldReceive('forward')->times(1);
 
@@ -181,6 +188,8 @@ class CheckRequiredScopesTest extends TestCase
         // TestingTime
 
         $this->actingAs($this->test_user);
+
+        $this->mockMiddleware();
 
         //Expect redirect
         $this->middleware->shouldReceive('redirectTo')->times(1);
@@ -202,8 +211,79 @@ class CheckRequiredScopesTest extends TestCase
 
         $this->actingAs($this->test_user);
 
+        $this->mockMiddleware();
+
         //Expect 1 forward
         $this->request->shouldReceive('forward')->times(1);
+
+        $this->middleware->handle($this->request, $this->next);
+    }
+
+    /** @test */
+    public function it_lets_request_through_if_user_application_has_no_required_scopes()
+    {
+        // 1. Create RefreshToken for Character
+        $this->createRefreshTokenWithScopes(['a', 'b']);
+
+        // 2. create user application
+        $this->test_user->application()->create(['corporation_id' =>  $this->test_character->corporation->corporation_id]);
+
+        // TestingTime
+
+        $this->actingAs($this->test_user);
+
+        $this->mockMiddleware();
+
+        //Expect 1 forward
+        $this->request->shouldReceive('forward')->times(1);
+
+        $this->middleware->handle($this->request, $this->next);
+    }
+
+    /** @test */
+    public function it_lets_request_through_if_user_application_has_required_scopes()
+    {
+        // 1. Create RefreshToken for Character
+        $this->createRefreshTokenWithScopes(['a', 'b']);
+
+        // 2. create user application
+        $this->test_user->application()->create(['corporation_id' =>  $this->test_character->corporation->corporation_id]);
+
+        // 3. create required corp scopes
+        $this->createCorporationSsoScope(['a']);
+
+        // TestingTime
+
+        $this->actingAs($this->test_user);
+
+        $this->mockMiddleware();
+
+        //Expect 1 forward
+        $this->request->shouldReceive('forward')->times(1);
+
+        $this->middleware->handle($this->request, $this->next);
+    }
+
+    /** @test */
+    public function it_forwards_request_if_user_application_has_not_required_scopes()
+    {
+        // 1. Create RefreshToken for Character
+        $this->createRefreshTokenWithScopes(['a', 'b']);
+
+        // 2. create user application
+        $this->test_user->application()->create(['corporation_id' =>  $this->test_character->corporation->corporation_id]);
+
+        // 3. create required corp scopes
+        $this->createCorporationSsoScope(['c']);
+
+        // TestingTime
+
+        $this->actingAs($this->test_user);
+
+        $this->mockMiddleware();
+
+        //Expect redirect
+        $this->middleware->shouldReceive('redirectTo')->times(1);
 
         $this->middleware->handle($this->request, $this->next);
     }
@@ -234,5 +314,12 @@ class CheckRequiredScopesTest extends TestCase
             'morphable_id'    => $this->test_character->corporation->corporation_id,
             'morphable_type'  => CorporationInfo::class,
         ]);
+    }
+
+    private function mockMiddleware()
+    {
+        $this->middleware = Mockery::mock(CheckRequiredScopes::class, [])
+            ->makePartial()
+            ->shouldAllowMockingProtectedMethods();
     }
 }
