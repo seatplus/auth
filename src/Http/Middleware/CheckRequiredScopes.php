@@ -34,7 +34,6 @@ use Seatplus\Auth\Models\User;
 
 class CheckRequiredScopes
 {
-
     private User $user;
 
     public function __construct()
@@ -62,13 +61,12 @@ class CheckRequiredScopes
      */
     public function handle(Request $request, Closure $next)
     {
-
         $characters_with_missing_scopes = $this->getCharactersWithMissingScopes();
 
         return $characters_with_missing_scopes->isEmpty() ? $next($request) : $this->redirectTo($characters_with_missing_scopes);
     }
 
-    private function getCharactersWithMissingScopes() : Collection
+    private function getCharactersWithMissingScopes(): Collection
     {
 
         // Add global required scopes
@@ -104,10 +102,10 @@ class CheckRequiredScopes
                 ->flatten(1)
                 ->toArray(),
             'token_scopes' => $character->refresh_token->scopes ?? [],
-            ])
+        ])
             // Build missing scopes
-            ->map(fn($character) => Arr::add($character,'missing_scopes',array_diff(Arr::get($character,'required_scopes'), Arr::get($character,'token_scopes'))))
-            ->filter(fn($character) => Arr::get($character,'missing_scopes'));
+            ->map(fn ($character) => Arr::add($character, 'missing_scopes', array_diff(Arr::get($character, 'required_scopes'), Arr::get($character, 'token_scopes'))))
+            ->filter(fn ($character) => Arr::get($character, 'missing_scopes'));
     }
 
     /*
