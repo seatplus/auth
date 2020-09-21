@@ -19,8 +19,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Seatplus\\Auth\\Tests\\": "tests/",
-            "Seatplus\\Eveapi\\": "../eveapi/src/"
+            "Seatplus\\Auth\\Tests\\": "tests/"
         }
     },
     "minimum-stability": "alpha",
