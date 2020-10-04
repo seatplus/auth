@@ -28,7 +28,6 @@ namespace Seatplus\Auth\Http\Controllers\Auth;
 
 use Laravel\Socialite\Contracts\Factory as Socialite;
 use Seatplus\Auth\Http\Controllers\Controller;
-use Seatplus\Auth\Services\GetRequiredScopes;
 use Seatplus\Eveapi\Models\RefreshToken;
 
 class StepUpController extends Controller

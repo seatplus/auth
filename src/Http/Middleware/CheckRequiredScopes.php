@@ -87,20 +87,6 @@ class CheckRequiredScopes
             ])->flatten(1)
                 ->filter()
                 ->unique()
-                //Not really sure why this is needed
-                /*->map(function ($scope_array) {
-
-                    $scopes = collect($scope_array)
-                        ->flatten()
-                        ->map(fn ($scope) => explode(',', $scope))
-                        ->flatten(1);
-
-                    if (Arr::get($scope_array, 'corporation')) {
-                        $scopes->push('esi-characters.read_corporation_roles.v1');
-                    }
-
-                    return $scopes->toArray();
-                })*/
                 ->flatten(1)
                 ->toArray(),
             'token_scopes' => $character->refresh_token->scopes ?? [],
