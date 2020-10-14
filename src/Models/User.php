@@ -110,6 +110,6 @@ class User extends Authenticatable
 
     public function application()
     {
-        return $this->morphOne(Applications::class, 'applicationable');
+        return $this->morphOne(Applications::class, 'applicationable')->whereStatus('open');
     }
 }
