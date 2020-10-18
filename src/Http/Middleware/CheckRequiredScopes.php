@@ -36,21 +36,6 @@ class CheckRequiredScopes
 {
     private User $user;
 
-    public function __construct()
-    {
-
-        /** @noinspection PhpFieldAssignmentTypeMismatchInspection */
-        $this->user = User::with(
-            'characters.alliance.ssoScopes',
-            'characters.corporation.ssoScopes',
-            'characters.application.corporation.ssoScopes',
-            'characters.application.corporation.alliance.ssoScopes',
-            'characters.refresh_token',
-            'application.corporation.ssoScopes',
-            'application.corporation.alliance.ssoScopes'
-        )->find(auth()->user()->getAuthIdentifier());
-    }
-
     /**
      * Handle an incoming request.
      *
@@ -61,9 +46,26 @@ class CheckRequiredScopes
      */
     public function handle(Request $request, Closure $next)
     {
+
+        $this->buildUser();
+
         $characters_with_missing_scopes = $this->getCharactersWithMissingScopes();
 
         return $characters_with_missing_scopes->isEmpty() ? $next($request) : $this->redirectTo($characters_with_missing_scopes);
+    }
+
+    public function buildUser() : void
+    {
+        /** @noinspection PhpFieldAssignmentTypeMismatchInspection */
+        $this->user = User::with(
+            'characters.alliance.ssoScopes',
+            'characters.corporation.ssoScopes',
+            'characters.application.corporation.ssoScopes',
+            'characters.application.corporation.alliance.ssoScopes',
+            'characters.refresh_token',
+            'application.corporation.ssoScopes',
+            'application.corporation.alliance.ssoScopes'
+        )->find(auth()->user()->getAuthIdentifier());
     }
 
     private function getCharactersWithMissingScopes(): Collection
