@@ -46,7 +46,6 @@ class CheckRequiredScopes
      */
     public function handle(Request $request, Closure $next)
     {
-
         $this->buildUser();
 
         $characters_with_missing_scopes = $this->getCharactersWithMissingScopes();
@@ -54,7 +53,7 @@ class CheckRequiredScopes
         return $characters_with_missing_scopes->isEmpty() ? $next($request) : $this->redirectTo($characters_with_missing_scopes);
     }
 
-    public function buildUser() : void
+    public function buildUser(): void
     {
         /** @noinspection PhpFieldAssignmentTypeMismatchInspection */
         $this->user = User::with(
