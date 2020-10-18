@@ -30,6 +30,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Seatplus\Eveapi\Models\Applications;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Spatie\Permission\Traits\HasRoles;
 
@@ -105,5 +106,10 @@ class User extends Authenticatable
         return $query->whereHas('characters', function (Builder $query) use ($query_string) {
             $query->where('name', 'like', '%' . $query_string . '%');
         });
+    }
+
+    public function application()
+    {
+        return $this->morphOne(Applications::class, 'applicationable')->whereStatus('open');
     }
 }
