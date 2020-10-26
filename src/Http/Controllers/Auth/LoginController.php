@@ -26,24 +26,11 @@
 
 namespace Seatplus\Auth\Http\Controllers\Auth;
 
-use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Inertia\Inertia;
 use Seatplus\Web\Http\Controllers\Controller;
 
 class LoginController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | Login Controller
-    |--------------------------------------------------------------------------
-    |
-    | This controller handles authenticating users for the application and
-    | redirecting them to your home screen. The controller uses a trait
-    | to conveniently provide its functionality to your applications.
-    |
-    */
-
-    use AuthenticatesUsers;
 
     /**
      * Where to redirect users after login.
@@ -77,5 +64,12 @@ class LoginController extends Controller
             'login_welcome'  => trans('web::auth.login_welcome'),
             'evesso_img_src' => asset('img/evesso.png'),
         ]);
+    }
+
+    public function logout()
+    {
+        auth()->logout();
+
+        return redirect('/');
     }
 }
