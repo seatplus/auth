@@ -31,6 +31,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Seatplus\Auth\Models\User;
+use Seatplus\Eveapi\Models\SsoScopes;
 
 class CheckRequiredScopes
 {
@@ -64,14 +65,25 @@ class CheckRequiredScopes
             'characters.refresh_token',
             'application.corporation.ssoScopes',
             'application.corporation.alliance.ssoScopes'
-        )->find(auth()->user()->getAuthIdentifier());
+        )->addSelect(['global_scope' => SsoScopes::global()->select('selected_scopes')])
+            ->find(auth()->user()->getAuthIdentifier());
     }
 
     private function getCharactersWithMissingScopes(): Collection
     {
 
-        // Add global required scopes
-        $global_scope = setting('global_sso_scopes');
+        // Get user level required scopes
+        $user_scopes = $this->user->characters->map(fn ($character) => collect([
+            $character->corporation->ssoScopes ?? [],
+            $character->alliance->ssoScopes ?? []
+        ])->where('type','user'))
+            ->filter(fn ($character) => $character->isNotEmpty())
+            ->map(fn ($character) => $character->map(fn($scope) => $scope->selected_scopes))
+            ->flatten()
+            ->unique()
+            ->toArray();
+
+        //dump(json_decode($this->user->global_scope));
 
         return $this->user->characters->map(fn ($character) => [
             'character' => $character,
@@ -80,7 +92,8 @@ class CheckRequiredScopes
                 'alliance_scopes'                => $character->alliance->ssoScopes->selected_scopes ?? [],
                 'character_application_corporation_scopes' => $character->application->corporation->ssoScopes->selected_scopes ?? [],
                 'character_application_alliance_scopes'    => $character->application->corporation->alliance->ssoScopes->selected_scopes ?? [],
-                'global_scopes'                  => $global_scope,
+                'global_scopes'                  => json_decode($this->user->global_scope) ?? [],
+                'user_scope'                    => $user_scopes,
                 'user_application_corporation_scopes' => $this->user->application->corporation->ssoScopes->selected_scopes ?? [],
                 'user_application_alliance_scopes'    => $this->user->application->corporation->alliance->ssoScopes->selected_scopes ?? [],
             ])->flatten(1)
