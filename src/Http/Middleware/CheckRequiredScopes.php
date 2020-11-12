@@ -75,10 +75,10 @@ class CheckRequiredScopes
         // Get user level required scopes
         $user_scopes = $this->user->characters->map(fn ($character) => collect([
             $character->corporation->ssoScopes ?? [],
-            $character->alliance->ssoScopes ?? []
-        ])->where('type','user'))
+            $character->alliance->ssoScopes ?? [],
+        ])->where('type', 'user'))
             ->filter(fn ($character) => $character->isNotEmpty())
-            ->map(fn ($character) => $character->map(fn($scope) => $scope->selected_scopes))
+            ->map(fn ($character) => $character->map(fn ($scope) => $scope->selected_scopes))
             ->flatten()
             ->unique()
             ->toArray();
