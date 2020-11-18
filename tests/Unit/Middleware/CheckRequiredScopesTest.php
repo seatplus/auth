@@ -30,7 +30,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
 use Mockery;
 use Seatplus\Auth\Http\Middleware\CheckRequiredScopes;
+use Seatplus\Auth\Models\CharacterUser;
 use Seatplus\Auth\Tests\TestCase;
+use Seatplus\Eveapi\Models\Character\CharacterAffiliation;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 use Seatplus\Eveapi\Models\RefreshToken;
@@ -177,13 +179,13 @@ class CheckRequiredScopesTest extends TestCase
     }
 
     /** @test */
-    public function it_stops_request_if_required_global_scopes_are_missing()
+    public function it_forwards_request_if_user_misses_global_scopes()
     {
         // 1. Create RefreshToken for Character
         $this->createRefreshTokenWithScopes(['a', 'b']);
 
-        // 2. create global required sso scope
-        setting(['global_sso_scopes', ['esi-characters.read_corporation_roles.v1']]);
+        // 2. create global required scope
+        SsoScopes::updateOrCreate(['type' => 'global'], ['selected_scopes' => ['c']]);
 
         // TestingTime
 
@@ -205,7 +207,7 @@ class CheckRequiredScopesTest extends TestCase
         $this->createRefreshTokenWithScopes(['a', 'b']);
 
         // 2. create global required sso scope
-        setting(['global_sso_scopes', ['a']]);
+        SsoScopes::updateOrCreate(['type' => 'global'], ['selected_scopes' => ['a']]);
 
         // TestingTime
 
@@ -214,6 +216,100 @@ class CheckRequiredScopesTest extends TestCase
         $this->mockMiddleware();
 
         //Expect 1 forward
+        $this->request->shouldReceive('forward')->times(1);
+
+        $this->middleware->handle($this->request, $this->next);
+    }
+
+    /** @test */
+    public function it_stops_request_if_user_scopes_is_missing()
+    {
+
+        // Create RefreshToken for Character
+        $this->createRefreshTokenWithScopes(['a', 'b']);
+
+        // create user corporation scope
+        $this->createCorporationSsoScope(['a'], 'user');
+
+        // to this point the middleware should pass no question asked
+
+        // Create secondary character
+        $secondary_character = Event::fakeFor(function () {
+
+            $character_user = factory(CharacterUser::class)->make();
+            $this->test_user->character_users()->save($character_user);
+
+            return CharacterInfo::find($character_user->character_id);
+        });
+
+        // test that the test user owns both characters
+        $this->assertCount(2, $this->test_user->refresh()->characters);
+
+        // test that primary and secondary character has different corporations
+        $this->assertNotEquals($this->test_character->corporation->corporation_id, $secondary_character->corporation->corporation_id);
+
+        // create refresh_token for secondary character
+        Event::fakeFor(fn ()  => factory(RefreshToken::class)->create([
+            'character_id' => $secondary_character->character_id,
+            'scopes'       => ['c'],
+        ]));
+
+        // at this point secondary character has scope c and misses scope a thus should result in an error
+
+        // TestingTime
+
+        $this->actingAs($this->test_user);
+
+        $this->mockMiddleware();
+
+        //Expect redirect
+        $this->middleware->shouldReceive('redirectTo')->times(1);
+
+        $this->middleware->handle($this->request, $this->next);
+    }
+
+    /** @test */
+    public function it_lets_request_through_if_user_scopes_is_present()
+    {
+
+        // Create RefreshToken for Character
+        $this->createRefreshTokenWithScopes(['a', 'b']);
+
+        // create user corporation scope
+        $this->createCorporationSsoScope(['a'], 'user');
+
+        // to this point the middleware should pass no question asked
+
+        // Create secondary character
+        $secondary_character = Event::fakeFor(function () {
+
+            $character_user = factory(CharacterUser::class)->make();
+            $this->test_user->character_users()->save($character_user);
+
+            return CharacterInfo::find($character_user->character_id);
+        });
+
+        // test that the test user owns both characters
+        $this->assertCount(2, $this->test_user->refresh()->characters);
+
+        // test that primary and secondary character has different corporations
+        $this->assertNotEquals($this->test_character->corporation->corporation_id, $secondary_character->corporation->corporation_id);
+
+        // create refresh_token for secondary character
+        Event::fakeFor(fn ()  => factory(RefreshToken::class)->create([
+            'character_id' => $secondary_character->character_id,
+            'scopes'       => ['a'],
+        ]));
+
+        // at this point secondary character has scope a and scope a is required, thus should result in an forward
+
+        // TestingTime
+
+        $this->actingAs($this->test_user);
+
+        $this->mockMiddleware();
+
+        //Expect redirect
         $this->request->shouldReceive('forward')->times(1);
 
         $this->middleware->handle($this->request, $this->next);
@@ -307,12 +403,13 @@ class CheckRequiredScopesTest extends TestCase
         });
     }
 
-    private function createCorporationSsoScope(array $array)
+    private function createCorporationSsoScope(array $array, string $type = 'default')
     {
         factory(SsoScopes::class)->create([
             'selected_scopes' => $array,
             'morphable_id'    => $this->test_character->corporation->corporation_id,
             'morphable_type'  => CorporationInfo::class,
+            'type' => $type
         ]);
     }
 

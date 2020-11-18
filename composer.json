@@ -29,7 +29,7 @@
         "laravel/framework": "^8.0",
         "laravel/socialite": "^5.0",
         "seatplus/eseye": "^3.0",
-        "seatplus/eveapi": "^0.4.0",
+        "seatplus/eveapi": "^0.4.4",
         "spatie/laravel-permission": "^3.0"
     },
     "require-dev": {
