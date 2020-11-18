@@ -31,6 +31,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Seatplus\Auth\Models\User;
+use Seatplus\Auth\Services\BuildCharacterScopesArray;
+use Seatplus\Auth\Services\BuildUserLevelRequiredScopes;
 use Seatplus\Eveapi\Models\SsoScopes;
 
 class CheckRequiredScopes
@@ -73,38 +75,11 @@ class CheckRequiredScopes
     {
 
         // Get user level required scopes
-        $user_scopes = $this->user->characters->map(fn ($character) => collect([
-            $character->corporation->ssoScopes ?? [],
-            $character->alliance->ssoScopes ?? []
-        ])->where('type','user'))
-            ->filter(fn ($character) => $character->isNotEmpty())
-            ->map(fn ($character) => $character->map(fn($scope) => $scope->selected_scopes))
-            ->flatten()
-            ->unique()
-            ->toArray();
+        $user_scopes = BuildUserLevelRequiredScopes::get($this->user);
 
         //dump(json_decode($this->user->global_scope));
 
-        return $this->user->characters->map(fn ($character) => [
-            'character' => $character,
-            'required_scopes' => collect([
-                'corporation_scopes'             => $character->corporation->ssoScopes->selected_scopes ?? [],
-                'alliance_scopes'                => $character->alliance->ssoScopes->selected_scopes ?? [],
-                'character_application_corporation_scopes' => $character->application->corporation->ssoScopes->selected_scopes ?? [],
-                'character_application_alliance_scopes'    => $character->application->corporation->alliance->ssoScopes->selected_scopes ?? [],
-                'global_scopes'                  => json_decode($this->user->global_scope) ?? [],
-                'user_scope'                    => $user_scopes,
-                'user_application_corporation_scopes' => $this->user->application->corporation->ssoScopes->selected_scopes ?? [],
-                'user_application_alliance_scopes'    => $this->user->application->corporation->alliance->ssoScopes->selected_scopes ?? [],
-            ])->flatten(1)
-                ->filter()
-                ->unique()
-                ->flatten(1)
-                ->toArray(),
-            'token_scopes' => $character->refresh_token->scopes ?? [],
-        ])
-            // Build missing scopes
-            ->map(fn ($character) => Arr::add($character, 'missing_scopes', array_diff(Arr::get($character, 'required_scopes'), Arr::get($character, 'token_scopes'))))
+        return $this->user->characters->map(fn ($character) => BuildCharacterScopesArray::get($character, $user_scopes))
             ->filter(fn ($character) => Arr::get($character, 'missing_scopes'));
     }
 
