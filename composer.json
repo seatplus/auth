@@ -25,11 +25,11 @@
     "minimum-stability": "alpha",
     "prefer-stable": true,
     "require": {
-        "php": "^7.4",
+        "php": "^8.0",
         "laravel/framework": "^8.0",
         "laravel/socialite": "^5.0",
         "seatplus/eseye": "^3.0",
-        "seatplus/eveapi": "^0.4.4",
+        "seatplus/eveapi": "^0.5.0",
         "spatie/laravel-permission": "^3.0"
     },
     "require-dev": {

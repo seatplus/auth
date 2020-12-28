@@ -105,7 +105,7 @@ class RoleModelTest extends TestCase
             'type' => 'allowed'
         ]);
 
-        $this->assertEquals(CorporationInfo::class, get_class($this->role->affiliations->first()->affiliatable));
+        $this->assertEquals(CorporationInfo::class, $this->role->affiliations->first()->affiliatable::class);
 
     }
 
@@ -125,7 +125,7 @@ class RoleModelTest extends TestCase
             'affiliatable_type' => CharacterInfo::class,
         ]);
 
-        $this->assertEquals(CharacterInfo::class, get_class($this->role->acl_affiliations->first()->affiliatable));
+        $this->assertEquals(CharacterInfo::class, $this->role->acl_affiliations->first()->affiliatable::class);
     }
 
     /** @test */
@@ -140,7 +140,7 @@ class RoleModelTest extends TestCase
 
         $this->assertTrue($this->role->acl_affiliations->isEmpty());
 
-        $this->assertEquals(CharacterInfo::class, get_class($this->role->moderators->first()->affiliatable));
+        $this->assertEquals(CharacterInfo::class, $this->role->moderators->first()->affiliatable::class);
     }
 
     /** @test */

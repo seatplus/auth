@@ -48,11 +48,6 @@ class UserRolesSync implements ShouldQueue
      */
     public $tries = 1;
 
-    /**
-     * @var \Seatplus\Auth\Models\User
-     */
-    private User $user;
-
     private array $character_ids;
 
     /**
@@ -72,9 +67,11 @@ class UserRolesSync implements ShouldQueue
         ];
     }
 
-    public function __construct(User $user)
+    public function __construct(/**
+     * @var \Seatplus\Auth\Models\User
+     */
+    private User $user)
     {
-        $this->user = $user;
         $this->character_ids = User::has('characters.refresh_token')
             ->with(['characters.refresh_token' => fn ($query) => $query->select('character_id')])
             ->whereId($this->user->id)

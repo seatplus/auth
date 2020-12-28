@@ -47,7 +47,7 @@ class AuthenticationServiceProvider extends ServiceProvider
         Gate::before(function ($user, $ability) {
             try {
                 return $user->hasPermissionTo('superuser') ? true : null;
-            } catch (PermissionDoesNotExist $exception) {
+            } catch (PermissionDoesNotExist) {
                 return null;
             }
         });
