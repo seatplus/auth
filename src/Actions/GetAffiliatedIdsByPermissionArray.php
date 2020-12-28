@@ -36,8 +36,6 @@ use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 
 class GetAffiliatedIdsByPermissionArray
 {
-    private $permission;
-
     /**
      * @var \Illuminate\Contracts\Auth\Authenticatable|null
      */
@@ -48,8 +46,6 @@ class GetAffiliatedIdsByPermissionArray
      */
     private $cache_key;
 
-    private string $corporation_role;
-
     /**
      * @return string
      */
@@ -58,14 +54,11 @@ class GetAffiliatedIdsByPermissionArray
         return $this->cache_key;
     }
 
-    public function __construct(string $permission, string $corporation_role = '')
+    public function __construct(private string $permission, private string $corporation_role = '')
     {
-        $this->permission = $permission;
         $this->user = auth()->user();
         $this->cache_key = sprintf('affiliated character ids by permission %s for user wit user_id: %s',
             $this->user->id, $this->permission);
-
-        $this->corporation_role = $corporation_role;
     }
 
     public function execute(): array

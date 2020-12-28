@@ -24,14 +24,15 @@
  * SOFTWARE.
  */
 
-namespace Seatplus\Auth\Tests;
+namespace Seatplus\Auth\Tests\Unit;
 
 use Faker\Factory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Socialite\Two\User as SocialiteUser;
 use Seatplus\Auth\Http\Actions\Sso\FindOrCreateUserAction;
 use Seatplus\Auth\Models\CharacterUser;
-use Seatplus\Auth\Models\User;
+use Seatplus\Auth\Tests\TestCase;
+
 
 class FindOrCreateUserActionTest extends TestCase
 {

@@ -27,7 +27,7 @@
 namespace Seatplus\Auth\Http\Controllers\Auth;
 
 use Inertia\Inertia;
-use Seatplus\Web\Http\Controllers\Controller;
+use Seatplus\Auth\Http\Controllers\Controller;
 
 class LoginController extends Controller
 {

@@ -35,7 +35,7 @@ class AclMemberTest extends TestCase
         $member = AclMember::where('user_id',$this->test_user->id)
             ->get()->first();
 
-        $this->assertEquals(User::class, get_class($member->user));
+        $this->assertEquals(User::class, $member->user::class);
 
     }
 }
