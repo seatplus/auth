@@ -57,13 +57,13 @@ class UserRolesSync implements ShouldQueue
      */
     public function middleware(): array
     {
-        $rate_limited_middleare = (new RateLimitedJobMiddleware)
+        $rate_limited_middleware = (new RateLimitedJobMiddleware)
             ->setKey(self::class)
             ->setViaCharacterId($this->user->id)
             ->setDuration(3600);
 
         return [
-            $rate_limited_middleare,
+            $rate_limited_middleware,
         ];
     }
 
