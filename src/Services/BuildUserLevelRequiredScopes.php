@@ -60,9 +60,8 @@ class BuildUserLevelRequiredScopes
             ->toArray();
     }
 
-    private static function getSelectedScopes() : array
+    private static function getSelectedScopes(): array
     {
-
         $query_result = SsoScopes::global()->select('selected_scopes')->first();
 
         return $query_result ? $query_result->selected_scopes : [];

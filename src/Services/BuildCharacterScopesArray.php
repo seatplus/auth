@@ -58,9 +58,9 @@ class BuildCharacterScopesArray
         ];
 
         $required_scopes = Arr::get($character_array, 'required_scopes');
-        $token_scopes =  Arr::get($character_array, 'token_scopes');
+        $token_scopes = Arr::get($character_array, 'token_scopes');
         $missing_scopes = collect($required_scopes)
-            ->reject(fn($required_scope) => in_array($required_scope, $token_scopes))
+            ->reject(fn ($required_scope) => in_array($required_scope, $token_scopes))
             ->toArray();
 
         return Arr::add($character_array, 'missing_scopes', $missing_scopes);
