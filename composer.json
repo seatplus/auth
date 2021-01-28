@@ -30,7 +30,7 @@
         "laravel/socialite": "^5.0",
         "seatplus/eseye": "^3.0",
         "seatplus/eveapi": "^0.5.0",
-        "spatie/laravel-permission": "^3.0"
+        "spatie/laravel-permission": "^4.0"
     },
     "require-dev": {
         "orchestra/testbench": "^6.0",
