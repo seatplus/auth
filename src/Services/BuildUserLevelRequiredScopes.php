@@ -34,7 +34,11 @@ class BuildUserLevelRequiredScopes
 {
     public static function get(User $user): array
     {
-        $user->global_scope = $user->global_scope ?? Arr::get($user->getAttributes(), 'global_scope', SsoScopes::global()->select('selected_scopes')->first());
+        $user->global_scope = $user->global_scope ?? Arr::get(
+            $user->getAttributes(),
+            'global_scope',
+            self::getSelectedScopes()
+            );
 
         return $user->characters->map(fn ($character) => collect([
             $character->corporation->ssoScopes ?? [],
@@ -47,10 +51,19 @@ class BuildUserLevelRequiredScopes
             ->concat([
                 'user_application_corporation_scopes' => $user->application->corporation->ssoScopes->selected_scopes ?? [],
                 'user_application_alliance_scopes'    => $user->application->corporation->alliance->ssoScopes->selected_scopes ?? [],
-                'global_scopes'                  => json_decode($user->global_scope) ?? [],
+                'global_scopes'                  => is_array($user->global_scope)
+                    ? $user->global_scope
+                    : (is_string($user->global_scope) ? json_decode($user->global_scope) : []),
             ])
             ->flatten()
             ->unique()
             ->toArray();
+    }
+
+    private static function getSelectedScopes(): array
+    {
+        $query_result = SsoScopes::global()->select('selected_scopes')->first();
+
+        return $query_result ? $query_result->selected_scopes : [];
     }
 }
