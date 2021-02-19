@@ -28,7 +28,6 @@ namespace Seatplus\Auth\database\factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Seatplus\Auth\Models\CharacterUser;
-use Seatplus\Auth\Models\User;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 
 class CharacterUserFactory extends Factory
