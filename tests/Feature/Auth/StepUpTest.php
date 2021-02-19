@@ -75,7 +75,7 @@ class StepUpTest extends TestCase
 
     private function createCorporationSsoScope(array $array)
     {
-        factory(SsoScopes::class)->create([
+        SsoScopes::factory()->create([
             'selected_scopes' => $array,
             'morphable_id'    => $this->test_character->corporation->corporation_id,
             'morphable_type'  => CorporationInfo::class,
@@ -85,7 +85,17 @@ class StepUpTest extends TestCase
     private function createRefreshTokenWithScopes(array $array)
     {
         Event::fakeFor(function () use ($array) {
-            factory(RefreshToken::class)->create([
+
+            if($this->test_character->refresh_token) {
+
+                $refresh_token = $this->test_character->refresh_token;
+                $refresh_token->scopes = $array;
+                $refresh_token->save();
+
+                return;
+            }
+
+            RefreshToken::factory()->create([
                 'character_id' => $this->test_character->character_id,
                 'scopes'       => $array,
             ]);

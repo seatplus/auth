@@ -24,18 +24,23 @@
  * SOFTWARE.
  */
 
-use Faker\Generator as Faker;
+namespace Seatplus\Auth\database\factories;
+
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Seatplus\Auth\Models\CharacterUser;
 use Seatplus\Auth\Models\User;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 
-$factory->define(User::class, function (Faker $faker) {
-    return [
-        'main_character_id'       => factory(CharacterInfo::class),
-        'active'                  => true,
-    ];
-});
+class CharacterUserFactory extends Factory
+{
+    protected $model = CharacterUser::class;
 
-$factory->afterCreating(User::class, function ($user, $faker) {
-    $user->character_users()->save(factory(CharacterUser::class)->make());
-});
+    public function definition()
+    {
+        return [
+            'user_id'               => $this->faker->numberBetween(90000000, 98000000),
+            'character_id'          => CharacterInfo::factory(),
+            'character_owner_hash'  => sha1($this->faker->text),
+        ];
+    }
+}

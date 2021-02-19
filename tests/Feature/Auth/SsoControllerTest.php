@@ -37,35 +37,11 @@ use Seatplus\Eveapi\Models\RefreshToken;
 
 class SsoControllerTest extends TestCase
 {
-    /**
-     * @var \Illuminate\Database\Eloquent\Collection|\Illuminate\Database\Eloquent\Model
-     */
-    private $character;
-
-    /**
-     * @var \Illuminate\Database\Eloquent\Collection|\Illuminate\Database\Eloquent\Model
-     */
-    private $refresh_token;
-
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        Event::fakeFor(function () {
-            $this->refresh_token = factory(RefreshToken::class)->create([
-                'character_id' => $this->test_user->character_users->first()->character_id,
-            ]);
-
-            $this->character = $this->test_user->characters->first();
-        });
-
-        $this->test_user = $this->test_user->refresh();
-    }
 
     /** @test */
     public function it_works_for_non_authed_users()
     {
-        $character_id = factory(CharacterInfo::class)->make()->character_id;
+        $character_id = CharacterInfo::factory()->make()->character_id;
 
         $abstractUser = $this->createSocialiteUser($character_id);
 
@@ -91,7 +67,7 @@ class SsoControllerTest extends TestCase
     /** @test */
     public function it_returns_error_if_scopes_changed()
     {
-        $character_id = Event::fakeFor(fn () => factory(CharacterInfo::class)->make()->character_id);
+        $character_id = Event::fakeFor(fn () => CharacterInfo::factory()->make()->character_id);
 
         $abstractUser = $this->createSocialiteUser($character_id);
 
@@ -119,7 +95,7 @@ class SsoControllerTest extends TestCase
     public function one_can_add_another_character()
     {
         // Setup character user
-        $character_id = Event::fakeFor(fn () => factory(CharacterInfo::class)->make()->character_id);
+        $character_id = Event::fakeFor(fn () => CharacterInfo::factory()->make()->character_id);
 
         $abstractUser = $this->createSocialiteUser($character_id, 'refresh_token', implode(' ', config('eveapi.scopes.minimum')));
 

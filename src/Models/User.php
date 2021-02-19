@@ -27,16 +27,23 @@
 namespace Seatplus\Auth\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Seatplus\Eveapi\Models\Applications;
+use Seatplus\Auth\database\factories\UserFactory;
+use Seatplus\Eveapi\Models\Application;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasRoles;
+    use HasRoles, HasFactory;
+
+    protected static function newFactory()
+    {
+        return UserFactory::new();
+    }
 
     /**
      * The primary key associated with the table.
@@ -110,6 +117,6 @@ class User extends Authenticatable
 
     public function application()
     {
-        return $this->morphOne(Applications::class, 'applicationable')->whereStatus('open');
+        return $this->morphOne(Application::class, 'applicationable')->whereStatus('open');
     }
 }

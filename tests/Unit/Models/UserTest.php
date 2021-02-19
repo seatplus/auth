@@ -43,7 +43,7 @@ class UserTest extends TestCase
     /** @test */
     public function it_has_main_character_relationship()
     {
-        $test_user = factory(User::class)->create();
+        $test_user = User::factory()->create();
 
         $this->assertInstanceOf(CharacterInfo::class, $test_user->main_character);
     }
@@ -51,7 +51,7 @@ class UserTest extends TestCase
     /** @test */
     public function it_has_characters_relationship()
     {
-        $test_user = factory(User::class)->create();
+        $test_user = User::factory()->create();
 
         $this->assertDatabaseHas('character_users', [
             'character_id' => $test_user->character_users->first()->character_id,
@@ -67,7 +67,7 @@ class UserTest extends TestCase
     /** @test */
     public function it_has_search_scope()
     {
-        $test_user = factory(User::class)->create();
+        $test_user = User::factory()->create();
 
         $character = $test_user->characters->first();
 

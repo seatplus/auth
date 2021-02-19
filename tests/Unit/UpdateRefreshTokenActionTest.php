@@ -85,7 +85,7 @@ class UpdateRefreshTokenActionTest extends TestCase
         $eve_data = $this->createSocialiteUser($this->test_user->id);
 
         Event::fakeFor(function () use ($eve_data) {
-            factory(RefreshToken::class)->create([
+            RefreshToken::factory()->create([
                 'character_id'  => $this->test_user->id,
                 'refresh_token' => 'refresh_token',
             ]);
