@@ -236,7 +236,7 @@ class CheckRequiredScopesTest extends TestCase
         // Create secondary character
         $secondary_character = Event::fakeFor(function () {
 
-            $character_user = factory(CharacterUser::class)->make();
+            $character_user = CharacterUser::factory()->make();
             $this->test_user->character_users()->save($character_user);
 
             return CharacterInfo::find($character_user->character_id);
@@ -249,10 +249,11 @@ class CheckRequiredScopesTest extends TestCase
         $this->assertNotEquals($this->test_character->corporation->corporation_id, $secondary_character->corporation->corporation_id);
 
         // create refresh_token for secondary character
-        Event::fakeFor(fn ()  => factory(RefreshToken::class)->create([
-            'character_id' => $secondary_character->character_id,
-            'scopes'       => ['c'],
-        ]));
+        Event::fakeFor(function () use ($secondary_character) {
+            $refresh_token = $secondary_character->refresh_token;
+            $refresh_token->scopes = ['c'];
+            $refresh_token->save();
+        });
 
         // at this point secondary character has scope c and misses scope a thus should result in an error
 
@@ -283,7 +284,7 @@ class CheckRequiredScopesTest extends TestCase
         // Create secondary character
         $secondary_character = Event::fakeFor(function () {
 
-            $character_user = factory(CharacterUser::class)->make();
+            $character_user = CharacterUser::factory()->make();
             $this->test_user->character_users()->save($character_user);
 
             return CharacterInfo::find($character_user->character_id);
@@ -295,11 +296,12 @@ class CheckRequiredScopesTest extends TestCase
         // test that primary and secondary character has different corporations
         $this->assertNotEquals($this->test_character->corporation->corporation_id, $secondary_character->corporation->corporation_id);
 
-        // create refresh_token for secondary character
-        Event::fakeFor(fn ()  => factory(RefreshToken::class)->create([
-            'character_id' => $secondary_character->character_id,
-            'scopes'       => ['a'],
-        ]));
+        // update refresh_token for secondary character
+        Event::fakeFor(function () use ($secondary_character) {
+            $refresh_token = $secondary_character->refresh_token;
+            $refresh_token->scopes = ['a'];
+            $refresh_token->save();
+        });
 
         // at this point secondary character has scope a and scope a is required, thus should result in an forward
 
@@ -396,7 +398,18 @@ class CheckRequiredScopesTest extends TestCase
     private function createRefreshTokenWithScopes(array $array)
     {
         Event::fakeFor(function () use ($array) {
-            factory(RefreshToken::class)->create([
+
+            if($this->test_character->refresh_token) {
+
+                $refresh_token = $this->test_character->refresh_token;
+                $refresh_token->scopes = $array;
+                $refresh_token->save();
+
+                return;
+            }
+
+
+            RefreshToken::factory()->create([
                 'character_id' => $this->test_character->character_id,
                 'scopes'       => $array,
             ]);
@@ -405,7 +418,7 @@ class CheckRequiredScopesTest extends TestCase
 
     private function createCorporationSsoScope(array $array, string $type = 'default')
     {
-        factory(SsoScopes::class)->create([
+        SsoScopes::factory()->create([
             'selected_scopes' => $array,
             'morphable_id'    => $this->test_character->corporation->corporation_id,
             'morphable_type'  => CorporationInfo::class,

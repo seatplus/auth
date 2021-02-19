@@ -102,7 +102,7 @@ class FindOrCreateUserActionTest extends TestCase
 
         // add 3 characters to test_user
         $this->test_user->character_users()->createMany(
-            factory(CharacterUser::class, 3)->make()->toArray()
+            CharacterUser::factory()->count(3)->make()->toArray()
         );
 
         $this->assertEquals(4, $this->test_user->character_users->count());
@@ -137,7 +137,7 @@ class FindOrCreateUserActionTest extends TestCase
         $this->assertEquals($this->test_user->character_users->count(), 1);
 
         // 2. create character_users entry
-        /*factory(CharacterUser::class)->create([
+        /*CharacterUser::factory()->create([
             'user_id' => $this->test_user->id,
             'character_id' => $this->test_user->id,
             'character_owner_hash' => $this->test_user->character_owner_hash
@@ -172,7 +172,7 @@ class FindOrCreateUserActionTest extends TestCase
     {
 
         // 1. Create secondary character
-        $secondary_user = factory(CharacterUser::class)->make();
+        $secondary_user = CharacterUser::factory()->make();
 
         // 2. assign secondary user to test_user
         $this->test_user->character_users()->save($secondary_user);
@@ -222,7 +222,7 @@ class FindOrCreateUserActionTest extends TestCase
     public function it_returns_authed_user()
     {
         // 1. Create secondary character
-        $secondary_user = factory(CharacterUser::class)->make();
+        $secondary_user = CharacterUser::factory()->make();
 
         $socialiteUser = $this->createSocialUserMock(
             $secondary_user->character_id,

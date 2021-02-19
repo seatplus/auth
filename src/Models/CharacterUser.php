@@ -26,11 +26,20 @@
 
 namespace Seatplus\Auth\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Seatplus\Auth\database\factories\CharacterUserFactory;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 
 class CharacterUser extends Model
 {
+    use HasFactory;
+
+    protected static function newFactory()
+    {
+        return CharacterUserFactory::new();
+    }
+
     /**
      * @var bool
      */

@@ -49,9 +49,9 @@ class SeatPlusRolesTest extends TestCase
 
         Event::fake();
 
-        $this->secondary_character = factory(CharacterInfo::class)->create();
+        $this->secondary_character = CharacterInfo::factory()->create();
 
-        $this->tertiary_character = factory(CharacterInfo::class)->create();
+        $this->tertiary_character = CharacterInfo::factory()->create();
 
         $this->role = Role::create(['name' => 'derp']);
     }
@@ -106,7 +106,7 @@ class SeatPlusRolesTest extends TestCase
     public function characterIsInCharacterAllowedAffiliationTest()
     {
 
-        $secondary_character = factory(CharacterInfo::class)->create();
+        $secondary_character = CharacterInfo::factory()->create();
 
         $this->role->affiliations()->createMany([
             [

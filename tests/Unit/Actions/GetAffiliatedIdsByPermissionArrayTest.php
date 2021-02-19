@@ -68,9 +68,9 @@ class GetAffiliatedIdsByPermissionArrayTest extends TestCase
 
         Event::fakeFor(function () {
 
-            $this->secondary_character = factory(CharacterInfo::class)->create();
+            $this->secondary_character = CharacterInfo::factory()->create();
 
-            $this->tertiary_character = factory(CharacterInfo::class)->create();
+            $this->tertiary_character = CharacterInfo::factory()->create();
         });
 
     }
@@ -399,7 +399,7 @@ class GetAffiliatedIdsByPermissionArrayTest extends TestCase
         ]);
 
         // Create director role for corporation
-        $character_role = factory(CharacterRole::class)->make([
+        $character_role = CharacterRole::factory()->make([
             'character_id' => $this->test_character->character_id,
             'roles' => ['Contract_Manager', 'Director']
         ]);

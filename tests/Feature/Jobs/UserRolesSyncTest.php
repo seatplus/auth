@@ -36,14 +36,6 @@ class UserRolesSyncTest extends TestCase
 
         $this->role = Role::create(['name' => 'derp']);
 
-
-        Event::fakeFor(function () {
-
-            factory(RefreshToken::class)->create([
-                'character_id' => $this->test_character->character_id
-            ]);
-        });
-
         $this->test_user = $this->test_user->refresh();
 
         $this->job = new UserRolesSync($this->test_user);
