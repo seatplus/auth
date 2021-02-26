@@ -8216,25 +8216,26 @@
         },
         {
             "name": "spatie/phpunit-watcher",
-            "version": "1.23.1",
+            "version": "1.23.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/spatie/phpunit-watcher.git",
-                "reference": "0c70d569658a1cad9a6869716a4351d2ccfec4d1"
+                "reference": "548be41abab87336ef95cef5bf5cbd564bce5c26"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/spatie/phpunit-watcher/zipball/0c70d569658a1cad9a6869716a4351d2ccfec4d1",
-                "reference": "0c70d569658a1cad9a6869716a4351d2ccfec4d1",
+                "url": "https://api.github.com/repos/spatie/phpunit-watcher/zipball/548be41abab87336ef95cef5bf5cbd564bce5c26",
+                "reference": "548be41abab87336ef95cef5bf5cbd564bce5c26",
                 "shasum": ""
             },
             "require": {
-                "clue/stdio-react": "^2.0",
-                "jolicode/jolinotif": "^2.0",
+                "clue/stdio-react": "^2.4",
+                "jolicode/jolinotif": "^2.2",
                 "php": "^7.2 | ^8.0",
-                "symfony/console": "^5.0",
-                "symfony/process": "^5.0",
-                "symfony/yaml": "^5.0",
+                "symfony/console": "^5.2",
+                "symfony/finder": "^5.2",
+                "symfony/process": "^5.2",
+                "symfony/yaml": "^5.2",
                 "yosymfony/resource-watcher": "^2.0"
             },
             "conflict": {
@@ -8272,9 +8273,9 @@
             ],
             "support": {
                 "issues": "https://github.com/spatie/phpunit-watcher/issues",
-                "source": "https://github.com/spatie/phpunit-watcher/tree/1.23.1"
+                "source": "https://github.com/spatie/phpunit-watcher/tree/1.23.2"
             },
-            "time": "2020-10-31T17:47:29+00:00"
+            "time": "2021-02-26T08:00:42+00:00"
         },
         {
             "name": "spatie/ray",
