@@ -36,7 +36,7 @@ use Seatplus\Eveapi\Models\Character\CharacterAffiliation;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\Character\CharacterRole;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
-use Seatplus\Eveapi\Tests\Unit\Actions\Jobs\Alliance\AllianceInfoActionTest;
+use Seatplus\Eveapi\Tests\Unit\Services\Jobs\Alliance\AllianceInfoActionTest;
 
 class GetAffiliatedIdsByPermissionArrayTest extends TestCase
 {
