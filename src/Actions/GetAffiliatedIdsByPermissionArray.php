@@ -126,6 +126,7 @@ class GetAffiliatedIdsByPermissionArray
     private function buildOwnedIds(): Collection
     {
         //$this->user->characters->pluck('character_id');
+        // TODO: optimize and load user initially with necessairy relations
 
         return User::whereId($this->user->getAuthIdentifier())
             ->with('characters.roles', 'characters.corporation')
