@@ -27,7 +27,6 @@
 namespace Seatplus\Auth\Actions;
 
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Seatplus\Auth\Models\User;
@@ -152,7 +151,7 @@ class GetAffiliatedIdsByPermissionArray
         $roles = explode('|', $this->corporation_role);
 
         foreach ($roles as $role) {
-            if($character->roles->hasRole('roles', Str::ucfirst($role))) {
+            if ($character->roles->hasRole('roles', Str::ucfirst($role))) {
                 return $character->corporation->corporation_id;
             }
         }
