@@ -148,6 +148,14 @@ class GetAffiliatedIdsByPermissionArray
             return null;
         }
 
-        return $character->roles->hasRole('roles', Str::ucfirst($this->corporation_role)) ? $character->corporation->corporation_id : null;
+        $roles = explode('|', $this->corporation_role);
+
+        foreach ($roles as $role) {
+            if ($character->roles->hasRole('roles', Str::ucfirst($role))) {
+                return $character->corporation->corporation_id;
+            }
+        }
+
+        return null;
     }
 }
