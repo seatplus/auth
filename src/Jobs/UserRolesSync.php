@@ -28,6 +28,7 @@ namespace Seatplus\Auth\Jobs;
 
 use Exception;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -35,9 +36,8 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Seatplus\Auth\Models\Permissions\Role;
 use Seatplus\Auth\Models\User;
-use Seatplus\Eveapi\Jobs\Middleware\RateLimitedJobMiddleware;
 
-class UserRolesSync implements ShouldQueue
+class UserRolesSync implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -51,27 +51,25 @@ class UserRolesSync implements ShouldQueue
     private array $character_ids;
 
     /**
-     * Get the middleware the job should pass through.
+     * The unique ID of the job.
      *
-     * @return array
+     * @return string
      */
-    public function middleware(): array
+    public function uniqueId()
     {
-        $rate_limited_middleware = (new RateLimitedJobMiddleware)
-            ->setKey(self::class)
-            ->setViaCharacterId($this->user->id)
-            ->setDuration(3600);
-
-        return [
-            $rate_limited_middleware,
-        ];
+        return implode(', ', $this->tags());
     }
 
-    public function __construct(/**
-     * @var \Seatplus\Auth\Models\User
+    /**
+     * The number of seconds after which the job's unique lock will be released.
+     *
+     * @var int
      */
-    private User $user)
-    {
+    public $uniqueFor = 3600;
+
+    public function __construct(
+        private User $user
+    ) {
         $this->character_ids = User::has('characters.refresh_token')
             ->with(['characters.refresh_token' => fn ($query) => $query->select('character_id')])
             ->whereId($this->user->id)
