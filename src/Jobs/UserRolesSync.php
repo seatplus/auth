@@ -57,7 +57,7 @@ class UserRolesSync implements ShouldQueue, ShouldBeUnique
      */
     public function uniqueId()
     {
-        return implode(', ',$this->tags());
+        return implode(', ', $this->tags());
     }
 
     /**
@@ -69,8 +69,7 @@ class UserRolesSync implements ShouldQueue, ShouldBeUnique
 
     public function __construct(
         private User $user
-    )
-    {
+    ) {
         $this->character_ids = User::has('characters.refresh_token')
             ->with(['characters.refresh_token' => fn ($query) => $query->select('character_id')])
             ->whereId($this->user->id)
