@@ -1,53 +1,53 @@
 {
-    "name": "seatplus/auth",
-    "description": "SeAT plus package that handles authentication agnostic to SeAT plus usage as pure API or Web",
-    "type": "seatplus-package",
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Herpaderp Aldent",
-            "email": "felix.a.huber@gmx.net"
-        }
-    ],
-    "autoload": {
-        "psr-4": {
-            "Seatplus\\Auth\\": "src/"
-        },
-        "files": [
-            "src/Helpers/helpers.php"
-        ]
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Seatplus\\Auth\\Tests\\": "tests/"
-        }
-    },
-    "minimum-stability": "alpha",
-    "prefer-stable": true,
-    "require": {
-        "php": "^8.0",
-        "laravel/framework": "^8.0",
-        "laravel/socialite": "^5.0",
-        "seatplus/eseye": "^3.0",
-        "seatplus/eveapi": "^0.8.5",
-        "spatie/laravel-permission": "^4.0"
-    },
-    "require-dev": {
-      "orchestra/testbench": "^6.10",
-      "nunomaduro/collision": "^5.3",
-      "spatie/phpunit-watcher": "^1.11",
-      "brianium/paratest": "^6.2",
-      "laravel/legacy-factories": "^1.0"
-    },
-    "extra": {
-        "laravel": {
-            "providers": [
-                "Seatplus\\Auth\\AuthenticationServiceProvider"
-            ]
-        }
-    },
-    "scripts": {
-      "watch": "vendor/bin/phpunit-watcher watch --no-logging",
-      "parallel": "vendor/bin/testbench package:test --parallel --no-coverage"
+  "name": "seatplus/auth",
+  "description": "SeAT plus package that handles authentication agnostic to SeAT plus usage as pure API or Web",
+  "type": "seatplus-package",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Herpaderp Aldent",
+      "email": "felix.a.huber@gmx.net"
     }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Seatplus\\Auth\\": "src/"
+    },
+    "files": [
+      "src/Helpers/helpers.php"
+    ]
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Seatplus\\Auth\\Tests\\": "tests/"
+    }
+  },
+  "minimum-stability": "alpha",
+  "prefer-stable": true,
+  "require": {
+    "php": "^8.0",
+    "laravel/framework": "^8.0",
+    "laravel/socialite": "^5.0",
+    "seatplus/eseye": "^3.0",
+    "seatplus/eveapi": "^0.8.9",
+    "spatie/laravel-permission": "^4.0"
+  },
+  "require-dev": {
+    "orchestra/testbench": "^6.10",
+    "nunomaduro/collision": "^5.3",
+    "spatie/phpunit-watcher": "^1.11",
+    "brianium/paratest": "^6.2",
+    "laravel/legacy-factories": "^1.0"
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Seatplus\\Auth\\AuthenticationServiceProvider"
+      ]
+    }
+  },
+  "scripts": {
+    "watch": "vendor/bin/phpunit-watcher watch --no-logging",
+    "parallel": "vendor/bin/testbench package:test --parallel --no-coverage"
+  }
 }
