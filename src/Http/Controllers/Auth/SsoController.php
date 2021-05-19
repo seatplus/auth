@@ -31,6 +31,7 @@ use Laravel\Socialite\Two\User as EveData;
 use Seatplus\Auth\Http\Actions\Sso\FindOrCreateUserAction;
 use Seatplus\Auth\Http\Actions\Sso\UpdateRefreshTokenAction;
 use Seatplus\Auth\Http\Controllers\Controller;
+use Seatplus\Auth\Jobs\UserRolesSync;
 use Seatplus\Auth\Models\User;
 use Seatplus\Auth\Services\GetRequiredScopes;
 
@@ -106,6 +107,8 @@ class SsoController extends Controller
         }
 
         session()->flash('success', 'Character added/updated successfully');
+
+        UserRolesSync::dispatch($user)->onQueue('high');
 
         return redirect()->intended();
     }
