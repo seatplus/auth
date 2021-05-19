@@ -33,7 +33,6 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Seatplus\Auth\Models\User;
-use Seatplus\Eveapi\Jobs\Middleware\RedisFunnelMiddleware;
 
 class DispatchUserRoleSync implements ShouldQueue, ShouldBeUnique
 {
