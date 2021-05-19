@@ -27,6 +27,7 @@
 namespace Seatplus\Auth\Jobs;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -34,7 +35,7 @@ use Illuminate\Queue\SerializesModels;
 use Seatplus\Auth\Models\User;
 use Seatplus\Eveapi\Jobs\Middleware\RedisFunnelMiddleware;
 
-class DispatchUserRoleSync implements ShouldQueue
+class DispatchUserRoleSync implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -44,18 +45,6 @@ class DispatchUserRoleSync implements ShouldQueue
      * @var int
      */
     public $tries = 1;
-
-    /**
-     * Get the middleware the job should pass through.
-     *
-     * @return array
-     */
-    public function middleware(): array
-    {
-        return [
-            new RedisFunnelMiddleware,
-        ];
-    }
 
     /**
      * Assign this job a tag so that Horizon can categorize and allow
