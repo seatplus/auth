@@ -123,6 +123,7 @@ class User extends Authenticatable
     public function changeMainCharacter(int $character_id)
     {
         $this->main_character_id = $character_id;
+
         return $this->save();
     }
 }
