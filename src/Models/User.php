@@ -119,4 +119,10 @@ class User extends Authenticatable
     {
         return $this->morphOne(Application::class, 'applicationable')->whereStatus('open');
     }
+
+    public function changeMainCharacter(int $character_id)
+    {
+        $this->main_character_id = $character_id;
+        return $this->save();
+    }
 }

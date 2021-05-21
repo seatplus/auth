@@ -28,6 +28,7 @@ use Illuminate\Support\Facades\Route;
 use Seatplus\Auth\Http\Controllers\Auth\LoginController;
 use Seatplus\Auth\Http\Controllers\Auth\SsoController;
 use Seatplus\Auth\Http\Controllers\Auth\StepUpController;
+use Seatplus\Auth\Http\Controllers\MainCharacterController;
 
 Route::prefix('auth')
     ->middleware('web')
@@ -43,4 +44,8 @@ Route::prefix('auth')
         Route::get('/eve/sso/{character_id}/step_up', StepUpController::class)->name('auth.eve.step_up');
 
         Route::get('/eve/callback', [SsoController::class, 'handleProviderCallback'])->name('auth.eve.callback');
+
+        // MainCharacter
+        Route::post('main_character/change', [MainCharacterController::class, 'change'])
+            ->name('change.main_character');
     });
