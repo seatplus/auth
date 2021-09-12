@@ -26,7 +26,6 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
-use Mockery;
 use Seatplus\Auth\Http\Middleware\CheckRequiredScopes;
 use Seatplus\Auth\Models\CharacterUser;
 use Seatplus\Auth\Tests\TestCase;

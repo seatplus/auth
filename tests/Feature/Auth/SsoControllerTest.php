@@ -29,7 +29,6 @@ use Illuminate\Support\Facades\Queue;
 use Laravel\Socialite\Contracts\Provider;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\User as SocialiteUser;
-use Mockery;
 use Seatplus\Auth\Jobs\UserRolesSync;
 use Seatplus\Auth\Tests\TestCase;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
