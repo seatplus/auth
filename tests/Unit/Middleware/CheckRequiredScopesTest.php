@@ -28,13 +28,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
 use Seatplus\Auth\Http\Middleware\CheckRequiredScopes;
 use Seatplus\Auth\Models\CharacterUser;
-use Seatplus\Auth\Tests\TestCase;
-use Seatplus\Eveapi\Models\Character\CharacterAffiliation;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 use Seatplus\Eveapi\Models\RefreshToken;
 use Seatplus\Eveapi\Models\SsoScopes;
-
 
 beforeEach(function () {
     //test()->actingAs(test()->test_user);

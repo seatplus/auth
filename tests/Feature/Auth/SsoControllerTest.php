@@ -30,10 +30,7 @@ use Laravel\Socialite\Contracts\Provider;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\User as SocialiteUser;
 use Seatplus\Auth\Jobs\UserRolesSync;
-use Seatplus\Auth\Tests\TestCase;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
-use Seatplus\Eveapi\Models\RefreshToken;
-
 
 it('works for non authed users', function () {
     $character_id = CharacterInfo::factory()->make()->character_id;

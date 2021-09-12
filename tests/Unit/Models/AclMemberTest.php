@@ -4,8 +4,6 @@
 use Seatplus\Auth\Models\AccessControl\AclMember;
 use Seatplus\Auth\Models\Permissions\Role;
 use Seatplus\Auth\Models\User;
-use Seatplus\Auth\Tests\TestCase;
-
 
 beforeEach(function () {
     test()->role = Role::create(['name' => 'derp']);

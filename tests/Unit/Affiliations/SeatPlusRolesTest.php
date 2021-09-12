@@ -25,14 +25,10 @@
  */
 
 use Illuminate\Support\Facades\Event;
-use Seatplus\Auth\Models\Permissions\Affiliation;
 use Seatplus\Auth\Models\Permissions\Role;
-use Seatplus\Auth\Tests\TestCase;
 use Seatplus\Eveapi\Models\Alliance\AllianceInfo;
-use Seatplus\Eveapi\Models\Character\CharacterAffiliation;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
-
 
 beforeEach(function () {
     Event::fake();

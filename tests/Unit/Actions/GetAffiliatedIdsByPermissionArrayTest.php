@@ -28,14 +28,10 @@ use Illuminate\Support\Facades\Event;
 use Seatplus\Auth\Actions\GetAffiliatedIdsByPermissionArray;
 use Seatplus\Auth\Models\Permissions\Permission;
 use Seatplus\Auth\Models\Permissions\Role;
-use Seatplus\Auth\Tests\TestCase;
 use Seatplus\Eveapi\Models\Alliance\AllianceInfo;
-use Seatplus\Eveapi\Models\Character\CharacterAffiliation;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\Character\CharacterRole;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
-use Seatplus\Eveapi\Tests\Unit\Services\Jobs\Alliance\AllianceInfoActionTest;
-
 
 beforeEach(function () {
     test()->role = Role::create(['name' => 'writer']);

@@ -27,10 +27,8 @@
 use Seatplus\Auth\Models\Permissions\Affiliation;
 use Seatplus\Auth\Models\Permissions\Permission;
 use Seatplus\Auth\Models\Permissions\Role;
-use Seatplus\Auth\Tests\TestCase;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
-
 
 beforeEach(function () {
     test()->role = Role::create(['name' => 'derp']);

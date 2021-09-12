@@ -1,19 +1,14 @@
 <?php
 
 
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
 use Seatplus\Auth\Jobs\DispatchUserRoleSync;
 use Seatplus\Auth\Jobs\UserRolesSync;
-use Seatplus\Auth\Models\AccessControl\AclMember;
 use Seatplus\Auth\Models\Permissions\Affiliation;
 use Seatplus\Auth\Models\Permissions\Role;
 use Seatplus\Auth\Models\User;
-use Seatplus\Auth\Tests\TestCase;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\RefreshToken;
-
 
 beforeEach(function () {
     test()->role = Role::create(['name' => 'derp']);

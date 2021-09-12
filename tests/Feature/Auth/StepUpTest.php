@@ -27,12 +27,9 @@
 use Illuminate\Support\Facades\Event;
 use Laravel\Socialite\Contracts\Factory;
 use Laravel\Socialite\Facades\Socialite;
-use Seatplus\Auth\Tests\TestCase;
-use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 use Seatplus\Eveapi\Models\RefreshToken;
 use Seatplus\Eveapi\Models\SsoScopes;
-
 
 beforeEach(function () {
     Event::fake();

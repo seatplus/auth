@@ -2,8 +2,6 @@
 
 
 use Seatplus\Auth\Models\CharacterUser;
-use Seatplus\Auth\Tests\TestCase;
-
 
 test('one can change main character', function () {
 

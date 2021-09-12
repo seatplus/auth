@@ -29,7 +29,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Socialite\Two\User as SocialiteUser;
 use Seatplus\Auth\Http\Actions\Sso\FindOrCreateUserAction;
 use Seatplus\Auth\Models\CharacterUser;
-use Seatplus\Auth\Tests\TestCase;
 
 uses(RefreshDatabase::class);
 
