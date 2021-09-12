@@ -27,10 +27,12 @@
 namespace Seatplus\Auth\Tests\Feature\Auth;
 
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Queue;
 use Laravel\Socialite\Contracts\Provider;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\User as SocialiteUser;
 use Mockery;
+use Seatplus\Auth\Jobs\UserRolesSync;
 use Seatplus\Auth\Tests\TestCase;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\RefreshToken;
@@ -56,7 +58,7 @@ class SsoControllerTest extends TestCase
 
         Event::fakeFor(function () {
             $response = $this->get(route('auth.eve.callback'))
-                ->assertRedirect();
+               ->assertRedirect();
         });
 
         $this->assertDatabaseHas('refresh_tokens', [
@@ -113,14 +115,22 @@ class SsoControllerTest extends TestCase
             'rurl'       => '/home',
         ]);
 
+        // assert no UserRolesSync job has been dispatched
+        Queue::assertNothingPushed();
+
         $result = $this->get(route('auth.eve.callback'));
 
+        // assert no UserRolesSync job has been dispatched
+        Queue::assertPushedOn('high', UserRolesSync::class);
+
+        // assert that no error is present
         $this->assertNull(session('error'));
 
         $this->assertEquals(
             'Character added/updated successfully',
             session('success')
         );
+
     }
 
     private function createSocialiteUser($character_id, $refresh_token = 'refresh_token', $scopes = '1 2', $token = 'qq3dpeTMpDkjNasdasdewva3Be658eVVkox_1Ikodc')

@@ -24,28 +24,29 @@
  * SOFTWARE.
  */
 
-use Illuminate\Support\Facades\Route;
-use Seatplus\Auth\Http\Controllers\Auth\LoginController;
-use Seatplus\Auth\Http\Controllers\Auth\SsoController;
-use Seatplus\Auth\Http\Controllers\Auth\StepUpController;
-use Seatplus\Auth\Http\Controllers\MainCharacterController;
+namespace Seatplus\Auth\Http\Controllers;
 
-Route::prefix('auth')
-    ->middleware('web')
-    ->group(function () {
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
+use Seatplus\Auth\Models\User;
 
-        // Auth
-        Route::get('login', [LoginController::class, 'showLoginForm'])->name('auth.login');
+class MainCharacterController extends Controller
+{
+    public function change(Request $request)
+    {
+        $request->validate(['character_id' => ['required', 'exists:character_infos,character_id']]);
 
-        Route::get('logout', [LoginController::class, 'logout'])->name('auth.logout');
+        $character_id = $request->get('character_id');
 
-        // SSO
-        Route::get('/eve/sso/', [SsoController::class, 'redirectToProvider'])->name('auth.eve');
-        Route::get('/eve/sso/{character_id}/step_up', StepUpController::class)->name('auth.eve.step_up');
+        $user = User::whereHas('character_users', fn (Builder $query) => $query->whereCharacterId($character_id))
+            ->firstWhere('id', auth()->user()->getAuthIdentifier());
 
-        Route::get('/eve/callback', [SsoController::class, 'handleProviderCallback'])->name('auth.eve.callback');
+        if (is_null($user)) {
+            return response('Unauthorized: supplied character_id does not belong to the current user', 401);
+        }
 
-        // MainCharacter
-        Route::post('main_character/change', [MainCharacterController::class, 'change'])
-            ->name('change.main_character');
-    });
+        $user->changeMainCharacter($character_id);
+
+        return back();
+    }
+}
