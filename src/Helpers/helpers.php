@@ -31,10 +31,8 @@ if (! function_exists('getAffiliatedIdsByClass')) {
     /**
      * A helper to get all affiliated Characters.
      *
-     * @param string $class
-     *
-     * @param string $role
-     *
+     * @param  string  $class
+     * @param  string  $role
      * @return array
      */
     function getAffiliatedIdsByClass(string $class, string $role = ''): array
@@ -50,10 +48,8 @@ if (! function_exists('getAffiliatedIdsByPermission')) {
     /**
      * A helper to get all affiliated Characters.
      *
-     * @param string $class
-     *
-     * @param string $role
-     *
+     * @param  string  $class
+     * @param  string  $role
      * @return array
      */
     function getAffiliatedIdsByPermission(string $permission, string $role = ''): array
