@@ -29,7 +29,7 @@ it('gives automatic role', function () {
     test()->role->update(['type' => 'automatic']);
 
     //assure that role is of type auto
-    test()->assertEquals('automatic', test()->role->type);
+    expect(test()->role->type)->toEqual('automatic');
 
     // First create acl affiliation with user
     test()->role->acl_affiliations()->create([
@@ -37,13 +37,13 @@ it('gives automatic role', function () {
         'affiliatable_type' => CharacterInfo::class,
     ]);
 
-    test()->assertTrue(test()->role->members->isEmpty());
+    expect(test()->role->members->isEmpty())->toBeTrue();
 
     test()->job->handle();
 
-    test()->assertFalse(test()->role->refresh()->members->isEmpty());
+    expect(test()->role->refresh()->members->isEmpty())->toBeFalse();
 
-    test()->assertTrue(test()->test_user->hasRole('derp'));
+    expect(test()->test_user->hasRole('derp'))->toBeTrue();
 });
 
 it('removes automatic role', function () {
@@ -56,7 +56,7 @@ it('removes automatic role', function () {
     $job = new UserRolesSync(test()->test_user->refresh());
     $job->handle();
 
-    test()->assertFalse(test()->test_user->hasRole('derp'));
+    expect(test()->test_user->hasRole('derp'))->toBeFalse();
 
 });
 
@@ -65,7 +65,7 @@ it('adds membership for paused user', function () {
     test()->role->update(['type' => 'on-request']);
 
     //assure that role is of type auto
-    test()->assertEquals('on-request', test()->role->type);
+    expect(test()->role->type)->toEqual('on-request');
 
     // First create acl affiliation with user
     test()->role->acl_affiliations()->create([
@@ -79,11 +79,11 @@ it('adds membership for paused user', function () {
         'status' => 'paused'
     ]);
 
-    test()->assertTrue(test()->role->members->isEmpty());
+    expect(test()->role->members->isEmpty())->toBeTrue();
 
     test()->job->handle();
 
-    test()->assertFalse(test()->role->refresh()->members->isEmpty());
+    expect(test()->role->refresh()->members->isEmpty())->toBeFalse();
 });
 
 it('removes membership if refresh token is removed', function () {
@@ -91,7 +91,7 @@ it('removes membership if refresh token is removed', function () {
     test()->role->update(['type' => 'on-request']);
 
     //assure that role is of type auto
-    test()->assertEquals('on-request', test()->role->type);
+    expect(test()->role->type)->toEqual('on-request');
 
     // First create acl affiliation with user
     test()->role->acl_affiliations()->create([
@@ -105,7 +105,7 @@ it('removes membership if refresh token is removed', function () {
         'status' => 'member'
     ]);
 
-    test()->assertFalse(test()->role->refresh()->members->isEmpty());
+    expect(test()->role->refresh()->members->isEmpty())->toBeFalse();
 
     // Remove refresh_token
     RefreshToken::find(test()->test_character->character_id)->delete();
@@ -114,24 +114,24 @@ it('removes membership if refresh token is removed', function () {
     $job = new UserRolesSync(test()->test_user->refresh());
     $job->handle();
 
-    test()->assertTrue(test()->role->refresh()->members->isEmpty());
+    expect(test()->role->refresh()->members->isEmpty())->toBeTrue();
 });
 
 test('roles without acl affiliations are not impacted by job', function () {
     // Update role to be on-request
     test()->role->update(['type' => 'automatic']);
 
-    test()->assertTrue(test()->role->acl_affiliations->isEmpty());
+    expect(test()->role->acl_affiliations->isEmpty())->toBeTrue();
 
     //assure that role is of type auto
-    test()->assertEquals('automatic', test()->role->type);
+    expect(test()->role->type)->toEqual('automatic');
 
 
-    test()->assertFalse(test()->test_user->hasRole(test()->role));
+    expect(test()->test_user->hasRole(test()->role))->toBeFalse();
 
     test()->job->handle();
 
-    test()->assertFalse(test()->test_user->hasRole(test()->role));
+    expect(test()->test_user->hasRole(test()->role))->toBeFalse();
 });
 
 test('dispatching roles sync', function () {

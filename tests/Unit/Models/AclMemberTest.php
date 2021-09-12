@@ -21,6 +21,6 @@ it('has user relationship', function () {
     $member = AclMember::where('user_id',test()->test_user->id)
         ->get()->first();
 
-    test()->assertEquals(User::class, $member->user::class);
+    expect($member->user::class)->toEqual(User::class);
 
 });

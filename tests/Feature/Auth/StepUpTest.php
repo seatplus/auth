@@ -62,8 +62,8 @@ test('one can request another scope', function () {
         'add_scopes'   => $add_scopes,
     ]));
 
-    test()->assertEquals(test()->test_character->character_id, session('step_up'));
-    test()->assertEquals(['a', 'b', '1', '2'], session('sso_scopes'));
+    expect(session('step_up'))->toEqual(test()->test_character->character_id);
+    expect(session('sso_scopes'))->toEqual(['a', 'b', '1', '2']);
 });
 
 // Helpers

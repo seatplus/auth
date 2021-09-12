@@ -36,5 +36,5 @@ test('superuser got any permission', function () {
 
     $another_permission = Permission::create(['name' => 'another permission']);
 
-    test()->assertTrue(test()->test_user->can($another_permission->name));
+    expect(test()->test_user->can($another_permission->name))->toBeTrue();
 });

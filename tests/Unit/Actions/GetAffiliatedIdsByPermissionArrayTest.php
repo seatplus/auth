@@ -71,7 +71,7 @@ it('returns own character id', function () {
 
     $ids = (new GetAffiliatedIdsByPermissionArray(test()->permission->name))->execute();
 
-    test()->assertTrue(in_array(test()->test_character_user->character_id, $ids));
+    expect(in_array(test()->test_character_user->character_id, $ids))->toBeTrue();
 });
 
 it('returns other and own character id for inverted', function () {
@@ -83,8 +83,8 @@ it('returns other and own character id for inverted', function () {
 
     $ids = (new GetAffiliatedIdsByPermissionArray(test()->permission->name))->execute();
 
-    test()->assertTrue(in_array(test()->test_character_user->character_id, $ids));
-    test()->assertTrue(in_array(test()->secondary_character->character_id, $ids));
+    expect(in_array(test()->test_character_user->character_id, $ids))->toBeTrue();
+    expect(in_array(test()->secondary_character->character_id, $ids))->toBeTrue();
 });
 
 it('does not return secondary character id if secondary character is inverted', function () {
@@ -97,13 +97,13 @@ it('does not return secondary character id if secondary character is inverted', 
     $ids = (new GetAffiliatedIdsByPermissionArray(test()->permission->name))->execute();
 
     // Assert that the owned character_ids are present
-    test()->assertTrue(in_array(test()->test_character_user->character_id, $ids));
+    expect(in_array(test()->test_character_user->character_id, $ids))->toBeTrue();
 
     // Assert that ids from the inverted corporation is missing
-    test()->assertFalse(in_array(test()->secondary_character->character_id, $ids));
+    expect(in_array(test()->secondary_character->character_id, $ids))->toBeFalse();
 
     // Assert that ids from any other third party is present
-    test()->assertTrue(in_array(test()->tertiary_character->character_id, $ids));
+    expect(in_array(test()->tertiary_character->character_id, $ids))->toBeTrue();
 });
 
 it('does not return secondary character id if secondary corporation is inverted', function () {
@@ -119,13 +119,13 @@ it('does not return secondary character id if secondary corporation is inverted'
     test()->assertNotEquals(test()->secondary_character->corporation->corporation_id, test()->test_character->corporation->corporation_id);
 
     // Assert that the owned character_ids are present
-    test()->assertTrue(in_array(test()->test_character_user->character_id, $ids));
+    expect(in_array(test()->test_character_user->character_id, $ids))->toBeTrue();
 
     // Assert that ids from the inverted corporation is missing
-    test()->assertFalse(in_array(test()->secondary_character->character_id, $ids));
+    expect(in_array(test()->secondary_character->character_id, $ids))->toBeFalse();
 
     // Assert that ids from any other third party is present
-    test()->assertTrue(in_array(test()->tertiary_character->character_id, $ids));
+    expect(in_array(test()->tertiary_character->character_id, $ids))->toBeTrue();
 });
 
 it('does not return secondary character id if secondary alliance is inverted', function () {
@@ -141,13 +141,13 @@ it('does not return secondary character id if secondary alliance is inverted', f
     test()->assertNotEquals(test()->secondary_character->alliance->alliance_id, test()->test_character->alliance->alliance_id);
 
     // Assert that the owned character_ids are present
-    test()->assertTrue(in_array(test()->test_character_user->character_id, $ids));
+    expect(in_array(test()->test_character_user->character_id, $ids))->toBeTrue();
 
     // Assert that ids from the inverted corporation is missing
-    test()->assertFalse(in_array(test()->secondary_character->character_id, $ids));
+    expect(in_array(test()->secondary_character->character_id, $ids))->toBeFalse();
 
     // Assert that ids from any other third party is present
-    test()->assertTrue(in_array(test()->tertiary_character->character_id, $ids));
+    expect(in_array(test()->tertiary_character->character_id, $ids))->toBeTrue();
 });
 
 it('does return secondary character id if secondary character is allowed', function () {
@@ -163,13 +163,13 @@ it('does return secondary character id if secondary character is allowed', funct
     test()->assertNotEquals(test()->secondary_character->character_id, test()->test_character->character_id);
 
     // Assert that the owned character_ids are present
-    test()->assertTrue(in_array(test()->test_character_user->character_id, $ids));
+    expect(in_array(test()->test_character_user->character_id, $ids))->toBeTrue();
 
     // Assert that ids from the allowed character is present
-    test()->assertTrue(in_array(test()->secondary_character->character_id, $ids));
+    expect(in_array(test()->secondary_character->character_id, $ids))->toBeTrue();
 
     // Assert that ids from any other third party is not present
-    test()->assertFalse(in_array(test()->tertiary_character->character_id, $ids));
+    expect(in_array(test()->tertiary_character->character_id, $ids))->toBeFalse();
 });
 
 it('does return secondary character id if secondary corporation is allowed', function () {
@@ -185,13 +185,13 @@ it('does return secondary character id if secondary corporation is allowed', fun
     test()->assertNotEquals(test()->secondary_character->corporation->corporation_id, test()->test_character->corporation->corporation_id);
 
     // Assert that the owned character_ids are present
-    test()->assertTrue(in_array(test()->test_character_user->character_id, $ids));
+    expect(in_array(test()->test_character_user->character_id, $ids))->toBeTrue();
 
     // Assert that ids from the allowed character is present
-    test()->assertTrue(in_array(test()->secondary_character->character_id, $ids));
+    expect(in_array(test()->secondary_character->character_id, $ids))->toBeTrue();
 
     // Assert that ids from any other third party is not present
-    test()->assertFalse(in_array(test()->tertiary_character->character_id, $ids));
+    expect(in_array(test()->tertiary_character->character_id, $ids))->toBeFalse();
 });
 
 it('does return secondary character id if secondary alliance is allowed', function () {
@@ -207,13 +207,13 @@ it('does return secondary character id if secondary alliance is allowed', functi
     test()->assertNotEquals(test()->secondary_character->alliance->alliance_id, test()->test_character->alliance->alliance_id);
 
     // Assert that the owned character_ids are present
-    test()->assertTrue(in_array(test()->test_character_user->character_id, $ids));
+    expect(in_array(test()->test_character_user->character_id, $ids))->toBeTrue();
 
     // Assert that ids from the allowed character is present
-    test()->assertTrue(in_array(test()->secondary_character->character_id, $ids));
+    expect(in_array(test()->secondary_character->character_id, $ids))->toBeTrue();
 
     // Assert that ids from any other third party is not present
-    test()->assertFalse(in_array(test()->tertiary_character->character_id, $ids));
+    expect(in_array(test()->tertiary_character->character_id, $ids))->toBeFalse();
 });
 
 it('does return own character even if listed as forbidden', function () {
@@ -226,7 +226,7 @@ it('does return own character even if listed as forbidden', function () {
     $ids = (new GetAffiliatedIdsByPermissionArray(test()->permission->name))->execute();
 
     // Assert that the owned character_ids are present
-    test()->assertTrue(in_array(test()->test_character_user->character_id, $ids));
+    expect(in_array(test()->test_character_user->character_id, $ids))->toBeTrue();
 });
 
 it('does not return secondary character id if secondary character is forbidden', function () {
@@ -249,13 +249,13 @@ it('does not return secondary character id if secondary character is forbidden',
     test()->assertNotEquals(test()->secondary_character->character_id, test()->test_character->character_id);
 
     // Assert that the owned character_ids are present
-    test()->assertTrue(in_array(test()->test_character_user->character_id, $ids));
+    expect(in_array(test()->test_character_user->character_id, $ids))->toBeTrue();
 
     // Assert that ids from the allowed character is not present
-    test()->assertFalse(in_array(test()->secondary_character->character_id, $ids));
+    expect(in_array(test()->secondary_character->character_id, $ids))->toBeFalse();
 
     // Assert that ids from any other third party is not present
-    test()->assertFalse(in_array(test()->tertiary_character->character_id, $ids));
+    expect(in_array(test()->tertiary_character->character_id, $ids))->toBeFalse();
 });
 
 it('does not return secondary character id if secondary corporation is forbidden', function () {
@@ -278,13 +278,13 @@ it('does not return secondary character id if secondary corporation is forbidden
     test()->assertNotEquals(test()->secondary_character->corporation->corporation_id, test()->test_character->corporation->corporation_id);
 
     // Assert that the owned character_ids are present
-    test()->assertTrue(in_array(test()->test_character_user->character_id, $ids));
+    expect(in_array(test()->test_character_user->character_id, $ids))->toBeTrue();
 
     // Assert that ids from the allowed character is not present
-    test()->assertFalse(in_array(test()->secondary_character->character_id, $ids));
+    expect(in_array(test()->secondary_character->character_id, $ids))->toBeFalse();
 
     // Assert that ids from any other third party is not present
-    test()->assertFalse(in_array(test()->tertiary_character->character_id, $ids));
+    expect(in_array(test()->tertiary_character->character_id, $ids))->toBeFalse();
 });
 
 it('does not return secondary character id if secondary alliance is forbidden', function () {
@@ -307,13 +307,13 @@ it('does not return secondary character id if secondary alliance is forbidden', 
     test()->assertNotEquals(test()->secondary_character->alliance->alliance_id, test()->test_character->alliance->alliance_id);
 
     // Assert that the owned character_ids are present
-    test()->assertTrue(in_array(test()->test_character_user->character_id, $ids));
+    expect(in_array(test()->test_character_user->character_id, $ids))->toBeTrue();
 
     // Assert that ids from the allowed character is not present
-    test()->assertFalse(in_array(test()->secondary_character->character_id, $ids));
+    expect(in_array(test()->secondary_character->character_id, $ids))->toBeFalse();
 
     // Assert that ids from any other third party is not present
-    test()->assertFalse(in_array(test()->tertiary_character->character_id, $ids));
+    expect(in_array(test()->tertiary_character->character_id, $ids))->toBeFalse();
 });
 
 it('caches results', function () {
@@ -332,12 +332,12 @@ it('caches results', function () {
 
     $action = new GetAffiliatedIdsByPermissionArray(test()->permission->name);
 
-    test()->assertFalse(cache()->has($action->getCacheKey()));
+    expect(cache()->has($action->getCacheKey()))->toBeFalse();
 
     $ids = $action->execute();
 
-    test()->assertTrue(cache()->has($action->getCacheKey()));
-    test()->assertEquals($ids, cache($action->getCacheKey()));
+    expect(cache()->has($action->getCacheKey()))->toBeTrue();
+    expect(cache($action->getCacheKey()))->toEqual($ids);
 });
 
 it('returns corporation id', function () {
@@ -362,10 +362,10 @@ it('returns corporation id', function () {
     $ids = (new GetAffiliatedIdsByPermissionArray(test()->permission->name, 'Director'))->execute();
 
     // Assert that the owned character_ids are present
-    test()->assertTrue(in_array(test()->test_character->character_id, $ids));
+    expect(in_array(test()->test_character->character_id, $ids))->toBeTrue();
 
     // Assert that the corporation_id of test_character with director role is present
-    test()->assertTrue(in_array(test()->test_character->corporation->corporation_id, $ids));
+    expect(in_array(test()->test_character->corporation->corporation_id, $ids))->toBeTrue();
 });
 
 it('returns all character and corporation ids for superuser', function () {
@@ -383,5 +383,5 @@ it('returns all character and corporation ids for superuser', function () {
     $ids = (new GetAffiliatedIdsByPermissionArray(test()->permission->name))->execute();
 
     // check if ids are present
-    test()->assertTrue(collect([...$character_ids, ...$corporation_ids])->diff($ids)->isEmpty());
+    expect(collect([...$character_ids, ...$corporation_ids])->diff($ids)->isEmpty())->toBeTrue();
 });

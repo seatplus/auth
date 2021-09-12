@@ -40,7 +40,7 @@ beforeEach(function () {
 it('has main character relationship', function () {
     $test_user = User::factory()->create();
 
-    test()->assertInstanceOf(CharacterInfo::class, $test_user->main_character);
+    expect($test_user->main_character)->toBeInstanceOf(CharacterInfo::class);
 });
 
 it('has characters relationship', function () {
@@ -54,7 +54,7 @@ it('has characters relationship', function () {
         'character_id' => $test_user->character_users->first()->character_id,
     ]);
 
-    test()->assertInstanceOf(CharacterInfo::class, $test_user->characters->first());
+    expect($test_user->characters->first())->toBeInstanceOf(CharacterInfo::class);
 });
 
 it('has search scope', function () {
@@ -64,5 +64,5 @@ it('has search scope', function () {
 
     $user = User::search($character->name)->first();
 
-    test()->assertEquals($test_user->id, $user->id);
+    expect($user->id)->toEqual($test_user->id);
 });

@@ -88,13 +88,13 @@ it('has polymorphic relation', function () {
         'type' => 'allowed'
     ]);
 
-    test()->assertEquals(CorporationInfo::class, test()->role->affiliations->first()->affiliatable::class);
+    expect(test()->role->affiliations->first()->affiliatable::class)->toEqual(CorporationInfo::class);
 
 });
 
 it('has default type attribute', function () {
 
-    test()->assertEquals('manual', test()->role->fresh()->type);
+    expect(test()->role->fresh()->type)->toEqual('manual');
 });
 
 it('has acl affiliations', function () {
@@ -104,7 +104,7 @@ it('has acl affiliations', function () {
         'affiliatable_type' => CharacterInfo::class,
     ]);
 
-    test()->assertEquals(CharacterInfo::class, test()->role->acl_affiliations->first()->affiliatable::class);
+    expect(test()->role->acl_affiliations->first()->affiliatable::class)->toEqual(CharacterInfo::class);
 });
 
 it('has acl moderators', function () {
@@ -115,9 +115,9 @@ it('has acl moderators', function () {
         'can_moderate' => true
     ]);
 
-    test()->assertTrue(test()->role->acl_affiliations->isEmpty());
+    expect(test()->role->acl_affiliations->isEmpty())->toBeTrue();
 
-    test()->assertEquals(CharacterInfo::class, test()->role->moderators->first()->affiliatable::class);
+    expect(test()->role->moderators->first()->affiliatable::class)->toEqual(CharacterInfo::class);
 });
 
 it('has acl members', function () {
@@ -127,33 +127,33 @@ it('has acl members', function () {
         'status' => 'member'
     ]);
 
-    test()->assertTrue(test()->role->members->isNotEmpty());
+    expect(test()->role->members->isNotEmpty())->toBeTrue();
 });
 
 test('one can add member', function () {
     test()->role->activateMember(test()->test_user);
 
-    test()->assertTrue(test()->role->members->isNotEmpty());
+    expect(test()->role->members->isNotEmpty())->toBeTrue();
 });
 
 test('one can pause member', function () {
     test()->role->activateMember(test()->test_user);
 
-    test()->assertTrue(test()->role->members->isNotEmpty());
+    expect(test()->role->members->isNotEmpty())->toBeTrue();
 
     test()->role->pauseMember(test()->test_user);
 
-    test()->assertTrue(test()->role->refresh()->members->isEmpty());
+    expect(test()->role->refresh()->members->isEmpty())->toBeTrue();
 });
 
 test('one can remove member', function () {
     test()->role->activateMember(test()->test_user);
 
-    test()->assertTrue(test()->role->members->isNotEmpty());
+    expect(test()->role->members->isNotEmpty())->toBeTrue();
 
     test()->role->removeMember(test()->test_user);
 
-    test()->assertTrue(test()->role->refresh()->members->isEmpty());
+    expect(test()->role->refresh()->members->isEmpty())->toBeTrue();
 });
 
 it('throws error if unaffiliated user wants to join', function () {
@@ -191,7 +191,7 @@ test('user can join waitlist', function () {
 
     $role->joinWaitlist(test()->test_user);
 
-    test()->assertEquals(test()->test_user->id, $role->refresh()->acl_members()->whereStatus('waitlist')->first()->user_id);
+    expect($role->refresh()->acl_members()->whereStatus('waitlist')->first()->user_id)->toEqual(test()->test_user->id);
 });
 
 test('one can get moderator ids', function () {
@@ -204,5 +204,5 @@ test('one can get moderator ids', function () {
         'can_moderate' => true
     ]);
 
-    test()->assertTrue($role->refresh()->isModerator(test()->test_user));
+    expect($role->refresh()->isModerator(test()->test_user))->toBeTrue();
 });

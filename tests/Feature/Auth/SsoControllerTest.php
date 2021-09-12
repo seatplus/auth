@@ -114,7 +114,7 @@ test('one can add another character', function () {
     Queue::assertPushedOn('high', UserRolesSync::class);
 
     // assert that no error is present
-    test()->assertNull(session('error'));
+    expect(session('error'))->toBeNull();
 
     test()->assertEquals(
         'Character added/updated successfully',

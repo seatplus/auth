@@ -46,18 +46,18 @@ beforeEach(function () {
 });
 
 test('user has no roles test', function () {
-    test()->assertTrue(test()->test_user->roles->isEmpty());
+    expect(test()->test_user->roles->isEmpty())->toBeTrue();
 });
 
 test('user has role test', function () {
     test()->test_user->assignRole(test()->role);
 
-    test()->assertTrue(test()->test_user->roles->isNotEmpty());
+    expect(test()->test_user->roles->isNotEmpty())->toBeTrue();
 });
 
 test('role has no affiliation test', function () {
 
-    test()->assertTrue(test()->role->affiliations->isEmpty());
+    expect(test()->role->affiliations->isEmpty())->toBeTrue();
 });
 
 test('role has an affiliation test', function () {
@@ -78,7 +78,7 @@ test('user is in affiliation test', function () {
         'type'         => 'allowed',
     ]);
 
-    test()->assertTrue(in_array(test()->test_character->character_id, test()->role->affiliated_ids));
+    expect(in_array(test()->test_character->character_id, test()->role->affiliated_ids))->toBeTrue();
 });
 
 test('character is in character allowed affiliation test', function () {
@@ -99,8 +99,8 @@ test('character is in character allowed affiliation test', function () {
 
     ]);
 
-    test()->assertTrue(in_array(test()->test_character->character_id, test()->role->affiliated_ids));
-    test()->assertTrue(in_array($secondary_character->character_id, test()->role->affiliated_ids));
+    expect(in_array(test()->test_character->character_id, test()->role->affiliated_ids))->toBeTrue();
+    expect(in_array($secondary_character->character_id, test()->role->affiliated_ids))->toBeTrue();
 });
 
 test('character is in character inversed affiliation test', function () {
@@ -118,8 +118,8 @@ test('character is in character inversed affiliation test', function () {
         ],
     ]);
 
-    test()->assertFalse(in_array(test()->test_character->character_id, test()->role->affiliated_ids));
-    test()->assertTrue(in_array(test()->secondary_character->character_id, test()->role->affiliated_ids));
+    expect(in_array(test()->test_character->character_id, test()->role->affiliated_ids))->toBeFalse();
+    expect(in_array(test()->secondary_character->character_id, test()->role->affiliated_ids))->toBeTrue();
 });
 
 test('character is not in character inverse affiliation test', function () {
@@ -137,9 +137,9 @@ test('character is not in character inverse affiliation test', function () {
         ],
     ]);
 
-    test()->assertTrue(in_array(test()->test_character->character_id, test()->role->affiliated_ids));
-    test()->assertFalse(in_array(test()->secondary_character->character_id, test()->role->affiliated_ids));
-    test()->assertFalse(in_array(test()->tertiary_character->character_id, test()->role->affiliated_ids));
+    expect(in_array(test()->test_character->character_id, test()->role->affiliated_ids))->toBeTrue();
+    expect(in_array(test()->secondary_character->character_id, test()->role->affiliated_ids))->toBeFalse();
+    expect(in_array(test()->tertiary_character->character_id, test()->role->affiliated_ids))->toBeFalse();
 });
 
 test('character is in character forbidden affiliation test', function () {
@@ -158,9 +158,9 @@ test('character is in character forbidden affiliation test', function () {
         ],
     ]);
 
-    test()->assertFalse(in_array(test()->test_character->character_id, test()->role->affiliated_ids));
-    test()->assertFalse(in_array(test()->secondary_character->character_id, test()->role->affiliated_ids));
-    test()->assertFalse(in_array(test()->tertiary_character->character_id, test()->role->affiliated_ids));
+    expect(in_array(test()->test_character->character_id, test()->role->affiliated_ids))->toBeFalse();
+    expect(in_array(test()->secondary_character->character_id, test()->role->affiliated_ids))->toBeFalse();
+    expect(in_array(test()->tertiary_character->character_id, test()->role->affiliated_ids))->toBeFalse();
 });
 
 test('character is in corporation allowed affiliation test', function () {
@@ -171,9 +171,9 @@ test('character is in corporation allowed affiliation test', function () {
         'type'           => 'allowed',
     ]);
 
-    test()->assertTrue(in_array(test()->test_character->character_id, test()->role->affiliated_ids));
-    test()->assertFalse(in_array(test()->secondary_character->character_id, test()->role->affiliated_ids));
-    test()->assertFalse(in_array(test()->tertiary_character->character_id, test()->role->affiliated_ids));
+    expect(in_array(test()->test_character->character_id, test()->role->affiliated_ids))->toBeTrue();
+    expect(in_array(test()->secondary_character->character_id, test()->role->affiliated_ids))->toBeFalse();
+    expect(in_array(test()->tertiary_character->character_id, test()->role->affiliated_ids))->toBeFalse();
 });
 
 test('character is in corporation inversed affiliation test', function () {
@@ -191,9 +191,9 @@ test('character is in corporation inversed affiliation test', function () {
         ],
     ]);
 
-    test()->assertFalse(in_array(test()->test_character->character_id, test()->role->affiliated_ids));
-    test()->assertFalse(in_array(test()->secondary_character->character_id, test()->role->affiliated_ids));
-    test()->assertTrue(in_array(test()->tertiary_character->character_id, test()->role->affiliated_ids));
+    expect(in_array(test()->test_character->character_id, test()->role->affiliated_ids))->toBeFalse();
+    expect(in_array(test()->secondary_character->character_id, test()->role->affiliated_ids))->toBeFalse();
+    expect(in_array(test()->tertiary_character->character_id, test()->role->affiliated_ids))->toBeTrue();
 });
 
 test('character is in corporation forbidden affiliation test', function () {
@@ -211,9 +211,9 @@ test('character is in corporation forbidden affiliation test', function () {
         ],
     ]);
 
-    test()->assertFalse(in_array(test()->test_character->character_id, test()->role->affiliated_ids));
-    test()->assertFalse(in_array(test()->secondary_character->character_id, test()->role->affiliated_ids));
-    test()->assertFalse(in_array(test()->tertiary_character->character_id, test()->role->affiliated_ids));
+    expect(in_array(test()->test_character->character_id, test()->role->affiliated_ids))->toBeFalse();
+    expect(in_array(test()->secondary_character->character_id, test()->role->affiliated_ids))->toBeFalse();
+    expect(in_array(test()->tertiary_character->character_id, test()->role->affiliated_ids))->toBeFalse();
 });
 
 test('character is in alliance allowed affiliation test', function () {
@@ -231,9 +231,9 @@ test('character is in alliance allowed affiliation test', function () {
         ],
     ]);
 
-    test()->assertTrue(in_array(test()->test_character->character_id, test()->role->affiliated_ids));
-    test()->assertTrue(in_array(test()->secondary_character->character_id, test()->role->affiliated_ids));
-    test()->assertFalse(in_array(test()->tertiary_character->character_id, test()->role->affiliated_ids));
+    expect(in_array(test()->test_character->character_id, test()->role->affiliated_ids))->toBeTrue();
+    expect(in_array(test()->secondary_character->character_id, test()->role->affiliated_ids))->toBeTrue();
+    expect(in_array(test()->tertiary_character->character_id, test()->role->affiliated_ids))->toBeFalse();
 });
 
 test('character is in alliance inversed affiliation test', function () {
@@ -251,9 +251,9 @@ test('character is in alliance inversed affiliation test', function () {
         ],
     ]);
 
-    test()->assertFalse(in_array(test()->test_character->character_id, test()->role->affiliated_ids));
-    test()->assertFalse(in_array(test()->secondary_character->character_id, test()->role->affiliated_ids));
-    test()->assertTrue(in_array(test()->tertiary_character->character_id, test()->role->affiliated_ids));
+    expect(in_array(test()->test_character->character_id, test()->role->affiliated_ids))->toBeFalse();
+    expect(in_array(test()->secondary_character->character_id, test()->role->affiliated_ids))->toBeFalse();
+    expect(in_array(test()->tertiary_character->character_id, test()->role->affiliated_ids))->toBeTrue();
 });
 
 test('character is in alliance forbidden affiliation test', function () {
@@ -271,7 +271,7 @@ test('character is in alliance forbidden affiliation test', function () {
         ],
     ]);
 
-    test()->assertFalse(in_array(test()->test_character->character_id, test()->role->affiliated_ids));
-    test()->assertFalse(in_array(test()->secondary_character->character_id, test()->role->affiliated_ids));
-    test()->assertFalse(in_array(test()->tertiary_character->character_id, test()->role->affiliated_ids));
+    expect(in_array(test()->test_character->character_id, test()->role->affiliated_ids))->toBeFalse();
+    expect(in_array(test()->secondary_character->character_id, test()->role->affiliated_ids))->toBeFalse();
+    expect(in_array(test()->tertiary_character->character_id, test()->role->affiliated_ids))->toBeFalse();
 });

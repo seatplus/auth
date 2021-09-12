@@ -14,7 +14,7 @@ test('one can change main character', function () {
 
     test()->test_user = test()->test_user->refresh();
 
-    test()->assertCount(2, test()->test_user->characters);
+    expect(test()->test_user->characters)->toHaveCount(2);
 
     test()->assertNotEquals($secondary->character_id, test()->test_user->main_character_id);
 
@@ -22,14 +22,14 @@ test('one can change main character', function () {
         'character_id' => $secondary->character_id
     ])->assertRedirect();
 
-    test()->assertEquals($secondary->character_id, test()->test_user->refresh()->main_character_id);
+    expect(test()->test_user->refresh()->main_character_id)->toEqual($secondary->character_id);
 });
 
 test('one cannot change main character if character does not belong to user', function () {
 
     $secondary = CharacterUser::factory()->make();
 
-    test()->assertCount(1, test()->test_user->characters);
+    expect(test()->test_user->characters)->toHaveCount(1);
 
     test()->assertNotEquals($secondary->character_id, test()->test_user->main_character_id);
 

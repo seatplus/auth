@@ -206,7 +206,7 @@ it('stops request if user scopes is missing', function () {
     });
 
     // test that the test user owns both characters
-    test()->assertCount(2, test()->test_user->refresh()->characters);
+    expect(test()->test_user->refresh()->characters)->toHaveCount(2);
 
     // test that primary and secondary character has different corporations
     test()->assertNotEquals(test()->test_character->corporation->corporation_id, $secondary_character->corporation->corporation_id);
@@ -252,7 +252,7 @@ it('lets request through if user scopes is present', function () {
     });
 
     // test that the test user owns both characters
-    test()->assertCount(2, test()->test_user->refresh()->characters);
+    expect(test()->test_user->refresh()->characters)->toHaveCount(2);
 
     // test that primary and secondary character has different corporations
     test()->assertNotEquals(test()->test_character->corporation->corporation_id, $secondary_character->corporation->corporation_id);

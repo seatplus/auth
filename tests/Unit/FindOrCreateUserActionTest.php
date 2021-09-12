@@ -65,7 +65,7 @@ test('find existing user with two character', function () {
         CharacterUser::factory()->count(3)->make()->toArray()
     );
 
-    test()->assertEquals(4, test()->test_user->character_users->count());
+    expect(test()->test_user->character_users->count())->toEqual(4);
 
     // select last character to login
 
@@ -79,7 +79,7 @@ test('find existing user with two character', function () {
 
     $user = (new FindOrCreateUserAction())->execute($socialiteUser);
 
-    test()->assertEquals(test()->test_user->id, $user->id);
+    expect($user->id)->toEqual(test()->test_user->id);
 
     test()->assertDatabaseMissing('users', [
         'name' => $socialiteUser->name,
@@ -92,7 +92,7 @@ test('find existing user with two character', function () {
 });
 
 test('deal with changed owner hash', function () {
-    test()->assertEquals(test()->test_user->character_users->count(), 1);
+    expect(1)->toEqual(test()->test_user->character_users->count());
 
     // 2. create character_users entry
     /*CharacterUser::factory()->create([
@@ -133,7 +133,7 @@ test('deal with two characters with one changed owner hash', function () {
     // 2. assign secondary user to test_user
     test()->test_user->character_users()->save($secondary_user);
 
-    test()->assertEquals(2, test()->test_user->character_users->count());
+    expect(test()->test_user->character_users->count())->toEqual(2);
 
     // 3. find user
 
@@ -149,9 +149,9 @@ test('deal with two characters with one changed owner hash', function () {
 
     //dd($secondary_user->character_id,User::first()->characters);
 
-    test()->assertEquals(1, $user->character_users->count());
+    expect($user->character_users->count())->toEqual(1);
 
-    test()->assertEquals(2, CharacterUser::all()->count());
+    expect(CharacterUser::all()->count())->toEqual(2);
 
     test()->assertDatabaseHas('users', [
         'id' => test()->test_user->id,
@@ -190,7 +190,7 @@ it('returns authed user', function () {
     $user = (new FindOrCreateUserAction())->execute($socialiteUser);
 
     // Assert that test user id and the returned user id is equal
-    test()->assertEquals(test()->test_user->id, $user->id);
+    expect($user->id)->toEqual(test()->test_user->id);
 
     // assert that character user relation has been set
     test()->assertDatabaseHas('character_users', [
@@ -198,7 +198,7 @@ it('returns authed user', function () {
         'character_id' => $secondary_user->character_id,
     ]);
 
-    test()->assertEquals(2, test()->test_user->character_users->count());
+    expect(test()->test_user->character_users->count())->toEqual(2);
 });
 
 // Helpers
