@@ -35,9 +35,8 @@ class StepUpController extends Controller
     /**
      * Redirect the user to the Eve Online authentication page.
      *
-     * @param \Laravel\Socialite\Contracts\Factory      $social
-     * @param int                                       $character_id
-     *
+     * @param  \Laravel\Socialite\Contracts\Factory  $social
+     * @param  int  $character_id
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
     public function __invoke(Socialite $social, int $character_id)
