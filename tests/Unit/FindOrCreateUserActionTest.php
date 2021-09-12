@@ -31,7 +31,6 @@ use Seatplus\Auth\Http\Actions\Sso\FindOrCreateUserAction;
 use Seatplus\Auth\Models\CharacterUser;
 use Seatplus\Auth\Tests\TestCase;
 
-uses(TestCase::class);
 uses(RefreshDatabase::class);
 
 

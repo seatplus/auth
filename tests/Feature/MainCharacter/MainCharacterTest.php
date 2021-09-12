@@ -4,7 +4,6 @@
 use Seatplus\Auth\Models\CharacterUser;
 use Seatplus\Auth\Tests\TestCase;
 
-uses(TestCase::class);
 
 test('one can change main character', function () {
 

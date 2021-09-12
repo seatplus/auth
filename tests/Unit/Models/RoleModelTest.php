@@ -31,7 +31,6 @@ use Seatplus\Auth\Tests\TestCase;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 
-uses(TestCase::class);
 
 beforeEach(function () {
     test()->role = Role::create(['name' => 'derp']);

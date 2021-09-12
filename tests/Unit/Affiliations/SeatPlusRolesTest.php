@@ -33,7 +33,6 @@ use Seatplus\Eveapi\Models\Character\CharacterAffiliation;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 
-uses(TestCase::class);
 
 beforeEach(function () {
     Event::fake();

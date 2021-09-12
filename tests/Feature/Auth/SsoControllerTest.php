@@ -34,7 +34,6 @@ use Seatplus\Auth\Tests\TestCase;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\RefreshToken;
 
-uses(TestCase::class);
 
 it('works for non authed users', function () {
     $character_id = CharacterInfo::factory()->make()->character_id;

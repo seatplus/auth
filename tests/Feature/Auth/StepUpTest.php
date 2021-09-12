@@ -33,7 +33,6 @@ use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 use Seatplus\Eveapi\Models\RefreshToken;
 use Seatplus\Eveapi\Models\SsoScopes;
 
-uses(TestCase::class);
 
 beforeEach(function () {
     Event::fake();

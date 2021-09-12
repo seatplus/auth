@@ -6,7 +6,6 @@ use Seatplus\Auth\Models\Permissions\Role;
 use Seatplus\Auth\Models\User;
 use Seatplus\Auth\Tests\TestCase;
 
-uses(TestCase::class);
 
 beforeEach(function () {
     test()->role = Role::create(['name' => 'derp']);

@@ -27,7 +27,6 @@
 use Seatplus\Auth\Models\Permissions\Permission;
 use Seatplus\Auth\Tests\TestCase;
 
-uses(TestCase::class);
 
 test('superuser got any permission', function () {
     $superuser_permission = Permission::create(['name' => 'superuser']);

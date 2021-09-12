@@ -1,5 +1,7 @@
 <?php
 
+uses(\Seatplus\Auth\Tests\TestCase::class);
+
 /*
 |--------------------------------------------------------------------------
 | Test Case

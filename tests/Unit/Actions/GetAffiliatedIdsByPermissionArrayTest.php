@@ -36,7 +36,6 @@ use Seatplus\Eveapi\Models\Character\CharacterRole;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 use Seatplus\Eveapi\Tests\Unit\Services\Jobs\Alliance\AllianceInfoActionTest;
 
-uses(TestCase::class);
 
 beforeEach(function () {
     test()->role = Role::create(['name' => 'writer']);

@@ -30,7 +30,6 @@ use Seatplus\Auth\Http\Actions\Sso\UpdateRefreshTokenAction;
 use Seatplus\Auth\Tests\TestCase;
 use Seatplus\Eveapi\Models\RefreshToken;
 
-uses(TestCase::class);
 
 test('create refresh token', function () {
     $eve_data = createSocialiteUser(test()->test_user->id);
