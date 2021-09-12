@@ -73,9 +73,9 @@ class GetAffiliatedIdsByPermissionArray
     }
 
     /**
-     * @throws \Exception
-     *
      * @return array
+     *
+     * @throws \Exception
      */
     private function getResult(): array
     {
