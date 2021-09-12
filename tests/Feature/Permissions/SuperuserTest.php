@@ -24,22 +24,17 @@
  * SOFTWARE.
  */
 
-namespace Seatplus\Auth\Tests\Feature\Permissions;
-
 use Seatplus\Auth\Models\Permissions\Permission;
 use Seatplus\Auth\Tests\TestCase;
 
-class SuperuserTest extends TestCase
-{
-    /** @test */
-    public function superuser_got_any_permission()
-    {
-        $superuser_permission = Permission::create(['name' => 'superuser']);
+uses(TestCase::class);
 
-        $this->test_user->givePermissionTo('superuser');
+test('superuser got any permission', function () {
+    $superuser_permission = Permission::create(['name' => 'superuser']);
 
-        $another_permission = Permission::create(['name' => 'another permission']);
+    test()->test_user->givePermissionTo('superuser');
 
-        $this->assertTrue($this->test_user->can($another_permission->name));
-    }
-}
+    $another_permission = Permission::create(['name' => 'another permission']);
+
+    test()->assertTrue(test()->test_user->can($another_permission->name));
+});

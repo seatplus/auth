@@ -24,8 +24,6 @@
  * SOFTWARE.
  */
 
-namespace Seatplus\Auth\Tests\Feature\Auth;
-
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
 use Laravel\Socialite\Contracts\Provider;
@@ -37,112 +35,105 @@ use Seatplus\Auth\Tests\TestCase;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\RefreshToken;
 
-class SsoControllerTest extends TestCase
+uses(TestCase::class);
+
+it('works for non authed users', function () {
+    $character_id = CharacterInfo::factory()->make()->character_id;
+
+    $abstractUser = createSocialiteUser($character_id);
+
+    $provider = Mockery::mock(Provider::class);
+    $provider->shouldReceive('user')->andReturn($abstractUser);
+
+    Socialite::shouldReceive('driver')->with('eveonline')->andReturn($provider);
+
+    test()->assertDatabaseMissing('refresh_tokens', [
+        'character_id' => $character_id,
+    ]);
+
+    Event::fakeFor(function () {
+        $response = test()->get(route('auth.eve.callback'))
+           ->assertRedirect();
+    });
+
+    test()->assertDatabaseHas('refresh_tokens', [
+        'character_id' => $character_id,
+    ]);
+});
+
+it('returns error if scopes changed', function () {
+    $character_id = Event::fakeFor(fn () => CharacterInfo::factory()->make()->character_id);
+
+    $abstractUser = createSocialiteUser($character_id);
+
+    $provider = Mockery::mock(Provider::class);
+    $provider->shouldReceive('user')->andReturn($abstractUser);
+
+    Socialite::shouldReceive('driver')->with('eveonline')->andReturn($provider);
+
+    test()->actingAs(test()->test_user);
+
+    session([
+        'sso_scopes' => ['test'],
+        'rurl'       => '/home',
+    ]);
+
+    test()->get(route('auth.eve.callback'));
+
+    test()->assertEquals(
+        'Something might have gone wrong. You might have changed the requested scopes on esi, please refer from doing so.',
+        session('error')
+    );
+});
+
+test('one can add another character', function () {
+    // Setup character user
+    $character_id = Event::fakeFor(fn () => CharacterInfo::factory()->make()->character_id);
+
+    $abstractUser = createSocialiteUser($character_id, 'refresh_token', implode(' ', config('eveapi.scopes.minimum')));
+
+    $provider = Mockery::mock(Provider::class);
+    $provider->shouldReceive('user')->andReturn($abstractUser);
+
+    Socialite::shouldReceive('driver')->with('eveonline')->andReturn($provider);
+
+    // Mock Esi Response
+
+    test()->actingAs(test()->test_user);
+
+    session([
+        'sso_scopes' => config('eveapi.scopes.minimum'),
+        'rurl'       => '/home',
+    ]);
+
+    // assert no UserRolesSync job has been dispatched
+    Queue::assertNothingPushed();
+
+    $result = test()->get(route('auth.eve.callback'));
+
+    // assert no UserRolesSync job has been dispatched
+    Queue::assertPushedOn('high', UserRolesSync::class);
+
+    // assert that no error is present
+    test()->assertNull(session('error'));
+
+    test()->assertEquals(
+        'Character added/updated successfully',
+        session('success')
+    );
+
+});
+
+// Helpers
+function createSocialiteUser($character_id, $refresh_token = 'refresh_token', $scopes = '1 2', $token = 'qq3dpeTMpDkjNasdasdewva3Be658eVVkox_1Ikodc')
 {
+    $socialiteUser = test()->createMock(SocialiteUser::class);
+    $socialiteUser->character_id = $character_id;
+    $socialiteUser->refresh_token = $refresh_token;
+    $socialiteUser->character_owner_hash = sha1($token);
+    $socialiteUser->scopes = $scopes;
+    $socialiteUser->token = $token;
+    $socialiteUser->expires_on = carbon('now')->addMinutes(15);
 
-    /** @test */
-    public function it_works_for_non_authed_users()
-    {
-        $character_id = CharacterInfo::factory()->make()->character_id;
-
-        $abstractUser = $this->createSocialiteUser($character_id);
-
-        $provider = Mockery::mock(Provider::class);
-        $provider->shouldReceive('user')->andReturn($abstractUser);
-
-        Socialite::shouldReceive('driver')->with('eveonline')->andReturn($provider);
-
-        $this->assertDatabaseMissing('refresh_tokens', [
-            'character_id' => $character_id,
-        ]);
-
-        Event::fakeFor(function () {
-            $response = $this->get(route('auth.eve.callback'))
-               ->assertRedirect();
-        });
-
-        $this->assertDatabaseHas('refresh_tokens', [
-            'character_id' => $character_id,
-        ]);
-    }
-
-    /** @test */
-    public function it_returns_error_if_scopes_changed()
-    {
-        $character_id = Event::fakeFor(fn () => CharacterInfo::factory()->make()->character_id);
-
-        $abstractUser = $this->createSocialiteUser($character_id);
-
-        $provider = Mockery::mock(Provider::class);
-        $provider->shouldReceive('user')->andReturn($abstractUser);
-
-        Socialite::shouldReceive('driver')->with('eveonline')->andReturn($provider);
-
-        $this->actingAs($this->test_user);
-
-        session([
-            'sso_scopes' => ['test'],
-            'rurl'       => '/home',
-        ]);
-
-        $this->get(route('auth.eve.callback'));
-
-        $this->assertEquals(
-            'Something might have gone wrong. You might have changed the requested scopes on esi, please refer from doing so.',
-            session('error')
-        );
-    }
-
-    /** @test */
-    public function one_can_add_another_character()
-    {
-        // Setup character user
-        $character_id = Event::fakeFor(fn () => CharacterInfo::factory()->make()->character_id);
-
-        $abstractUser = $this->createSocialiteUser($character_id, 'refresh_token', implode(' ', config('eveapi.scopes.minimum')));
-
-        $provider = Mockery::mock(Provider::class);
-        $provider->shouldReceive('user')->andReturn($abstractUser);
-
-        Socialite::shouldReceive('driver')->with('eveonline')->andReturn($provider);
-
-        // Mock Esi Response
-
-        $this->actingAs($this->test_user);
-
-        session([
-            'sso_scopes' => config('eveapi.scopes.minimum'),
-            'rurl'       => '/home',
-        ]);
-
-        // assert no UserRolesSync job has been dispatched
-        Queue::assertNothingPushed();
-
-        $result = $this->get(route('auth.eve.callback'));
-
-        // assert no UserRolesSync job has been dispatched
-        Queue::assertPushedOn('high', UserRolesSync::class);
-
-        // assert that no error is present
-        $this->assertNull(session('error'));
-
-        $this->assertEquals(
-            'Character added/updated successfully',
-            session('success')
-        );
-
-    }
-
-    private function createSocialiteUser($character_id, $refresh_token = 'refresh_token', $scopes = '1 2', $token = 'qq3dpeTMpDkjNasdasdewva3Be658eVVkox_1Ikodc')
-    {
-        $socialiteUser = $this->createMock(SocialiteUser::class);
-        $socialiteUser->character_id = $character_id;
-        $socialiteUser->refresh_token = $refresh_token;
-        $socialiteUser->character_owner_hash = sha1($token);
-        $socialiteUser->scopes = $scopes;
-        $socialiteUser->token = $token;
-        $socialiteUser->expires_on = carbon('now')->addMinutes(15);
-
-        return $socialiteUser;
-    }
+    return $socialiteUser;
 }

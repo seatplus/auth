@@ -24,135 +24,125 @@
  * SOFTWARE.
  */
 
-namespace Seatplus\Auth\Tests\Unit;
-
 use Illuminate\Support\Facades\Event;
 use Laravel\Socialite\Two\User as SocialiteUser;
 use Seatplus\Auth\Http\Actions\Sso\UpdateRefreshTokenAction;
 use Seatplus\Auth\Tests\TestCase;
 use Seatplus\Eveapi\Models\RefreshToken;
 
-class UpdateRefreshTokenActionTest extends TestCase
+uses(TestCase::class);
+
+test('create refresh token', function () {
+    $eve_data = createSocialiteUser(test()->test_user->id);
+
+    Event::fakeFor(function () use ($eve_data) {
+        (new UpdateRefreshTokenAction())->execute($eve_data);
+    });
+
+    test()->assertDatabaseHas('refresh_tokens', [
+        'character_id' => test()->test_user->id,
+    ]);
+});
+
+it('does update refresh token active sessions', function () {
+    test()->actingAs(test()->test_user);
+
+    // create RefreshToken
+    $eve_data = createSocialiteUser(test()->test_user->id);
+
+    Event::fakeFor(function () use ($eve_data) {
+        (new UpdateRefreshTokenAction())->execute($eve_data);
+    });
+
+    test()->assertDatabaseHas('refresh_tokens', [
+        'character_id'  => test()->test_user->id,
+        'refresh_token' => 'refresh_token',
+    ]);
+
+    test()->actingAs(test()->test_user);
+    // Change RefreshToken
+
+    $eve_data = createSocialiteUser(test()->test_user->id, 'new_refreshToken');
+
+    (new UpdateRefreshTokenAction())->execute($eve_data);
+
+    test()->assertDatabaseHas('refresh_tokens', [
+        'character_id'  => test()->test_user->id,
+        'refresh_token' => 'new_refreshToken',
+    ]);
+});
+
+it('does not update refresh token for new session of a valid refresh token user', function () {
+    // create RefreshToken
+    $eve_data = createSocialiteUser(test()->test_user->id);
+
+    Event::fakeFor(function () use ($eve_data) {
+        RefreshToken::factory()->create([
+            'character_id'  => test()->test_user->id,
+            'refresh_token' => 'refresh_token',
+        ]);
+
+        (new UpdateRefreshTokenAction())->execute($eve_data);
+    });
+
+    test()->assertDatabaseHas('refresh_tokens', [
+        'character_id'  => test()->test_user->id,
+        'refresh_token' => 'refresh_token',
+    ]);
+
+    // Change RefreshToken
+
+    $eve_data = createSocialiteUser(test()->test_user->id, 'new_refreshToken');
+
+    (new UpdateRefreshTokenAction())->execute($eve_data);
+
+    test()->assertDatabaseMissing('refresh_tokens', [
+        'character_id'  => test()->test_user->id,
+        'refresh_token' => 'new_refreshToken',
+    ]);
+});
+
+test('restore trashed refresh token', function () {
+    // create RefreshToken
+    $eve_data = createSocialiteUser(test()->test_user->id);
+
+    Event::fakeFor(function () use ($eve_data) {
+        (new UpdateRefreshTokenAction())->execute($eve_data);
+    });
+
+    test()->assertDatabaseHas('refresh_tokens', [
+        'character_id' => test()->test_user->id,
+    ]);
+
+    // Assert if RefreshToken was created
+    $refresh_token = RefreshToken::find(test()->test_user->id);
+
+    test()->assertNotEmpty($refresh_token);
+
+    // SoftDelete RefreshToken
+    $refresh_token->delete();
+
+    test()->assertSoftDeleted(RefreshToken::find(test()->test_user->id));
+
+    // Recreate RefreshToken
+    $eve_data = createSocialiteUser(test()->test_user->id, 'newRefreshToken');
+    (new UpdateRefreshTokenAction())->execute($eve_data);
+    test()->assertNotEmpty(RefreshToken::find(test()->test_user->id));
+    test()->assertDatabaseHas('refresh_tokens', [
+        'character_id'  => test()->test_user->id,
+        'refresh_token' => 'newRefreshToken',
+    ]);
+});
+
+// Helpers
+function createSocialiteUser($character_id, $refresh_token = 'refresh_token', $scopes = '1 2', $token = 'qq3dpeTMpDkjNasdasdewva3Be658eVVkox_1Ikodc')
 {
-    /** @test */
-    public function CreateRefreshToken()
-    {
-        $eve_data = $this->createSocialiteUser($this->test_user->id);
+    $socialiteUser = test()->createMock(SocialiteUser::class);
+    $socialiteUser->character_id = $character_id;
+    $socialiteUser->refresh_token = $refresh_token;
+    $socialiteUser->scopes = $scopes;
+    $socialiteUser->token = $token;
+    $socialiteUser->expires_on = carbon('now')->addMinutes(15);
 
-        Event::fakeFor(function () use ($eve_data) {
-            (new UpdateRefreshTokenAction())->execute($eve_data);
-        });
-
-        $this->assertDatabaseHas('refresh_tokens', [
-            'character_id' => $this->test_user->id,
-        ]);
-    }
-
-    /** @test */
-    public function it_does_update_refresh_token_active_sessions()
-    {
-        $this->actingAs($this->test_user);
-
-        // create RefreshToken
-        $eve_data = $this->createSocialiteUser($this->test_user->id);
-
-        Event::fakeFor(function () use ($eve_data) {
-            (new UpdateRefreshTokenAction())->execute($eve_data);
-        });
-
-        $this->assertDatabaseHas('refresh_tokens', [
-            'character_id'  => $this->test_user->id,
-            'refresh_token' => 'refresh_token',
-        ]);
-
-        $this->actingAs($this->test_user);
-        // Change RefreshToken
-
-        $eve_data = $this->createSocialiteUser($this->test_user->id, 'new_refreshToken');
-
-        (new UpdateRefreshTokenAction())->execute($eve_data);
-
-        $this->assertDatabaseHas('refresh_tokens', [
-            'character_id'  => $this->test_user->id,
-            'refresh_token' => 'new_refreshToken',
-        ]);
-    }
-
-    /** @test */
-    public function it_does_not_update_refresh_token_for_new_session_of_a_valid_refresh_token_user()
-    {
-        // create RefreshToken
-        $eve_data = $this->createSocialiteUser($this->test_user->id);
-
-        Event::fakeFor(function () use ($eve_data) {
-            RefreshToken::factory()->create([
-                'character_id'  => $this->test_user->id,
-                'refresh_token' => 'refresh_token',
-            ]);
-
-            (new UpdateRefreshTokenAction())->execute($eve_data);
-        });
-
-        $this->assertDatabaseHas('refresh_tokens', [
-            'character_id'  => $this->test_user->id,
-            'refresh_token' => 'refresh_token',
-        ]);
-
-        // Change RefreshToken
-
-        $eve_data = $this->createSocialiteUser($this->test_user->id, 'new_refreshToken');
-
-        (new UpdateRefreshTokenAction())->execute($eve_data);
-
-        $this->assertDatabaseMissing('refresh_tokens', [
-            'character_id'  => $this->test_user->id,
-            'refresh_token' => 'new_refreshToken',
-        ]);
-    }
-
-    /** @test */
-    public function RestoreTrashedRefreshToken()
-    {
-        // create RefreshToken
-        $eve_data = $this->createSocialiteUser($this->test_user->id);
-
-        Event::fakeFor(function () use ($eve_data) {
-            (new UpdateRefreshTokenAction())->execute($eve_data);
-        });
-
-        $this->assertDatabaseHas('refresh_tokens', [
-            'character_id' => $this->test_user->id,
-        ]);
-
-        // Assert if RefreshToken was created
-        $refresh_token = RefreshToken::find($this->test_user->id);
-
-        $this->assertNotEmpty($refresh_token);
-
-        // SoftDelete RefreshToken
-        $refresh_token->delete();
-
-        $this->assertSoftDeleted(RefreshToken::find($this->test_user->id));
-
-        // Recreate RefreshToken
-        $eve_data = $this->createSocialiteUser($this->test_user->id, 'newRefreshToken');
-        (new UpdateRefreshTokenAction())->execute($eve_data);
-        $this->assertNotEmpty(RefreshToken::find($this->test_user->id));
-        $this->assertDatabaseHas('refresh_tokens', [
-            'character_id'  => $this->test_user->id,
-            'refresh_token' => 'newRefreshToken',
-        ]);
-    }
-
-    private function createSocialiteUser($character_id, $refresh_token = 'refresh_token', $scopes = '1 2', $token = 'qq3dpeTMpDkjNasdasdewva3Be658eVVkox_1Ikodc')
-    {
-        $socialiteUser = $this->createMock(SocialiteUser::class);
-        $socialiteUser->character_id = $character_id;
-        $socialiteUser->refresh_token = $refresh_token;
-        $socialiteUser->scopes = $scopes;
-        $socialiteUser->token = $token;
-        $socialiteUser->expires_on = carbon('now')->addMinutes(15);
-
-        return $socialiteUser;
-    }
+    return $socialiteUser;
 }

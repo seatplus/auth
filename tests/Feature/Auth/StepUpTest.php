@@ -24,8 +24,6 @@
  * SOFTWARE.
  */
 
-namespace Seatplus\Auth\Tests\Feature\Auth;
-
 use Illuminate\Support\Facades\Event;
 use Laravel\Socialite\Contracts\Factory;
 use Laravel\Socialite\Facades\Socialite;
@@ -35,70 +33,65 @@ use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 use Seatplus\Eveapi\Models\RefreshToken;
 use Seatplus\Eveapi\Models\SsoScopes;
 
-class StepUpTest extends TestCase
+uses(TestCase::class);
+
+beforeEach(function () {
+    Event::fake();
+
+    //test()->test_character =
+
+    //\Mockery::mock(Factory::class)->shouldReceive('driver')->andReturn('');
+    Socialite::shouldReceive('driver->scopes->redirect')->andReturn('');
+});
+
+test('one can request another scope', function () {
+
+    // 1. Create refresh_token
+    createRefreshTokenWithScopes(['a', 'b']);
+
+    // 2. Create SsoScope (Corporation)
+    /*createCorporationSsoScope([
+        'character'   => ['a'],
+        'corporation' => [],
+    ]);*/
+
+    $add_scopes = implode(',', ['1', '2']);
+
+    $response = test()->actingAs(test()->test_user)->get(route('auth.eve.step_up', [
+        'character_id' => test()->test_character->character_id,
+        'add_scopes'   => $add_scopes,
+    ]));
+
+    test()->assertEquals(test()->test_character->character_id, session('step_up'));
+    test()->assertEquals(['a', 'b', '1', '2'], session('sso_scopes'));
+});
+
+// Helpers
+function createCorporationSsoScope(array $array)
 {
-    public function setUp(): void
-    {
-        parent::setUp();
+    SsoScopes::factory()->create([
+        'selected_scopes' => $array,
+        'morphable_id'    => test()->test_character->corporation->corporation_id,
+        'morphable_type'  => CorporationInfo::class,
+    ]);
+}
 
-        Event::fake();
+function createRefreshTokenWithScopes(array $array)
+{
+    Event::fakeFor(function () use ($array) {
 
-        //$this->test_character =
+        if(test()->test_character->refresh_token) {
 
-        //\Mockery::mock(Factory::class)->shouldReceive('driver')->andReturn('');
-        Socialite::shouldReceive('driver->scopes->redirect')->andReturn('');
-    }
+            $refresh_token = test()->test_character->refresh_token;
+            $refresh_token->scopes = $array;
+            $refresh_token->save();
 
-    /** @test */
-    public function one_can_request_another_scope()
-    {
+            return;
+        }
 
-        // 1. Create refresh_token
-        $this->createRefreshTokenWithScopes(['a', 'b']);
-
-        // 2. Create SsoScope (Corporation)
-        /*$this->createCorporationSsoScope([
-            'character'   => ['a'],
-            'corporation' => [],
-        ]);*/
-
-        $add_scopes = implode(',', ['1', '2']);
-
-        $response = $this->actingAs($this->test_user)->get(route('auth.eve.step_up', [
-            'character_id' => $this->test_character->character_id,
-            'add_scopes'   => $add_scopes,
-        ]));
-
-        $this->assertEquals($this->test_character->character_id, session('step_up'));
-        $this->assertEquals(['a', 'b', '1', '2'], session('sso_scopes'));
-    }
-
-    private function createCorporationSsoScope(array $array)
-    {
-        SsoScopes::factory()->create([
-            'selected_scopes' => $array,
-            'morphable_id'    => $this->test_character->corporation->corporation_id,
-            'morphable_type'  => CorporationInfo::class,
+        RefreshToken::factory()->create([
+            'character_id' => test()->test_character->character_id,
+            'scopes'       => $array,
         ]);
-    }
-
-    private function createRefreshTokenWithScopes(array $array)
-    {
-        Event::fakeFor(function () use ($array) {
-
-            if($this->test_character->refresh_token) {
-
-                $refresh_token = $this->test_character->refresh_token;
-                $refresh_token->scopes = $array;
-                $refresh_token->save();
-
-                return;
-            }
-
-            RefreshToken::factory()->create([
-                'character_id' => $this->test_character->character_id,
-                'scopes'       => $array,
-            ]);
-        });
-    }
+    });
 }
