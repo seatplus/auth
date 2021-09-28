@@ -1,176 +1,157 @@
 <?php
 
 
-namespace Seatplus\Auth\Tests\Feature\Jobs;
-
-
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
 use Seatplus\Auth\Jobs\DispatchUserRoleSync;
 use Seatplus\Auth\Jobs\UserRolesSync;
-use Seatplus\Auth\Models\AccessControl\AclMember;
 use Seatplus\Auth\Models\Permissions\Affiliation;
 use Seatplus\Auth\Models\Permissions\Role;
 use Seatplus\Auth\Models\User;
-use Seatplus\Auth\Tests\TestCase;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\RefreshToken;
 
-class UserRolesSyncTest extends TestCase
-{
-    /**
-     * @var \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model
-     */
-    private Role $role;
+beforeEach(function () {
+    test()->role = Role::create(['name' => 'derp']);
 
-    /**
-     * @var \Seatplus\Auth\Jobs\UserRolesSync
-     */
-    private UserRolesSync $job;
+    test()->test_user = test()->test_user->refresh();
 
-    public function setUp(): void
-    {
+    test()->job = new UserRolesSync(test()->test_user);
+});
 
-        parent::setUp();
+it('gives automatic role', function () {
+    // Update role to be automatic
+    test()->role->update(['type' => 'automatic']);
 
-        $this->role = Role::create(['name' => 'derp']);
+    //assure that role is of type auto
+    expect(test()->role->type)->toEqual('automatic');
 
-        $this->test_user = $this->test_user->refresh();
+    // First create acl affiliation with user
+    test()->role->acl_affiliations()->create([
+        'affiliatable_id' => test()->test_character->character_id,
+        'affiliatable_type' => CharacterInfo::class,
+    ]);
 
-        $this->job = new UserRolesSync($this->test_user);
-    }
+    expect(test()->role->members->isEmpty())->toBeTrue();
 
-    /** @test */
-    public function it_gives_automatic_role()
-    {
-        // Update role to be automatic
-        $this->role->update(['type' => 'automatic']);
+    test()->job->handle();
 
-        //assure that role is of type auto
-        $this->assertEquals('automatic', $this->role->type);
+    expect(test()->role->refresh()->members->isEmpty())->toBeFalse();
 
-        // First create acl affiliation with user
-        $this->role->acl_affiliations()->create([
-            'affiliatable_id' => $this->test_character->character_id,
-            'affiliatable_type' => CharacterInfo::class,
-        ]);
+    expect(test()->test_user->hasRole('derp'))->toBeTrue();
+});
 
-        $this->assertTrue($this->role->members->isEmpty());
+it('removes automatic role', function () {
 
-        $this->job->handle();
+    // Update role to be automatic
+    test()->role->update(['type' => 'automatic']);
 
-        $this->assertFalse($this->role->refresh()->members->isEmpty());
+    //assure that role is of type auto
+    expect(test()->role->type)->toEqual('automatic');
 
-        $this->assertTrue($this->test_user->hasRole('derp'));
-    }
+    // First create acl affiliation with user
+    test()->role->acl_affiliations()->create([
+        'affiliatable_id' => test()->test_character->character_id,
+        'affiliatable_type' => CharacterInfo::class,
+    ]);
 
-    /** @test */
-    public function it_removes_automatic_role()
-    {
+    expect(test()->role->members->isEmpty())->toBeTrue();
 
-        $this->it_gives_automatic_role();
+    test()->job->handle();
 
-        RefreshToken::find($this->test_character->character_id)->delete();
+    expect(test()->role->refresh()->members->isEmpty())->toBeFalse();
 
-        // we need a new job instance, as the valid character_ids are build in the constructor of the job
-        $job = new UserRolesSync($this->test_user->refresh());
-        $job->handle();
+    expect(test()->test_user->hasRole('derp'))->toBeTrue();
 
-        $this->assertFalse($this->test_user->hasRole('derp'));
+    RefreshToken::find(test()->test_character->character_id)->delete();
 
-    }
+    // we need a new job instance, as the valid character_ids are build in the constructor of the job
+    $job = new UserRolesSync(test()->test_user->refresh());
+    $job->handle();
 
-    /** @test */
-    public function it_adds_membership_for_paused_user()
-    {
-        // Update role to be on-request
-        $this->role->update(['type' => 'on-request']);
+    expect(test()->test_user->hasRole('derp'))->toBeFalse();
 
-        //assure that role is of type auto
-        $this->assertEquals('on-request', $this->role->type);
+});
 
-        // First create acl affiliation with user
-        $this->role->acl_affiliations()->create([
-            'affiliatable_id' => $this->test_character->character_id,
-            'affiliatable_type' => CharacterInfo::class,
-        ]);
+it('adds membership for paused user', function () {
+    // Update role to be on-request
+    test()->role->update(['type' => 'on-request']);
 
-        // Second add character as paused to role
-        $this->role->acl_members()->create([
-            'user_id' => $this->test_user->getAuthIdentifier(),
-            'status' => 'paused'
-        ]);
+    //assure that role is of type auto
+    expect(test()->role->type)->toEqual('on-request');
 
-        $this->assertTrue($this->role->members->isEmpty());
+    // First create acl affiliation with user
+    test()->role->acl_affiliations()->create([
+        'affiliatable_id' => test()->test_character->character_id,
+        'affiliatable_type' => CharacterInfo::class,
+    ]);
 
-        $this->job->handle();
+    // Second add character as paused to role
+    test()->role->acl_members()->create([
+        'user_id' => test()->test_user->getAuthIdentifier(),
+        'status' => 'paused'
+    ]);
 
-        $this->assertFalse($this->role->refresh()->members->isEmpty());
-    }
+    expect(test()->role->members->isEmpty())->toBeTrue();
 
-    /** @test */
-    public function it_removes_membership_if_refresh_token_is_removed()
-    {
-        // Update role to be on-request
-        $this->role->update(['type' => 'on-request']);
+    test()->job->handle();
 
-        //assure that role is of type auto
-        $this->assertEquals('on-request', $this->role->type);
+    expect(test()->role->refresh()->members->isEmpty())->toBeFalse();
+});
 
-        // First create acl affiliation with user
-        $this->role->acl_affiliations()->create([
-            'affiliatable_id' => $this->test_character->character_id,
-            'affiliatable_type' => CharacterInfo::class,
-        ]);
+it('removes membership if refresh token is removed', function () {
+    // Update role to be on-request
+    test()->role->update(['type' => 'on-request']);
 
-        // Second add character as paused to role
-        $this->role->acl_members()->create([
-            'user_id' => $this->test_user->getAuthIdentifier(),
-            'status' => 'member'
-        ]);
+    //assure that role is of type auto
+    expect(test()->role->type)->toEqual('on-request');
 
-        $this->assertFalse($this->role->refresh()->members->isEmpty());
+    // First create acl affiliation with user
+    test()->role->acl_affiliations()->create([
+        'affiliatable_id' => test()->test_character->character_id,
+        'affiliatable_type' => CharacterInfo::class,
+    ]);
 
-        // Remove refresh_token
-        RefreshToken::find($this->test_character->character_id)->delete();
+    // Second add character as paused to role
+    test()->role->acl_members()->create([
+        'user_id' => test()->test_user->getAuthIdentifier(),
+        'status' => 'member'
+    ]);
 
-        // we need a new job instance, as the valid character_ids are build in the constructor of the job
-        $job = new UserRolesSync($this->test_user->refresh());
-        $job->handle();
+    expect(test()->role->refresh()->members->isEmpty())->toBeFalse();
 
-        $this->assertTrue($this->role->refresh()->members->isEmpty());
-    }
+    // Remove refresh_token
+    RefreshToken::find(test()->test_character->character_id)->delete();
 
-    /** @test */
-    public function roles_without_acl_affiliations_are_not_impacted_by_job()
-    {
-        // Update role to be on-request
-        $this->role->update(['type' => 'automatic']);
+    // we need a new job instance, as the valid character_ids are build in the constructor of the job
+    $job = new UserRolesSync(test()->test_user->refresh());
+    $job->handle();
 
-        $this->assertTrue($this->role->acl_affiliations->isEmpty());
+    expect(test()->role->refresh()->members->isEmpty())->toBeTrue();
+});
 
-        //assure that role is of type auto
-        $this->assertEquals('automatic', $this->role->type);
+test('roles without acl affiliations are not impacted by job', function () {
+    // Update role to be on-request
+    test()->role->update(['type' => 'automatic']);
+
+    expect(test()->role->acl_affiliations->isEmpty())->toBeTrue();
+
+    //assure that role is of type auto
+    expect(test()->role->type)->toEqual('automatic');
 
 
-        $this->assertFalse($this->test_user->hasRole($this->role));
+    expect(test()->test_user->hasRole(test()->role))->toBeFalse();
 
-        $this->job->handle();
+    test()->job->handle();
 
-        $this->assertFalse($this->test_user->hasRole($this->role));
-    }
+    expect(test()->test_user->hasRole(test()->role))->toBeFalse();
+});
 
-    /** @test */
-    public function dispatching_roles_sync()
-    {
-        Queue::fake();
+test('dispatching roles sync', function () {
+    Queue::fake();
 
-        $dispatch_job = new DispatchUserRoleSync;
+    $dispatch_job = new DispatchUserRoleSync;
 
-        $dispatch_job->handle();
+    $dispatch_job->handle();
 
-        Queue::assertPushedOn('high', UserRolesSync::class);
-    }
-
-}
+    Queue::assertPushedOn('high', UserRolesSync::class);
+});

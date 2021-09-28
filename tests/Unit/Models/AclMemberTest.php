@@ -1,41 +1,23 @@
 <?php
 
 
-namespace Seatplus\Auth\Tests\Unit\Models;
-
-
 use Seatplus\Auth\Models\AccessControl\AclMember;
 use Seatplus\Auth\Models\Permissions\Role;
 use Seatplus\Auth\Models\User;
-use Seatplus\Auth\Tests\TestCase;
 
-class AclMemberTest extends TestCase
-{
-    /**
-     * @var \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model
-     */
-    private $role;
+beforeEach(function () {
+    test()->role = Role::create(['name' => 'derp']);
+});
 
-    public function setUp(): void
-    {
+it('has user relationship', function () {
+    test()->role->members()->create([
+        'user_id' => test()->test_user->id,
+        'status' => 'member'
+    ]);
 
-        parent::setUp();
+    $member = AclMember::where('user_id',test()->test_user->id)
+        ->get()->first();
 
-        $this->role = Role::create(['name' => 'derp']);
-    }
+    expect($member->user::class)->toEqual(User::class);
 
-    /** @test */
-    public function it_has_user_relationship()
-    {
-        $this->role->members()->create([
-            'user_id' => $this->test_user->id,
-            'status' => 'member'
-        ]);
-
-        $member = AclMember::where('user_id',$this->test_user->id)
-            ->get()->first();
-
-        $this->assertEquals(User::class, $member->user::class);
-
-    }
-}
+});

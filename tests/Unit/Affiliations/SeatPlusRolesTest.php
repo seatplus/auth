@@ -24,302 +24,251 @@
  * SOFTWARE.
  */
 
-namespace Seatplus\Auth\Tests\Unit\Affiliations;
-
 use Illuminate\Support\Facades\Event;
-use Seatplus\Auth\Models\Permissions\Affiliation;
 use Seatplus\Auth\Models\Permissions\Role;
-use Seatplus\Auth\Tests\TestCase;
 use Seatplus\Eveapi\Models\Alliance\AllianceInfo;
-use Seatplus\Eveapi\Models\Character\CharacterAffiliation;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 
-class SeatPlusRolesTest extends TestCase
-{
-    private $secondary_character;
+//uses(\Seatplus\Auth\Tests\TestCase::class);
 
-    private $tertiary_character;
+beforeEach(function () {
+    Event::fake();
 
-    private Role $role;
+    test()->secondary_character = CharacterInfo::factory()->create();
 
-    public function setUp(): void
-    {
-        parent::setUp();
+    test()->tertiary_character = CharacterInfo::factory()->create();
 
-        Event::fake();
+    test()->role = Role::create(['name' => 'derp']);
+});
 
-        $this->secondary_character = CharacterInfo::factory()->create();
+test('user has no roles test', function () {
+    expect(test()->test_user->roles->isEmpty())->toBeTrue();
+});
 
-        $this->tertiary_character = CharacterInfo::factory()->create();
+test('user has role test', function () {
+    test()->test_user->assignRole(test()->role);
 
-        $this->role = Role::create(['name' => 'derp']);
-    }
+    expect(test()->test_user->roles->isNotEmpty())->toBeTrue();
+});
 
-    /** @test */
-    public function userHasNoRolesTest()
-    {
-        $this->assertTrue($this->test_user->roles->isEmpty());
-    }
+test('role has no affiliation test', function () {
 
-    /** @test */
-    public function userHasRoleTest()
-    {
-        $this->test_user->assignRole($this->role);
+    expect(test()->role->affiliations->isEmpty())->toBeTrue();
+});
 
-        $this->assertTrue($this->test_user->roles->isNotEmpty());
-    }
+test('role has an affiliation test', function () {
+    test()->role->affiliations()->create([
+        'affiliatable_id' => test()->test_character->character_id,
+        'affiliatable_type' => CharacterInfo::class,
+        'type' => 'allowed'
+    ]);
 
-    /** @test */
-    public function roleHasNoAffiliationTest()
-    {
+    test()->assertNotNUll(test()->role->affiliations);
+});
 
-        $this->assertTrue($this->role->affiliations->isEmpty());
-    }
+test('user is in affiliation test', function () {
 
-    /** @test */
-    public function roleHasAnAffiliationTest()
-    {
-        $this->role->affiliations()->create([
-            'affiliatable_id' => $this->test_character->character_id,
-            'affiliatable_type' => CharacterInfo::class,
-            'type' => 'allowed'
-        ]);
+    test()->role->affiliations()->create([
+        'affiliatable_id' => test()->test_character->character_id,
+        'affiliatable_type' => CharacterInfo::class,
+        'type'         => 'allowed',
+    ]);
 
-        $this->assertNotNUll($this->role->affiliations);
-    }
+    expect(in_array(test()->test_character->character_id, test()->role->affiliated_ids))->toBeTrue();
+});
 
-    /** @test */
-    public function userIsInAffiliationTest()
-    {
+test('character is in character allowed affiliation test', function () {
 
-        $this->role->affiliations()->create([
-            'affiliatable_id' => $this->test_character->character_id,
+    $secondary_character = CharacterInfo::factory()->create();
+
+    test()->role->affiliations()->createMany([
+        [
+            'affiliatable_id' => test()->test_character->character_id,
             'affiliatable_type' => CharacterInfo::class,
             'type'         => 'allowed',
-        ]);
+        ],
+        [
+            'affiliatable_id' => $secondary_character->character_id,
+            'affiliatable_type' => CharacterInfo::class,
+            'type'         => 'allowed',
+        ],
 
-        $this->assertTrue(in_array($this->test_character->character_id, $this->role->affiliated_ids));
-    }
+    ]);
 
-    /** @test */
-    public function characterIsInCharacterAllowedAffiliationTest()
-    {
+    expect(in_array(test()->test_character->character_id, test()->role->affiliated_ids))->toBeTrue();
+    expect(in_array($secondary_character->character_id, test()->role->affiliated_ids))->toBeTrue();
+});
 
-        $secondary_character = CharacterInfo::factory()->create();
+test('character is in character inversed affiliation test', function () {
 
-        $this->role->affiliations()->createMany([
-            [
-                'affiliatable_id' => $this->test_character->character_id,
-                'affiliatable_type' => CharacterInfo::class,
-                'type'         => 'allowed',
-            ],
-            [
-                'affiliatable_id' => $secondary_character->character_id,
-                'affiliatable_type' => CharacterInfo::class,
-                'type'         => 'allowed',
-            ],
+    test()->role->affiliations()->createMany([
+        [
+            'affiliatable_id' => test()->test_character->character_id,
+            'affiliatable_type' => CharacterInfo::class,
+            'type'         => 'inverse',
+        ],
+        [
+            'affiliatable_id' => 1234,
+            'affiliatable_type' => CharacterInfo::class,
+            'type'         => 'inverse',
+        ],
+    ]);
 
-        ]);
+    expect(in_array(test()->test_character->character_id, test()->role->affiliated_ids))->toBeFalse();
+    expect(in_array(test()->secondary_character->character_id, test()->role->affiliated_ids))->toBeTrue();
+});
 
-        $this->assertTrue(in_array($this->test_character->character_id, $this->role->affiliated_ids));
-        $this->assertTrue(in_array($secondary_character->character_id, $this->role->affiliated_ids));
-    }
+test('character is not in character inverse affiliation test', function () {
 
-    /** @test */
-    public function characterIsInCharacterInversedAffiliationTest()
-    {
+    test()->role->affiliations()->createMany([
+        [
+            'affiliatable_id' => test()->secondary_character->character_id,
+            'affiliatable_type' => CharacterInfo::class,
+            'type'         => 'inverse',
+        ],
+        [
+            'affiliatable_id' => test()->tertiary_character->character_id,
+            'affiliatable_type' => CharacterInfo::class,
+            'type'         => 'inverse',
+        ],
+    ]);
 
-        $this->role->affiliations()->createMany([
-            [
-                'affiliatable_id' => $this->test_character->character_id,
-                'affiliatable_type' => CharacterInfo::class,
-                'type'         => 'inverse',
-            ],
-            [
-                'affiliatable_id' => 1234,
-                'affiliatable_type' => CharacterInfo::class,
-                'type'         => 'inverse',
-            ],
-        ]);
+    expect(in_array(test()->test_character->character_id, test()->role->affiliated_ids))->toBeTrue();
+    expect(in_array(test()->secondary_character->character_id, test()->role->affiliated_ids))->toBeFalse();
+    expect(in_array(test()->tertiary_character->character_id, test()->role->affiliated_ids))->toBeFalse();
+});
 
-        $this->assertFalse(in_array($this->test_character->character_id, $this->role->affiliated_ids));
-        $this->assertTrue(in_array($this->secondary_character->character_id, $this->role->affiliated_ids));
-    }
-
-    /** @test */
-    public function characterIsNotInCharacterInverseAffiliationTest()
-    {
-
-        $this->role->affiliations()->createMany([
-            [
-                'affiliatable_id' => $this->secondary_character->character_id,
-                'affiliatable_type' => CharacterInfo::class,
-                'type'         => 'inverse',
-            ],
-            [
-                'affiliatable_id' => $this->tertiary_character->character_id,
-                'affiliatable_type' => CharacterInfo::class,
-                'type'         => 'inverse',
-            ],
-        ]);
-
-        $this->assertTrue(in_array($this->test_character->character_id, $this->role->affiliated_ids));
-        $this->assertFalse(in_array($this->secondary_character->character_id, $this->role->affiliated_ids));
-        $this->assertFalse(in_array($this->tertiary_character->character_id, $this->role->affiliated_ids));
-    }
-
-    /** @test */
-    public function characterIsInCharacterForbiddenAffiliationTest()
-    {
+test('character is in character forbidden affiliation test', function () {
 
 
-        $this->role->affiliations()->createMany([
-            [
-                'affiliatable_id' => $this->test_character->character_id,
-                'affiliatable_type' => CharacterInfo::class,
-                'type'         => 'forbidden',
-            ],
-            [
-                'affiliatable_id' => $this->secondary_character->character_id,
-                'affiliatable_type' => CharacterInfo::class,
-                'type'         => 'forbidden',
-            ],
-        ]);
+    test()->role->affiliations()->createMany([
+        [
+            'affiliatable_id' => test()->test_character->character_id,
+            'affiliatable_type' => CharacterInfo::class,
+            'type'         => 'forbidden',
+        ],
+        [
+            'affiliatable_id' => test()->secondary_character->character_id,
+            'affiliatable_type' => CharacterInfo::class,
+            'type'         => 'forbidden',
+        ],
+    ]);
 
-        $this->assertFalse(in_array($this->test_character->character_id, $this->role->affiliated_ids));
-        $this->assertFalse(in_array($this->secondary_character->character_id, $this->role->affiliated_ids));
-        $this->assertFalse(in_array($this->tertiary_character->character_id, $this->role->affiliated_ids));
-    }
+    expect(in_array(test()->test_character->character_id, test()->role->affiliated_ids))->toBeFalse();
+    expect(in_array(test()->secondary_character->character_id, test()->role->affiliated_ids))->toBeFalse();
+    expect(in_array(test()->tertiary_character->character_id, test()->role->affiliated_ids))->toBeFalse();
+});
 
-    //TODO: Assertion that checks combination of forbidden character and allowed/inverse corporation
+test('character is in corporation allowed affiliation test', function () {
 
-    // Corporation
+    test()->role->affiliations()->create([
+        'affiliatable_id' => test()->test_character->corporation_id,
+        'affiliatable_type' => CorporationInfo::class,
+        'type'           => 'allowed',
+    ]);
 
-    /** @test */
-    public function characterIsInCorporationAllowedAffiliationTest()
-    {
+    expect(in_array(test()->test_character->character_id, test()->role->affiliated_ids))->toBeTrue();
+    expect(in_array(test()->secondary_character->character_id, test()->role->affiliated_ids))->toBeFalse();
+    expect(in_array(test()->tertiary_character->character_id, test()->role->affiliated_ids))->toBeFalse();
+});
 
-        $this->role->affiliations()->create([
-            'affiliatable_id' => $this->test_character->corporation_id,
+test('character is in corporation inversed affiliation test', function () {
+
+    test()->role->affiliations()->createMany([
+        [
+            'affiliatable_id' => test()->test_character->corporation_id,
             'affiliatable_type' => CorporationInfo::class,
-            'type'           => 'allowed',
-        ]);
+            'type'           => 'inverse',
+        ],
+        [
+            'affiliatable_id' => test()->secondary_character->corporation_id,
+            'affiliatable_type' => CorporationInfo::class,
+            'type'           => 'inverse',
+        ],
+    ]);
 
-        $this->assertTrue(in_array($this->test_character->character_id, $this->role->affiliated_ids));
-        $this->assertFalse(in_array($this->secondary_character->character_id, $this->role->affiliated_ids));
-        $this->assertFalse(in_array($this->tertiary_character->character_id, $this->role->affiliated_ids));
-    }
+    expect(in_array(test()->test_character->character_id, test()->role->affiliated_ids))->toBeFalse();
+    expect(in_array(test()->secondary_character->character_id, test()->role->affiliated_ids))->toBeFalse();
+    expect(in_array(test()->tertiary_character->character_id, test()->role->affiliated_ids))->toBeTrue();
+});
 
-    /** @test */
-    public function characterIsInCorporationInversedAffiliationTest()
-    {
+test('character is in corporation forbidden affiliation test', function () {
 
-        $this->role->affiliations()->createMany([
-            [
-                'affiliatable_id' => $this->test_character->corporation_id,
-                'affiliatable_type' => CorporationInfo::class,
-                'type'           => 'inverse',
-            ],
-            [
-                'affiliatable_id' => $this->secondary_character->corporation_id,
-                'affiliatable_type' => CorporationInfo::class,
-                'type'           => 'inverse',
-            ],
-        ]);
+    test()->role->affiliations()->createMany([
+        [
+            'affiliatable_id' => test()->test_character->corporation_id,
+            'affiliatable_type' => CorporationInfo::class,
+            'type'           => 'forbidden',
+        ],
+        [
+            'affiliatable_id' => test()->secondary_character->corporation_id,
+            'affiliatable_type' => CorporationInfo::class,
+            'type'           => 'forbidden',
+        ],
+    ]);
 
-        $this->assertFalse(in_array($this->test_character->character_id, $this->role->affiliated_ids));
-        $this->assertFalse(in_array($this->secondary_character->character_id, $this->role->affiliated_ids));
-        $this->assertTrue(in_array($this->tertiary_character->character_id, $this->role->affiliated_ids));
-    }
+    expect(in_array(test()->test_character->character_id, test()->role->affiliated_ids))->toBeFalse();
+    expect(in_array(test()->secondary_character->character_id, test()->role->affiliated_ids))->toBeFalse();
+    expect(in_array(test()->tertiary_character->character_id, test()->role->affiliated_ids))->toBeFalse();
+});
 
-    /** @test */
-    public function characterIsInCorporationForbiddenAffiliationTest()
-    {
+test('character is in alliance allowed affiliation test', function () {
 
-        $this->role->affiliations()->createMany([
-            [
-                'affiliatable_id' => $this->test_character->corporation_id,
-                'affiliatable_type' => CorporationInfo::class,
-                'type'           => 'forbidden',
-            ],
-            [
-                'affiliatable_id' => $this->secondary_character->corporation_id,
-                'affiliatable_type' => CorporationInfo::class,
-                'type'           => 'forbidden',
-            ],
-        ]);
+    test()->role->affiliations()->createMany([
+        [
+            'affiliatable_id' => test()->test_character->alliance_id,
+            'affiliatable_type' => AllianceInfo::class,
+            'type'        => 'allowed',
+        ],
+        [
+            'affiliatable_id' => test()->secondary_character->alliance_id,
+            'affiliatable_type' => AllianceInfo::class,
+            'type'        => 'allowed',
+        ],
+    ]);
 
-        $this->assertFalse(in_array($this->test_character->character_id, $this->role->affiliated_ids));
-        $this->assertFalse(in_array($this->secondary_character->character_id, $this->role->affiliated_ids));
-        $this->assertFalse(in_array($this->tertiary_character->character_id, $this->role->affiliated_ids));
-    }
+    expect(in_array(test()->test_character->character_id, test()->role->affiliated_ids))->toBeTrue();
+    expect(in_array(test()->secondary_character->character_id, test()->role->affiliated_ids))->toBeTrue();
+    expect(in_array(test()->tertiary_character->character_id, test()->role->affiliated_ids))->toBeFalse();
+});
 
-    // Alliance
+test('character is in alliance inversed affiliation test', function () {
 
-    /** @test */
-    public function characterIsInAllianceAllowedAffiliationTest()
-    {
+    test()->role->affiliations()->createMany([
+        [
+            'affiliatable_id' => test()->test_character->alliance_id,
+            'affiliatable_type' => AllianceInfo::class,
+            'type'        => 'inverse',
+        ],
+        [
+            'affiliatable_id' => test()->secondary_character->alliance_id,
+            'affiliatable_type' => AllianceInfo::class,
+            'type'        => 'inverse',
+        ],
+    ]);
 
-        $this->role->affiliations()->createMany([
-            [
-                'affiliatable_id' => $this->test_character->alliance_id,
-                'affiliatable_type' => AllianceInfo::class,
-                'type'        => 'allowed',
-            ],
-            [
-                'affiliatable_id' => $this->secondary_character->alliance_id,
-                'affiliatable_type' => AllianceInfo::class,
-                'type'        => 'allowed',
-            ],
-        ]);
+    expect(in_array(test()->test_character->character_id, test()->role->affiliated_ids))->toBeFalse();
+    expect(in_array(test()->secondary_character->character_id, test()->role->affiliated_ids))->toBeFalse();
+    expect(in_array(test()->tertiary_character->character_id, test()->role->affiliated_ids))->toBeTrue();
+});
 
-        $this->assertTrue(in_array($this->test_character->character_id, $this->role->affiliated_ids));
-        $this->assertTrue(in_array($this->secondary_character->character_id, $this->role->affiliated_ids));
-        $this->assertFalse(in_array($this->tertiary_character->character_id, $this->role->affiliated_ids));
-    }
+test('character is in alliance forbidden affiliation test', function () {
 
-    /** @test */
-    public function characterIsInAllianceInversedAffiliationTest()
-    {
+    test()->role->affiliations()->createMany([
+        [
+            'affiliatable_id' => test()->test_character->alliance_id,
+            'affiliatable_type' => AllianceInfo::class,
+            'type'        => 'forbidden',
+        ],
+        [
+            'affiliatable_id' => test()->secondary_character->alliance_id,
+            'affiliatable_type' => AllianceInfo::class,
+            'type'        => 'forbidden',
+        ],
+    ]);
 
-        $this->role->affiliations()->createMany([
-            [
-                'affiliatable_id' => $this->test_character->alliance_id,
-                'affiliatable_type' => AllianceInfo::class,
-                'type'        => 'inverse',
-            ],
-            [
-                'affiliatable_id' => $this->secondary_character->alliance_id,
-                'affiliatable_type' => AllianceInfo::class,
-                'type'        => 'inverse',
-            ],
-        ]);
-
-        $this->assertFalse(in_array($this->test_character->character_id, $this->role->affiliated_ids));
-        $this->assertFalse(in_array($this->secondary_character->character_id, $this->role->affiliated_ids));
-        $this->assertTrue(in_array($this->tertiary_character->character_id, $this->role->affiliated_ids));
-    }
-
-    /** @test */
-    public function characterIsInAllianceForbiddenAffiliationTest()
-    {
-
-        $this->role->affiliations()->createMany([
-            [
-                'affiliatable_id' => $this->test_character->alliance_id,
-                'affiliatable_type' => AllianceInfo::class,
-                'type'        => 'forbidden',
-            ],
-            [
-                'affiliatable_id' => $this->secondary_character->alliance_id,
-                'affiliatable_type' => AllianceInfo::class,
-                'type'        => 'forbidden',
-            ],
-        ]);
-
-        $this->assertFalse(in_array($this->test_character->character_id, $this->role->affiliated_ids));
-        $this->assertFalse(in_array($this->secondary_character->character_id, $this->role->affiliated_ids));
-        $this->assertFalse(in_array($this->tertiary_character->character_id, $this->role->affiliated_ids));
-    }
-}
+    expect(in_array(test()->test_character->character_id, test()->role->affiliated_ids))->toBeFalse();
+    expect(in_array(test()->secondary_character->character_id, test()->role->affiliated_ids))->toBeFalse();
+    expect(in_array(test()->tertiary_character->character_id, test()->role->affiliated_ids))->toBeFalse();
+});

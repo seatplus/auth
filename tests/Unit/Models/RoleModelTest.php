@@ -24,227 +24,182 @@
  * SOFTWARE.
  */
 
-namespace Seatplus\Auth\Tests\Unit\Models;
-
 use Seatplus\Auth\Models\Permissions\Affiliation;
 use Seatplus\Auth\Models\Permissions\Permission;
 use Seatplus\Auth\Models\Permissions\Role;
-use Seatplus\Auth\Tests\TestCase;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 
-class RoleModelTest extends TestCase
-{
-    /**
-     * @var \Seatplus\Auth\Models\Permissions\Role
-     */
-    private Role $role;
+beforeEach(function () {
+    test()->role = Role::create(['name' => 'derp']);
+});
 
-    public function setUp(): void
-    {
-
-        parent::setUp();
-
-        $this->role = Role::create(['name' => 'derp']);
-    }
-
-    /** @test */
-    public function it_deletes_affiliation_after_model_deletion()
-    {
+it('deletes affiliation after model deletion', function () {
 
 
-        $affiliation = Affiliation::create([
-            'role_id' => $this->role->id,
-            'affiliatable_id' => $this->test_character->corporation_id,
-            'affiliatable_type' => CorporationInfo::class,
-            'type' => 'allowed'
-        ]);
+    $affiliation = Affiliation::create([
+        'role_id' => test()->role->id,
+        'affiliatable_id' => test()->test_character->corporation_id,
+        'affiliatable_type' => CorporationInfo::class,
+        'type' => 'allowed'
+    ]);
 
-        $this->assertDatabaseHas('affiliations', [
-            'role_id' => $this->role->id,
-        ]);
+    test()->assertDatabaseHas('affiliations', [
+        'role_id' => test()->role->id,
+    ]);
 
-        $this->role->delete();
+    test()->role->delete();
 
-        $this->assertDatabaseMissing('affiliations', [
-            'role_id' => $this->role->id,
-        ]);
-    }
+    test()->assertDatabaseMissing('affiliations', [
+        'role_id' => test()->role->id,
+    ]);
+});
 
-    /** @test */
-    public function it_deletes_permission_pivot_after_model_deletion()
-    {
+it('deletes permission pivot after model deletion', function () {
 
-        $permission_name = 'test permission';
+    $permission_name = 'test permission';
 
-        $permission = Permission::create(['name' => $permission_name]);
+    $permission = Permission::create(['name' => $permission_name]);
 
-        $this->role->givePermissionTo($permission_name);
+    test()->role->givePermissionTo($permission_name);
 
-        $this->assertDatabaseHas('role_has_permissions', [
-            'role_id'       => $this->role->id,
-            'permission_id' => $permission->id,
-        ]);
+    test()->assertDatabaseHas('role_has_permissions', [
+        'role_id'       => test()->role->id,
+        'permission_id' => $permission->id,
+    ]);
 
-        $this->role->delete();
+    test()->role->delete();
 
-        $this->assertDatabaseMissing('role_has_permissions', [
-            'role_id'       => $this->role->id,
-            'permission_id' => $permission->id,
-        ]);
-    }
+    test()->assertDatabaseMissing('role_has_permissions', [
+        'role_id'       => test()->role->id,
+        'permission_id' => $permission->id,
+    ]);
+});
 
-    /** @test */
-    public function it_has_polymorphic_relation()
-    {
+it('has polymorphic relation', function () {
 
-        $affiliation = Affiliation::create([
-            'role_id' => $this->role->id,
-            'affiliatable_id' => $this->test_character->corporation_id,
-            'affiliatable_type' => CorporationInfo::class,
-            'type' => 'allowed'
-        ]);
+    $affiliation = Affiliation::create([
+        'role_id' => test()->role->id,
+        'affiliatable_id' => test()->test_character->corporation_id,
+        'affiliatable_type' => CorporationInfo::class,
+        'type' => 'allowed'
+    ]);
 
-        $this->assertEquals(CorporationInfo::class, $this->role->affiliations->first()->affiliatable::class);
+    expect(test()->role->affiliations->first()->affiliatable::class)->toEqual(CorporationInfo::class);
 
-    }
+});
 
-    /** @test */
-    public function it_has_default_type_attribute()
-    {
+it('has default type attribute', function () {
 
-        $this->assertEquals('manual', $this->role->fresh()->type);
-    }
+    expect(test()->role->fresh()->type)->toEqual('manual');
+});
 
-    /** @test */
-    public function it_has_acl_affiliations()
-    {
+it('has acl affiliations', function () {
 
-        $this->role->acl_affiliations()->create([
-            'affiliatable_id' => $this->test_character->character_id,
-            'affiliatable_type' => CharacterInfo::class,
-        ]);
+    test()->role->acl_affiliations()->create([
+        'affiliatable_id' => test()->test_character->character_id,
+        'affiliatable_type' => CharacterInfo::class,
+    ]);
 
-        $this->assertEquals(CharacterInfo::class, $this->role->acl_affiliations->first()->affiliatable::class);
-    }
+    expect(test()->role->acl_affiliations->first()->affiliatable::class)->toEqual(CharacterInfo::class);
+});
 
-    /** @test */
-    public function it_has_acl_moderators()
-    {
+it('has acl moderators', function () {
 
-        $this->role->acl_affiliations()->create([
-            'affiliatable_id' => $this->test_character->character_id,
-            'affiliatable_type' => CharacterInfo::class,
-            'can_moderate' => true
-        ]);
+    test()->role->acl_affiliations()->create([
+        'affiliatable_id' => test()->test_character->character_id,
+        'affiliatable_type' => CharacterInfo::class,
+        'can_moderate' => true
+    ]);
 
-        $this->assertTrue($this->role->acl_affiliations->isEmpty());
+    expect(test()->role->acl_affiliations->isEmpty())->toBeTrue();
 
-        $this->assertEquals(CharacterInfo::class, $this->role->moderators->first()->affiliatable::class);
-    }
+    expect(test()->role->moderators->first()->affiliatable::class)->toEqual(CharacterInfo::class);
+});
 
-    /** @test */
-    public function it_has_acl_members()
-    {
+it('has acl members', function () {
 
-        $this->role->members()->create([
-            'user_id' => $this->test_user->id,
-            'status' => 'member'
-        ]);
+    test()->role->members()->create([
+        'user_id' => test()->test_user->id,
+        'status' => 'member'
+    ]);
 
-        $this->assertTrue($this->role->members->isNotEmpty());
-    }
+    expect(test()->role->members->isNotEmpty())->toBeTrue();
+});
 
-    /** @test */
-    public function one_can_add_member()
-    {
-        $this->role->activateMember($this->test_user);
+test('one can add member', function () {
+    test()->role->activateMember(test()->test_user);
 
-        $this->assertTrue($this->role->members->isNotEmpty());
-    }
+    expect(test()->role->members->isNotEmpty())->toBeTrue();
+});
 
-    /** @test */
-    public function one_can_pause_member()
-    {
-        $this->role->activateMember($this->test_user);
+test('one can pause member', function () {
+    test()->role->activateMember(test()->test_user);
 
-        $this->assertTrue($this->role->members->isNotEmpty());
+    expect(test()->role->members->isNotEmpty())->toBeTrue();
 
-        $this->role->pauseMember($this->test_user);
+    test()->role->pauseMember(test()->test_user);
 
-        $this->assertTrue($this->role->refresh()->members->isEmpty());
-    }
+    expect(test()->role->refresh()->members->isEmpty())->toBeTrue();
+});
 
-    /** @test */
-    public function one_can_remove_member()
-    {
-        $this->role->activateMember($this->test_user);
+test('one can remove member', function () {
+    test()->role->activateMember(test()->test_user);
 
-        $this->assertTrue($this->role->members->isNotEmpty());
+    expect(test()->role->members->isNotEmpty())->toBeTrue();
 
-        $this->role->removeMember($this->test_user);
+    test()->role->removeMember(test()->test_user);
 
-        $this->assertTrue($this->role->refresh()->members->isEmpty());
-    }
+    expect(test()->role->refresh()->members->isEmpty())->toBeTrue();
+});
 
-    /** @test */
-    public function it_throws_error_if_unaffiliated_user_wants_to_join()
-    {
-        $role = Role::create(['name' => 'test', 'type' => 'on-request']);
+it('throws error if unaffiliated user wants to join', function () {
+    $role = Role::create(['name' => 'test', 'type' => 'on-request']);
 
-        $this->expectExceptionMessage('User is not allowed for this access control group');
+    test()->expectExceptionMessage('User is not allowed for this access control group');
 
-        $role->activateMember($this->test_user);
-    }
+    $role->activateMember(test()->test_user);
+});
 
-    /** @test */
-    public function it_throws_error_if_one_tries_to_join_waitlist_on_invalid_role()
-    {
+it('throws error if one tries to join waitlist on invalid role', function () {
 
-        $this->expectExceptionMessage('Only on-request control groups do have a waitlist');
+    test()->expectExceptionMessage('Only on-request control groups do have a waitlist');
 
-        $this->role->joinWaitlist($this->test_user);
-    }
+    test()->role->joinWaitlist(test()->test_user);
+});
 
-    /** @test */
-    public function it_throws_error_if_unaffiliated_user_tries_to_join_waitlist()
-    {
+it('throws error if unaffiliated user tries to join waitlist', function () {
 
-        $role = Role::create(['name' => 'test', 'type' => 'on-request']);
+    $role = Role::create(['name' => 'test', 'type' => 'on-request']);
 
-        $this->expectExceptionMessage('User is not allowed for this access control group');
+    test()->expectExceptionMessage('User is not allowed for this access control group');
 
-        $role->joinWaitlist($this->test_user);
-    }
+    $role->joinWaitlist(test()->test_user);
+});
 
-    /** @test */
-    public function user_can_join_waitlist()
-    {
+test('user can join waitlist', function () {
 
-        $role = Role::create(['name' => 'test', 'type' => 'on-request']);
+    $role = Role::create(['name' => 'test', 'type' => 'on-request']);
 
-        $role->acl_affiliations()->create([
-            'affiliatable_id' => $this->test_character->character_id,
-            'affiliatable_type' => CharacterInfo::class
-        ]);
+    $role->acl_affiliations()->create([
+        'affiliatable_id' => test()->test_character->character_id,
+        'affiliatable_type' => CharacterInfo::class
+    ]);
 
-        $role->joinWaitlist($this->test_user);
+    $role->joinWaitlist(test()->test_user);
 
-        $this->assertEquals($this->test_user->id, $role->refresh()->acl_members()->whereStatus('waitlist')->first()->user_id);
-    }
+    expect($role->refresh()->acl_members()->whereStatus('waitlist')->first()->user_id)->toEqual(test()->test_user->id);
+});
 
-    /** @test */
-    public function one_can_get_moderator_ids()
-    {
+test('one can get moderator ids', function () {
 
-        $role = Role::create(['name' => 'test', 'type' => 'on-request']);
+    $role = Role::create(['name' => 'test', 'type' => 'on-request']);
 
-        $role->acl_affiliations()->create([
-            'affiliatable_id' => $this->test_character->character_id,
-            'affiliatable_type' => CharacterInfo::class,
-            'can_moderate' => true
-        ]);
+    $role->acl_affiliations()->create([
+        'affiliatable_id' => test()->test_character->character_id,
+        'affiliatable_type' => CharacterInfo::class,
+        'can_moderate' => true
+    ]);
 
-        $this->assertTrue($role->refresh()->isModerator($this->test_user));
-    }
-}
+    expect($role->refresh()->isModerator(test()->test_user))->toBeTrue();
+});

@@ -24,412 +24,336 @@
  * SOFTWARE.
  */
 
-namespace Seatplus\Auth\Tests\Unit\Middleware;
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
-use Mockery;
 use Seatplus\Auth\Http\Middleware\CheckRequiredScopes;
 use Seatplus\Auth\Models\CharacterUser;
-use Seatplus\Auth\Tests\TestCase;
-use Seatplus\Eveapi\Models\Character\CharacterAffiliation;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 use Seatplus\Eveapi\Models\RefreshToken;
 use Seatplus\Eveapi\Models\SsoScopes;
 
-class CheckRequiredScopesTest extends TestCase
+beforeEach(function () {
+    //test()->actingAs(test()->test_user);
+
+    mockRequest();
+
+    Event::fake();
+});
+
+it('lets request through if no scopes are required', function () {
+    createRefreshTokenWithScopes(['a', 'b']);
+
+    test()->actingAs(test()->test_user);
+
+    mockMiddleware();
+
+    //test()->middleware->shouldReceive('redirectTo')->once();
+    test()->request->shouldReceive('forward')->times(1);
+
+    test()->middleware->handle(test()->request, test()->next);
+});
+
+it('lets request through if required scopes are present', function () {
+
+    // 1. Create RefreshToken for Character
+    createRefreshTokenWithScopes(['a', 'b']);
+
+    // 2. Create SsoScope (Corporation)
+    createCorporationSsoScope([
+        'character'   => ['a'],
+        'corporation' => [],
+    ]);
+
+    // TestingTime
+
+    test()->actingAs(test()->test_user);
+
+    mockMiddleware();
+
+    //Expect 1 forward
+    test()->request->shouldReceive('forward')->times(1);
+
+    test()->middleware->handle(test()->request, test()->next);
+});
+
+it('stops request if required scopes are missing', function () {
+
+    // 1. Create RefreshToken for Character
+    createRefreshTokenWithScopes(['a', 'b']);
+
+    // 2. Create SsoScope (Corporation)
+    createCorporationSsoScope([
+        'character'   => ['c'],
+        'corporation' => [],
+    ]);
+
+    // TestingTime
+
+    test()->actingAs(test()->test_user);
+
+    mockMiddleware();
+
+    //Expect redirect
+    test()->middleware->shouldReceive('redirectTo')->times(1);
+
+    test()->middleware->handle(test()->request, test()->next);
+});
+
+it('stops request if required corporation role scopes is missing', function () {
+
+    // 1. Create RefreshToken for Character
+    createRefreshTokenWithScopes(['a', 'b']);
+
+    // 2. Create SsoScope (Corporation)
+    createCorporationSsoScope(['c']);
+
+    // TestingTime
+
+    test()->actingAs(test()->test_user);
+
+    mockMiddleware();
+
+    //Expect redirect
+    test()->middleware->shouldReceive('redirectTo')->times(1);
+
+    test()->middleware->handle(test()->request, test()->next);
+});
+
+it('lets request through if required corporation role scopes is present', function () {
+
+    // 1. Create RefreshToken for Character
+    createRefreshTokenWithScopes(['a', 'b', 'esi-characters.read_corporation_roles.v1']);
+
+    // 2. Create SsoScope (Corporation)
+    createCorporationSsoScope([
+        'character'   => [],
+        'corporation' => ['b'],
+    ]);
+
+    // TestingTime
+
+    test()->actingAs(test()->test_user);
+
+    mockMiddleware();
+
+    //Expect redirect
+    test()->request->shouldReceive('forward')->times(1);
+
+    test()->middleware->handle(test()->request, test()->next);
+});
+
+it('forwards request if user misses global scopes', function () {
+    // 1. Create RefreshToken for Character
+    createRefreshTokenWithScopes(['a', 'b']);
+
+    // 2. create global required scope
+    SsoScopes::updateOrCreate(['type' => 'global'], ['selected_scopes' => ['c']]);
+
+    // TestingTime
+
+    test()->actingAs(test()->test_user);
+
+    mockMiddleware();
+
+    //Expect redirect
+    test()->middleware->shouldReceive('redirectTo')->times(1);
+
+    test()->middleware->handle(test()->request, test()->next);
+});
+
+it('lets request through if required global scopes are present', function () {
+
+    // 1. Create RefreshToken for Character
+    createRefreshTokenWithScopes(['a', 'b']);
+
+    // 2. create global required sso scope
+    SsoScopes::updateOrCreate(['type' => 'global'], ['selected_scopes' => ['a']]);
+
+    // TestingTime
+
+    test()->actingAs(test()->test_user);
+
+    mockMiddleware();
+
+    //Expect 1 forward
+    test()->request->shouldReceive('forward')->times(1);
+
+    test()->middleware->handle(test()->request, test()->next);
+});
+
+it('stops request if user scopes is missing', function () {
+
+    // Create RefreshToken for Character
+    createRefreshTokenWithScopes(['a', 'b']);
+
+    // create user corporation scope
+    createCorporationSsoScope(['a'], 'user');
+
+    // to this point the middleware should pass no question asked
+
+    // Create secondary character
+    $secondary_character = Event::fakeFor(function () {
+
+        $character_user = CharacterUser::factory()->make();
+        test()->test_user->character_users()->save($character_user);
+
+        return CharacterInfo::find($character_user->character_id);
+    });
+
+    // test that the test user owns both characters
+    expect(test()->test_user->refresh()->characters)->toHaveCount(2);
+
+    // test that primary and secondary character has different corporations
+    test()->assertNotEquals(test()->test_character->corporation->corporation_id, $secondary_character->corporation->corporation_id);
+
+    // create refresh_token for secondary character
+    Event::fakeFor(function () use ($secondary_character) {
+        $refresh_token = $secondary_character->refresh_token;
+        $token = json_decode($refresh_token->getRawOriginal('token'), true);
+        data_set($token, 'scp', ['c']);
+        $refresh_token->token = json_encode($token);
+        $refresh_token->save();
+    });
+
+    // at this point secondary character has scope c and misses scope a thus should result in an error
+
+    // TestingTime
+
+    test()->actingAs(test()->test_user);
+
+    mockMiddleware();
+
+    //Expect redirect
+    test()->middleware->shouldReceive('redirectTo')->times(1);
+
+    test()->middleware->handle(test()->request, test()->next);
+});
+
+it('lets request through if user scopes is present', function () {
+
+    // Create RefreshToken for Character
+    createRefreshTokenWithScopes(['a', 'b']);
+
+    // create user corporation scope
+    createCorporationSsoScope(['a'], 'user');
+
+    // to this point the middleware should pass no question asked
+
+    // Create secondary character
+    $secondary_character = Event::fakeFor(function () {
+
+        $character_user = CharacterUser::factory()->make();
+        test()->test_user->character_users()->save($character_user);
+
+        return CharacterInfo::find($character_user->character_id);
+    });
+
+    // test that the test user owns both characters
+    expect(test()->test_user->refresh()->characters)->toHaveCount(2);
+
+    // test that primary and secondary character has different corporations
+    test()->assertNotEquals(test()->test_character->corporation->corporation_id, $secondary_character->corporation->corporation_id);
+
+    // update refresh_token for secondary character
+    Event::fakeFor(function () use ($secondary_character) {
+        $refresh_token = $secondary_character->refresh_token;
+        $token = json_decode($refresh_token->getRawOriginal('token'), true);
+        data_set($token, 'scp', ['a']);
+        $refresh_token->token = json_encode($token);
+        $refresh_token->save();
+    });
+
+    // at this point secondary character has scope a and scope a is required, thus should result in an forward
+
+    // TestingTime
+
+    test()->actingAs(test()->test_user);
+
+    mockMiddleware();
+
+    //Expect redirect
+    test()->request->shouldReceive('forward')->times(1);
+
+    test()->middleware->handle(test()->request, test()->next);
+});
+
+it('lets request through if user application has no required scopes', function () {
+    // 1. Create RefreshToken for Character
+    createRefreshTokenWithScopes(['a', 'b']);
+
+    // 2. create user application
+    test()->test_user->application()->create(['corporation_id' =>  test()->test_character->corporation->corporation_id]);
+
+    // TestingTime
+
+    test()->actingAs(test()->test_user);
+
+    mockMiddleware();
+
+    //Expect 1 forward
+    test()->request->shouldReceive('forward')->times(1);
+
+    test()->middleware->handle(test()->request, test()->next);
+});
+
+it('lets request through if user application has required scopes', function () {
+    // 1. Create RefreshToken for Character
+    createRefreshTokenWithScopes(['a', 'b']);
+
+    // 2. create user application
+    test()->test_user->application()->create(['corporation_id' =>  test()->test_character->corporation->corporation_id]);
+
+    // 3. create required corp scopes
+    createCorporationSsoScope(['a']);
+
+    // TestingTime
+
+    test()->actingAs(test()->test_user);
+
+    mockMiddleware();
+
+    //Expect 1 forward
+    test()->request->shouldReceive('forward')->times(1);
+
+    test()->middleware->handle(test()->request, test()->next);
+});
+
+it('forwards request if user application has not required scopes', function () {
+    // 1. Create RefreshToken for Character
+    createRefreshTokenWithScopes(['a', 'b']);
+
+    // 2. create user application
+    test()->test_user->application()->create(['corporation_id' =>  test()->test_character->corporation->corporation_id]);
+
+    // 3. create required corp scopes
+    createCorporationSsoScope(['c']);
+
+    // TestingTime
+
+    test()->actingAs(test()->test_user);
+
+    mockMiddleware();
+
+    //Expect redirect
+    test()->middleware->shouldReceive('redirectTo')->times(1);
+
+    test()->middleware->handle(test()->request, test()->next);
+});
+
+// Helpers
+function mockRequest(): void
 {
-    /**
-     * @var \Mockery\Mock
-     */
-    private $middleware;
-
-    /**
-     * @var \Mockery\LegacyMockInterface|\Mockery\MockInterface
-     */
-    private $request;
-
-    /**
-     * @var \Closure
-     */
-    private $next;
-
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        //$this->actingAs($this->test_user);
-
-        $this->mockRequest();
-
-        Event::fake();
-    }
-
-    /** @test */
-    public function it_lets_request_through_if_no_scopes_are_required()
-    {
-        $this->createRefreshTokenWithScopes(['a', 'b']);
-
-        $this->actingAs($this->test_user);
-
-        $this->mockMiddleware();
-
-        //$this->middleware->shouldReceive('redirectTo')->once();
-        $this->request->shouldReceive('forward')->times(1);
-
-        $this->middleware->handle($this->request, $this->next);
-    }
-
-    /** @test */
-    public function it_lets_request_through_if_required_scopes_are_present()
-    {
-
-        // 1. Create RefreshToken for Character
-        $this->createRefreshTokenWithScopes(['a', 'b']);
-
-        // 2. Create SsoScope (Corporation)
-        $this->createCorporationSsoScope([
-            'character'   => ['a'],
-            'corporation' => [],
-        ]);
-
-        // TestingTime
-
-        $this->actingAs($this->test_user);
-
-        $this->mockMiddleware();
-
-        //Expect 1 forward
-        $this->request->shouldReceive('forward')->times(1);
-
-        $this->middleware->handle($this->request, $this->next);
-    }
-
-    /** @test */
-    public function it_stops_request_if_required_scopes_are_missing()
-    {
-
-        // 1. Create RefreshToken for Character
-        $this->createRefreshTokenWithScopes(['a', 'b']);
-
-        // 2. Create SsoScope (Corporation)
-        $this->createCorporationSsoScope([
-            'character'   => ['c'],
-            'corporation' => [],
-        ]);
-
-        // TestingTime
-
-        $this->actingAs($this->test_user);
-
-        $this->mockMiddleware();
-
-        //Expect redirect
-        $this->middleware->shouldReceive('redirectTo')->times(1);
-
-        $this->middleware->handle($this->request, $this->next);
-    }
-
-    /** @test */
-    public function it_stops_request_if_required_corporation_role_scopes_is_missing()
-    {
-
-        // 1. Create RefreshToken for Character
-        $this->createRefreshTokenWithScopes(['a', 'b']);
-
-        // 2. Create SsoScope (Corporation)
-        $this->createCorporationSsoScope(['c']);
-
-        // TestingTime
-
-        $this->actingAs($this->test_user);
-
-        $this->mockMiddleware();
-
-        //Expect redirect
-        $this->middleware->shouldReceive('redirectTo')->times(1);
-
-        $this->middleware->handle($this->request, $this->next);
-    }
-
-    /** @test */
-    public function it_lets_request_through_if_required_corporation_role_scopes_is_present()
-    {
-
-        // 1. Create RefreshToken for Character
-        $this->createRefreshTokenWithScopes(['a', 'b', 'esi-characters.read_corporation_roles.v1']);
-
-        // 2. Create SsoScope (Corporation)
-        $this->createCorporationSsoScope([
-            'character'   => [],
-            'corporation' => ['b'],
-        ]);
-
-        // TestingTime
-
-        $this->actingAs($this->test_user);
-
-        $this->mockMiddleware();
-
-        //Expect redirect
-        $this->request->shouldReceive('forward')->times(1);
-
-        $this->middleware->handle($this->request, $this->next);
-    }
-
-    /** @test */
-    public function it_forwards_request_if_user_misses_global_scopes()
-    {
-        // 1. Create RefreshToken for Character
-        $this->createRefreshTokenWithScopes(['a', 'b']);
-
-        // 2. create global required scope
-        SsoScopes::updateOrCreate(['type' => 'global'], ['selected_scopes' => ['c']]);
-
-        // TestingTime
-
-        $this->actingAs($this->test_user);
-
-        $this->mockMiddleware();
-
-        //Expect redirect
-        $this->middleware->shouldReceive('redirectTo')->times(1);
-
-        $this->middleware->handle($this->request, $this->next);
-    }
-
-    /** @test */
-    public function it_lets_request_through_if_required_global_scopes_are_present()
-    {
-
-        // 1. Create RefreshToken for Character
-        $this->createRefreshTokenWithScopes(['a', 'b']);
-
-        // 2. create global required sso scope
-        SsoScopes::updateOrCreate(['type' => 'global'], ['selected_scopes' => ['a']]);
-
-        // TestingTime
-
-        $this->actingAs($this->test_user);
-
-        $this->mockMiddleware();
-
-        //Expect 1 forward
-        $this->request->shouldReceive('forward')->times(1);
-
-        $this->middleware->handle($this->request, $this->next);
-    }
-
-    /** @test */
-    public function it_stops_request_if_user_scopes_is_missing()
-    {
-
-        // Create RefreshToken for Character
-        $this->createRefreshTokenWithScopes(['a', 'b']);
-
-        // create user corporation scope
-        $this->createCorporationSsoScope(['a'], 'user');
-
-        // to this point the middleware should pass no question asked
-
-        // Create secondary character
-        $secondary_character = Event::fakeFor(function () {
-
-            $character_user = CharacterUser::factory()->make();
-            $this->test_user->character_users()->save($character_user);
-
-            return CharacterInfo::find($character_user->character_id);
-        });
-
-        // test that the test user owns both characters
-        $this->assertCount(2, $this->test_user->refresh()->characters);
-
-        // test that primary and secondary character has different corporations
-        $this->assertNotEquals($this->test_character->corporation->corporation_id, $secondary_character->corporation->corporation_id);
-
-        // create refresh_token for secondary character
-        Event::fakeFor(function () use ($secondary_character) {
-            $refresh_token = $secondary_character->refresh_token;
-            $refresh_token->scopes = ['c'];
-            $refresh_token->save();
-        });
-
-        // at this point secondary character has scope c and misses scope a thus should result in an error
-
-        // TestingTime
-
-        $this->actingAs($this->test_user);
-
-        $this->mockMiddleware();
-
-        //Expect redirect
-        $this->middleware->shouldReceive('redirectTo')->times(1);
-
-        $this->middleware->handle($this->request, $this->next);
-    }
-
-    /** @test */
-    public function it_lets_request_through_if_user_scopes_is_present()
-    {
-
-        // Create RefreshToken for Character
-        $this->createRefreshTokenWithScopes(['a', 'b']);
-
-        // create user corporation scope
-        $this->createCorporationSsoScope(['a'], 'user');
-
-        // to this point the middleware should pass no question asked
-
-        // Create secondary character
-        $secondary_character = Event::fakeFor(function () {
-
-            $character_user = CharacterUser::factory()->make();
-            $this->test_user->character_users()->save($character_user);
-
-            return CharacterInfo::find($character_user->character_id);
-        });
-
-        // test that the test user owns both characters
-        $this->assertCount(2, $this->test_user->refresh()->characters);
-
-        // test that primary and secondary character has different corporations
-        $this->assertNotEquals($this->test_character->corporation->corporation_id, $secondary_character->corporation->corporation_id);
-
-        // update refresh_token for secondary character
-        Event::fakeFor(function () use ($secondary_character) {
-            $refresh_token = $secondary_character->refresh_token;
-            $refresh_token->scopes = ['a'];
-            $refresh_token->save();
-        });
-
-        // at this point secondary character has scope a and scope a is required, thus should result in an forward
-
-        // TestingTime
-
-        $this->actingAs($this->test_user);
-
-        $this->mockMiddleware();
-
-        //Expect redirect
-        $this->request->shouldReceive('forward')->times(1);
-
-        $this->middleware->handle($this->request, $this->next);
-    }
-
-    /** @test */
-    public function it_lets_request_through_if_user_application_has_no_required_scopes()
-    {
-        // 1. Create RefreshToken for Character
-        $this->createRefreshTokenWithScopes(['a', 'b']);
-
-        // 2. create user application
-        $this->test_user->application()->create(['corporation_id' =>  $this->test_character->corporation->corporation_id]);
-
-        // TestingTime
-
-        $this->actingAs($this->test_user);
-
-        $this->mockMiddleware();
-
-        //Expect 1 forward
-        $this->request->shouldReceive('forward')->times(1);
-
-        $this->middleware->handle($this->request, $this->next);
-    }
-
-    /** @test */
-    public function it_lets_request_through_if_user_application_has_required_scopes()
-    {
-        // 1. Create RefreshToken for Character
-        $this->createRefreshTokenWithScopes(['a', 'b']);
-
-        // 2. create user application
-        $this->test_user->application()->create(['corporation_id' =>  $this->test_character->corporation->corporation_id]);
-
-        // 3. create required corp scopes
-        $this->createCorporationSsoScope(['a']);
-
-        // TestingTime
-
-        $this->actingAs($this->test_user);
-
-        $this->mockMiddleware();
-
-        //Expect 1 forward
-        $this->request->shouldReceive('forward')->times(1);
-
-        $this->middleware->handle($this->request, $this->next);
-    }
-
-    /** @test */
-    public function it_forwards_request_if_user_application_has_not_required_scopes()
-    {
-        // 1. Create RefreshToken for Character
-        $this->createRefreshTokenWithScopes(['a', 'b']);
-
-        // 2. create user application
-        $this->test_user->application()->create(['corporation_id' =>  $this->test_character->corporation->corporation_id]);
-
-        // 3. create required corp scopes
-        $this->createCorporationSsoScope(['c']);
-
-        // TestingTime
-
-        $this->actingAs($this->test_user);
-
-        $this->mockMiddleware();
-
-        //Expect redirect
-        $this->middleware->shouldReceive('redirectTo')->times(1);
-
-        $this->middleware->handle($this->request, $this->next);
-    }
-
-    private function mockRequest(): void
-    {
-        $this->request = Mockery::mock(Request::class);
-
-        $this->next = function ($request) {
-            $request->forward();
-        };
-    }
-
-    private function createRefreshTokenWithScopes(array $array)
-    {
-        Event::fakeFor(function () use ($array) {
-
-            if($this->test_character->refresh_token) {
-
-                $refresh_token = $this->test_character->refresh_token;
-                $refresh_token->scopes = $array;
-                $refresh_token->save();
-
-                return;
-            }
-
-
-            RefreshToken::factory()->create([
-                'character_id' => $this->test_character->character_id,
-                'scopes'       => $array,
-            ]);
-        });
-    }
-
-    private function createCorporationSsoScope(array $array, string $type = 'default')
-    {
-        SsoScopes::factory()->create([
-            'selected_scopes' => $array,
-            'morphable_id'    => $this->test_character->corporation->corporation_id,
-            'morphable_type'  => CorporationInfo::class,
-            'type' => $type
-        ]);
-    }
-
-    private function mockMiddleware()
-    {
-        $this->middleware = Mockery::mock(CheckRequiredScopes::class, [])
-            ->makePartial()
-            ->shouldAllowMockingProtectedMethods();
-    }
+    test()->request = Mockery::mock(Request::class);
+
+    test()->next = function ($request) {
+        $request->forward();
+    };
+}
+
+function mockMiddleware()
+{
+    test()->middleware = Mockery::mock(CheckRequiredScopes::class, [])
+        ->makePartial()
+        ->shouldAllowMockingProtectedMethods();
 }

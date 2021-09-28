@@ -24,81 +24,39 @@
  * SOFTWARE.
  */
 
-namespace Seatplus\Auth\Tests\Feature\Auth;
-
 use Illuminate\Support\Facades\Event;
 use Laravel\Socialite\Contracts\Factory;
 use Laravel\Socialite\Facades\Socialite;
-use Seatplus\Auth\Tests\TestCase;
-use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 use Seatplus\Eveapi\Models\RefreshToken;
 use Seatplus\Eveapi\Models\SsoScopes;
 
-class StepUpTest extends TestCase
-{
-    public function setUp(): void
-    {
-        parent::setUp();
+beforeEach(function () {
+    Event::fake();
 
-        Event::fake();
+    Socialite::shouldReceive('driver->scopes->redirect')->andReturn('');
+});
 
-        //$this->test_character =
+test('one can request another scope', function () {
 
-        //\Mockery::mock(Factory::class)->shouldReceive('driver')->andReturn('');
-        Socialite::shouldReceive('driver->scopes->redirect')->andReturn('');
-    }
+    // 1. Create refresh_token
+    createRefreshTokenWithScopes(['a', 'b']);
 
-    /** @test */
-    public function one_can_request_another_scope()
-    {
+    expect(test()->test_character->refresh_token->scopes)
+        ->toBeArray()
+        ->toBe(['a','b']);
 
-        // 1. Create refresh_token
-        $this->createRefreshTokenWithScopes(['a', 'b']);
 
-        // 2. Create SsoScope (Corporation)
-        /*$this->createCorporationSsoScope([
-            'character'   => ['a'],
-            'corporation' => [],
-        ]);*/
+    $add_scopes = implode(',', ['1', '2']);
 
-        $add_scopes = implode(',', ['1', '2']);
+    $response = test()->actingAs(test()->test_user)->get(route('auth.eve.step_up', [
+        'character_id' => test()->test_character->character_id,
+        'add_scopes'   => $add_scopes,
+    ]));
 
-        $response = $this->actingAs($this->test_user)->get(route('auth.eve.step_up', [
-            'character_id' => $this->test_character->character_id,
-            'add_scopes'   => $add_scopes,
-        ]));
+    expect(session('step_up'))->toEqual(test()->test_character->character_id);
+    expect(session('sso_scopes'))->toEqual(['a', 'b', '1', '2']);
+});
 
-        $this->assertEquals($this->test_character->character_id, session('step_up'));
-        $this->assertEquals(['a', 'b', '1', '2'], session('sso_scopes'));
-    }
 
-    private function createCorporationSsoScope(array $array)
-    {
-        SsoScopes::factory()->create([
-            'selected_scopes' => $array,
-            'morphable_id'    => $this->test_character->corporation->corporation_id,
-            'morphable_type'  => CorporationInfo::class,
-        ]);
-    }
 
-    private function createRefreshTokenWithScopes(array $array)
-    {
-        Event::fakeFor(function () use ($array) {
-
-            if($this->test_character->refresh_token) {
-
-                $refresh_token = $this->test_character->refresh_token;
-                $refresh_token->scopes = $array;
-                $refresh_token->save();
-
-                return;
-            }
-
-            RefreshToken::factory()->create([
-                'character_id' => $this->test_character->character_id,
-                'scopes'       => $array,
-            ]);
-        });
-    }
-}
