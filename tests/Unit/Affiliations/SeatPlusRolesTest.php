@@ -30,6 +30,8 @@ use Seatplus\Eveapi\Models\Alliance\AllianceInfo;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 
+//uses(\Seatplus\Auth\Tests\TestCase::class);
+
 beforeEach(function () {
     Event::fake();
 

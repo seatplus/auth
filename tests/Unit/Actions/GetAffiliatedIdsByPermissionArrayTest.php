@@ -34,7 +34,7 @@ use Seatplus\Eveapi\Models\Character\CharacterRole;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 
 beforeEach(function () {
-    test()->role = Role::create(['name' => 'writer']);
+    $this->role = Role::create(['name' => 'writer']);
     test()->permission = Permission::create(['name' => 'edit articles']);
 
     test()->role->givePermissionTo(test()->permission);

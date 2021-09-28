@@ -34,9 +34,6 @@ use Seatplus\Eveapi\Models\SsoScopes;
 beforeEach(function () {
     Event::fake();
 
-    //test()->test_character =
-
-    //\Mockery::mock(Factory::class)->shouldReceive('driver')->andReturn('');
     Socialite::shouldReceive('driver->scopes->redirect')->andReturn('');
 });
 
@@ -45,11 +42,10 @@ test('one can request another scope', function () {
     // 1. Create refresh_token
     createRefreshTokenWithScopes(['a', 'b']);
 
-    // 2. Create SsoScope (Corporation)
-    /*createCorporationSsoScope([
-        'character'   => ['a'],
-        'corporation' => [],
-    ]);*/
+    expect(test()->test_character->refresh_token->scopes)
+        ->toBeArray()
+        ->toBe(['a','b']);
+
 
     $add_scopes = implode(',', ['1', '2']);
 
@@ -62,32 +58,5 @@ test('one can request another scope', function () {
     expect(session('sso_scopes'))->toEqual(['a', 'b', '1', '2']);
 });
 
-// Helpers
-function createCorporationSsoScope(array $array)
-{
-    SsoScopes::factory()->create([
-        'selected_scopes' => $array,
-        'morphable_id'    => test()->test_character->corporation->corporation_id,
-        'morphable_type'  => CorporationInfo::class,
-    ]);
-}
 
-function createRefreshTokenWithScopes(array $array)
-{
-    Event::fakeFor(function () use ($array) {
 
-        if(test()->test_character->refresh_token) {
-
-            $refresh_token = test()->test_character->refresh_token;
-            $refresh_token->scopes = $array;
-            $refresh_token->save();
-
-            return;
-        }
-
-        RefreshToken::factory()->create([
-            'character_id' => test()->test_character->character_id,
-            'scopes'       => $array,
-        ]);
-    });
-}

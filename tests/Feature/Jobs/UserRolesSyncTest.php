@@ -42,7 +42,25 @@ it('gives automatic role', function () {
 
 it('removes automatic role', function () {
 
-    test()->it_gives_automatic_role();
+    // Update role to be automatic
+    test()->role->update(['type' => 'automatic']);
+
+    //assure that role is of type auto
+    expect(test()->role->type)->toEqual('automatic');
+
+    // First create acl affiliation with user
+    test()->role->acl_affiliations()->create([
+        'affiliatable_id' => test()->test_character->character_id,
+        'affiliatable_type' => CharacterInfo::class,
+    ]);
+
+    expect(test()->role->members->isEmpty())->toBeTrue();
+
+    test()->job->handle();
+
+    expect(test()->role->refresh()->members->isEmpty())->toBeFalse();
+
+    expect(test()->test_user->hasRole('derp'))->toBeTrue();
 
     RefreshToken::find(test()->test_character->character_id)->delete();
 

@@ -120,15 +120,4 @@ test('one can add another character', function () {
 });
 
 // Helpers
-function createSocialiteUser($character_id, $refresh_token = 'refresh_token', $scopes = '1 2', $token = 'qq3dpeTMpDkjNasdasdewva3Be658eVVkox_1Ikodc')
-{
-    $socialiteUser = test()->createMock(SocialiteUser::class);
-    $socialiteUser->character_id = $character_id;
-    $socialiteUser->refresh_token = $refresh_token;
-    $socialiteUser->character_owner_hash = sha1($token);
-    $socialiteUser->scopes = $scopes;
-    $socialiteUser->token = $token;
-    $socialiteUser->expires_on = carbon('now')->addMinutes(15);
 
-    return $socialiteUser;
-}

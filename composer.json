@@ -29,17 +29,16 @@
         "laravel/framework": "^8.0",
         "laravel/socialite": "^5.0",
         "seatplus/eseye": "^3.0",
-        "seatplus/eveapi": "^0.8.5",
+        "seatplus/eveapi": "^0.9.0",
         "spatie/laravel-permission": "^4.0"
     },
     "require-dev": {
         "orchestra/testbench": "^6.10",
         "nunomaduro/collision": "^5.3",
-        "spatie/phpunit-watcher": "^1.11",
         "brianium/paratest": "^6.2",
-        "laravel/legacy-factories": "^1.0",
         "pestphp/pest": "^1.18",
-        "pestphp/pest-plugin-laravel": "^1.1"
+        "pestphp/pest-plugin-laravel": "^1.1",
+        "pestphp/pest-plugin-parallel": "^0.3.1"
     },
     "extra": {
         "laravel": {
@@ -49,7 +48,8 @@
         }
     },
     "scripts": {
-        "watch": "vendor/bin/phpunit-watcher watch --no-logging",
-        "parallel": "vendor/bin/testbench package:test --parallel --no-coverage"
+      "test": "vendor/bin/pest",
+      "test-coverage": "XDEBUG_MODE=coverage ./vendor/bin/pest --coverage",
+      "parallel": "XDEBUG_MODE=coverage ./vendor/bin/pest --coverage -p"
     }
 }

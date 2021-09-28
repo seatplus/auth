@@ -210,7 +210,9 @@ it('stops request if user scopes is missing', function () {
     // create refresh_token for secondary character
     Event::fakeFor(function () use ($secondary_character) {
         $refresh_token = $secondary_character->refresh_token;
-        $refresh_token->scopes = ['c'];
+        $token = json_decode($refresh_token->getRawOriginal('token'), true);
+        data_set($token, 'scp', ['c']);
+        $refresh_token->token = json_encode($token);
         $refresh_token->save();
     });
 
@@ -256,7 +258,9 @@ it('lets request through if user scopes is present', function () {
     // update refresh_token for secondary character
     Event::fakeFor(function () use ($secondary_character) {
         $refresh_token = $secondary_character->refresh_token;
-        $refresh_token->scopes = ['a'];
+        $token = json_decode($refresh_token->getRawOriginal('token'), true);
+        data_set($token, 'scp', ['a']);
+        $refresh_token->token = json_encode($token);
         $refresh_token->save();
     });
 
@@ -345,37 +349,6 @@ function mockRequest(): void
     test()->next = function ($request) {
         $request->forward();
     };
-}
-
-function createRefreshTokenWithScopes(array $array)
-{
-    Event::fakeFor(function () use ($array) {
-
-        if(test()->test_character->refresh_token) {
-
-            $refresh_token = test()->test_character->refresh_token;
-            $refresh_token->scopes = $array;
-            $refresh_token->save();
-
-            return;
-        }
-
-
-        RefreshToken::factory()->create([
-            'character_id' => test()->test_character->character_id,
-            'scopes'       => $array,
-        ]);
-    });
-}
-
-function createCorporationSsoScope(array $array, string $type = 'default')
-{
-    SsoScopes::factory()->create([
-        'selected_scopes' => $array,
-        'morphable_id'    => test()->test_character->corporation->corporation_id,
-        'morphable_type'  => CorporationInfo::class,
-        'type' => $type
-    ]);
 }
 
 function mockMiddleware()
