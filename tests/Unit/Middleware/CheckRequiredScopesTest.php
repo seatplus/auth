@@ -209,10 +209,12 @@ it('stops request if user scopes is missing', function () {
 
     // create refresh_token for secondary character
     Event::fakeFor(function () use ($secondary_character) {
+        $helper_token = RefreshToken::factory()->scopes(['c'])->make([
+            'character_id' => $secondary_character->character_id
+        ]);
+
         $refresh_token = $secondary_character->refresh_token;
-        $token = json_decode($refresh_token->getRawOriginal('token'), true);
-        data_set($token, 'scp', ['c']);
-        $refresh_token->token = json_encode($token);
+        $refresh_token->token = $helper_token->token;
         $refresh_token->save();
     });
 
@@ -257,10 +259,13 @@ it('lets request through if user scopes is present', function () {
 
     // update refresh_token for secondary character
     Event::fakeFor(function () use ($secondary_character) {
+
+        $helper_token = RefreshToken::factory()->scopes(['a'])->make([
+            'character_id' => $secondary_character->character_id
+        ]);
+
         $refresh_token = $secondary_character->refresh_token;
-        $token = json_decode($refresh_token->getRawOriginal('token'), true);
-        data_set($token, 'scp', ['a']);
-        $refresh_token->token = json_encode($token);
+        $refresh_token->token = $helper_token->token;
         $refresh_token->save();
     });
 

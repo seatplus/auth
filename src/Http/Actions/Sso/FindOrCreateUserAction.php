@@ -26,31 +26,65 @@
 
 namespace Seatplus\Auth\Http\Actions\Sso;
 
-use Laravel\Socialite\Two\User as EveUser;
+use Seatplus\Auth\Containers\EveUser;
 use Seatplus\Auth\Models\CharacterUser;
 use Seatplus\Auth\Models\User;
 
 class FindOrCreateUserAction
 {
-    /**
-     * @var \Laravel\Socialite\Two\User
-     */
-    private $eve_user;
+    private EveUser $eve_user;
 
-    private $character_user;
+    private ?CharacterUser $character_user;
 
-    public function execute(EveUser $eve_user): User
+    private User $user;
+
+    public function __invoke(EveUser $eve_user): User
     {
         $this->eve_user = $eve_user;
+        $this->character_user = CharacterUser::firstWhere('character_id', $eve_user->character_id);
 
-        $this->character_user = CharacterUser::where('character_id', $eve_user->character_id)->first();
+        $this->setUserFromUnchangedOwnerHash();
+        $this->handleChangedOwnerHash();
 
-        /*
-         * If user is known and character_owner_hash didn't change return the user. This might cause an exploit
-         *  if the character is shared with other users, which is not allowed according to CCP.
-        */
-        if (! empty($this->character_user) && $this->character_user->character_owner_hash === $eve_user->character_owner_hash) {
-            return $this->character_user->user;
+        $user = $this->getUser();
+
+        $this->handleCharacterUserEntry($user, $eve_user);
+
+        return $user;
+    }
+
+    private function handleCharacterUserEntry(User $user, EveUser $eve_user)
+    {
+        // When character_user is set and found skip
+        if($this->character_user) {
+            return;
+        }
+
+        CharacterUser::firstOrCreate([
+            'user_id'              => $user->id,
+            'character_id'         => $eve_user->character_id,
+        ], [
+            'character_owner_hash' => $eve_user->character_owner_hash,
+        ]);
+    }
+
+    private function getUser(): User
+    {
+        if(! isset($this->user)) {
+            $this->user = auth()->user() ?? User::create([
+                    'main_character_id' => $this->eve_user->character_id,
+                    'active'            => true,
+                ]);
+        }
+
+        return $this->user;
+    }
+
+    private function handleChangedOwnerHash()
+    {
+        // If character_user is unknown or character_owner_hash did not change don't bother anymore
+        if(empty($this->character_user) || ($this->character_user->character_owner_hash === $this->eve_user->character_owner_hash)) {
+            return;
         }
 
         /*
@@ -58,31 +92,7 @@ class FindOrCreateUserAction
          * character might have been transferred. We create a new user and
          * return the new user
          */
-        if (! empty($this->character_user) && $this->character_user->character_owner_hash !== $this->eve_user->character_owner_hash) {
-            $this->handleChangedOwnerHash();
-        }
 
-        $user = auth()->user() ?? User::create([
-            'main_character_id' => $eve_user->character_id,
-            'active'            => true,
-        ]);
-
-        $this->createCharacterUserEntry($user->id, $eve_user);
-
-        return $user;
-    }
-
-    private function createCharacterUserEntry(int $user_id, EveUser $eve_user)
-    {
-        CharacterUser::create([
-            'user_id'              => $user_id,
-            'character_id'         => $eve_user->character_id,
-            'character_owner_hash' => $eve_user->character_owner_hash,
-        ]);
-    }
-
-    private function handleChangedOwnerHash()
-    {
         // First let's check if this is the only character within the user group
         if ($this->character_user->user->characters->count() < 2) {
             // reset main_character name as this single user account went stale
@@ -90,7 +100,21 @@ class FindOrCreateUserAction
             $this->character_user->user->save();
         }
 
-        // Delete character_user relationship
+        // Delete character_user model
         CharacterUser::where('character_id', $this->eve_user->character_id)->delete();
+        // reset found character_user
+        $this->character_user = null;
+
+    }
+
+    private function setUserFromUnchangedOwnerHash()
+    {
+        /*
+         * If user is known and character_owner_hash didn't change return the user. This might cause an exploit
+         *  if the character is shared with other users, which is not allowed according to CCP.
+        */
+        if (! empty($this->character_user) && $this->character_user->character_owner_hash === $this->eve_user->character_owner_hash) {
+            $this->user = $this->character_user->user;
+        }
     }
 }

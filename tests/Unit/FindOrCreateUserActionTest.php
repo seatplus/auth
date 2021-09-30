@@ -27,32 +27,29 @@
 use Faker\Factory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Socialite\Two\User as SocialiteUser;
+use Seatplus\Auth\Containers\EveUser;
 use Seatplus\Auth\Http\Actions\Sso\FindOrCreateUserAction;
 use Seatplus\Auth\Models\CharacterUser;
 
 uses(RefreshDatabase::class);
 
-
-beforeEach(function () {
-    test()->faker = Factory::create();
-});
-
 test('create new user', function () {
-    $socialiteUser = createSocialUserMock();
+    $eve_user = createEveUser();
 
     test()->assertDatabaseMissing('users', [
-        'main_character_id' => $socialiteUser->character_id,
+        'main_character_id' => $eve_user->character_id,
     ]);
 
-    $user = (new FindOrCreateUserAction())->execute($socialiteUser);
+    $action = new FindOrCreateUserAction();
+    $user = $action($eve_user);
 
     test()->assertDatabaseHas('users', [
-        'main_character_id' => $socialiteUser->character_id,
+        'main_character_id' => $eve_user->character_id,
     ]);
 
     test()->assertDatabaseHas('character_users', [
         'user_id'      => $user->id,
-        'character_id' => $socialiteUser->character_id,
+        'character_id' => $eve_user->character_id,
     ]);
 });
 
@@ -66,48 +63,35 @@ test('find existing user with two character', function () {
     expect(test()->test_user->character_users->count())->toEqual(4);
 
     // select last character to login
-
     $secondary_character = test()->test_user->character_users->last();
 
-    $socialiteUser = createSocialUserMock(
+    $eve_user = createEveUser(
         $secondary_character->character_id,
-        'SocialiteUserName',
         $secondary_character->character_owner_hash
     );
 
-    $user = (new FindOrCreateUserAction())->execute($socialiteUser);
+    $action = new FindOrCreateUserAction();
+    $user = $action($eve_user);
 
     expect($user->id)->toEqual(test()->test_user->id);
-
-    test()->assertDatabaseMissing('users', [
-        'name' => $socialiteUser->name,
-    ]);
 
     test()->assertDatabaseHas('character_users', [
         'user_id'      => test()->test_user->id,
         'character_id' => $secondary_character->character_id,
     ]);
+
 });
 
 test('deal with changed owner hash', function () {
     expect(1)->toEqual(test()->test_user->character_users->count());
 
-    // 2. create character_users entry
-    /*CharacterUser::factory()->create([
-        'user_id' => test()->test_user->id,
-        'character_id' => test()->test_user->id,
-        'character_owner_hash' => test()->test_user->character_owner_hash
-    ]);*/
-
-    $socialiteUser = createSocialUserMock(
+    $eve_user = createEveUser(
         test()->test_user->character_users->first()->character_id,
-        test()->test_user->main_character,
         'anotherHashValue'
     );
 
-    // 3. find user
-
-    $user = (new FindOrCreateUserAction())->execute($socialiteUser);
+    $action = new FindOrCreateUserAction();
+    $user = $action($eve_user);
 
     test()->assertDatabaseHas('users', [
         'id' => $user->id,
@@ -116,6 +100,8 @@ test('deal with changed owner hash', function () {
     test()->assertDatabaseHas('users', [
         'id' => test()->test_user->id,
     ]);
+
+    expect(test()->test_user->id)->not()->toBe($user->id);
 
     test()->assertDatabaseMissing('character_users', [
         'user_id'      => test()->test_user->id,
@@ -135,17 +121,13 @@ test('deal with two characters with one changed owner hash', function () {
 
     // 3. find user
 
-    $socialiteUser = createSocialUserMock(
+    $eve_user = createEveUser(
         $secondary_user->character_id,
-        'someName',
         'anotherHashValue'
     );
 
-    $user = (new FindOrCreateUserAction())->execute($socialiteUser);
-
-    // 4. assert that two users exist
-
-    //dd($secondary_user->character_id,User::first()->characters);
+    $action = new FindOrCreateUserAction();
+    $user = $action($eve_user);
 
     expect($user->character_users->count())->toEqual(1);
 
@@ -158,6 +140,8 @@ test('deal with two characters with one changed owner hash', function () {
     test()->assertDatabaseHas('users', [
         'id' => $user->id,
     ]);
+
+    expect(test()->test_user->id)->not()->toBe($user->id);
 
     //5. assert that secondary character is not affiliated to first user
 
@@ -176,16 +160,17 @@ it('returns authed user', function () {
     // 1. Create secondary character
     $secondary_user = CharacterUser::factory()->make();
 
-    $socialiteUser = createSocialUserMock(
+    $eve_user = createEveUser(
         $secondary_user->character_id,
-        'someName',
-        'anotherHashValue'
+        $secondary_user->character_owner_hash
     );
+
+    $action = new FindOrCreateUserAction();
 
     // act as test user
     test()->actingAs(test()->test_user);
 
-    $user = (new FindOrCreateUserAction())->execute($socialiteUser);
+    $user = $action($eve_user);
 
     // Assert that test user id and the returned user id is equal
     expect($user->id)->toEqual(test()->test_user->id);
@@ -199,14 +184,4 @@ it('returns authed user', function () {
     expect(test()->test_user->character_users->count())->toEqual(2);
 });
 
-// Helpers
-function createSocialUserMock(int $character_id = null, string $name = null, string $character_owner_hash = null): SocialiteUser
-{
-    $socialiteUser = test()->createMock(SocialiteUser::class);
 
-    $socialiteUser->character_id = $character_id ?? test()->faker->numberBetween(90000000, 98000000);
-    $socialiteUser->name = $name ?? test()->faker->name;
-    $socialiteUser->character_owner_hash = $character_owner_hash ?? sha1(test()->faker->text);
-
-    return $socialiteUser;
-}

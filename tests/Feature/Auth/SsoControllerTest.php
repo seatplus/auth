@@ -33,9 +33,8 @@ use Seatplus\Auth\Jobs\UserRolesSync;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 
 it('works for non authed users', function () {
-    $character_id = CharacterInfo::factory()->make()->character_id;
 
-    $abstractUser = createSocialiteUser($character_id);
+    $abstractUser = createSocialiteUser();
 
     $provider = Mockery::mock(Provider::class);
     $provider->shouldReceive('user')->andReturn($abstractUser);
@@ -43,7 +42,7 @@ it('works for non authed users', function () {
     Socialite::shouldReceive('driver')->with('eveonline')->andReturn($provider);
 
     test()->assertDatabaseMissing('refresh_tokens', [
-        'character_id' => $character_id,
+        'character_id' => $abstractUser->character_id,
     ]);
 
     Event::fakeFor(function () {
@@ -52,14 +51,13 @@ it('works for non authed users', function () {
     });
 
     test()->assertDatabaseHas('refresh_tokens', [
-        'character_id' => $character_id,
+        'character_id' => $abstractUser->character_id,
     ]);
 });
 
 it('returns error if scopes changed', function () {
-    $character_id = Event::fakeFor(fn () => CharacterInfo::factory()->make()->character_id);
 
-    $abstractUser = createSocialiteUser($character_id);
+    $abstractUser = createSocialiteUser();
 
     $provider = Mockery::mock(Provider::class);
     $provider->shouldReceive('user')->andReturn($abstractUser);
@@ -75,17 +73,13 @@ it('returns error if scopes changed', function () {
 
     test()->get(route('auth.eve.callback'));
 
-    test()->assertEquals(
-        'Something might have gone wrong. You might have changed the requested scopes on esi, please refer from doing so.',
-        session('error')
-    );
+    expect(session('error'))->toBe('Something might have gone wrong. You might have changed the requested scopes on esi, please refer from doing so.');
 });
 
 test('one can add another character', function () {
     // Setup character user
-    $character_id = Event::fakeFor(fn () => CharacterInfo::factory()->make()->character_id);
 
-    $abstractUser = createSocialiteUser($character_id, 'refresh_token', implode(' ', config('eveapi.scopes.minimum')));
+    $abstractUser = createSocialiteUser(null, config('eveapi.scopes.minimum'));
 
     $provider = Mockery::mock(Provider::class);
     $provider->shouldReceive('user')->andReturn($abstractUser);
@@ -101,6 +95,9 @@ test('one can add another character', function () {
         'rurl'       => '/home',
     ]);
 
+    // expect test_user only to have one character
+    expect(test()->test_user->character_users)->toHaveCount(1);
+
     // assert no UserRolesSync job has been dispatched
     Queue::assertNothingPushed();
 
@@ -112,12 +109,9 @@ test('one can add another character', function () {
     // assert that no error is present
     expect(session('error'))->toBeNull();
 
-    test()->assertEquals(
-        'Character added/updated successfully',
-        session('success')
-    );
+    expect(session('success'))->toBe('Character added/updated successfully');
+
+    expect(test()->test_user->refresh()->character_users)->toHaveCount(2);
 
 });
-
-// Helpers
 

@@ -30,6 +30,9 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Socialite\SocialiteManager;
 use Seatplus\Auth\Extentions\EveOnlineProvider;
+use SocialiteProviders\Eveonline\EveonlineExtendSocialite;
+use SocialiteProviders\Eveonline\Provider;
+use SocialiteProviders\Manager\SocialiteWasCalled;
 use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 
 class AuthenticationServiceProvider extends ServiceProvider
@@ -42,6 +45,9 @@ class AuthenticationServiceProvider extends ServiceProvider
 
         // Add routes
         $this->loadRoutesFrom(__DIR__ . '/Http/routes.php');
+
+        // Add event listeners
+        $this->addEventListeners();
 
         // Add GateLogic
         Gate::before(function ($user, $ability) {
@@ -62,18 +68,24 @@ class AuthenticationServiceProvider extends ServiceProvider
         });
 
         // Slap in the Eveonline Socialite Provider
-        $eveonline = $this->app->make('Laravel\Socialite\Contracts\Factory');
+        $socialite = $this->app->make('Laravel\Socialite\Contracts\Factory');
 
-        $eveonline->extend(
+        $socialite->extend(
             'eveonline',
-            function ($app) use ($eveonline) {
+            function ($app) use ($socialite) {
                 $config = $app['config']['services.eveonline'];
 
-                return $eveonline->buildProvider(EveOnlineProvider::class, $config);
+                return $socialite->buildProvider(Provider::class, $config);
             }
         );
 
         $this->mergeConfigFrom(__DIR__ . '/config/permission.php', 'permission');
         $this->mergeConfigFrom(__DIR__ . '/config/auth.updateJobs.php', 'seatplus.updateJobs');
+        $this->mergeConfigFrom(__DIR__ . '/config/auth.services.php', 'services');
+    }
+
+    private function addEventListeners()
+    {
+        $this->app->events->listen(SocialiteWasCalled::class, EveonlineExtendSocialite::class);
     }
 }

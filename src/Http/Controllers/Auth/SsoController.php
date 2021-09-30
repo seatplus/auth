@@ -28,6 +28,7 @@ namespace Seatplus\Auth\Http\Controllers\Auth;
 
 use Laravel\Socialite\Contracts\Factory as Socialite;
 use Laravel\Socialite\Two\User as EveData;
+use Seatplus\Auth\Containers\EveUser;
 use Seatplus\Auth\Http\Actions\Sso\FindOrCreateUserAction;
 use Seatplus\Auth\Http\Actions\Sso\UpdateRefreshTokenAction;
 use Seatplus\Auth\Http\Controllers\Controller;
@@ -37,6 +38,9 @@ use Seatplus\Auth\Services\GetRequiredScopes;
 
 class SsoController extends Controller
 {
+
+    private bool $should_redirect = false;
+
     /**
      * Redirect the user to the Eve Online authentication page.
      *
@@ -71,8 +75,17 @@ class SsoController extends Controller
         FindOrCreateUserAction $find_or_create_user_action,
         UpdateRefreshTokenAction $update_refresh_token_action
     ) {
-        $eve_data = $social->driver('eveonline')->user();
+        $socialite_user = $social->driver('eveonline')->user();
         $rurl = session()->pull('rurl');
+
+        $eve_data = new EveUser([
+            'character_id' => data_get($socialite_user, 'character_id'),
+            'character_owner_hash' => data_get($socialite_user, 'character_owner_hash'),
+            'token' => data_get($socialite_user, 'token'),
+            'refreshToken' => data_get($socialite_user, 'refreshToken'),
+            'expiresIn' => data_get($socialite_user, 'expiresIn'),
+            'user' => data_get($socialite_user, 'user'),
+        ]);
 
         // if return url was set, set the intended URL
         if ($rurl) {
@@ -81,23 +94,22 @@ class SsoController extends Controller
 
         // check if the requested scopes matches the provided scopes
         if (auth()->user()) {
-            if ($this->isInvalidProviderCallback($eve_data)) {
-                return redirect()->intended();
-            }
 
-            // check if step up character_id is the same as provided
-            if ($this->differentCharacterIdHasBeenProvided($eve_data)) {
+            $this->checkForInvalidProviderCallback($eve_data);
+            $this->checkIfDifferentCharacterIdHasBeenProvided($eve_data);
+
+            if ($this->should_redirect) {
                 return redirect()->intended();
             }
         }
 
         // Get or create the User bound to this login.
-        $user = $find_or_create_user_action->execute($eve_data);
+        $user = $find_or_create_user_action($eve_data);
 
         /*
          * Update the refresh token for this character.
          */
-        $update_refresh_token_action->execute($eve_data);
+        $update_refresh_token_action($eve_data);
 
         if (! $this->loginUser($user)) {
             return redirect()->route('auth.login')
@@ -130,41 +142,27 @@ class SsoController extends Controller
         return true;
     }
 
-    /**
-     * @param  \Laravel\Socialite\Two\User  $eve_data
-     * @return bool
-     */
-    private function isInvalidProviderCallback(EveData $eve_data): bool
+    private function checkForInvalidProviderCallback(EveUser $user): void
     {
-        $missing_scopes = array_diff(session()->pull('sso_scopes'), explode(' ', $eve_data->scopes));
+        $missing_scopes = array_diff(session()->pull('sso_scopes'), $user->getScopes());
 
         if (empty($missing_scopes)) {
-            return false;
+            return;
         }
 
         session()->flash('error', 'Something might have gone wrong. You might have changed the requested scopes on esi, please refer from doing so.');
-
-        return true;
+        $this->should_redirect = true;
     }
 
-    /**
-     * @param  \Laravel\Socialite\Two\User  $eve_data
-     * @return bool
-     */
-    private function differentCharacterIdHasBeenProvided(EveData $eve_data): bool
+    private function checkIfDifferentCharacterIdHasBeenProvided(EveUser $user): void
     {
         $step_up_character_id = session()->pull('step_up');
 
-        if (! $step_up_character_id) {
-            return false;
+        if (! $step_up_character_id || $step_up_character_id === $user->character_id) {
+            return;
         }
 
-        $character_id_has_changed = $step_up_character_id !== $eve_data->character_id;
-
-        if ($character_id_has_changed) {
-            session()->flash('error', 'Please make sure to select the same character to step up on CCP as on seatplus.');
-        }
-
-        return $character_id_has_changed;
+        session()->flash('error', 'Please make sure to select the same character to step up on CCP as on seatplus.');
+        $this->should_redirect = true;
     }
 }

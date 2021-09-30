@@ -26,12 +26,13 @@
 
 namespace Seatplus\Auth\Http\Actions\Sso;
 
-use Laravel\Socialite\Two\User as EveUser;
+
+use Seatplus\Auth\Containers\EveUser;
 use Seatplus\Eveapi\Models\RefreshToken;
 
 class UpdateRefreshTokenAction
 {
-    public function execute(EveUser $eve_data)
+    public function __invoke(EveUser $eve_data)
     {
         // To prevent overwriting a perfectly fine refresh_token of users without a valid session
         //
@@ -41,10 +42,9 @@ class UpdateRefreshTokenAction
 
         RefreshToken::withTrashed()->firstOrNew(['character_id' => $eve_data->character_id])
             ->fill([
-                'refresh_token' => $eve_data->refresh_token,
-                //'scopes'        => explode(' ', $eve_data->scopes), //TODO: remove this in v2
+                'refresh_token' => $eve_data->refreshToken,
                 'token'         => $eve_data->token,
-                'expires_on'    => $eve_data->expires_on,
+                'expires_on'    => carbon()->addSeconds($eve_data->expiresIn),
             ])
             ->save();
 
