@@ -27,7 +27,6 @@
 namespace Seatplus\Auth\Http\Controllers\Auth;
 
 use Laravel\Socialite\Contracts\Factory as Socialite;
-use Laravel\Socialite\Two\User as EveData;
 use Seatplus\Auth\Containers\EveUser;
 use Seatplus\Auth\Http\Actions\Sso\FindOrCreateUserAction;
 use Seatplus\Auth\Http\Actions\Sso\UpdateRefreshTokenAction;
@@ -38,7 +37,6 @@ use Seatplus\Auth\Services\GetRequiredScopes;
 
 class SsoController extends Controller
 {
-
     private bool $should_redirect = false;
 
     /**
@@ -94,7 +92,6 @@ class SsoController extends Controller
 
         // check if the requested scopes matches the provided scopes
         if (auth()->user()) {
-
             $this->checkForInvalidProviderCallback($eve_data);
             $this->checkIfDifferentCharacterIdHasBeenProvided($eve_data);
 

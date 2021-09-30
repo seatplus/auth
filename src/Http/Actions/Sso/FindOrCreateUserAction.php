@@ -56,7 +56,7 @@ class FindOrCreateUserAction
     private function handleCharacterUserEntry(User $user, EveUser $eve_user)
     {
         // When character_user is set and found skip
-        if($this->character_user) {
+        if ($this->character_user) {
             return;
         }
 
@@ -70,11 +70,11 @@ class FindOrCreateUserAction
 
     private function getUser(): User
     {
-        if(! isset($this->user)) {
+        if (! isset($this->user)) {
             $this->user = auth()->user() ?? User::create([
-                    'main_character_id' => $this->eve_user->character_id,
-                    'active'            => true,
-                ]);
+                'main_character_id' => $this->eve_user->character_id,
+                'active'            => true,
+            ]);
         }
 
         return $this->user;
@@ -83,7 +83,7 @@ class FindOrCreateUserAction
     private function handleChangedOwnerHash()
     {
         // If character_user is unknown or character_owner_hash did not change don't bother anymore
-        if(empty($this->character_user) || ($this->character_user->character_owner_hash === $this->eve_user->character_owner_hash)) {
+        if (empty($this->character_user) || ($this->character_user->character_owner_hash === $this->eve_user->character_owner_hash)) {
             return;
         }
 
@@ -104,7 +104,6 @@ class FindOrCreateUserAction
         CharacterUser::where('character_id', $this->eve_user->character_id)->delete();
         // reset found character_user
         $this->character_user = null;
-
     }
 
     private function setUserFromUnchangedOwnerHash()

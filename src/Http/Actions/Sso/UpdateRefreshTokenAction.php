@@ -26,7 +26,6 @@
 
 namespace Seatplus\Auth\Http\Actions\Sso;
 
-
 use Seatplus\Auth\Containers\EveUser;
 use Seatplus\Eveapi\Models\RefreshToken;
 
