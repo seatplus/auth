@@ -29,7 +29,6 @@ namespace Seatplus\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Socialite\SocialiteManager;
-use Seatplus\Auth\Extentions\EveOnlineProvider;
 use SocialiteProviders\Eveonline\EveonlineExtendSocialite;
 use SocialiteProviders\Eveonline\Provider;
 use SocialiteProviders\Manager\SocialiteWasCalled;
