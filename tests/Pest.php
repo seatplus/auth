@@ -1,6 +1,9 @@
 <?php
 
+use Faker\Factory;
+use Firebase\JWT\JWT;
 use Illuminate\Support\Facades\Event;
+use Seatplus\Auth\Containers\EveUser;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 use Seatplus\Eveapi\Models\RefreshToken;
 use Seatplus\Eveapi\Models\SsoScopes;
@@ -52,9 +55,11 @@ function createRefreshTokenWithScopes(array $scopes)
         if(test()->test_character->refresh_token) {
 
             $refresh_token = test()->test_character->refresh_token;
-            $token = json_decode($refresh_token->getRawOriginal('token'), true);
-            data_set($token, 'scp', $scopes);
-            $refresh_token->token = json_encode($token);
+            $helper_token = RefreshToken::factory()->scopes($scopes)->make([
+                'character_id' => $refresh_token->character_id
+            ]);
+
+            $refresh_token->token = $helper_token->token;
             $refresh_token->save();
 
             return;
@@ -76,15 +81,45 @@ function createCorporationSsoScope(array $array, string $type = 'default')
     ]);
 }
 
-function createSocialiteUser($character_id, $refresh_token = 'refresh_token', $scopes = '1 2', $token = 'qq3dpeTMpDkjNasdasdewva3Be658eVVkox_1Ikodc')
+function createSocialiteUser($character_id = null, array $scopes = ["esi-skills.read_skills.v1", "esi-skills.read_skillqueue.v1",])
 {
+
+    $refresh_token = RefreshToken::factory()->scopes($scopes)->make();
+
     $socialiteUser = test()->createMock(SocialiteUser::class);
-    $socialiteUser->character_id = $character_id;
-    $socialiteUser->refresh_token = $refresh_token;
-    $socialiteUser->character_owner_hash = sha1($token);
-    $socialiteUser->scopes = $scopes;
-    $socialiteUser->token = $token;
-    $socialiteUser->expires_on = carbon('now')->addMinutes(15);
+    $socialiteUser->character_owner_hash = faker()->sha256;
+    //name - we don't care for that
+    $socialiteUser->character_id = $character_id ?? $refresh_token->character_id;
+    $socialiteUser->token = $refresh_token->token;
+    $socialiteUser->refreshToken = $refresh_token->refresh_token;
+    $socialiteUser->expiresIn = 12*60; //let's just say 12 minutes
+    $socialiteUser->user = [
+        'scp' => $scopes
+    ];
 
     return $socialiteUser;
+}
+
+function faker()
+{
+    if(!isset(test()->faker)) {
+        test()->faker = Factory::create();
+    }
+
+    return test()->faker;
+}
+
+function createEveUser(int $character_id = null, string $character_owner_hash = null): EveUser
+{
+
+    $faker = faker();
+
+    return new EveUser([
+        'character_id' => $character_id ?? $faker->numberBetween(90000000, 98000000),
+        'character_owner_hash' => $character_owner_hash ?? sha1($faker->text),
+        'token' => sha1($faker->text),
+        'refreshToken' => sha1($faker->text),
+        'expiresIn' => $faker->numberBetween(1,20),
+        'user' => ['user'],
+    ]);
 }

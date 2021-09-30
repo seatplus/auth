@@ -24,32 +24,26 @@
  * SOFTWARE.
  */
 
-namespace Seatplus\Auth\Http\Actions\Sso;
+namespace Seatplus\Auth\Containers;
 
-use Seatplus\Auth\Containers\EveUser;
-use Seatplus\Eveapi\Models\RefreshToken;
+use Spatie\DataTransferObject\Attributes\Strict;
 
-class UpdateRefreshTokenAction
+#[Strict]
+class EveUser extends \Spatie\DataTransferObject\DataTransferObject
 {
-    public function __invoke(EveUser $eve_data)
+    public int $character_id;
+    public string $character_owner_hash;
+
+    // Token related
+    public string $token;
+    public string $refreshToken;
+    public int $expiresIn;
+
+    //jwt payload
+    public array $user;
+
+    public function getScopes(): array
     {
-        // To prevent overwriting a perfectly fine refresh_token of users without a valid session
-        //
-        if (auth()->guest() && RefreshToken::where('character_id', $eve_data->character_id)->get()->isNotEmpty()) {
-            return;
-        }
-
-        RefreshToken::withTrashed()->firstOrNew(['character_id' => $eve_data->character_id])
-            ->fill([
-                'refresh_token' => $eve_data->refreshToken,
-                'token'         => $eve_data->token,
-                'expires_on'    => carbon()->addSeconds($eve_data->expiresIn),
-            ])
-            ->save();
-
-        // restore soft deleted token if any
-        RefreshToken::onlyTrashed()->where('character_id', $eve_data->character_id)->restore();
-
-        //TODO: if user was deactivated reactivate him https://github.com/eveseat/web/blob/a0c1dd6a73c10e91813276cd57b5b51460bdfc43/src/Http/Controllers/Auth/SsoController.php#L264
+        return data_get($this->user, 'scp');
     }
 }

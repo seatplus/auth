@@ -29,11 +29,10 @@ use Seatplus\Auth\Http\Actions\Sso\UpdateRefreshTokenAction;
 use Seatplus\Eveapi\Models\RefreshToken;
 
 test('create refresh token', function () {
-    $eve_data = createSocialiteUser(test()->test_user->id);
+    $eve_data = createEveUser(test()->test_user->id);
 
-    Event::fakeFor(function () use ($eve_data) {
-        (new UpdateRefreshTokenAction())->execute($eve_data);
-    });
+    $action = new UpdateRefreshTokenAction();
+    Event::fakeFor(fn() => $action($eve_data));
 
     test()->assertDatabaseHas('refresh_tokens', [
         'character_id' => test()->test_user->id,
@@ -44,89 +43,94 @@ it('does update refresh token active sessions', function () {
     test()->actingAs(test()->test_user);
 
     // create RefreshToken
-    $eve_data = createSocialiteUser(test()->test_user->id);
+    $eveUser = createEveUser();
 
-    Event::fakeFor(function () use ($eve_data) {
-        (new UpdateRefreshTokenAction())->execute($eve_data);
-    });
+    $action = new UpdateRefreshTokenAction();
+    Event::fakeFor(fn() => $action($eveUser));
 
     test()->assertDatabaseHas('refresh_tokens', [
-        'character_id'  => test()->test_user->id,
-        'refresh_token' => 'refresh_token',
+        'character_id'  => $eveUser->character_id,
+        'refresh_token' => $eveUser->refreshToken,
     ]);
 
-    test()->actingAs(test()->test_user);
     // Change RefreshToken
+    $eveUser_changedRefreshToken = createEveUser(
+        $eveUser->character_id,
+        $eveUser->character_owner_hash
+    );
 
-    $eve_data = createSocialiteUser(test()->test_user->id, 'new_refreshToken');
-
-    (new UpdateRefreshTokenAction())->execute($eve_data);
+    Event::fakeFor(fn() => $action($eveUser_changedRefreshToken));
 
     test()->assertDatabaseHas('refresh_tokens', [
-        'character_id'  => test()->test_user->id,
-        'refresh_token' => 'new_refreshToken',
+        'character_id'  => $eveUser->character_id,
+        'refresh_token' => $eveUser_changedRefreshToken->refreshToken,
     ]);
 });
 
 it('does not update refresh token for new session of a valid refresh token user', function () {
     // create RefreshToken
-    $eve_data = createSocialiteUser(test()->test_user->id);
+    $eveUser = createEveUser();
 
-    Event::fakeFor(function () use ($eve_data) {
-        RefreshToken::factory()->create([
-            'character_id'  => test()->test_user->id,
-            'refresh_token' => 'refresh_token',
-        ]);
-
-        (new UpdateRefreshTokenAction())->execute($eve_data);
-    });
+    $action = new UpdateRefreshTokenAction();
+    Event::fakeFor(fn() => $action($eveUser));
 
     test()->assertDatabaseHas('refresh_tokens', [
-        'character_id'  => test()->test_user->id,
-        'refresh_token' => 'refresh_token',
+        'character_id'  => $eveUser->character_id,
+        'refresh_token' => $eveUser->refreshToken,
     ]);
 
     // Change RefreshToken
 
-    $eve_data = createSocialiteUser(test()->test_user->id, 'new_refreshToken');
+    $eveUser_changedRefreshToken = createEveUser(
+        $eveUser->character_id,
+        $eveUser->character_owner_hash
+    );
 
-    (new UpdateRefreshTokenAction())->execute($eve_data);
+    Event::fakeFor(fn() => $action($eveUser));
 
     test()->assertDatabaseMissing('refresh_tokens', [
-        'character_id'  => test()->test_user->id,
-        'refresh_token' => 'new_refreshToken',
+        'character_id'  => $eveUser->character_id,
+        'refresh_token' => $eveUser_changedRefreshToken->refreshToken,
     ]);
 });
 
 test('restore trashed refresh token', function () {
     // create RefreshToken
-    $eve_data = createSocialiteUser(test()->test_user->id);
+    $eveUser = createEveUser();
 
-    Event::fakeFor(function () use ($eve_data) {
-        (new UpdateRefreshTokenAction())->execute($eve_data);
-    });
+    $action = new UpdateRefreshTokenAction();
+    Event::fakeFor(fn() => $action($eveUser));
 
     test()->assertDatabaseHas('refresh_tokens', [
-        'character_id' => test()->test_user->id,
+        'character_id'  => $eveUser->character_id,
+        'refresh_token' => $eveUser->refreshToken,
     ]);
 
-    // Assert if RefreshToken was created
-    $refresh_token = RefreshToken::find(test()->test_user->id);
+    $refresh_token = RefreshToken::find($eveUser->character_id);
 
-    test()->assertNotEmpty($refresh_token);
+    // Assert if RefreshToken was created
+    expect($refresh_token)
+        ->character_id->toBe((string) $eveUser->character_id)
+        ->not()->toBeEmpty();
 
     // SoftDelete RefreshToken
     $refresh_token->delete();
 
-    test()->assertSoftDeleted(RefreshToken::find(test()->test_user->id));
+    test()->assertSoftDeleted(RefreshToken::find($eveUser->character_id));
 
     // Recreate RefreshToken
-    $eve_data = createSocialiteUser(test()->test_user->id, 'newRefreshToken');
-    (new UpdateRefreshTokenAction())->execute($eve_data);
-    test()->assertNotEmpty(RefreshToken::find(test()->test_user->id));
+    $eveUser_changedRefreshToken = createEveUser(
+        $eveUser->character_id,
+        $eveUser->character_owner_hash
+    );
+
+    Event::fakeFor(fn() => $action($eveUser_changedRefreshToken));
+
+    expect(RefreshToken::find($eveUser->character_id))->not()->toBeEmpty();
+
     test()->assertDatabaseHas('refresh_tokens', [
-        'character_id'  => test()->test_user->id,
-        'refresh_token' => 'newRefreshToken',
+        'character_id'  => $eveUser->character_id,
+        'refresh_token' => $eveUser_changedRefreshToken->refreshToken,
     ]);
 });
 
