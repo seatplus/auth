@@ -1,7 +1,6 @@
 <?php
 
 use Faker\Factory;
-use Firebase\JWT\JWT;
 use Illuminate\Support\Facades\Event;
 use Seatplus\Auth\Containers\EveUser;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
