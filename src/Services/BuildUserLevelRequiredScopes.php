@@ -28,32 +28,33 @@ namespace Seatplus\Auth\Services;
 
 use Illuminate\Support\Arr;
 use Seatplus\Auth\Models\User;
+use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\SsoScopes;
 
 class BuildUserLevelRequiredScopes
 {
     public static function get(User $user): array
     {
-        $user->global_scope = $user->global_scope ?? Arr::get(
-            $user->getAttributes(),
-            'global_scope',
-            self::getSelectedScopes()
-            );
+        $user = $user->replicate();
 
-        return $user->characters->map(fn ($character) => collect([
-            $character->corporation->ssoScopes ?? [],
-            $character->alliance->ssoScopes ?? [],
-        ])->where('type', 'user'))
+        if (! Arr::has($user->getAttributes(), 'global_scope')) {
+            $user->global_scope = self::getSelectedScopes();
+        }
+
+        return $user
+            ->characters
+            ->map(fn (CharacterInfo $character) => collect([
+                $character->corporation->ssoScopes ?? [],
+                $character->alliance->ssoScopes ?? [],
+            ])->where('type', 'user'))
             ->filter(fn ($character) => $character->isNotEmpty())
             ->map(fn ($character) => $character->map(fn ($scope) =>[
                 $scope->selected_scopes,
             ]))
             ->concat([
-                'user_application_corporation_scopes' => $user->application->corporation->ssoScopes->selected_scopes ?? [],
-                'user_application_alliance_scopes'    => $user->application->corporation->alliance->ssoScopes->selected_scopes ?? [],
-                'global_scopes'                  => is_array($user->global_scope)
-                    ? $user->global_scope
-                    : (is_string($user->global_scope) ? json_decode($user->global_scope) : []),
+                'user_application_corporation_scopes' => $user->getRelation('application') ? $user->application->corporation->ssoScopes?->selected_scopes : [],
+                'user_application_alliance_scopes'    => $user->getRelation('application') ? $user->application->corporation->alliance->ssoScopes?->selected_scopes : [],
+                'global_scopes'                  => is_array($user->global_scope) ? $user->global_scope : (is_string($user->global_scope) ? json_decode($user->global_scope) : []),
             ])
             ->flatten()
             ->unique()
