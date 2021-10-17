@@ -44,6 +44,8 @@ class EveUser extends \Spatie\DataTransferObject\DataTransferObject
 
     public function getScopes(): array
     {
-        return data_get($this->user, 'scp');
+        $scopes = data_get($this->user, 'scp');
+
+        return is_array($scopes) ? $scopes : [$scopes];
     }
 }

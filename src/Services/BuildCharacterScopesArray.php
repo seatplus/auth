@@ -26,20 +26,35 @@
 
 namespace Seatplus\Auth\Services;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
-use Seatplus\Auth\Models\CharacterUser;
+use Seatplus\Auth\Models\User;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 
 class BuildCharacterScopesArray
 {
-    public static function get(CharacterInfo $character, array $user_scopes = []): array
+    public static function get(CharacterInfo $character, array $user_scopes = [], ?User $user = null): array
     {
-        $user_scopes = $user_scopes
-            ? $user_scopes
-            : (optional(CharacterUser::whereCharacterId($character->character_id)->first())->user
-                ? BuildUserLevelRequiredScopes::get(CharacterUser::whereCharacterId($character->character_id)->first()->user)
-                : []
-            );
+
+        $user = $user ?? User::query()
+            ->with(
+                'characters.alliance.ssoScopes',
+                'characters.corporation.ssoScopes',
+                'characters.application.corporation.ssoScopes',
+                'characters.application.corporation.alliance.ssoScopes',
+                'characters.refresh_token',
+                'application.corporation.ssoScopes',
+                'application.corporation.alliance.ssoScopes'
+            )
+            ->whereHas('characters', fn(Builder $query) => $query
+                ->where('character_infos.character_id', $character->character_id)
+            )
+            ->get()
+            ->first();
+
+        //CharacterUser::with('user')->firstWhere('character_id', $character->character_id)?->user;
+
+        $user_scopes = $user_scopes ? $user_scopes : ($user ? BuildUserLevelRequiredScopes::get($user) : []);
 
         $character_array = [
             'character' => $character,

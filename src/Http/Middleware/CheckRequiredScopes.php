@@ -52,7 +52,9 @@ class CheckRequiredScopes
 
         $characters_with_missing_scopes = $this->getCharactersWithMissingScopes();
 
-        return $characters_with_missing_scopes->isEmpty() ? $next($request) : $this->redirectTo($characters_with_missing_scopes);
+        return $characters_with_missing_scopes->isEmpty()
+            ? $next($request)
+            : $this->redirectTo($characters_with_missing_scopes);
     }
 
     public function buildUser(): void
@@ -78,7 +80,7 @@ class CheckRequiredScopes
 
         //dump(json_decode($this->user->global_scope));
 
-        return $this->user->characters->map(fn ($character) => BuildCharacterScopesArray::get($character, $user_scopes))
+        return $this->user->characters->map(fn ($character) => BuildCharacterScopesArray::get($character, $user_scopes, $this->user))
             ->filter(fn ($character) => Arr::get($character, 'missing_scopes'));
     }
 
