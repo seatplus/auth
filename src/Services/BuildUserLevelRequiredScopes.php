@@ -37,7 +37,7 @@ class BuildUserLevelRequiredScopes
     {
         $user = $user->replicate();
 
-        if(! Arr::has($user->getAttributes(),'global_scope')) {
+        if (! Arr::has($user->getAttributes(), 'global_scope')) {
             $user->global_scope = self::getSelectedScopes();
         }
 
