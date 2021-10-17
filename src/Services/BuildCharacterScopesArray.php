@@ -35,7 +35,6 @@ class BuildCharacterScopesArray
 {
     public static function get(CharacterInfo $character, array $user_scopes = [], ?User $user = null): array
     {
-
         $user = $user ?? User::query()
             ->with(
                 'characters.alliance.ssoScopes',
@@ -46,7 +45,7 @@ class BuildCharacterScopesArray
                 'application.corporation.ssoScopes',
                 'application.corporation.alliance.ssoScopes'
             )
-            ->whereHas('characters', fn(Builder $query) => $query
+            ->whereHas('characters', fn (Builder $query) => $query
                 ->where('character_infos.character_id', $character->character_id)
             )
             ->get()
