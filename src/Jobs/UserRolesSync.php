@@ -75,7 +75,7 @@ class UserRolesSync implements ShouldQueue, ShouldBeUnique
             ->whereId($this->user->id)
             ->get()
             ->whenNotEmpty(function ($collection) {
-                return $collection->first()->characters->map(fn ($character) => $character->refresh_token->character_id);
+                return $collection->first()->characters->map(fn ($character) => $character->character_id);
             })
             ->toArray();
     }
