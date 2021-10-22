@@ -80,7 +80,9 @@ class CheckRequiredScopes
 
         //dump(json_decode($this->user->global_scope));
 
-        return $this->user->characters->map(fn ($character) => BuildCharacterScopesArray::get($character, $user_scopes, $this->user))
+        return $this->user
+            ->characters
+            ->map(fn ($character) => BuildCharacterScopesArray::make()->setUserScopes($user_scopes)->setCharacter($character)->get())
             ->filter(fn ($character) => Arr::get($character, 'missing_scopes'));
     }
 
@@ -90,5 +92,13 @@ class CheckRequiredScopes
     protected function redirectTo(Collection $missing_character_scopes)
     {
         //TODO: extend this with default view.
+    }
+
+    /**
+     * @return User
+     */
+    public function getUser(): User
+    {
+        return $this->user;
     }
 }
