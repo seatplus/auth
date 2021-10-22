@@ -40,12 +40,13 @@ class BuildCharacterScopesArray
     private bool $withUserScope = false;
 
     /**
-     * @param bool $withUserScope
+     * @param  bool  $withUserScope
      * @return BuildCharacterScopesArray
      */
     public function setWithUserScope(bool $withUserScope = true): BuildCharacterScopesArray
     {
         $this->withUserScope = $withUserScope;
+
         return $this;
     }
 
@@ -54,11 +55,11 @@ class BuildCharacterScopesArray
      */
     public function getUserScopes(): array
     {
-        if(! $this->withUserScope) {
+        if (! $this->withUserScope) {
             return [];
         }
 
-        if(! isset($this->user_scopes)) {
+        if (! isset($this->user_scopes)) {
             $this->user_scopes = BuildUserLevelRequiredScopes::get($this->getUser());
         }
 
@@ -95,7 +96,7 @@ class BuildCharacterScopesArray
 
     public function getUser(): User
     {
-        if(!isset($this->user)) {
+        if (! isset($this->user)) {
             $this->user = User::query()
                 ->with(
                     'characters.alliance.ssoScopes',
@@ -117,7 +118,7 @@ class BuildCharacterScopesArray
         return $this->user->replicate();
     }
 
-    public function setCharacter(CharacterInfo $character) : self
+    public function setCharacter(CharacterInfo $character): self
     {
         $this->character = $character;
 
@@ -126,7 +127,6 @@ class BuildCharacterScopesArray
 
     public function get(): array
     {
-
         $character_array = [
             'character' => $this->getCharacter(),
             'required_scopes' => collect([
