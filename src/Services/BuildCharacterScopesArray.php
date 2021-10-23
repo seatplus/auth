@@ -26,49 +26,71 @@
 
 namespace Seatplus\Auth\Services;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
-use Seatplus\Auth\Models\User;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 
 class BuildCharacterScopesArray
 {
-    public static function get(CharacterInfo $character, array $user_scopes = [], ?User $user = null): array
+    private array $user_scopes;
+    private CharacterInfo $character;
+    private bool $withUserScope = false;
+
+    /**
+     * @return array
+     */
+    public function getUserScopes(): array
     {
-        $user = $user ?? User::query()
-            ->with(
-                'characters.alliance.ssoScopes',
-                'characters.corporation.ssoScopes',
-                'characters.application.corporation.ssoScopes',
-                'characters.application.corporation.alliance.ssoScopes',
-                'characters.refresh_token',
-                'application.corporation.ssoScopes',
-                'application.corporation.alliance.ssoScopes'
-            )
-            ->whereHas('characters', fn (Builder $query) => $query
-                ->where('character_infos.character_id', $character->character_id)
-            )
-            ->get()
-            ->first();
+        if (! $this->withUserScope) {
+            return [];
+        }
 
-        //CharacterUser::with('user')->firstWhere('character_id', $character->character_id)?->user;
+        return $this->user_scopes;
+    }
 
-        $user_scopes = $user_scopes ? $user_scopes : ($user ? BuildUserLevelRequiredScopes::get($user) : []);
+    /**
+     * @return CharacterInfo
+     */
+    public function getCharacter(): CharacterInfo
+    {
+        return $this->character;
+    }
 
+    public static function make()
+    {
+        return new static();
+    }
+
+    public function setUserScopes(array $user_scopes)
+    {
+        $this->withUserScope = true;
+        $this->user_scopes = $user_scopes;
+
+        return $this;
+    }
+
+    public function setCharacter(CharacterInfo $character): self
+    {
+        $this->character = $character;
+
+        return $this;
+    }
+
+    public function get(): array
+    {
         $character_array = [
-            'character' => $character,
+            'character' => $this->getCharacter(),
             'required_scopes' => collect([
-                'corporation_scopes'             => $character->corporation->ssoScopes->selected_scopes ?? [],
-                'alliance_scopes'                => $character->alliance->ssoScopes->selected_scopes ?? [],
-                'character_application_corporation_scopes' => $character->application->corporation->ssoScopes->selected_scopes ?? [],
-                'character_application_alliance_scopes'    => $character->application->corporation->alliance->ssoScopes->selected_scopes ?? [],
-                'user_scope'                    => $user_scopes,
+                'corporation_scopes'             => $this->getCharacter()->corporation->ssoScopes->selected_scopes ?? [],
+                'alliance_scopes'                => $this->getCharacter()->alliance->ssoScopes->selected_scopes ?? [],
+                'character_application_corporation_scopes' => $this->getCharacter()->application->corporation->ssoScopes->selected_scopes ?? [],
+                'character_application_alliance_scopes'    => $this->getCharacter()->application->corporation->alliance->ssoScopes->selected_scopes ?? [],
+                'user_scope'                    => $this->getUserScopes(),
             ])->flatten(1)
                 ->filter()
                 ->unique()
                 ->flatten(1)
                 ->toArray(),
-            'token_scopes' => $character->refresh_token->scopes ?? [],
+            'token_scopes' => $this->getCharacter()->refresh_token->scopes ?? [],
         ];
 
         $required_scopes = Arr::get($character_array, 'required_scopes');
