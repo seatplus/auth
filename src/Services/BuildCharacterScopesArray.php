@@ -26,11 +26,8 @@
 
 namespace Seatplus\Auth\Services;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
-use Seatplus\Auth\Models\User;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
-use Seatplus\Eveapi\Models\SsoScopes;
 
 class BuildCharacterScopesArray
 {
@@ -43,7 +40,7 @@ class BuildCharacterScopesArray
      */
     public function getUserScopes(): array
     {
-        if(! $this->withUserScope) {
+        if (! $this->withUserScope) {
             return [];
         }
 
@@ -71,7 +68,7 @@ class BuildCharacterScopesArray
         return $this;
     }
 
-    public function setCharacter(CharacterInfo $character) : self
+    public function setCharacter(CharacterInfo $character): self
     {
         $this->character = $character;
 
@@ -80,7 +77,6 @@ class BuildCharacterScopesArray
 
     public function get(): array
     {
-
         $character_array = [
             'character' => $this->getCharacter(),
             'required_scopes' => collect([
