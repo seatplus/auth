@@ -34,20 +34,9 @@ use Seatplus\Eveapi\Models\SsoScopes;
 
 class BuildCharacterScopesArray
 {
-    private User $user;
     private array $user_scopes;
     private CharacterInfo $character;
     private bool $withUserScope = false;
-
-    /**
-     * @param bool $withUserScope
-     * @return BuildCharacterScopesArray
-     */
-    public function setWithUserScope(bool $withUserScope = true): BuildCharacterScopesArray
-    {
-        $this->withUserScope = $withUserScope;
-        return $this;
-    }
 
     /**
      * @return array
@@ -56,10 +45,6 @@ class BuildCharacterScopesArray
     {
         if(! $this->withUserScope) {
             return [];
-        }
-
-        if(! isset($this->user_scopes)) {
-            $this->user_scopes = BuildUserLevelRequiredScopes::get($this->getUser());
         }
 
         return $this->user_scopes;
@@ -78,43 +63,12 @@ class BuildCharacterScopesArray
         return new static();
     }
 
-    public function setUser(User $user)
-    {
-        $this->user = $user;
-
-        return $this;
-    }
-
     public function setUserScopes(array $user_scopes)
     {
         $this->withUserScope = true;
         $this->user_scopes = $user_scopes;
 
         return $this;
-    }
-
-    public function getUser(): User
-    {
-        if(!isset($this->user)) {
-            $this->user = User::query()
-                ->with(
-                    'characters.alliance.ssoScopes',
-                    'characters.corporation.ssoScopes',
-                    'characters.application.corporation.ssoScopes',
-                    'characters.application.corporation.alliance.ssoScopes',
-                    'characters.refresh_token',
-                    'application.corporation.ssoScopes',
-                    'application.corporation.alliance.ssoScopes'
-                )
-                ->whereHas('characters', fn (Builder $query) => $query
-                    ->where('character_infos.character_id', $this->getCharacter()->character_id)
-                )
-                ->addSelect(['global_scope' => SsoScopes::global()->select('selected_scopes')])
-                ->get()
-                ->first();
-        }
-
-        return $this->user->replicate();
     }
 
     public function setCharacter(CharacterInfo $character) : self
