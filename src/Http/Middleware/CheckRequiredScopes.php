@@ -63,6 +63,7 @@ class CheckRequiredScopes
         $this->user = User::with(
             'characters.alliance.ssoScopes',
             'characters.corporation.ssoScopes',
+            'characters.alliance.ssoScopes',
             'characters.application.corporation.ssoScopes',
             'characters.application.corporation.alliance.ssoScopes',
             'characters.refresh_token',
