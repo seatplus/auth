@@ -103,6 +103,6 @@ class BuildCharacterScopesArray
             ->reject(fn ($required_scope) => in_array($required_scope, $token_scopes))
             ->toArray();
 
-        return Arr::add($character_array, 'missing_scopes', $missing_scopes);
+        return Arr::add($character_array, 'missing_scopes', array_values($missing_scopes));
     }
 }
