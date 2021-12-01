@@ -29,6 +29,8 @@ namespace Seatplus\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Socialite\SocialiteManager;
+use Seatplus\Auth\Observers\CharacterAffiliationObserver;
+use Seatplus\Eveapi\Models\Character\CharacterAffiliation;
 use SocialiteProviders\Eveonline\EveonlineExtendSocialite;
 use SocialiteProviders\Eveonline\Provider;
 use SocialiteProviders\Manager\SocialiteWasCalled;
@@ -56,6 +58,9 @@ class AuthenticationServiceProvider extends ServiceProvider
                 return null;
             }
         });
+
+        // Add observer
+        CharacterAffiliation::observe(CharacterAffiliationObserver::class);
     }
 
     public function register()

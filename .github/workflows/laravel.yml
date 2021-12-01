@@ -19,6 +19,13 @@ jobs:
         php-version: '8.0'
         extensions: mbstring, dom, fileinfo
         coverage: xdebug #optional
+    - uses: getong/mariadb-action@v1.1
+      with:
+        host port: 3308 # Optional, default value is 3306. The port of host
+        mariadb version: '10.3' # Optional, default value is "latest". The version of the MariaDB
+        mysql database: 'testbench' # Optional, default value is "test". The specified database which will be create
+        mysql user: 'default' # Required if "mysql root password" is empty, default is empty. The superuser for the specified database. Can use secrets, too
+        mysql password: 'secret' # Required if "mysql user" exists. The password for the "mysql user"
     - name: Redis Server in GitHub Actions
       uses: supercharge/redis-github-action@1.1.0
       with:
@@ -31,5 +38,5 @@ jobs:
       env:
         CC_TEST_REPORTER_ID: dfdd27f143f73ad7911f5393e3378b9b989cfed884bf522fa3b0d9fbc2b8d4c1
       with:
-        coverageCommand: vendor/bin/pest --coverage -p
+        coverageCommand: vendor/bin/pest --coverage --ci
         debug: false
