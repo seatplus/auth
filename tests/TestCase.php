@@ -32,7 +32,6 @@ use Orchestra\Testbench\TestCase as OrchestraTestCase;
 use Seatplus\Auth\AuthenticationServiceProvider;
 use Seatplus\Auth\Models\User;
 use Seatplus\Eveapi\EveapiServiceProvider;
-use Spatie\Activitylog\ActivitylogServiceProvider;
 
 abstract class TestCase extends OrchestraTestCase
 {
@@ -68,9 +67,8 @@ abstract class TestCase extends OrchestraTestCase
     protected function getPackageProviders($app)
     {
         return [
-            ActivitylogServiceProvider::class,
-            EveapiServiceProvider::class,
             AuthenticationServiceProvider::class,
+            EveapiServiceProvider::class,
         ];
     }
 
@@ -97,10 +95,11 @@ abstract class TestCase extends OrchestraTestCase
         config(['database.default' => 'mysql']);
 
         config(['app.debug' => true]);
+        config(['activitylog.table_name' => 'activity_log']);
 
         // Use test User model for users provider
         $app['config']->set('auth.providers.users.model', User::class);
 
-        $app['config']->set('cache.prefix', 'seatplus_tests---');
+        //$app['config']->set('cache.prefix', 'seatplus_tests---');
     }
 }
