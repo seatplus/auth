@@ -26,7 +26,6 @@
 
 namespace Seatplus\Auth\Tests;
 
-use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
@@ -37,8 +36,6 @@ use Spatie\Activitylog\ActivitylogServiceProvider;
 
 abstract class TestCase extends OrchestraTestCase
 {
-
-    use LazilyRefreshDatabase;
 
     public User $test_user;
 

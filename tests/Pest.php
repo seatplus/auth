@@ -21,6 +21,7 @@ use Laravel\Socialite\Two\User as SocialiteUser;
 
 /** @link https://pestphp.com/docs/underlying-test-case */
 uses(\Seatplus\Auth\Tests\TestCase::class)->in('Unit', 'Feature');
+uses(\Illuminate\Foundation\Testing\LazilyRefreshDatabase::class)->in('Unit', 'Feature');
 
 /*
 |--------------------------------------------------------------------------
