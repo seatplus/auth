@@ -110,13 +110,16 @@ test('restore trashed refresh token', function () {
 
     // Assert if RefreshToken was created
     expect($refresh_token)
-        ->character_id->toBe((string) $eveUser->character_id)
+        ->character_id->toBe($eveUser->character_id)
         ->not()->toBeEmpty();
 
     // SoftDelete RefreshToken
     $refresh_token->delete();
 
-    test()->assertSoftDeleted(RefreshToken::find($eveUser->character_id));
+    expect(RefreshToken::withoutTrashed()->firstWhere('character_id',$eveUser->character_id))->toBeNull();
+    expect(RefreshToken::withTrashed()->firstWhere('character_id',$eveUser->character_id))
+        ->not()->toBeNull()
+        ->toBeInstanceOf(RefreshToken::class);
 
     // Recreate RefreshToken
     $eveUser_changedRefreshToken = createEveUser(

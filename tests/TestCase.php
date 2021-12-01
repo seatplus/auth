@@ -26,16 +26,20 @@
 
 namespace Seatplus\Auth\Tests;
 
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
 use Seatplus\Auth\AuthenticationServiceProvider;
 use Seatplus\Auth\Models\User;
 use Seatplus\Eveapi\EveapiServiceProvider;
-use Seatplus\Eveapi\Models\Character\CharacterInfo;
+use Spatie\Activitylog\ActivitylogServiceProvider;
 
 abstract class TestCase extends OrchestraTestCase
 {
+
+    use LazilyRefreshDatabase;
+
     public User $test_user;
 
     public $test_character;
@@ -67,8 +71,9 @@ abstract class TestCase extends OrchestraTestCase
     protected function getPackageProviders($app)
     {
         return [
-            AuthenticationServiceProvider::class,
+            ActivitylogServiceProvider::class,
             EveapiServiceProvider::class,
+            AuthenticationServiceProvider::class,
         ];
     }
 
@@ -79,7 +84,7 @@ abstract class TestCase extends OrchestraTestCase
     {
         // Path to our migrations to load
         //$this->loadMigrationsFrom(__DIR__ . '/database/migrations');
-        $this->artisan('migrate', ['--database' => 'testbench']);
+        $this->artisan('migrate');
     }
 
     /**
@@ -91,13 +96,8 @@ abstract class TestCase extends OrchestraTestCase
      */
     protected function getEnvironmentSetUp($app)
     {
-        // Use memory SQLite, cleans it self up
-        $app['config']->set('database.default', 'testbench');
-        $app['config']->set('database.connections.testbench', [
-            'driver'   => 'sqlite',
-            'database' => ':memory:',
-            'prefix'   => '',
-        ]);
+
+        config(['database.default' => 'mysql']);
 
         config(['app.debug' => true]);
 
