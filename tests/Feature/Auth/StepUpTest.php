@@ -58,5 +58,25 @@ test('one can request another scope', function () {
     expect(session('sso_scopes'))->toEqual(['a', 'b', '1', '2']);
 });
 
+test('one can request another scope for a deleted token', function () {
+
+    // Delete the token
+    $token = test()->test_character->refresh_token;
+    $token->delete();
+
+    expect(test()->test_character->refresh()->refresh_token)
+        ->toBeNull();
+
+    $add_scopes = implode(',', ['1', '2']);
+
+    $response = test()->actingAs(test()->test_user)->get(route('auth.eve.step_up', [
+        'character_id' => test()->test_character->character_id,
+        'add_scopes'   => $add_scopes,
+    ]));
+
+    expect(session('step_up'))->toEqual(test()->test_character->character_id);
+    expect(session('sso_scopes'))->toEqual(['1', '2']);
+});
+
 
 
