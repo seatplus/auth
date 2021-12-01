@@ -21,9 +21,15 @@
     </filter>
     <php>
         <env name="APP_KEY" value="AckfSECXIvnK5r28GVIWUAxmbBSjTsmF"/>
-        <env name="REDIS_HOST" value="redis"/>
+        <env name="REDIS_CLIENT" value="phpredis"/>
+        <env name="REDIS_HOST" value="127.0.0.1"/>
         <env name="REDIS_PASSWORD" value="null"/>
         <env name="REDIS_PORT" value="6379"/>
+        <env name="DB_HOST" value="127.0.0.1" />
+        <env name="DB_PORT" value="3308" />
+        <env name="DB_DATABASE" value="testbench" />
+        <env name="DB_USERNAME" value="default" />
+        <env name="DB_PASSWORD" value="secret" />
     </php>
     <logging>
         <log type="coverage-clover" target="build/logs/clover.xml"/>

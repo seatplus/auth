@@ -45,6 +45,8 @@ class CharacterUser extends Model
      */
     public $incrementing = false;
 
+    protected $primaryKey = false;
+
     /**
      * The attributes that are mass assignable.
      *

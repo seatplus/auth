@@ -32,10 +32,10 @@ use Orchestra\Testbench\TestCase as OrchestraTestCase;
 use Seatplus\Auth\AuthenticationServiceProvider;
 use Seatplus\Auth\Models\User;
 use Seatplus\Eveapi\EveapiServiceProvider;
-use Seatplus\Eveapi\Models\Character\CharacterInfo;
 
 abstract class TestCase extends OrchestraTestCase
 {
+
     public User $test_user;
 
     public $test_character;
@@ -79,7 +79,7 @@ abstract class TestCase extends OrchestraTestCase
     {
         // Path to our migrations to load
         //$this->loadMigrationsFrom(__DIR__ . '/database/migrations');
-        $this->artisan('migrate', ['--database' => 'testbench']);
+        $this->artisan('migrate');
     }
 
     /**
@@ -91,19 +91,15 @@ abstract class TestCase extends OrchestraTestCase
      */
     protected function getEnvironmentSetUp($app)
     {
-        // Use memory SQLite, cleans it self up
-        $app['config']->set('database.default', 'testbench');
-        $app['config']->set('database.connections.testbench', [
-            'driver'   => 'sqlite',
-            'database' => ':memory:',
-            'prefix'   => '',
-        ]);
+
+        config(['database.default' => 'mysql']);
 
         config(['app.debug' => true]);
+        config(['activitylog.table_name' => 'activity_log']);
 
         // Use test User model for users provider
         $app['config']->set('auth.providers.users.model', User::class);
 
-        $app['config']->set('cache.prefix', 'seatplus_tests---');
+        //$app['config']->set('cache.prefix', 'seatplus_tests---');
     }
 }
