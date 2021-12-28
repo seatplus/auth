@@ -49,10 +49,9 @@ class CheckRequiredScopes
      */
     public function handle(Request $request, Closure $next)
     {
-
         $characters_with_missing_scopes = Cache::tags(['characters_with_missing_scopes', $this->getUserId()])->get($this->getCacheKey());
 
-        if(is_null($characters_with_missing_scopes)) {
+        if (is_null($characters_with_missing_scopes)) {
             $this->buildUser();
 
             $characters_with_missing_scopes = $this->getCharactersWithMissingScopes();
@@ -85,7 +84,7 @@ class CheckRequiredScopes
         // Get user level required scopes
         $user_scopes = BuildUserLevelRequiredScopes::get($this->user);
 
-        $missing_scopes =  $this->user
+        $missing_scopes = $this->user
             ->characters
             ->map(fn ($character) => BuildCharacterScopesArray::make()->setUserScopes($user_scopes)->setCharacter($character)->get())
             ->filter(fn ($character) => Arr::get($character, 'missing_scopes'));
@@ -93,18 +92,16 @@ class CheckRequiredScopes
         Cache::tags(['characters_with_missing_scopes', $this->getUserId()])->put($this->getCacheKey(), $missing_scopes, now()->addMinutes(15));
 
         return $missing_scopes;
-
     }
 
-    private function getCacheKey() : string
+    private function getCacheKey(): string
     {
-
         $user_id = $this->getUserId();
 
         return "UserScopes:${user_id}";
     }
 
-    private function getUserId() : string
+    private function getUserId(): string
     {
         return (string) isset($this->user) ? $this->user->id : auth()->user()->getAuthIdentifier();
     }
