@@ -25,11 +25,11 @@
  */
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
 use Seatplus\Auth\Http\Middleware\CheckRequiredScopes;
 use Seatplus\Auth\Models\CharacterUser;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
-use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 use Seatplus\Eveapi\Models\RefreshToken;
 use Seatplus\Eveapi\Models\SsoScopes;
 
@@ -344,6 +344,61 @@ it('forwards request if user application has not required scopes', function () {
     test()->middleware->shouldReceive('redirectTo')->times(1);
 
     test()->middleware->handle(test()->request, test()->next);
+});
+
+it('caches characters_with_missing_scopes', function() {
+    // 1. Create RefreshToken for Character
+    createRefreshTokenWithScopes(['a', 'b']);
+
+    // 2. create user application
+    test()->test_user->application()->create(['corporation_id' =>  test()->test_character->corporation->corporation_id]);
+
+    // 3. create required corp scopes
+    createCorporationSsoScope(['c']);
+
+    // TestingTime
+
+    test()->actingAs(test()->test_user);
+
+    mockMiddleware();
+
+    //Expect redirect
+    test()->middleware->shouldReceive('redirectTo')->times(1);
+
+    Cache::shouldReceive('tags')
+        ->with(['characters_with_missing_scopes', test()->test_user->id])
+        ->andReturnSelf();
+    Cache::shouldReceive('get')->andReturnNull();
+    Cache::shouldReceive('put')
+        ->once();
+
+    test()->middleware->handle(test()->request, test()->next);
+});
+
+it('it get caches characters_with_missing_scopes', function() {
+
+    // prepare
+    test()->actingAs(test()->test_user);
+    $user_id = test()->test_user->id;
+    $cache_key = "UserScopes:${user_id}";
+
+    mockMiddleware();
+
+    Cache::shouldReceive('tags')
+        ->with(['characters_with_missing_scopes', $user_id])
+        ->andReturnSelf();
+
+    Cache::shouldReceive('get')->with($cache_key)->andReturn(collect(['foo' => 'bar']));
+
+    Cache::shouldReceive('put')->never();
+
+    //Expect redirect
+    test()->middleware->shouldReceive('redirectTo')->times(1);
+
+    // test
+    test()->middleware->handle(test()->request, test()->next);
+
+
 });
 
 // Helpers

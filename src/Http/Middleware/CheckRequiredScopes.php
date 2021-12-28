@@ -30,6 +30,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Seatplus\Auth\Models\User;
 use Seatplus\Auth\Services\BuildCharacterScopesArray;
 use Seatplus\Auth\Services\BuildUserLevelRequiredScopes;
@@ -48,9 +49,14 @@ class CheckRequiredScopes
      */
     public function handle(Request $request, Closure $next)
     {
-        $this->buildUser();
 
-        $characters_with_missing_scopes = $this->getCharactersWithMissingScopes();
+        $characters_with_missing_scopes = Cache::tags(['characters_with_missing_scopes', $this->getUserId()])->get($this->getCacheKey());
+
+        if(is_null($characters_with_missing_scopes)) {
+            $this->buildUser();
+
+            $characters_with_missing_scopes = $this->getCharactersWithMissingScopes();
+        }
 
         return $characters_with_missing_scopes->isEmpty()
             ? $next($request)
@@ -79,12 +85,28 @@ class CheckRequiredScopes
         // Get user level required scopes
         $user_scopes = BuildUserLevelRequiredScopes::get($this->user);
 
-        //dump(json_decode($this->user->global_scope));
-
-        return $this->user
+        $missing_scopes =  $this->user
             ->characters
             ->map(fn ($character) => BuildCharacterScopesArray::make()->setUserScopes($user_scopes)->setCharacter($character)->get())
             ->filter(fn ($character) => Arr::get($character, 'missing_scopes'));
+
+        Cache::tags(['characters_with_missing_scopes', $this->getUserId()])->put($this->getCacheKey(), $missing_scopes, now()->addMinutes(15));
+
+        return $missing_scopes;
+
+    }
+
+    private function getCacheKey() : string
+    {
+
+        $user_id = $this->getUserId();
+
+        return "UserScopes:${user_id}";
+    }
+
+    private function getUserId() : string
+    {
+        return (string) isset($this->user) ? $this->user->id : auth()->user()->getAuthIdentifier();
     }
 
     /*
@@ -93,13 +115,5 @@ class CheckRequiredScopes
     protected function redirectTo(Collection $missing_character_scopes)
     {
         //TODO: extend this with default view.
-    }
-
-    /**
-     * @return User
-     */
-    public function getUser(): User
-    {
-        return $this->user;
     }
 }
