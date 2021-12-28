@@ -29,8 +29,14 @@ namespace Seatplus\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Socialite\SocialiteManager;
+use Seatplus\Auth\Listeners\ReactOnFreshRefreshToken;
+use Seatplus\Auth\Listeners\UpdatingRefreshTokenListener;
 use Seatplus\Auth\Observers\CharacterAffiliationObserver;
+use Seatplus\Auth\Observers\SsoScopeObserver;
+use Seatplus\Eveapi\Events\RefreshTokenCreated;
+use Seatplus\Eveapi\Events\UpdatingRefreshTokenEvent;
 use Seatplus\Eveapi\Models\Character\CharacterAffiliation;
+use Seatplus\Eveapi\Models\SsoScopes;
 use SocialiteProviders\Eveonline\EveonlineExtendSocialite;
 use SocialiteProviders\Eveonline\Provider;
 use SocialiteProviders\Manager\SocialiteWasCalled;
@@ -61,6 +67,11 @@ class AuthenticationServiceProvider extends ServiceProvider
 
         // Add observer
         CharacterAffiliation::observe(CharacterAffiliationObserver::class);
+        SsoScopes::observe(SsoScopeObserver::class);
+
+        // Add Event Listeners
+        $this->app->events->listen(RefreshTokenCreated::class, ReactOnFreshRefreshToken::class);
+        $this->app->events->listen(UpdatingRefreshTokenEvent::class, UpdatingRefreshTokenListener::class);
     }
 
     public function register()
