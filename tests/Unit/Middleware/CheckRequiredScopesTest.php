@@ -288,7 +288,7 @@ it('lets request through if user application has no required scopes', function (
     createRefreshTokenWithScopes(['a', 'b']);
 
     // 2. create user application
-    test()->test_user->application()->create(['corporation_id' =>  test()->test_character->corporation->corporation_id]);
+    test()->test_user->application()->create(['id' => \Illuminate\Support\Str::uuid(), 'corporation_id' =>  test()->test_character->corporation->corporation_id]);
 
     // TestingTime
 
@@ -307,7 +307,7 @@ it('lets request through if user application has required scopes', function () {
     createRefreshTokenWithScopes(['a', 'b']);
 
     // 2. create user application
-    test()->test_user->application()->create(['corporation_id' =>  test()->test_character->corporation->corporation_id]);
+    test()->test_user->application()->create(['id' => \Illuminate\Support\Str::uuid(), 'corporation_id' =>  test()->test_character->corporation->corporation_id]);
 
     // 3. create required corp scopes
     createCorporationSsoScope(['a']);
@@ -329,7 +329,7 @@ it('forwards request if user application has not required scopes', function () {
     createRefreshTokenWithScopes(['a', 'b']);
 
     // 2. create user application
-    test()->test_user->application()->create(['corporation_id' =>  test()->test_character->corporation->corporation_id]);
+    test()->test_user->application()->create(['id' => \Illuminate\Support\Str::uuid(), 'corporation_id' =>  test()->test_character->corporation->corporation_id]);
 
     // 3. create required corp scopes
     createCorporationSsoScope(['c']);
@@ -351,7 +351,7 @@ it('caches characters_with_missing_scopes', function() {
     createRefreshTokenWithScopes(['a', 'b']);
 
     // 2. create user application
-    test()->test_user->application()->create(['corporation_id' =>  test()->test_character->corporation->corporation_id]);
+    test()->test_user->application()->create(['id' => \Illuminate\Support\Str::uuid(), 'corporation_id' =>  test()->test_character->corporation->corporation_id]);
 
     // 3. create required corp scopes
     createCorporationSsoScope(['c']);

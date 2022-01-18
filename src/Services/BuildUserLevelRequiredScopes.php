@@ -53,7 +53,7 @@ class BuildUserLevelRequiredScopes
             ]))
             ->concat([
                 'user_application_corporation_scopes' => $user->getRelation('application') ? $user->application->corporation->ssoScopes?->selected_scopes : [],
-                'user_application_alliance_scopes'    => $user->getRelation('application') ? $user->application->corporation->alliance->ssoScopes?->selected_scopes : [],
+                'user_application_alliance_scopes'    => $user->getRelation('application') ? $user->application->corporation->alliance?->ssoScopes?->selected_scopes : [],
                 'global_scopes'                  => is_array($user->global_scope) ? $user->global_scope : (is_string($user->global_scope) ? json_decode($user->global_scope) : []),
             ])
             ->flatten()

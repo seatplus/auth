@@ -67,8 +67,8 @@ abstract class TestCase extends OrchestraTestCase
     protected function getPackageProviders($app)
     {
         return [
-            AuthenticationServiceProvider::class,
             EveapiServiceProvider::class,
+            AuthenticationServiceProvider::class,
         ];
     }
 
