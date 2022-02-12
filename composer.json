@@ -28,16 +28,16 @@
         "php": "^8.1",
         "laravel/framework": "^9.0",
         "laravel/socialite": "^5.0",
-        "seatplus/eveapi": "*",
+        "seatplus/eveapi": "^1.0",
         "spatie/laravel-permission": "^5.4",
         "socialiteproviders/eveonline": "^4.0"
     },
     "require-dev": {
-        "orchestra/testbench": "^6.10",
-        "nunomaduro/collision": "^5.3",
+        "orchestra/testbench": "^7.0",
+        "nunomaduro/collision": "^6.1",
         "brianium/paratest": "^6.2",
         "pestphp/pest": "^1.18",
-        "pestphp/pest-plugin-laravel": "^1.1",
+        "pestphp/pest-plugin-laravel": "^1.2",
         "pestphp/pest-plugin-parallel": "^0.3.1"
     },
     "extra": {
@@ -51,5 +51,10 @@
       "test": "vendor/bin/pest",
       "test-coverage": "XDEBUG_MODE=coverage ./vendor/bin/pest --coverage",
       "parallel": "XDEBUG_MODE=coverage ./vendor/bin/pest --coverage -p"
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
     }
 }
