@@ -38,7 +38,7 @@
         "brianium/paratest": "^6.2",
         "pestphp/pest": "^1.18",
         "pestphp/pest-plugin-laravel": "^1.2",
-        "pestphp/pest-plugin-parallel": "^0.3.1"
+        "pestphp/pest-plugin-parallel": "^1.0.0"
     },
     "extra": {
         "laravel": {
