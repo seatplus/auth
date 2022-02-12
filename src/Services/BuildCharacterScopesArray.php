@@ -80,11 +80,11 @@ class BuildCharacterScopesArray
         $character_array = [
             'character' => $this->getCharacter(),
             'required_scopes' => collect([
-                'corporation_scopes'             => $this->getCharacter()->corporation->ssoScopes->selected_scopes ?? [],
-                'alliance_scopes'                => $this->getCharacter()->alliance->ssoScopes->selected_scopes ?? [],
+                'corporation_scopes' => $this->getCharacter()->corporation->ssoScopes->selected_scopes ?? [],
+                'alliance_scopes' => $this->getCharacter()->alliance->ssoScopes->selected_scopes ?? [],
                 'character_application_corporation_scopes' => $this->getCharacter()->application->corporation->ssoScopes->selected_scopes ?? [],
-                'character_application_alliance_scopes'    => $this->getCharacter()->application->corporation->alliance->ssoScopes->selected_scopes ?? [],
-                'user_scope'                    => $this->getUserScopes(),
+                'character_application_alliance_scopes' => $this->getCharacter()->application->corporation->alliance->ssoScopes->selected_scopes ?? [],
+                'user_scope' => $this->getUserScopes(),
             ])->flatten(1)
                 ->filter()
                 ->unique()

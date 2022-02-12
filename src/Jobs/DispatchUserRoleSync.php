@@ -36,7 +36,10 @@ use Seatplus\Auth\Models\User;
 
 class DispatchUserRoleSync implements ShouldQueue, ShouldBeUnique
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
 
     /**
      * The number of times the job may be attempted.

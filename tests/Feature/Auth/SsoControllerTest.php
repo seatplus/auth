@@ -28,12 +28,9 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
 use Laravel\Socialite\Contracts\Provider;
 use Laravel\Socialite\Facades\Socialite;
-use Laravel\Socialite\Two\User as SocialiteUser;
 use Seatplus\Auth\Jobs\UserRolesSync;
-use Seatplus\Eveapi\Models\Character\CharacterInfo;
 
 it('works for non authed users', function () {
-
     $abstractUser = createSocialiteUser();
 
     $provider = Mockery::mock(Provider::class);
@@ -56,7 +53,6 @@ it('works for non authed users', function () {
 });
 
 it('returns error if scopes changed', function () {
-
     $abstractUser = createSocialiteUser();
 
     $provider = Mockery::mock(Provider::class);
@@ -68,7 +64,7 @@ it('returns error if scopes changed', function () {
 
     session([
         'sso_scopes' => ['test'],
-        'rurl'       => '/home',
+        'rurl' => '/home',
     ]);
 
     test()->get(route('auth.eve.callback'));
@@ -92,7 +88,7 @@ test('one can add another character', function () {
 
     session([
         'sso_scopes' => config('eveapi.scopes.minimum'),
-        'rurl'       => '/home',
+        'rurl' => '/home',
     ]);
 
     // expect test_user only to have one character
@@ -112,6 +108,4 @@ test('one can add another character', function () {
     expect(session('success'))->toBe('Character added/updated successfully');
 
     expect(test()->test_user->refresh()->character_users)->toHaveCount(2);
-
 });
-

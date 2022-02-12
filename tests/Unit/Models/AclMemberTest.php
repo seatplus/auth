@@ -12,12 +12,11 @@ beforeEach(function () {
 it('has user relationship', function () {
     test()->role->members()->create([
         'user_id' => test()->test_user->id,
-        'status' => 'member'
+        'status' => 'member',
     ]);
 
-    $member = AclMember::where('user_id',test()->test_user->id)
+    $member = AclMember::where('user_id', test()->test_user->id)
         ->get()->first();
 
     expect($member->user::class)->toEqual(User::class);
-
 });

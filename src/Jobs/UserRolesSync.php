@@ -39,7 +39,10 @@ use Seatplus\Auth\Models\User;
 
 class UserRolesSync implements ShouldQueue, ShouldBeUnique
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
 
     /**
      * The number of times the job may be attempted.
@@ -122,7 +125,9 @@ class UserRolesSync implements ShouldQueue, ShouldBeUnique
         $roles = Role::has('acl_affiliations')
             ->with('acl_affiliations.affiliatable.characters')
             ->whereNotIn('type', ['manual', 'automatic'])
-            ->whereHas('acl_members', fn (Builder $query) => $query->where('user_id', $this->user->getAuthIdentifier())
+            ->whereHas(
+                'acl_members',
+                fn (Builder $query) => $query->where('user_id', $this->user->getAuthIdentifier())
                 ->whereIn('status', ['member', 'paused'])
             )
             ->cursor();

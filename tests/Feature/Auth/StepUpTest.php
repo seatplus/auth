@@ -25,11 +25,7 @@
  */
 
 use Illuminate\Support\Facades\Event;
-use Laravel\Socialite\Contracts\Factory;
 use Laravel\Socialite\Facades\Socialite;
-use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
-use Seatplus\Eveapi\Models\RefreshToken;
-use Seatplus\Eveapi\Models\SsoScopes;
 
 beforeEach(function () {
     Event::fake();
@@ -51,7 +47,7 @@ test('one can request another scope', function () {
 
     $response = test()->actingAs(test()->test_user)->get(route('auth.eve.step_up', [
         'character_id' => test()->test_character->character_id,
-        'add_scopes'   => $add_scopes,
+        'add_scopes' => $add_scopes,
     ]));
 
     expect(session('step_up'))->toEqual(test()->test_character->character_id);
@@ -71,12 +67,9 @@ test('one can request another scope for a deleted token', function () {
 
     $response = test()->actingAs(test()->test_user)->get(route('auth.eve.step_up', [
         'character_id' => test()->test_character->character_id,
-        'add_scopes'   => $add_scopes,
+        'add_scopes' => $add_scopes,
     ]));
 
     expect(session('step_up'))->toEqual(test()->test_character->character_id);
     expect(session('sso_scopes'))->toEqual(['1', '2']);
 });
-
-
-

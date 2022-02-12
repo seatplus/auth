@@ -50,8 +50,8 @@ class UserFactory extends Factory
     public function definition()
     {
         return [
-            'main_character_id'       => CharacterInfo::factory(),
-            'active'                  => true,
+            'main_character_id' => CharacterInfo::factory(),
+            'active' => true,
         ];
     }
 }

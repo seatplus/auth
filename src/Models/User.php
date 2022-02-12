@@ -38,7 +38,8 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasRoles, HasFactory;
+    use HasRoles;
+    use HasFactory;
 
     protected static function newFactory()
     {

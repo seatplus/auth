@@ -5,7 +5,6 @@ use Seatplus\Auth\Models\CharacterUser;
 use Seatplus\Eveapi\Models\RefreshToken;
 
 it('flush characters_with_missing_scopes cache for user when a new character is added', function () {
-
     $user_id = test()->test_user->id;
 
     Cache::shouldReceive('tags')->with(['characters_with_missing_scopes', $user_id])->andReturnSelf();
@@ -17,11 +16,9 @@ it('flush characters_with_missing_scopes cache for user when a new character is 
     ]);
 
     RefreshToken::factory()->create(['character_id' => $character_user->character_id]);
-
 });
 
 it('flush characters_with_missing_scopes cache for user when refresh_token scopes are updated', function () {
-
     $user_id = test()->test_user->id;
 
     Cache::shouldReceive('tags')->with(['characters_with_missing_scopes', $user_id])->andReturnSelf();
@@ -31,5 +28,4 @@ it('flush characters_with_missing_scopes cache for user when refresh_token scope
     $refresh_token->token = createSocialiteUser($refresh_token->character_id, ['foo', 'bar'])->token;
 
     $refresh_token->save();
-
 });

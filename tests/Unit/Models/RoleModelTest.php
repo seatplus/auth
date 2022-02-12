@@ -35,13 +35,11 @@ beforeEach(function () {
 });
 
 it('deletes affiliation after model deletion', function () {
-
-
     $affiliation = Affiliation::create([
         'role_id' => test()->role->id,
         'affiliatable_id' => test()->test_character->corporation_id,
         'affiliatable_type' => CorporationInfo::class,
-        'type' => 'allowed'
+        'type' => 'allowed',
     ]);
 
     test()->assertDatabaseHas('affiliations', [
@@ -56,7 +54,6 @@ it('deletes affiliation after model deletion', function () {
 });
 
 it('deletes permission pivot after model deletion', function () {
-
     $permission_name = 'test permission';
 
     $permission = Permission::create(['name' => $permission_name]);
@@ -64,38 +61,34 @@ it('deletes permission pivot after model deletion', function () {
     test()->role->givePermissionTo($permission_name);
 
     test()->assertDatabaseHas('role_has_permissions', [
-        'role_id'       => test()->role->id,
+        'role_id' => test()->role->id,
         'permission_id' => $permission->id,
     ]);
 
     test()->role->delete();
 
     test()->assertDatabaseMissing('role_has_permissions', [
-        'role_id'       => test()->role->id,
+        'role_id' => test()->role->id,
         'permission_id' => $permission->id,
     ]);
 });
 
 it('has polymorphic relation', function () {
-
     $affiliation = Affiliation::create([
         'role_id' => test()->role->id,
         'affiliatable_id' => test()->test_character->corporation_id,
         'affiliatable_type' => CorporationInfo::class,
-        'type' => 'allowed'
+        'type' => 'allowed',
     ]);
 
     expect(test()->role->affiliations->first()->affiliatable::class)->toEqual(CorporationInfo::class);
-
 });
 
 it('has default type attribute', function () {
-
     expect(test()->role->fresh()->type)->toEqual('manual');
 });
 
 it('has acl affiliations', function () {
-
     test()->role->acl_affiliations()->create([
         'affiliatable_id' => test()->test_character->character_id,
         'affiliatable_type' => CharacterInfo::class,
@@ -105,11 +98,10 @@ it('has acl affiliations', function () {
 });
 
 it('has acl moderators', function () {
-
     test()->role->acl_affiliations()->create([
         'affiliatable_id' => test()->test_character->character_id,
         'affiliatable_type' => CharacterInfo::class,
-        'can_moderate' => true
+        'can_moderate' => true,
     ]);
 
     expect(test()->role->acl_affiliations->isEmpty())->toBeTrue();
@@ -118,10 +110,9 @@ it('has acl moderators', function () {
 });
 
 it('has acl members', function () {
-
     test()->role->members()->create([
         'user_id' => test()->test_user->id,
-        'status' => 'member'
+        'status' => 'member',
     ]);
 
     expect(test()->role->members->isNotEmpty())->toBeTrue();
@@ -162,14 +153,12 @@ it('throws error if unaffiliated user wants to join', function () {
 });
 
 it('throws error if one tries to join waitlist on invalid role', function () {
-
     test()->expectExceptionMessage('Only on-request control groups do have a waitlist');
 
     test()->role->joinWaitlist(test()->test_user);
 });
 
 it('throws error if unaffiliated user tries to join waitlist', function () {
-
     $role = Role::create(['name' => 'test', 'type' => 'on-request']);
 
     test()->expectExceptionMessage('User is not allowed for this access control group');
@@ -178,12 +167,11 @@ it('throws error if unaffiliated user tries to join waitlist', function () {
 });
 
 test('user can join waitlist', function () {
-
     $role = Role::create(['name' => 'test', 'type' => 'on-request']);
 
     $role->acl_affiliations()->create([
         'affiliatable_id' => test()->test_character->character_id,
-        'affiliatable_type' => CharacterInfo::class
+        'affiliatable_type' => CharacterInfo::class,
     ]);
 
     $role->joinWaitlist(test()->test_user);
@@ -192,13 +180,12 @@ test('user can join waitlist', function () {
 });
 
 test('one can get moderator ids', function () {
-
     $role = Role::create(['name' => 'test', 'type' => 'on-request']);
 
     $role->acl_affiliations()->create([
         'affiliatable_id' => test()->test_character->character_id,
         'affiliatable_type' => CharacterInfo::class,
-        'can_moderate' => true
+        'can_moderate' => true,
     ]);
 
     expect($role->refresh()->isModerator(test()->test_user))->toBeTrue();

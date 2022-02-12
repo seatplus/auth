@@ -61,7 +61,7 @@ it('lets request through if required scopes are present', function () {
 
     // 2. Create SsoScope (Corporation)
     createCorporationSsoScope([
-        'character'   => ['a'],
+        'character' => ['a'],
         'corporation' => [],
     ]);
 
@@ -84,7 +84,7 @@ it('stops request if required scopes are missing', function () {
 
     // 2. Create SsoScope (Corporation)
     createCorporationSsoScope([
-        'character'   => ['c'],
+        'character' => ['c'],
         'corporation' => [],
     ]);
 
@@ -127,7 +127,7 @@ it('lets request through if required corporation role scopes is present', functi
 
     // 2. Create SsoScope (Corporation)
     createCorporationSsoScope([
-        'character'   => [],
+        'character' => [],
         'corporation' => ['b'],
     ]);
 
@@ -194,7 +194,6 @@ it('stops request if user scopes is missing', function () {
 
     // Create secondary character
     $secondary_character = Event::fakeFor(function () {
-
         $character_user = CharacterUser::factory()->make();
         test()->test_user->character_users()->save($character_user);
 
@@ -210,7 +209,7 @@ it('stops request if user scopes is missing', function () {
     // create refresh_token for secondary character
     Event::fakeFor(function () use ($secondary_character) {
         $helper_token = RefreshToken::factory()->scopes(['c'])->make([
-            'character_id' => $secondary_character->character_id
+            'character_id' => $secondary_character->character_id,
         ]);
 
         $refresh_token = $secondary_character->refresh_token;
@@ -244,7 +243,6 @@ it('lets request through if user scopes is present', function () {
 
     // Create secondary character
     $secondary_character = Event::fakeFor(function () {
-
         $character_user = CharacterUser::factory()->make();
         test()->test_user->character_users()->save($character_user);
 
@@ -259,9 +257,8 @@ it('lets request through if user scopes is present', function () {
 
     // update refresh_token for secondary character
     Event::fakeFor(function () use ($secondary_character) {
-
         $helper_token = RefreshToken::factory()->scopes(['a'])->make([
-            'character_id' => $secondary_character->character_id
+            'character_id' => $secondary_character->character_id,
         ]);
 
         $refresh_token = $secondary_character->refresh_token;
@@ -288,7 +285,7 @@ it('lets request through if user application has no required scopes', function (
     createRefreshTokenWithScopes(['a', 'b']);
 
     // 2. create user application
-    test()->test_user->application()->create(['id' => \Illuminate\Support\Str::uuid(), 'corporation_id' =>  test()->test_character->corporation->corporation_id]);
+    test()->test_user->application()->create(['id' => \Illuminate\Support\Str::uuid(), 'corporation_id' => test()->test_character->corporation->corporation_id]);
 
     // TestingTime
 
@@ -307,7 +304,7 @@ it('lets request through if user application has required scopes', function () {
     createRefreshTokenWithScopes(['a', 'b']);
 
     // 2. create user application
-    test()->test_user->application()->create(['id' => \Illuminate\Support\Str::uuid(), 'corporation_id' =>  test()->test_character->corporation->corporation_id]);
+    test()->test_user->application()->create(['id' => \Illuminate\Support\Str::uuid(), 'corporation_id' => test()->test_character->corporation->corporation_id]);
 
     // 3. create required corp scopes
     createCorporationSsoScope(['a']);
@@ -329,7 +326,7 @@ it('forwards request if user application has not required scopes', function () {
     createRefreshTokenWithScopes(['a', 'b']);
 
     // 2. create user application
-    test()->test_user->application()->create(['id' => \Illuminate\Support\Str::uuid(), 'corporation_id' =>  test()->test_character->corporation->corporation_id]);
+    test()->test_user->application()->create(['id' => \Illuminate\Support\Str::uuid(), 'corporation_id' => test()->test_character->corporation->corporation_id]);
 
     // 3. create required corp scopes
     createCorporationSsoScope(['c']);
@@ -346,12 +343,12 @@ it('forwards request if user application has not required scopes', function () {
     test()->middleware->handle(test()->request, test()->next);
 });
 
-it('caches characters_with_missing_scopes', function() {
+it('caches characters_with_missing_scopes', function () {
     // 1. Create RefreshToken for Character
     createRefreshTokenWithScopes(['a', 'b']);
 
     // 2. create user application
-    test()->test_user->application()->create(['id' => \Illuminate\Support\Str::uuid(), 'corporation_id' =>  test()->test_character->corporation->corporation_id]);
+    test()->test_user->application()->create(['id' => \Illuminate\Support\Str::uuid(), 'corporation_id' => test()->test_character->corporation->corporation_id]);
 
     // 3. create required corp scopes
     createCorporationSsoScope(['c']);
@@ -375,7 +372,7 @@ it('caches characters_with_missing_scopes', function() {
     test()->middleware->handle(test()->request, test()->next);
 });
 
-it('it get caches characters_with_missing_scopes', function() {
+it('it get caches characters_with_missing_scopes', function () {
 
     // prepare
     test()->actingAs(test()->test_user);
@@ -397,8 +394,6 @@ it('it get caches characters_with_missing_scopes', function() {
 
     // test
     test()->middleware->handle(test()->request, test()->next);
-
-
 });
 
 // Helpers

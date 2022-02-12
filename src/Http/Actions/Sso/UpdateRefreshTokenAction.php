@@ -42,8 +42,8 @@ class UpdateRefreshTokenAction
         RefreshToken::withTrashed()->firstOrNew(['character_id' => $eve_data->character_id])
             ->fill([
                 'refresh_token' => $eve_data->refreshToken,
-                'token'         => $eve_data->token,
-                'expires_on'    => carbon()->addSeconds($eve_data->expiresIn),
+                'token' => $eve_data->token,
+                'expires_on' => carbon()->addSeconds($eve_data->expiresIn),
             ])
             ->save();
 
