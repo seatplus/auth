@@ -42,7 +42,7 @@ test('create new user', function () {
     ]);
 
     test()->assertDatabaseHas('character_users', [
-        'user_id'      => $user->id,
+        'user_id' => $user->id,
         'character_id' => $eve_user->character_id,
     ]);
 });
@@ -70,10 +70,9 @@ test('find existing user with two character', function () {
     expect($user->id)->toEqual(test()->test_user->id);
 
     test()->assertDatabaseHas('character_users', [
-        'user_id'      => test()->test_user->id,
+        'user_id' => test()->test_user->id,
         'character_id' => $secondary_character->character_id,
     ]);
-
 });
 
 test('deal with changed owner hash', function () {
@@ -98,7 +97,7 @@ test('deal with changed owner hash', function () {
     expect(test()->test_user->id)->not()->toBe($user->id);
 
     test()->assertDatabaseMissing('character_users', [
-        'user_id'      => test()->test_user->id,
+        'user_id' => test()->test_user->id,
         'character_id' => $user->id,
     ]);
 });
@@ -140,12 +139,12 @@ test('deal with two characters with one changed owner hash', function () {
     //5. assert that secondary character is not affiliated to first user
 
     test()->assertDatabaseMissing('character_users', [
-        'user_id'      => test()->test_user->id,
+        'user_id' => test()->test_user->id,
         'character_id' => $secondary_user->character_id,
     ]);
 
     test()->assertDatabaseHas('character_users', [
-        'user_id'      => $user->id,
+        'user_id' => $user->id,
         'character_id' => $secondary_user->character_id,
     ]);
 });
@@ -171,11 +170,9 @@ it('returns authed user', function () {
 
     // assert that character user relation has been set
     test()->assertDatabaseHas('character_users', [
-        'user_id'      => test()->test_user->id,
+        'user_id' => test()->test_user->id,
         'character_id' => $secondary_user->character_id,
     ]);
 
     expect(test()->test_user->character_users->count())->toEqual(2);
 });
-
-

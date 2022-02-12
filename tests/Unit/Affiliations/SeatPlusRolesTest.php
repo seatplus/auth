@@ -53,7 +53,6 @@ test('user has role test', function () {
 });
 
 test('role has no affiliation test', function () {
-
     expect(test()->role->affiliations->isEmpty())->toBeTrue();
 });
 
@@ -61,37 +60,35 @@ test('role has an affiliation test', function () {
     test()->role->affiliations()->create([
         'affiliatable_id' => test()->test_character->character_id,
         'affiliatable_type' => CharacterInfo::class,
-        'type' => 'allowed'
+        'type' => 'allowed',
     ]);
 
     test()->assertNotNUll(test()->role->affiliations);
 });
 
 test('user is in affiliation test', function () {
-
     test()->role->affiliations()->create([
         'affiliatable_id' => test()->test_character->character_id,
         'affiliatable_type' => CharacterInfo::class,
-        'type'         => 'allowed',
+        'type' => 'allowed',
     ]);
 
     expect(in_array(test()->test_character->character_id, test()->role->affiliated_ids))->toBeTrue();
 });
 
 test('character is in character allowed affiliation test', function () {
-
     $secondary_character = CharacterInfo::factory()->create();
 
     test()->role->affiliations()->createMany([
         [
             'affiliatable_id' => test()->test_character->character_id,
             'affiliatable_type' => CharacterInfo::class,
-            'type'         => 'allowed',
+            'type' => 'allowed',
         ],
         [
             'affiliatable_id' => $secondary_character->character_id,
             'affiliatable_type' => CharacterInfo::class,
-            'type'         => 'allowed',
+            'type' => 'allowed',
         ],
 
     ]);
@@ -101,17 +98,16 @@ test('character is in character allowed affiliation test', function () {
 });
 
 test('character is in character inversed affiliation test', function () {
-
     test()->role->affiliations()->createMany([
         [
             'affiliatable_id' => test()->test_character->character_id,
             'affiliatable_type' => CharacterInfo::class,
-            'type'         => 'inverse',
+            'type' => 'inverse',
         ],
         [
             'affiliatable_id' => 1234,
             'affiliatable_type' => CharacterInfo::class,
-            'type'         => 'inverse',
+            'type' => 'inverse',
         ],
     ]);
 
@@ -120,17 +116,16 @@ test('character is in character inversed affiliation test', function () {
 });
 
 test('character is not in character inverse affiliation test', function () {
-
     test()->role->affiliations()->createMany([
         [
             'affiliatable_id' => test()->secondary_character->character_id,
             'affiliatable_type' => CharacterInfo::class,
-            'type'         => 'inverse',
+            'type' => 'inverse',
         ],
         [
             'affiliatable_id' => test()->tertiary_character->character_id,
             'affiliatable_type' => CharacterInfo::class,
-            'type'         => 'inverse',
+            'type' => 'inverse',
         ],
     ]);
 
@@ -140,18 +135,16 @@ test('character is not in character inverse affiliation test', function () {
 });
 
 test('character is in character forbidden affiliation test', function () {
-
-
     test()->role->affiliations()->createMany([
         [
             'affiliatable_id' => test()->test_character->character_id,
             'affiliatable_type' => CharacterInfo::class,
-            'type'         => 'forbidden',
+            'type' => 'forbidden',
         ],
         [
             'affiliatable_id' => test()->secondary_character->character_id,
             'affiliatable_type' => CharacterInfo::class,
-            'type'         => 'forbidden',
+            'type' => 'forbidden',
         ],
     ]);
 
@@ -161,11 +154,10 @@ test('character is in character forbidden affiliation test', function () {
 });
 
 test('character is in corporation allowed affiliation test', function () {
-
     test()->role->affiliations()->create([
         'affiliatable_id' => test()->test_character->corporation_id,
         'affiliatable_type' => CorporationInfo::class,
-        'type'           => 'allowed',
+        'type' => 'allowed',
     ]);
 
     expect(in_array(test()->test_character->character_id, test()->role->affiliated_ids))->toBeTrue();
@@ -174,17 +166,16 @@ test('character is in corporation allowed affiliation test', function () {
 });
 
 test('character is in corporation inversed affiliation test', function () {
-
     test()->role->affiliations()->createMany([
         [
             'affiliatable_id' => test()->test_character->corporation_id,
             'affiliatable_type' => CorporationInfo::class,
-            'type'           => 'inverse',
+            'type' => 'inverse',
         ],
         [
             'affiliatable_id' => test()->secondary_character->corporation_id,
             'affiliatable_type' => CorporationInfo::class,
-            'type'           => 'inverse',
+            'type' => 'inverse',
         ],
     ]);
 
@@ -194,17 +185,16 @@ test('character is in corporation inversed affiliation test', function () {
 });
 
 test('character is in corporation forbidden affiliation test', function () {
-
     test()->role->affiliations()->createMany([
         [
             'affiliatable_id' => test()->test_character->corporation_id,
             'affiliatable_type' => CorporationInfo::class,
-            'type'           => 'forbidden',
+            'type' => 'forbidden',
         ],
         [
             'affiliatable_id' => test()->secondary_character->corporation_id,
             'affiliatable_type' => CorporationInfo::class,
-            'type'           => 'forbidden',
+            'type' => 'forbidden',
         ],
     ]);
 
@@ -214,17 +204,16 @@ test('character is in corporation forbidden affiliation test', function () {
 });
 
 test('character is in alliance allowed affiliation test', function () {
-
     test()->role->affiliations()->createMany([
         [
             'affiliatable_id' => test()->test_character->alliance_id,
             'affiliatable_type' => AllianceInfo::class,
-            'type'        => 'allowed',
+            'type' => 'allowed',
         ],
         [
             'affiliatable_id' => test()->secondary_character->alliance_id,
             'affiliatable_type' => AllianceInfo::class,
-            'type'        => 'allowed',
+            'type' => 'allowed',
         ],
     ]);
 
@@ -234,17 +223,16 @@ test('character is in alliance allowed affiliation test', function () {
 });
 
 test('character is in alliance inversed affiliation test', function () {
-
     test()->role->affiliations()->createMany([
         [
             'affiliatable_id' => test()->test_character->alliance_id,
             'affiliatable_type' => AllianceInfo::class,
-            'type'        => 'inverse',
+            'type' => 'inverse',
         ],
         [
             'affiliatable_id' => test()->secondary_character->alliance_id,
             'affiliatable_type' => AllianceInfo::class,
-            'type'        => 'inverse',
+            'type' => 'inverse',
         ],
     ]);
 
@@ -254,17 +242,16 @@ test('character is in alliance inversed affiliation test', function () {
 });
 
 test('character is in alliance forbidden affiliation test', function () {
-
     test()->role->affiliations()->createMany([
         [
             'affiliatable_id' => test()->test_character->alliance_id,
             'affiliatable_type' => AllianceInfo::class,
-            'type'        => 'forbidden',
+            'type' => 'forbidden',
         ],
         [
             'affiliatable_id' => test()->secondary_character->alliance_id,
             'affiliatable_type' => AllianceInfo::class,
-            'type'        => 'forbidden',
+            'type' => 'forbidden',
         ],
     ]);
 

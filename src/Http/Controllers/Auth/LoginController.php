@@ -61,7 +61,7 @@ class LoginController extends Controller
         }
 
         return Inertia::render('Auth/Login', [
-            'login_welcome'  => trans('web::auth.login_welcome'),
+            'login_welcome' => trans('web::auth.login_welcome'),
             'evesso_img_src' => asset('img/evesso.png'),
         ]);
     }

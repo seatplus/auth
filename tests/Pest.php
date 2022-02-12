@@ -2,11 +2,11 @@
 
 use Faker\Factory;
 use Illuminate\Support\Facades\Event;
+use Laravel\Socialite\Two\User as SocialiteUser;
 use Seatplus\Auth\Containers\EveUser;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 use Seatplus\Eveapi\Models\RefreshToken;
 use Seatplus\Eveapi\Models\SsoScopes;
-use Laravel\Socialite\Two\User as SocialiteUser;
 
 /*
 |--------------------------------------------------------------------------
@@ -51,12 +51,10 @@ uses(\Illuminate\Foundation\Testing\LazilyRefreshDatabase::class)->in('Unit', 'F
 function createRefreshTokenWithScopes(array $scopes)
 {
     Event::fakeFor(function () use ($scopes) {
-
-        if(test()->test_character->refresh_token) {
-
+        if (test()->test_character->refresh_token) {
             $refresh_token = test()->test_character->refresh_token;
             $helper_token = RefreshToken::factory()->scopes($scopes)->make([
-                'character_id' => $refresh_token->character_id
+                'character_id' => $refresh_token->character_id,
             ]);
 
             $refresh_token->token = $helper_token->token;
@@ -75,15 +73,14 @@ function createCorporationSsoScope(array $array, string $type = 'default')
 {
     SsoScopes::factory()->create([
         'selected_scopes' => $array,
-        'morphable_id'    => test()->test_character->corporation->corporation_id,
-        'morphable_type'  => CorporationInfo::class,
-        'type' => $type
+        'morphable_id' => test()->test_character->corporation->corporation_id,
+        'morphable_type' => CorporationInfo::class,
+        'type' => $type,
     ]);
 }
 
 function createSocialiteUser($character_id = null, array $scopes = ["esi-skills.read_skills.v1", "esi-skills.read_skillqueue.v1",])
 {
-
     $refresh_token = RefreshToken::factory()->scopes($scopes)->make();
 
     $socialiteUser = test()->createMock(SocialiteUser::class);
@@ -92,9 +89,9 @@ function createSocialiteUser($character_id = null, array $scopes = ["esi-skills.
     $socialiteUser->character_id = $character_id ?? $refresh_token->character_id;
     $socialiteUser->token = $refresh_token->token;
     $socialiteUser->refreshToken = $refresh_token->refresh_token;
-    $socialiteUser->expiresIn = 12*60; //let's just say 12 minutes
+    $socialiteUser->expiresIn = 12 * 60; //let's just say 12 minutes
     $socialiteUser->user = [
-        'scp' => $scopes
+        'scp' => $scopes,
     ];
 
     return $socialiteUser;
@@ -102,7 +99,7 @@ function createSocialiteUser($character_id = null, array $scopes = ["esi-skills.
 
 function faker()
 {
-    if(!isset(test()->faker)) {
+    if (! isset(test()->faker)) {
         test()->faker = Factory::create();
     }
 
@@ -111,7 +108,6 @@ function faker()
 
 function createEveUser(int $character_id = null, string $character_owner_hash = null): EveUser
 {
-
     $faker = faker();
 
     return new EveUser([
@@ -119,7 +115,7 @@ function createEveUser(int $character_id = null, string $character_owner_hash = 
         'character_owner_hash' => $character_owner_hash ?? sha1($faker->text),
         'token' => sha1($faker->text),
         'refreshToken' => sha1($faker->text),
-        'expiresIn' => $faker->numberBetween(1,20),
+        'expiresIn' => $faker->numberBetween(1, 20),
         'user' => ['user'],
     ]);
 }

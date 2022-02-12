@@ -57,8 +57,11 @@ class GetAffiliatedIdsByPermissionArray
     public function __construct(private string $permission, private string $corporation_role = '')
     {
         $this->user = auth()->user();
-        $this->cache_key = sprintf('affiliated character ids by permission %s for user wit user_id: %s',
-            $this->user->id, $this->permission);
+        $this->cache_key = sprintf(
+            'affiliated character ids by permission %s for user wit user_id: %s',
+            $this->user->id,
+            $this->permission
+        );
     }
 
     public function execute(): array
@@ -131,7 +134,8 @@ class GetAffiliatedIdsByPermissionArray
         return User::whereId($this->user->getAuthIdentifier())
             ->with('characters.roles', 'characters.corporation')
             ->get()
-            ->whenNotEmpty(fn ($collection) => $collection
+            ->whenNotEmpty(
+                fn ($collection) => $collection
                 ->first()
                 ->characters
                 // for owned corporation tokens, we need to add the affiliation as long as the character has the required role

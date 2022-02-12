@@ -51,8 +51,8 @@ class SsoController extends Controller
         $scopes = $required_scopes->execute()->toArray();
 
         session([
-            'rurl'             => session()->previousUrl(),
-            'sso_scopes'       => $scopes,
+            'rurl' => session()->previousUrl(),
+            'sso_scopes' => $scopes,
         ]);
 
         return $social->driver('eveonline')

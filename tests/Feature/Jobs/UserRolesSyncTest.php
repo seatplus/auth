@@ -69,7 +69,6 @@ it('removes automatic role', function () {
     $job->handle();
 
     expect(test()->test_user->hasRole('derp'))->toBeFalse();
-
 });
 
 it('adds membership for paused user', function () {
@@ -88,7 +87,7 @@ it('adds membership for paused user', function () {
     // Second add character as paused to role
     test()->role->acl_members()->create([
         'user_id' => test()->test_user->getAuthIdentifier(),
-        'status' => 'paused'
+        'status' => 'paused',
     ]);
 
     expect(test()->role->members->isEmpty())->toBeTrue();
@@ -114,7 +113,7 @@ it('removes membership if refresh token is removed', function () {
     // Second add character as paused to role
     test()->role->acl_members()->create([
         'user_id' => test()->test_user->getAuthIdentifier(),
-        'status' => 'member'
+        'status' => 'member',
     ]);
 
     expect(test()->role->refresh()->members->isEmpty())->toBeFalse();

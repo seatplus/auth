@@ -53,7 +53,8 @@ class GetRequiredScopes
         )->find(auth()->user()->getAuthIdentifier());
 
         return $this->scopes
-            ->merge(collect([
+            ->merge(
+                collect([
                 setting('global_sso_scopes'),
                 $this->user->application->corporation->ssoScopes->selected_scopes ?? [],
                 $this->user->application->corporation->alliance->ssoScopes->selected_scopes ?? [],

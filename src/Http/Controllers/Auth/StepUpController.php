@@ -50,9 +50,9 @@ class StepUpController extends Controller
         $scopes = collect(RefreshToken::find($character_id)?->scopes ?? [])->merge($add_scopes)->toArray();
 
         session([
-            'rurl'       => url()->previous(),
+            'rurl' => url()->previous(),
             'sso_scopes' => $scopes,
-            'step_up'    => $character_id,
+            'step_up' => $character_id,
         ]);
 
         return $social

@@ -61,8 +61,8 @@ class FindOrCreateUserAction
         }
 
         CharacterUser::firstOrCreate([
-            'user_id'              => $user->id,
-            'character_id'         => $eve_user->character_id,
+            'user_id' => $user->id,
+            'character_id' => $eve_user->character_id,
         ], [
             'character_owner_hash' => $eve_user->character_owner_hash,
         ]);
@@ -73,7 +73,7 @@ class FindOrCreateUserAction
         if (! isset($this->user)) {
             $this->user = auth()->user() ?? User::create([
                 'main_character_id' => $this->eve_user->character_id,
-                'active'            => true,
+                'active' => true,
             ]);
         }
 

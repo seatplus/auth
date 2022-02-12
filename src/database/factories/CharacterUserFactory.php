@@ -37,9 +37,9 @@ class CharacterUserFactory extends Factory
     public function definition()
     {
         return [
-            'user_id'               => $this->faker->numberBetween(90000000, 98000000),
-            'character_id'          => CharacterInfo::factory(),
-            'character_owner_hash'  => sha1($this->faker->text),
+            'user_id' => $this->faker->numberBetween(90000000, 98000000),
+            'character_id' => CharacterInfo::factory(),
+            'character_owner_hash' => sha1($this->faker->text),
         ];
     }
 }

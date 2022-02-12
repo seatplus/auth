@@ -45,12 +45,10 @@ beforeEach(function () {
     test()->actingAs(test()->test_user);
 
     Event::fakeFor(function () {
-
         test()->secondary_character = CharacterInfo::factory()->create();
 
         test()->tertiary_character = CharacterInfo::factory()->create();
     });
-
 });
 
 /**
@@ -58,10 +56,10 @@ beforeEach(function () {
  * @throws \Exception
  */
 it('returns own character id', function () {
-   test()->role->affiliations()->create([
+    test()->role->affiliations()->create([
         'affiliatable_id' => test()->test_character->character_id,
         'affiliatable_type' => CharacterInfo::class,
-        'type'         => 'allowed',
+        'type' => 'allowed',
     ]);
 
     $ids = (new GetAffiliatedIdsByPermissionArray(test()->permission->name))->execute();
@@ -73,7 +71,7 @@ it('returns other and own character id for inverted', function () {
     test()->role->affiliations()->create([
         'affiliatable_id' => test()->test_character->character_id,
         'affiliatable_type' => CharacterInfo::class,
-        'type'         => 'inverse',
+        'type' => 'inverse',
     ]);
 
     $ids = (new GetAffiliatedIdsByPermissionArray(test()->permission->name))->execute();
@@ -86,7 +84,7 @@ it('does not return secondary character id if secondary character is inverted', 
     test()->role->affiliations()->create([
         'affiliatable_id' => test()->secondary_character->character_id,
         'affiliatable_type' => CharacterInfo::class,
-        'type'         => 'inverse',
+        'type' => 'inverse',
     ]);
 
     $ids = (new GetAffiliatedIdsByPermissionArray(test()->permission->name))->execute();
@@ -105,7 +103,7 @@ it('does not return secondary character id if secondary corporation is inverted'
     test()->role->affiliations()->create([
         'affiliatable_id' => test()->secondary_character->corporation->corporation_id,
         'affiliatable_type' => CorporationInfo::class,
-        'type'           => 'inverse',
+        'type' => 'inverse',
     ]);
 
     $ids = (new GetAffiliatedIdsByPermissionArray(test()->permission->name))->execute();
@@ -127,7 +125,7 @@ it('does not return secondary character id if secondary alliance is inverted', f
     test()->role->affiliations()->create([
         'affiliatable_id' => test()->secondary_character->alliance->alliance_id,
         'affiliatable_type' => AllianceInfo::class,
-        'type'        => 'inverse',
+        'type' => 'inverse',
     ]);
 
     $ids = (new GetAffiliatedIdsByPermissionArray(test()->permission->name))->execute();
@@ -149,7 +147,7 @@ it('does return secondary character id if secondary character is allowed', funct
     test()->role->affiliations()->create([
         'affiliatable_id' => test()->secondary_character->character_id,
         'affiliatable_type' => CharacterInfo::class,
-        'type'         => 'allowed',
+        'type' => 'allowed',
     ]);
 
     $ids = (new GetAffiliatedIdsByPermissionArray(test()->permission->name))->execute();
@@ -171,7 +169,7 @@ it('does return secondary character id if secondary corporation is allowed', fun
     test()->role->affiliations()->create([
         'affiliatable_id' => test()->secondary_character->corporation->corporation_id,
         'affiliatable_type' => CorporationInfo::class,
-        'type'           => 'allowed',
+        'type' => 'allowed',
     ]);
 
     $ids = (new GetAffiliatedIdsByPermissionArray(test()->permission->name))->execute();
@@ -193,7 +191,7 @@ it('does return secondary character id if secondary alliance is allowed', functi
     test()->role->affiliations()->create([
         'affiliatable_id' => test()->secondary_character->alliance->alliance_id,
         'affiliatable_type' => AllianceInfo::class,
-        'type'        => 'allowed',
+        'type' => 'allowed',
     ]);
 
     $ids = (new GetAffiliatedIdsByPermissionArray(test()->permission->name))->execute();
@@ -215,7 +213,7 @@ it('does return own character even if listed as forbidden', function () {
     test()->role->affiliations()->create([
         'affiliatable_id' => test()->secondary_character->character_id,
         'affiliatable_type' => CharacterInfo::class,
-        'type'         => 'forbidden',
+        'type' => 'forbidden',
     ]);
 
     $ids = (new GetAffiliatedIdsByPermissionArray(test()->permission->name))->execute();
@@ -229,12 +227,12 @@ it('does not return secondary character id if secondary character is forbidden',
         [
             'affiliatable_id' => test()->secondary_character->character_id,
             'affiliatable_type' => CharacterInfo::class,
-            'type'         => 'allowed',
+            'type' => 'allowed',
         ],
         [
             'affiliatable_id' => test()->secondary_character->character_id,
             'affiliatable_type' => CharacterInfo::class,
-            'type'         => 'forbidden',
+            'type' => 'forbidden',
         ],
     ]);
 
@@ -258,12 +256,12 @@ it('does not return secondary character id if secondary corporation is forbidden
         [
             'affiliatable_id' => test()->secondary_character->corporation->corporation_id,
             'affiliatable_type' => CorporationInfo::class,
-            'type'           => 'allowed',
+            'type' => 'allowed',
         ],
         [
             'affiliatable_id' => test()->secondary_character->corporation->corporation_id,
             'affiliatable_type' => CorporationInfo::class,
-            'type'           => 'forbidden',
+            'type' => 'forbidden',
         ],
     ]);
 
@@ -287,12 +285,12 @@ it('does not return secondary character id if secondary alliance is forbidden', 
         [
             'affiliatable_id' => test()->secondary_character->alliance->alliance_id,
             'affiliatable_type' => AllianceInfo::class,
-            'type'        => 'allowed',
+            'type' => 'allowed',
         ],
         [
             'affiliatable_id' => test()->secondary_character->alliance->alliance_id,
             'affiliatable_type' => AllianceInfo::class,
-            'type'        => 'forbidden',
+            'type' => 'forbidden',
         ],
     ]);
 
@@ -316,12 +314,12 @@ it('caches results', function () {
         [
             'affiliatable_id' => test()->secondary_character->alliance->alliance_id,
             'affiliatable_type' => AllianceInfo::class,
-            'type'        => 'allowed',
+            'type' => 'allowed',
         ],
         [
             'affiliatable_id' => test()->secondary_character->alliance->alliance_id,
             'affiliatable_type' => AllianceInfo::class,
-            'type'        => 'forbidden',
+            'type' => 'forbidden',
         ],
     ]);
 
@@ -345,13 +343,13 @@ it('returns corporation id', function () {
     test()->role->affiliations()->create([
         'affiliatable_id' => test()->test_character->alliance->alliance_id,
         'affiliatable_type' => AllianceInfo::class,
-        'type'        => 'allowed',
+        'type' => 'allowed',
     ]);
 
     // Create director role for corporation
     $character_role = CharacterRole::factory()->make([
         'character_id' => test()->test_character->character_id,
-        'roles' => ['Contract_Manager', 'Director']
+        'roles' => ['Contract_Manager', 'Director'],
     ]);
 
     $ids = (new GetAffiliatedIdsByPermissionArray(test()->permission->name, 'Director'))->execute();

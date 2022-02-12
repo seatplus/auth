@@ -1,7 +1,6 @@
 <?php
 
 it('deactivates user if character is doomsheimed', function () {
-
     expect($this->test_user)
         ->active->toBeTrue()
         ->characters->toHaveCount(1);
@@ -14,11 +13,9 @@ it('deactivates user if character is doomsheimed', function () {
 
     expect($this->test_user->refresh())
         ->active->toBeFalsy();
-
 });
 
 it('splits secondary user to a new user if doomsheimed', function () {
-
     $user = test()->test_user;
     $user->main_character_id = test()->test_character->character_id;
     $user->save();
@@ -33,7 +30,7 @@ it('splits secondary user to a new user if doomsheimed', function () {
         ->main_character_id->not()->toBe($character_user->character_id);
 
     // doomheim the character
-    $character_affiliation = \Seatplus\Eveapi\Models\Character\CharacterAffiliation::firstWhere('character_id',$character_user->character_id);
+    $character_affiliation = \Seatplus\Eveapi\Models\Character\CharacterAffiliation::firstWhere('character_id', $character_user->character_id);
     $character_affiliation->corporation_id = 1000001;
     $character_affiliation->save();
 
@@ -42,12 +39,10 @@ it('splits secondary user to a new user if doomsheimed', function () {
         ->active->toBeTruthy()
         ->main_character_id->toBeInt()->toBe(test()->test_character->character_id)
         ->characters->toHaveCount(1);
-
 });
 
 
 it('splits primary user to a new user if doomsheimed', function () {
-
     $user = test()->test_user;
     $user->main_character_id = test()->test_character->character_id;
     $user->save();
@@ -64,7 +59,7 @@ it('splits primary user to a new user if doomsheimed', function () {
     expect(\Seatplus\Auth\Models\User::all())->toHaveCount(1);
 
     // doomheim the character
-    $character_affiliation = \Seatplus\Eveapi\Models\Character\CharacterAffiliation::firstWhere('character_id',test()->test_character->character_id);
+    $character_affiliation = \Seatplus\Eveapi\Models\Character\CharacterAffiliation::firstWhere('character_id', test()->test_character->character_id);
     $character_affiliation->corporation_id = 1000001;
     $character_affiliation->save();
 
@@ -82,5 +77,4 @@ it('splits primary user to a new user if doomsheimed', function () {
         ->main_character_id->toBeInt()->toBe(test()->test_character->character_id)
         ->main_character_id->toBeInt()->not()->toBe($character_user->character_id)
         ->characters->toHaveCount(1);
-
 });
