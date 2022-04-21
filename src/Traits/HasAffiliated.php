@@ -2,16 +2,10 @@
 
 namespace Seatplus\Auth\Traits;
 
-
-
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Query\JoinClause;
-use Illuminate\Support\Facades\DB;
 use Seatplus\Auth\Enums\AffiliationType;
-use Seatplus\Auth\Models\AccessControl\AclAffiliation;
 use Seatplus\Auth\Models\Permissions\Affiliation;
-use Seatplus\Auth\Models\Permissions\Permission;
-use Seatplus\Auth\Models\Permissions\Role;
 use Seatplus\Auth\Models\User;
 use Seatplus\Eveapi\Models\Alliance\AllianceInfo;
 use Seatplus\Eveapi\Models\Character\CharacterAffiliation;
@@ -20,7 +14,6 @@ use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 
 trait HasAffiliated
 {
-
     private User $user;
     private Builder $affiliation;
     private string $permission;
@@ -29,7 +22,7 @@ trait HasAffiliated
     {
         throw_if(auth()->guest(), 'Unauthenticated');
 
-        if($this->getUser()->can('superuser')) {
+        if ($this->getUser()->can('superuser')) {
             return $query;
         }
 
@@ -41,7 +34,10 @@ trait HasAffiliated
             ->union($this->getAffiliatedCharacterAffiliations())
         ;
 
-        return $query->joinSub($character_affiliations, 'character_affiliations', fn (JoinClause $join) => $join
+        return $query->joinSub(
+            $character_affiliations,
+            'character_affiliations',
+            fn (JoinClause $join) => $join
             ->on($this->getTable() . ".$column", '=', 'character_affiliations.character_id')
         );
         /*return $query->when(!auth()->guest(), fn (Builder $query) => $query
@@ -55,7 +51,9 @@ trait HasAffiliated
     private function getOwnedCharacterAffiliations() : Builder
     {
         return CharacterAffiliation::query()
-            ->join('character_users', fn (JoinClause $join) => $join
+            ->join(
+                'character_users',
+                fn (JoinClause $join) => $join
                 ->on('character_affiliations.character_id', '=', 'character_users.character_id')
                 ->where('user_id', $this->getUser()->getAuthIdentifier())
             )
@@ -64,8 +62,7 @@ trait HasAffiliated
 
     private function convertToPermissionString(string $permission) : string
     {
-
-        if(class_exists($permission)) {
+        if (class_exists($permission)) {
             return config('eveapi.permissions.' . $permission) ?? $permission;
         }
 
@@ -76,7 +73,7 @@ trait HasAffiliated
     {
         $this->createAffiliation();
 
-        $allowed =  $this->getAllowedAffiliatedCharacterAffiliations();
+        $allowed = $this->getAllowedAffiliatedCharacterAffiliations();
         $inverted = $this->getInvertedAffiliatedCharacterAffiliations();
         $forbidden = $this->getForbiddenAffiliatedCharacterAffiliations();
 
@@ -89,7 +86,8 @@ trait HasAffiliated
                 ->fromSub($forbidden->select('character_id'), 'forbidden_affiliations')
                 ->select('forbidden_affiliations.character_id')
             )*/
-            ->whereNot(fn($query) => $query
+            ->whereNot(
+                fn ($query) => $query
                 ->select('character_affiliations.character_id')
                 ->fromSub($forbidden->select('character_id'), 'forbidden_affiliations')
                 ->whereColumn('forbidden_affiliations.character_id', 'character_affiliations.character_id')
@@ -108,16 +106,15 @@ trait HasAffiliated
 
     private function getUser(): User
     {
-       if(!isset($this->user)) {
-           $this->user = auth()->user();
-       }
+        if (! isset($this->user)) {
+            $this->user = auth()->user();
+        }
 
         return $this->user;
     }
 
     private function getAllowedAffiliatedCharacterAffiliations() : Builder
     {
-
         $type = AffiliationType::ALLOWED;
         $alias = sprintf('%s_entities', $type->value());
 
@@ -132,7 +129,6 @@ trait HasAffiliated
 
     private function getInvertedAffiliatedCharacterAffiliations() : Builder
     {
-
         $type = AffiliationType::INVERSE;
         $alias = sprintf('%s_entities', $type->value());
 
@@ -141,14 +137,13 @@ trait HasAffiliated
         return CharacterAffiliation::query()
             ->when(
                 $affiliation->count(),
-                fn(Builder $query) => $query
+                fn (Builder $query) => $query
                     ->leftJoinSub(
                         $affiliation,
                         $alias,
                         fn (JoinClause $join) => $this->joinAffiliatedCharacterAffiliations($join, $alias)
                     )
-                    ->whereNull("$alias.affiliatable_id")
-                ,
+                    ->whereNull("$alias.affiliatable_id"),
                 fn (Builder $query) => $query->whereNull('character_id')
             )
             ->select('character_affiliations.*');
@@ -156,7 +151,6 @@ trait HasAffiliated
 
     private function getForbiddenAffiliatedCharacterAffiliations() : Builder
     {
-
         $type = AffiliationType::FORBIDDEN;
         $alias = sprintf('%s_entities', $type->value());
 
@@ -165,13 +159,12 @@ trait HasAffiliated
         return CharacterAffiliation::query()
             ->when(
                 $affiliation->count(),
-                fn(Builder $query) => $query
+                fn (Builder $query) => $query
                     ->joinSub(
                         $affiliation,
                         $alias,
                         fn (JoinClause $join) => $this->joinAffiliatedCharacterAffiliations($join, $alias)
-                    )
-                ,
+                    ),
                 fn (Builder $query) => $query->whereNull('character_id')
             );
     }
@@ -212,7 +205,7 @@ trait HasAffiliated
      */
     public function setPermission(?string $permission): void
     {
-        if(is_null($permission)) {
+        if (is_null($permission)) {
             $permission = get_class($this);
         }
 
@@ -220,6 +213,4 @@ trait HasAffiliated
 
         $this->permission = $permission;
     }
-
-
 }
