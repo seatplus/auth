@@ -192,7 +192,6 @@ it('does not return assets of forbidden entities', function (int $secondary_id, 
 
     test()->actingAs(test()->test_user);
 
-    dump($tertiary_id);
     $assets = Assets::query()
         ->affiliatedCharacters('assetable_id', test()->permission->name)
         ->get();
@@ -207,7 +206,29 @@ it('does not return assets of forbidden entities', function (int $secondary_id, 
     [fn() => test()->tertiary_character->character_id, CharacterInfo::class],
     [fn() => test()->tertiary_character->corporation->corporation_id, CorporationInfo::class],
     [fn() => test()->tertiary_character->corporation->alliance_id, AllianceInfo::class],
-])->only();
+]);
+
+it('returns own character id even if it is forbidden', function () {
+
+    createAsset(test()->test_character->character_id);
+
+    expect(Assets::all())->toHaveCount(3);
+
+    test()->createAffiliation(
+        test()->test_character->character_id,
+        CharacterInfo::class,
+        'forbidden'
+    );
+
+    test()->actingAs(test()->test_user);
+
+    $assets = Assets::query()
+        ->affiliatedCharacters('assetable_id', test()->permission->name)
+        ->get();
+
+    expect($assets)->toHaveCount(1);
+
+});
 
 function createAffiliation($affiliatable_id, $affiliatable_type, $type = 'allowed'): Affiliation
 {
