@@ -1,11 +1,11 @@
 <?php
 
 use Seatplus\Auth\Models\Permissions\Affiliation;
+use Seatplus\Auth\Models\Permissions\Permission;
+use Seatplus\Auth\Models\Permissions\Role;
 use Seatplus\Auth\Tests\Stubs\Assets;
 use Seatplus\Eveapi\Models\Alliance\AllianceInfo;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
-use Seatplus\Auth\Models\Permissions\Permission;
-use Seatplus\Auth\Models\Permissions\Role;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 
 beforeEach(function () {
@@ -23,7 +23,6 @@ beforeEach(function () {
     test()->tertiary_character = createAsset()->assetable;
 
     expect(Assets::all())->toHaveCount(2);
-
 });
 
 it('trows Unauthenticated exception if used without a session', function () {
@@ -33,7 +32,6 @@ it('trows Unauthenticated exception if used without a session', function () {
 })->throws('Unauthenticated');
 
 it('returns owned assets', function () {
-
     createAsset(test()->test_character->character_id);
 
     expect(Assets::all())->toHaveCount(3);
@@ -46,7 +44,6 @@ it('returns owned assets', function () {
         ->get();
 
     expect($assets)->toHaveCount(1);
-
 });
 
 it('return all assets for superuser', function () {
@@ -65,11 +62,9 @@ it('return all assets for superuser', function () {
         ->get();
 
     expect($assets)->toHaveCount(2);
-
 });
 
 it('returns assets of allowed and own character', function () {
-
     createAsset(test()->test_character->character_id);
 
     // test to have test_character, 2nd and 3rd character assets
@@ -88,7 +83,6 @@ it('returns assets of allowed and own character', function () {
         ->get();
 
     expect($assets)->toHaveCount(2);
-
 });
 
 it('returns assets of allowed entities', function (int $affiliatable_id, string $affiliatable_type) {
@@ -109,11 +103,10 @@ it('returns assets of allowed entities', function (int $affiliatable_id, string 
         ->get();
 
     expect($assets)->toHaveCount(1);
-
 })->with([
-    [fn() => test()->secondary_character->character_id, CharacterInfo::class],
-    [fn() => test()->secondary_character->corporation->corporation_id, CorporationInfo::class],
-    [fn() => test()->secondary_character->corporation->alliance_id, AllianceInfo::class],
+    [fn () => test()->secondary_character->character_id, CharacterInfo::class],
+    [fn () => test()->secondary_character->corporation->corporation_id, CorporationInfo::class],
+    [fn () => test()->secondary_character->corporation->alliance_id, AllianceInfo::class],
 ]);
 
 it('returns assets of inverted entities', function (int $affiliatable_id, string $affiliatable_type) {
@@ -134,15 +127,13 @@ it('returns assets of inverted entities', function (int $affiliatable_id, string
         ->get();
 
     expect($assets)->toHaveCount(1);
-
 })->with([
-    [fn() => test()->secondary_character->character_id, CharacterInfo::class],
-    [fn() => test()->secondary_character->corporation->corporation_id, CorporationInfo::class],
-    [fn() => test()->secondary_character->corporation->alliance_id, AllianceInfo::class],
+    [fn () => test()->secondary_character->character_id, CharacterInfo::class],
+    [fn () => test()->secondary_character->corporation->corporation_id, CorporationInfo::class],
+    [fn () => test()->secondary_character->corporation->alliance_id, AllianceInfo::class],
 ]);
 
 it('returns assets of inverted entities and own', function (int $affiliatable_id, string $affiliatable_type) {
-
     createAsset(test()->test_character->character_id);
 
     // test to have 3 assets (test, 2nd and 3rd)
@@ -161,11 +152,10 @@ it('returns assets of inverted entities and own', function (int $affiliatable_id
         ->get();
 
     expect($assets)->toHaveCount(3);
-
 })->with([
-    [fn() => test()->test_character->character_id, CharacterInfo::class],
-    [fn() => test()->test_character->corporation->corporation_id, CorporationInfo::class],
-    [fn() => test()->test_character->corporation->alliance_id, AllianceInfo::class],
+    [fn () => test()->test_character->character_id, CharacterInfo::class],
+    [fn () => test()->test_character->corporation->corporation_id, CorporationInfo::class],
+    [fn () => test()->test_character->corporation->alliance_id, AllianceInfo::class],
 ]);
 
 it('does not return assets of forbidden entities', function (int $secondary_id, string $secondary_type, int $tertiary_id, string $tertiary_type) {
@@ -197,19 +187,17 @@ it('does not return assets of forbidden entities', function (int $secondary_id, 
         ->get();
 
     expect($assets)->toHaveCount(0);
-
 })->with([
-    [fn() => test()->secondary_character->character_id, CharacterInfo::class],
-    [fn() => test()->secondary_character->corporation->corporation_id, CorporationInfo::class],
-    [fn() => test()->secondary_character->corporation->alliance_id, AllianceInfo::class],
+    [fn () => test()->secondary_character->character_id, CharacterInfo::class],
+    [fn () => test()->secondary_character->corporation->corporation_id, CorporationInfo::class],
+    [fn () => test()->secondary_character->corporation->alliance_id, AllianceInfo::class],
 ])->with([
-    [fn() => test()->tertiary_character->character_id, CharacterInfo::class],
-    [fn() => test()->tertiary_character->corporation->corporation_id, CorporationInfo::class],
-    [fn() => test()->tertiary_character->corporation->alliance_id, AllianceInfo::class],
+    [fn () => test()->tertiary_character->character_id, CharacterInfo::class],
+    [fn () => test()->tertiary_character->corporation->corporation_id, CorporationInfo::class],
+    [fn () => test()->tertiary_character->corporation->alliance_id, AllianceInfo::class],
 ]);
 
 it('returns own character id even if it is forbidden', function () {
-
     createAsset(test()->test_character->character_id);
 
     expect(Assets::all())->toHaveCount(3);
@@ -227,24 +215,22 @@ it('returns own character id even if it is forbidden', function () {
         ->get();
 
     expect($assets)->toHaveCount(1);
-
 });
 
 it('runs faster then using the helper', function () {
-
     expect(Assets::all())->toHaveCount(2);
 
     // create 500 characters
     $characters = CharacterInfo::factory()->count(10)->create();
 
-    $characters->each(fn(CharacterInfo $character) => Assets::factory()
+    $characters->each(fn (CharacterInfo $character) => Assets::factory()
         ->count(100)
         ->create([
         'assetable_id' => $character->character_id,
         'assetable_type' => CharacterInfo::class,
     ]));
 
-    expect(Assets::query()->count())->toBe(100*10+2);
+    expect(Assets::query()->count())->toBe(100 * 10 + 2);
 
     test()->createAffiliation(
         test()->secondary_character->corporation->corporation_id,
@@ -274,8 +260,6 @@ it('runs faster then using the helper', function () {
     $time_elapsed_trait = microtime(true) - $start;
 
     expect($time_elapsed_trait)->toBeLessThan($time_elapsed_helper);
-
-
 });
 
 function createAffiliation($affiliatable_id, $affiliatable_type, $type = 'allowed'): Affiliation
