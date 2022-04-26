@@ -5,19 +5,16 @@ namespace Seatplus\Auth\Traits;
 
 
 use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\DB;
 use Seatplus\Auth\Enums\AffiliationType;
-use Seatplus\Auth\Models\AccessControl\AclAffiliation;
 use Seatplus\Auth\Models\Permissions\Affiliation;
-use Seatplus\Auth\Models\Permissions\Permission;
-use Seatplus\Auth\Models\Permissions\Role;
 use Seatplus\Auth\Models\User;
 use Seatplus\Eveapi\Models\Alliance\AllianceInfo;
 use Seatplus\Eveapi\Models\Character\CharacterAffiliation;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
-use function Pest\Laravel\get;
 
 trait HasAffiliated
 {
@@ -39,35 +36,16 @@ trait HasAffiliated
         $character_affiliations = $this->getOwnedCharacterAffiliations()
             ->union($this->getAffiliatedCharacterAffiliations());
 
-        $forbidden = $this->getForbiddenAffiliatedCharacterAffiliations()
-           /* ->leftJoinSub(
-                $this->getOwnedCharacterAffiliations(),
-                'owned_affiliations',
-                function (JoinClause $join) {
-                    $join->on('')
-                }
-            )*/
-        ;
+        $forbidden = $this->getForbiddenAffiliatedCharacterAffiliations();
 
         return $query->joinSub($character_affiliations, 'character_affiliations', fn (JoinClause $join) => $join
             ->on($this->getTable() . ".$column", '=', 'character_affiliations.character_id')
         )
-            //->get()->dd()
-            ->whereNotIn('character_id', fn(\Illuminate\Database\Query\Builder $query) => $query
-                ->fromSub($forbidden, 'helper')
-                ->select('helper.character_id')
+            ->whereNotIn('character_id', fn(QueryBuilder $query) => $query
+                ->fromSub($forbidden, 'forbidden_characters')
+                ->select('forbidden_characters.character_id')
             )
-            ->select($this->getTable() . ".*")
-            ;
-
-        //->get()->dd('test')
-
-        /*return $query->when(!auth()->guest(), fn (Builder $query) => $query
-            ->join('character_users', fn (JoinClause $join) => $join
-                ->on($this->getTable() . ".$column", '=', 'character_users.character_id')
-                ->where('user_id', auth()->user()->getAuthIdentifier())
-            )
-        );*/
+            ->select($this->getTable() . ".*");
     }
 
     private function getOwnedCharacterAffiliations() : Builder
@@ -92,49 +70,13 @@ trait HasAffiliated
 
     private function getAffiliatedCharacterAffiliations() : Builder
     {
-        $this->createAffiliation();
 
         $allowed =  $this->getAllowedAffiliatedCharacterAffiliations();
         $inverted = $this->getInvertedAffiliatedCharacterAffiliations();
-        $forbidden = $this->getForbiddenAffiliatedCharacterAffiliations()->select('character_id');
 
-        /*return $forbidden
-            ->rightJoinSub(
-                $allowed->union($inverted),
-                'not_forbidden_entities',
-                fn(JoinClause $join) => $join->on('not_forbidden_entities.character_id', '=', 'character_affiliations.character_id') // r.value = l.value
-            )
-            ->when($forbidden->count(), fn($query) => $query->whereNull('type') )
-            ->select('not_forbidden_entities.*');*/
-
-        $combined =  $allowed
+        return $allowed
             ->union($inverted)
-        ;
-
-        return $combined
-            //->get()->dd()
-            ->whereNotIn('character_id', fn(\Illuminate\Database\Query\Builder $query) => $query
-                ->fromSub($forbidden, 'helper')
-                ->select('helper.character_id')
-                //->get()->dd('test')
-            )
-            ->select('character_affiliations.*')
-            //->get()->dd()
-            ;
-
-            /*->whereNotIn('character_id', function ($query) use ($forbidden) {
-
-                $type = AffiliationType::INVERSE;
-                $alias = sprintf('%s_entities', $type->value());
-
-                $affiliation = $this->getAffiliation()->where('type', $type->value());
-
-                $query->select('helper.character_id')
-                    ->fromSub($forbidden, 'helper');
-                    //->where(fn($query) => $query->where('helper.affiliatable_type', CharacterInfo::class)->whereColumn('helper.affiliatable_id', 'character_affiliations.character_id'))
-                    //->orWhere(fn($query) => $query->where('helper.affiliatable_type', CharacterInfo::class)->whereColumn('helper.affiliatable_id', 'character_affiliations.corporation_id'))
-                    //->orWhere(fn($query) => $query->where('helper.affiliatable_type', CharacterInfo::class)->whereColumn('helper.affiliatable_id', 'character_affiliations.alliance_id'));
-            });*/
+            ->select('character_affiliations.*');
 
     }
 
@@ -194,25 +136,12 @@ trait HasAffiliated
         $type = AffiliationType::FORBIDDEN;
         $alias = sprintf('%s_entities', $type->value());
 
-        /*$affiliation = $this->getOwnedCharacterAffiliations()
-            //->get()->dd('forbidden')
-            ->get()->dd()
-            ;*/
-
         $affiliation = $this->getAffiliation()->where('type', $type->value())
-            ->whereNotExists(fn(\Illuminate\Database\Query\Builder $query) => $query
+            ->whereNotExists(fn(QueryBuilder $query) => $query
                 ->select(DB::raw(1))
                 ->fromSub($this->getOwnedCharacterAffiliations(), 'owned')
                 ->whereColumn('affiliations.affiliatable_id', 'owned.character_id')
-                ->orWhereColumn('affiliations.affiliatable_id', 'owned.corporation_id')
-                ->orWhereColumn('affiliations.affiliatable_id', 'owned.alliance_id')
             )
-            /*->leftJoinSub(
-                $this->getOwnedCharacterAffiliations(),
-                'owned_entities',
-                fn(JoinClause $join) => $this->joinAffiliatedCharacterAffiliations($join, 'owned_entities')
-            )*/
-            //->get()->dd()
         ;
 
         return CharacterAffiliation::query()

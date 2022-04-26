@@ -26,6 +26,9 @@
 
 use Seatplus\Auth\Actions\GetAffiliatedIdsByPermissionArray;
 
+/**
+ * @deprecated deprecated since version 2.0
+ */
 if (! function_exists('getAffiliatedIdsByClass')) {
 
     /**
@@ -34,6 +37,7 @@ if (! function_exists('getAffiliatedIdsByClass')) {
      * @param  string  $class
      * @param  string  $role
      * @return array
+     * @deprecated deprecated since version 2.0
      */
     function getAffiliatedIdsByClass(string $class, string $role = ''): array
     {
@@ -43,6 +47,9 @@ if (! function_exists('getAffiliatedIdsByClass')) {
     }
 }
 
+/**
+ * @deprecated deprecated since version 2.0
+ */
 if (! function_exists('getAffiliatedIdsByPermission')) {
 
     /**
@@ -51,6 +58,7 @@ if (! function_exists('getAffiliatedIdsByPermission')) {
      * @param  string  $class
      * @param  string  $role
      * @return array
+     * @deprecated deprecated since version 2.0
      */
     function getAffiliatedIdsByPermission(string $permission, string $role = ''): array
     {
