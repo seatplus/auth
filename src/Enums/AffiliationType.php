@@ -10,8 +10,7 @@ enum AffiliationType
 
     public function operator() : string
     {
-        return match ($this)
-        {
+        return match ($this) {
             self::ALLOWED, self::FORBIDDEN => '=',
             self::INVERSE => '='
         };
@@ -19,8 +18,7 @@ enum AffiliationType
 
     public function value() : string
     {
-        return match ($this)
-        {
+        return match ($this) {
             self::ALLOWED => 'allowed',
             self::FORBIDDEN => 'forbidden',
             self::INVERSE => 'inverse'
