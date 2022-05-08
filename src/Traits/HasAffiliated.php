@@ -9,6 +9,7 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\DB;
 use Seatplus\Auth\Enums\AffiliationType;
+use Seatplus\Auth\Models\CharacterUser;
 use Seatplus\Auth\Models\Permissions\Affiliation;
 use Seatplus\Auth\Models\User;
 use Seatplus\Eveapi\Models\Alliance\AllianceInfo;
@@ -22,16 +23,41 @@ trait HasAffiliated
     private User $user;
     private Builder $affiliation;
     private string $permission;
+    private string $corporation_role = '';
+
+    /**
+     * @return string|null
+     */
+    public function getCorporationRole(): string
+    {
+        return $this->corporation_role;
+    }
 
     public function scopeAffiliatedCharacters(Builder $query, string $column, null|string $permission = null)
     {
+
+        $this->setPermission($permission);
+
+        return $this->buildQuery('character', $query, $column);
+    }
+
+    public function scopeAffiliatedCorporations(Builder $query, string $column, null|string $permission = null, string $corporation_role = '') : Builder
+    {
+
+        $this->setPermission($permission);
+        $this->setCorporationRole($corporation_role);
+
+        return $this->buildQuery('corporation', $query, $column);
+    }
+
+    private function buildQuery(string $type, Builder $query, string $column) : Builder
+    {
+
         throw_if(auth()->guest(), 'Unauthenticated');
 
         if($this->getUser()->can('superuser')) {
             return $query;
         }
-
-        $this->setPermission($permission);
 
         $character_affiliations = $this->getOwnedCharacterAffiliations()
             ->union($this->getAffiliatedCharacterAffiliations());
@@ -39,11 +65,11 @@ trait HasAffiliated
         $forbidden = $this->getForbiddenAffiliatedCharacterAffiliations();
 
         return $query->joinSub($character_affiliations, 'character_affiliations', fn (JoinClause $join) => $join
-            ->on($this->getTable() . ".$column", '=', 'character_affiliations.character_id')
+            ->on($this->getTable() . ".$column", '=', "character_affiliations.${type}_id")
         )
-            ->whereNotIn('character_id', fn(QueryBuilder $query) => $query
-                ->fromSub($forbidden, 'forbidden_characters')
-                ->select('forbidden_characters.character_id')
+            ->whereNotIn("character_affiliations.${type}_id", fn(QueryBuilder $query) => $query
+                ->fromSub($forbidden, 'forbidden_entities')
+                ->select("forbidden_entities.${type}_id")
             )
             ->select($this->getTable() . ".*");
     }
@@ -51,11 +77,36 @@ trait HasAffiliated
     private function getOwnedCharacterAffiliations() : Builder
     {
         return CharacterAffiliation::query()
-            ->join('character_users', fn (JoinClause $join) => $join
-                ->on('character_affiliations.character_id', '=', 'character_users.character_id')
-                ->where('user_id', $this->getUser()->getAuthIdentifier())
+            ->when(
+                $this->getCorporationRole(),
+                // corporation scope
+                function (Builder $query) {
+
+                    $character_users = CharacterUser::query()
+                        ->whereHas('character.roles', fn(Builder $query) => $query
+                            ->whereJsonContains('roles', 'Director')
+                            ->orWhereJsonContains('roles', $this->getCorporationRole())
+                        )
+                        ->where('user_id', $this->getUser()->getAuthIdentifier());
+
+                    return $query->joinSub(
+                        $character_users,
+                        'character_users_sub',
+                        'character_affiliations.character_id', '=', 'character_users_sub.character_id'
+                    );
+                },
+                // character scope
+                fn(Builder $query) => $query->join('character_users', fn (JoinClause $join) => $join
+                    ->on('character_affiliations.character_id', '=', 'character_users.character_id')
+                    ->where('user_id', $this->getUser()->getAuthIdentifier())
+                )
             )
             ->select('character_affiliations.*');
+    }
+
+    public function setCorporationRole(string $corporation_role): void
+    {
+        $this->corporation_role = $corporation_role;
     }
 
     private function convertToPermissionString(string $permission) : string
