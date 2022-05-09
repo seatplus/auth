@@ -79,31 +79,9 @@ trait HasAffiliated
             ->when(
                 $this->getCorporationRole(),
                 // corporation scope
-                function (Builder $query) {
-                    $character_users = CharacterUser::query()
-                        ->whereHas(
-                            'character.roles',
-                            fn (Builder $query) => $query
-                            ->whereJsonContains('roles', 'Director')
-                            ->orWhereJsonContains('roles', $this->getCorporationRole())
-                        )
-                        ->where('user_id', $this->getUser()->getAuthIdentifier());
-
-                    return $query->joinSub(
-                        $character_users,
-                        'character_users_sub',
-                        'character_affiliations.character_id',
-                        '=',
-                        'character_users_sub.character_id'
-                    );
-                },
+                fn (Builder $query) => $this->getOwnedCharacterAffiliationsByCorporationScope($query),
                 // character scope
-                fn (Builder $query) => $query->join(
-                    'character_users',
-                    fn (JoinClause $join) => $join
-                    ->on('character_affiliations.character_id', '=', 'character_users.character_id')
-                    ->where('user_id', $this->getUser()->getAuthIdentifier())
-                )
+                fn (Builder $query) => $this->getOwnedCharacterAffiliationsByCharacterScope($query)
             )
             ->select('character_affiliations.*');
     }
@@ -111,6 +89,36 @@ trait HasAffiliated
     public function setCorporationRole(string $corporation_role): void
     {
         $this->corporation_role = $corporation_role;
+    }
+
+    private function getOwnedCharacterAffiliationsByCorporationScope(Builder $query) : Builder
+    {
+        $character_users = CharacterUser::query()
+            ->whereHas(
+                'character.roles',
+                fn (Builder $query) => $query
+                    ->whereJsonContains('roles', 'Director')
+                    ->orWhereJsonContains('roles', $this->getCorporationRole())
+            )
+            ->where('user_id', $this->getUser()->getAuthIdentifier());
+
+        return $query->joinSub(
+            $character_users,
+            'character_users_sub',
+            'character_affiliations.character_id',
+            '=',
+            'character_users_sub.character_id'
+        );
+    }
+
+    private function getOwnedCharacterAffiliationsByCharacterScope(Builder $query) : Builder
+    {
+        return $query->join(
+            'character_users',
+            fn (JoinClause $join) => $join
+                ->on('character_affiliations.character_id', '=', 'character_users.character_id')
+                ->where('user_id', $this->getUser()->getAuthIdentifier())
+        );
     }
 
     private function convertToPermissionString(string $permission) : string
