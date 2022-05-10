@@ -4,9 +4,11 @@ use Faker\Factory;
 use Illuminate\Support\Facades\Event;
 use Laravel\Socialite\Two\User as SocialiteUser;
 use Seatplus\Auth\Containers\EveUser;
+use Seatplus\Auth\Models\Permissions\Permission;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 use Seatplus\Eveapi\Models\RefreshToken;
 use Seatplus\Eveapi\Models\SsoScopes;
+use Spatie\Permission\PermissionRegistrar;
 
 /*
 |--------------------------------------------------------------------------
@@ -118,4 +120,18 @@ function createEveUser(int $character_id = null, string $character_owner_hash = 
         'expiresIn' => $faker->numberBetween(1, 20),
         'user' => ['user'],
     ]);
+}
+
+function assignPermissionToTestUser(array|string $permission_strings)
+{
+    $permission_strings = is_array($permission_strings) ? $permission_strings : [$permission_strings];
+
+    foreach ($permission_strings as $string) {
+        $permission = Permission::findOrCreate($string);
+
+        test()->test_user->givePermissionTo($permission);
+    }
+
+    // now re-register all the roles and permissions
+    app()->make(PermissionRegistrar::class)->registerPermissions();
 }

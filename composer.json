@@ -35,10 +35,8 @@
     "require-dev": {
         "orchestra/testbench": "^7.0",
         "nunomaduro/collision": "^6.1",
-        "brianium/paratest": "^6.2",
         "pestphp/pest": "^1.18",
-        "pestphp/pest-plugin-laravel": "^1.2",
-        "pestphp/pest-plugin-parallel": "^0.3.1"
+        "pestphp/pest-plugin-laravel": "^1.2"
     },
     "extra": {
         "laravel": {
@@ -49,8 +47,7 @@
     },
     "scripts": {
       "test": "vendor/bin/pest",
-      "test-coverage": "XDEBUG_MODE=coverage ./vendor/bin/pest --coverage",
-      "parallel": "XDEBUG_MODE=coverage ./vendor/bin/pest --coverage -p"
+      "test-coverage": "XDEBUG_MODE=coverage ./vendor/bin/pest --coverage"
     },
     "config": {
         "allow-plugins": {

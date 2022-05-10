@@ -22,7 +22,7 @@ jobs:
     - uses: getong/mariadb-action@v1.1
       with:
         host port: 3308 # Optional, default value is 3306. The port of host
-        mariadb version: '10.3' # Optional, default value is "latest". The version of the MariaDB
+        mariadb version: '10.7' # Optional, default value is "latest". The version of the MariaDB
         mysql database: 'testbench' # Optional, default value is "test". The specified database which will be create
         mysql user: 'default' # Required if "mysql root password" is empty, default is empty. The superuser for the specified database. Can use secrets, too
         mysql password: 'secret' # Required if "mysql user" exists. The password for the "mysql user"
