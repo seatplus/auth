@@ -289,6 +289,33 @@ it('return corporation owned assets for ($character_role, $corporation_role) ', 
     ['NoDirector', 'Director', false],
 ]);
 
+it('supports array of corporation roles ', function (string $character_role, string|array $corporation_role, bool $can_find_asset) {
+
+    // give test_character corporation role
+    \Seatplus\Eveapi\Models\Character\CharacterRole::factory()->create([
+        'character_id' => test()->test_character->character_id,
+        'roles' => [$character_role],
+    ]);
+
+    //dump(\Seatplus\Eveapi\Models\Character\CharacterRole::where('character_id', test()->test_character->character_id)->get());
+
+    // create corporation asset
+    createAsset(test()->test_character->corporation->corporation_id);
+
+    // query asset
+    test()->actingAs(test()->test_user);
+
+    $assets = Assets::query()
+        ->affiliatedCorporations('assetable_id', test()->permission->name, $corporation_role)
+        ->get();
+
+    expect($assets)->toHaveCount($can_find_asset ? 1 : 0);
+})->with([
+    ['Director', ['Director', 'NoDirector'], true],
+    ['Director', ['NoDirector'], true],
+    ['NoDirector', ['Director', 'derp'], false],
+]);
+
 function createAffiliation($affiliatable_id, $affiliatable_type, $type = 'allowed'): Affiliation
 {
     return test()->role->affiliations()->create([

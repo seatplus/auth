@@ -5,29 +5,34 @@ namespace Seatplus\Auth\Traits;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Query\JoinClause;
-use Illuminate\Support\Facades\DB;
-use Seatplus\Auth\Enums\AffiliationType;
-use Seatplus\Auth\Models\CharacterUser;
-use Seatplus\Auth\Models\Permissions\Affiliation;
 use Seatplus\Auth\Models\User;
-use Seatplus\Eveapi\Models\Alliance\AllianceInfo;
-use Seatplus\Eveapi\Models\Character\CharacterAffiliation;
-use Seatplus\Eveapi\Models\Character\CharacterInfo;
-use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
+use Seatplus\Auth\Services\Dtos\AffiliationsDto;
+use Seatplus\Auth\Services\GetForbiddenCharacterAffiliationsService;
+use Seatplus\Auth\Services\GetOwnedCharacterAffiliationsService;
+use Seatplus\Auth\Services\GetAffiliatedCharacterAffiliationsService;
 
 trait HasAffiliated
 {
     private User $user;
     private Builder $affiliation;
     private string $permission;
-    private string $corporation_role = '';
+    private array $corporation_roles = [];
+    private AffiliationsDto $affiliationsDto;
+
+    /**
+     * @return AffiliationsDto
+     */
+    public function getAffiliationsDto(): AffiliationsDto
+    {
+        return $this->affiliationsDto;
+    }
 
     /**
      * @return string|null
      */
-    public function getCorporationRole(): string
+    public function getCorporationRoles(): array
     {
-        return $this->corporation_role;
+        return $this->corporation_roles;
     }
 
     public function scopeAffiliatedCharacters(Builder $query, string $column, null|string $permission = null)
@@ -37,12 +42,21 @@ trait HasAffiliated
         return $this->buildQuery('character', $query, $column);
     }
 
-    public function scopeAffiliatedCorporations(Builder $query, string $column, null|string $permission = null, string $corporation_role = '') : Builder
+    public function scopeAffiliatedCorporations(Builder $query, string $column, null|string $permission = null, string|array $corporation_roles = []) : Builder
     {
         $this->setPermission($permission);
-        $this->setCorporationRole($corporation_role);
+        $this->setCorporationRoles($corporation_roles);
 
         return $this->buildQuery('corporation', $query, $column);
+    }
+
+    private function setAffiliationsDto()
+    {
+        $this->affiliationsDto = new AffiliationsDto(
+            user: $this->getUser(),
+            permission: $this->getPermission(),
+            corporation_roles: $this->getCorporationRoles()
+        );
     }
 
     private function buildQuery(string $type, Builder $query, string $column) : Builder
@@ -52,6 +66,8 @@ trait HasAffiliated
         if ($this->getUser()->can('superuser')) {
             return $query;
         }
+
+        $this->setAffiliationsDto();
 
         $character_affiliations = $this->getOwnedCharacterAffiliations()
             ->union($this->getAffiliatedCharacterAffiliations());
@@ -75,50 +91,16 @@ trait HasAffiliated
 
     private function getOwnedCharacterAffiliations() : Builder
     {
-        return CharacterAffiliation::query()
-            ->when(
-                $this->getCorporationRole(),
-                // corporation scope
-                fn (Builder $query) => $this->getOwnedCharacterAffiliationsByCorporationScope($query),
-                // character scope
-                fn (Builder $query) => $this->getOwnedCharacterAffiliationsByCharacterScope($query)
-            )
-            ->select('character_affiliations.*');
+
+        return GetOwnedCharacterAffiliationsService::make($this->getAffiliationsDto())
+            ->getQuery();
     }
 
-    public function setCorporationRole(string $corporation_role): void
+    public function setCorporationRoles(string|array $corporation_roles): void
     {
-        $this->corporation_role = $corporation_role;
-    }
+        $corporation_roles = is_array($corporation_roles) ? array_map('strval', $corporation_roles) : [$corporation_roles];
 
-    private function getOwnedCharacterAffiliationsByCorporationScope(Builder $query) : Builder
-    {
-        $character_users = CharacterUser::query()
-            ->whereHas(
-                'character.roles',
-                fn (Builder $query) => $query
-                    ->whereJsonContains('roles', 'Director')
-                    ->orWhereJsonContains('roles', $this->getCorporationRole())
-            )
-            ->where('user_id', $this->getUser()->getAuthIdentifier());
-
-        return $query->joinSub(
-            $character_users,
-            'character_users_sub',
-            'character_affiliations.character_id',
-            '=',
-            'character_users_sub.character_id'
-        );
-    }
-
-    private function getOwnedCharacterAffiliationsByCharacterScope(Builder $query) : Builder
-    {
-        return $query->join(
-            'character_users',
-            fn (JoinClause $join) => $join
-                ->on('character_affiliations.character_id', '=', 'character_users.character_id')
-                ->where('user_id', $this->getUser()->getAuthIdentifier())
-        );
+        $this->corporation_roles = $corporation_roles;
     }
 
     private function convertToPermissionString(string $permission) : string
@@ -132,12 +114,9 @@ trait HasAffiliated
 
     private function getAffiliatedCharacterAffiliations() : Builder
     {
-        $allowed = $this->getAllowedAffiliatedCharacterAffiliations();
-        $inverted = $this->getInvertedAffiliatedCharacterAffiliations();
 
-        return $allowed
-            ->union($inverted)
-            ->select('character_affiliations.*');
+        return GetAffiliatedCharacterAffiliationsService::make($this->getAffiliationsDto())
+            ->getQuery();
     }
 
     private function getUser(): User
@@ -149,98 +128,11 @@ trait HasAffiliated
         return $this->user;
     }
 
-    private function getAllowedAffiliatedCharacterAffiliations() : Builder
-    {
-        $type = AffiliationType::ALLOWED;
-        $alias = sprintf('%s_entities', $type->value());
-
-        return CharacterAffiliation::query()
-            ->joinSub(
-                $this->getAffiliation()->where('type', $type->value()),
-                $alias,
-                fn (JoinClause $join) => $this->joinAffiliatedCharacterAffiliations($join, $alias)
-            )
-            ->select('character_affiliations.*')
-            ;
-    }
-
-    private function getInvertedAffiliatedCharacterAffiliations() : Builder
-    {
-        $type = AffiliationType::INVERSE;
-        $alias = sprintf('%s_entities', $type->value());
-
-        $affiliation = $this->getAffiliation()->where('type', $type->value());
-
-        return CharacterAffiliation::query()
-            ->when(
-                $affiliation->count(),
-                fn (Builder $query) => $query
-                    ->leftJoinSub(
-                        $affiliation,
-                        $alias,
-                        fn (JoinClause $join) => $this->joinAffiliatedCharacterAffiliations($join, $alias)
-                    )
-                    ->whereNull("$alias.affiliatable_id"),
-                fn (Builder $query) => $query->whereNull('character_id')
-            )
-            ->select('character_affiliations.*')
-            ;
-    }
-
     private function getForbiddenAffiliatedCharacterAffiliations() : Builder
     {
-        $type = AffiliationType::FORBIDDEN;
-        $alias = sprintf('%s_entities', $type->value());
 
-        $affiliation = $this->getAffiliation()->where('type', $type->value())
-            ->whereNotExists(
-                fn (QueryBuilder $query) => $query
-                ->select(DB::raw(1))
-                ->fromSub($this->getOwnedCharacterAffiliations(), 'owned')
-                ->whereColumn('affiliations.affiliatable_id', 'owned.character_id')
-            )
-        ;
-
-        return CharacterAffiliation::query()
-            ->when(
-                $affiliation->count(),
-                fn (Builder $query) => $query
-                    ->joinSub(
-                        $affiliation,
-                        $alias,
-                        fn (JoinClause $join) => $this->joinAffiliatedCharacterAffiliations($join, $alias)
-                    ),
-                fn (Builder $query) => $query->whereNull('character_affiliations.character_id')
-            )
-            ->select('character_affiliations.*')
-            ;
-    }
-
-    private function joinAffiliatedCharacterAffiliations(JoinClause $join, string $alias) : JoinClause
-    {
-        return $join
-            ->on('character_affiliations.character_id', '=', "$alias.affiliatable_id")->where("$alias.affiliatable_type", CharacterInfo::class)
-            ->orOn('character_affiliations.corporation_id', '=', "$alias.affiliatable_id")->where("$alias.affiliatable_type", CorporationInfo::class)
-            ->orOn('character_affiliations.alliance_id', '=', "$alias.affiliatable_id")->where("$alias.affiliatable_type", AllianceInfo::class);
-    }
-
-    /**
-     * @return Builder
-     */
-    public function getAffiliation(): Builder
-    {
-        if (! isset($this->affiliation)) {
-            $this->createAffiliation();
-        }
-
-        return clone $this->affiliation;
-    }
-
-    public function createAffiliation(): void
-    {
-        $this->affiliation = Affiliation::query()
-            ->whereRelation('role.permissions', 'name', $this->getPermission())
-            ->whereRelation('role.members', 'user_id', $this->getUser()->getAuthIdentifier());
+        return GetForbiddenCharacterAffiliationsService::make($this->getAffiliationsDto())
+            ->getQuery();
     }
 
     /**
