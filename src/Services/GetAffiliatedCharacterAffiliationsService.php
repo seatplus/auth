@@ -5,12 +5,8 @@ namespace Seatplus\Auth\Services;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Query\JoinClause;
 use Seatplus\Auth\Enums\AffiliationType;
-use Seatplus\Auth\Models\Permissions\Affiliation;
 use Seatplus\Auth\Services\Dtos\AffiliationsDto;
-use Seatplus\Eveapi\Models\Alliance\AllianceInfo;
 use Seatplus\Eveapi\Models\Character\CharacterAffiliation;
-use Seatplus\Eveapi\Models\Character\CharacterInfo;
-use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 
 class GetAffiliatedCharacterAffiliationsService extends GetCharacterAffiliationsServiceBase
 {
