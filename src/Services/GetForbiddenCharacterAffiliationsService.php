@@ -2,13 +2,13 @@
 
 namespace Seatplus\Auth\Services;
 
+use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\DB;
 use Seatplus\Auth\Enums\AffiliationType;
 use Seatplus\Auth\Services\Dtos\AffiliationsDto;
 use Seatplus\Eveapi\Models\Character\CharacterAffiliation;
-use Illuminate\Contracts\Database\Eloquent\Builder;
-use Illuminate\Database\Query\Builder as QueryBuilder;
-use Illuminate\Database\Query\JoinClause;
 
 class GetForbiddenCharacterAffiliationsService extends GetCharacterAffiliationsServiceBase
 {
@@ -19,7 +19,6 @@ class GetForbiddenCharacterAffiliationsService extends GetCharacterAffiliationsS
 
     public function getQuery() : Builder
     {
-
         $type = AffiliationType::FORBIDDEN;
         $alias = sprintf('%s_entities', $type->value());
 
@@ -49,5 +48,4 @@ class GetForbiddenCharacterAffiliationsService extends GetCharacterAffiliationsS
             ->select('character_affiliations.*')
             ;
     }
-
 }

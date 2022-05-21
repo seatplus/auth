@@ -2,23 +2,21 @@
 
 namespace Seatplus\Auth\Services;
 
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Query\JoinClause;
 use Seatplus\Auth\Models\Permissions\Affiliation;
 use Seatplus\Auth\Services\Dtos\AffiliationsDto;
-use Illuminate\Contracts\Database\Eloquent\Builder;
 use Seatplus\Eveapi\Models\Alliance\AllianceInfo;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 
 class GetCharacterAffiliationsServiceBase
 {
-
     private Builder $affiliation;
 
     public function __construct(
         protected AffiliationsDto $affiliationsDto
-    )
-    {
+    ) {
     }
 
     protected function joinAffiliatedCharacterAffiliations(JoinClause $join, string $alias) : JoinClause

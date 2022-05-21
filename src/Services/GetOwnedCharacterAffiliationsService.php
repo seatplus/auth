@@ -2,20 +2,17 @@
 
 namespace Seatplus\Auth\Services;
 
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Query\JoinClause;
 use Seatplus\Auth\Models\CharacterUser;
 use Seatplus\Auth\Services\Dtos\AffiliationsDto;
-use Illuminate\Contracts\Database\Eloquent\Builder;
 use Seatplus\Eveapi\Models\Character\CharacterAffiliation;
 
 class GetOwnedCharacterAffiliationsService
 {
-
-
     public function __construct(
         private AffiliationsDto $affiliationsDto
-    )
-    {
+    ) {
     }
 
     public static function make(AffiliationsDto $affiliationsDto)
@@ -25,7 +22,6 @@ class GetOwnedCharacterAffiliationsService
 
     public function getQuery() : Builder
     {
-
         return CharacterAffiliation::query()
             ->when(
                 $this->affiliationsDto->corporation_roles,

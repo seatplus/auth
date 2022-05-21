@@ -2,12 +2,11 @@
 
 namespace Seatplus\Auth\Services;
 
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Query\JoinClause;
 use Seatplus\Auth\Enums\AffiliationType;
-use Seatplus\Auth\Models\CharacterUser;
 use Seatplus\Auth\Models\Permissions\Affiliation;
 use Seatplus\Auth\Services\Dtos\AffiliationsDto;
-use Illuminate\Contracts\Database\Eloquent\Builder;
 use Seatplus\Eveapi\Models\Alliance\AllianceInfo;
 use Seatplus\Eveapi\Models\Character\CharacterAffiliation;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
@@ -25,7 +24,6 @@ class GetAffiliatedCharacterAffiliationsService extends GetCharacterAffiliations
 
     public function getQuery() : Builder
     {
-
         $allowed = $this->getAllowedAffiliatedCharacterAffiliations();
         $inverted = $this->getInvertedAffiliatedCharacterAffiliations();
 
@@ -74,17 +72,17 @@ class GetAffiliatedCharacterAffiliationsService extends GetCharacterAffiliations
             ;
     }
 
-   /* private function joinAffiliatedCharacterAffiliations(JoinClause $join, string $alias) : JoinClause
-    {
-        return $join
-            ->on('character_affiliations.character_id', '=', "$alias.affiliatable_id")->where("$alias.affiliatable_type", CharacterInfo::class)
-            ->orOn('character_affiliations.corporation_id', '=', "$alias.affiliatable_id")->where("$alias.affiliatable_type", CorporationInfo::class)
-            ->orOn('character_affiliations.alliance_id', '=', "$alias.affiliatable_id")->where("$alias.affiliatable_type", AllianceInfo::class);
-    }
+    /* private function joinAffiliatedCharacterAffiliations(JoinClause $join, string $alias) : JoinClause
+     {
+         return $join
+             ->on('character_affiliations.character_id', '=', "$alias.affiliatable_id")->where("$alias.affiliatable_type", CharacterInfo::class)
+             ->orOn('character_affiliations.corporation_id', '=', "$alias.affiliatable_id")->where("$alias.affiliatable_type", CorporationInfo::class)
+             ->orOn('character_affiliations.alliance_id', '=', "$alias.affiliatable_id")->where("$alias.affiliatable_type", AllianceInfo::class);
+     }
 
-    /**
-     * @return Builder
-     */
+     /**
+      * @return Builder
+      */
     /*public function getAffiliation(): Builder
     {
         if (! isset($this->affiliation)) {

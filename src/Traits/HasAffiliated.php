@@ -7,9 +7,9 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Query\JoinClause;
 use Seatplus\Auth\Models\User;
 use Seatplus\Auth\Services\Dtos\AffiliationsDto;
+use Seatplus\Auth\Services\GetAffiliatedCharacterAffiliationsService;
 use Seatplus\Auth\Services\GetForbiddenCharacterAffiliationsService;
 use Seatplus\Auth\Services\GetOwnedCharacterAffiliationsService;
-use Seatplus\Auth\Services\GetAffiliatedCharacterAffiliationsService;
 
 trait HasAffiliated
 {
@@ -91,7 +91,6 @@ trait HasAffiliated
 
     private function getOwnedCharacterAffiliations() : Builder
     {
-
         return GetOwnedCharacterAffiliationsService::make($this->getAffiliationsDto())
             ->getQuery();
     }
@@ -114,7 +113,6 @@ trait HasAffiliated
 
     private function getAffiliatedCharacterAffiliations() : Builder
     {
-
         return GetAffiliatedCharacterAffiliationsService::make($this->getAffiliationsDto())
             ->getQuery();
     }
@@ -130,7 +128,6 @@ trait HasAffiliated
 
     private function getForbiddenAffiliatedCharacterAffiliations() : Builder
     {
-
         return GetForbiddenCharacterAffiliationsService::make($this->getAffiliationsDto())
             ->getQuery();
     }
