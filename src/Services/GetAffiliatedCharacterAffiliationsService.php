@@ -71,31 +71,4 @@ class GetAffiliatedCharacterAffiliationsService extends GetCharacterAffiliations
             ->select('character_affiliations.*')
             ;
     }
-
-    /* private function joinAffiliatedCharacterAffiliations(JoinClause $join, string $alias) : JoinClause
-     {
-         return $join
-             ->on('character_affiliations.character_id', '=', "$alias.affiliatable_id")->where("$alias.affiliatable_type", CharacterInfo::class)
-             ->orOn('character_affiliations.corporation_id', '=', "$alias.affiliatable_id")->where("$alias.affiliatable_type", CorporationInfo::class)
-             ->orOn('character_affiliations.alliance_id', '=', "$alias.affiliatable_id")->where("$alias.affiliatable_type", AllianceInfo::class);
-     }
-
-     /**
-      * @return Builder
-      */
-    /*public function getAffiliation(): Builder
-    {
-        if (! isset($this->affiliation)) {
-            $this->createAffiliation();
-        }
-
-        return clone $this->affiliation;
-    }
-
-    public function createAffiliation(): void
-    {
-        $this->affiliation = Affiliation::query()
-            ->whereRelation('role.permissions', 'name', $this->affiliationsDto->permission)
-            ->whereRelation('role.members', 'user_id', $this->affiliationsDto->user->getAuthIdentifier());
-    }*/
 }
