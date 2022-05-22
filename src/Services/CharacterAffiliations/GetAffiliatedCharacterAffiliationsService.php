@@ -7,7 +7,6 @@ use Seatplus\Auth\Services\Dtos\AffiliationsDto;
 
 class GetAffiliatedCharacterAffiliationsService extends GetCharacterAffiliationsServiceBase
 {
-
     public static function make(AffiliationsDto $affiliationsDto)
     {
         return new static($affiliationsDto);
@@ -15,8 +14,6 @@ class GetAffiliatedCharacterAffiliationsService extends GetCharacterAffiliations
 
     public function getQuery() : Builder
     {
-
-
         $allowed = $this->getAllowedAffiliatedCharacterAffiliations();
         $inverted = $this->getInvertedAffiliatedCharacterAffiliations();
 
@@ -24,12 +21,10 @@ class GetAffiliatedCharacterAffiliationsService extends GetCharacterAffiliations
             ->union($inverted)
             ->select('character_affiliations.*')
             ->distinct();
-
     }
 
     private function getAllowedAffiliatedCharacterAffiliations() : Builder
     {
-
         $allowed_affiliations = GetAllowedCharacterAffiliationsService::make($this->affiliationsDto)
             ->getQuery();
 
@@ -38,11 +33,9 @@ class GetAffiliatedCharacterAffiliationsService extends GetCharacterAffiliations
 
     private function getInvertedAffiliatedCharacterAffiliations() : Builder
     {
-
         $inverse_affiliations = GetInvertedCharacterAffiliationsService::make($this->affiliationsDto)
             ->getQuery();
 
         return $this->removeForbiddenAffiliations($inverse_affiliations);
     }
-
 }

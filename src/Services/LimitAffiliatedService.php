@@ -15,8 +15,7 @@ class LimitAffiliatedService
         private string $table,
         private string $column,
         private string $type = 'character'
-    )
-    {
+    ) {
     }
 
     public static function make(AffiliationsDto $affiliationsDto, Builder $query, string $table, string $column)
@@ -26,7 +25,7 @@ class LimitAffiliatedService
 
     public function getQuery() : Builder
     {
-        if($this->affiliationsDto->user->can('superuser')) {
+        if ($this->affiliationsDto->user->can('superuser')) {
             return $this->query->select($this->table . ".*");
         }
 
@@ -41,7 +40,6 @@ class LimitAffiliatedService
             sprintf("character_affiliations.%s_id", $this->type)
         )
             ->select($this->table . ".*");
-
     }
 
     private function getOwnedCharacterAffiliations() : Builder
@@ -71,8 +69,7 @@ class LimitAffiliatedService
     public function setType(string $type): LimitAffiliatedService
     {
         $this->type = $type;
+
         return $this;
     }
-
-
 }

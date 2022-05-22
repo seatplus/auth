@@ -3,13 +3,13 @@
 namespace Seatplus\Auth\Services\CharacterAffiliations;
 
 use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Query\JoinClause;
 use Seatplus\Auth\Models\Permissions\Affiliation;
 use Seatplus\Auth\Services\Dtos\AffiliationsDto;
 use Seatplus\Eveapi\Models\Alliance\AllianceInfo;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
-use Illuminate\Database\Query\Builder as QueryBuilder;
 
 abstract class GetCharacterAffiliationsServiceBase
 {
@@ -57,7 +57,7 @@ abstract class GetCharacterAffiliationsServiceBase
                 fn (Builder $query) => $query
                     ->whereNotIn(
                         'character_affiliations.character_id',
-                        fn(QueryBuilder $query) => $query
+                        fn (QueryBuilder $query) => $query
                             ->fromSub($forbidden, 'forbidden_entities')
                             ->select('forbidden_entities.character_id')
                     )

@@ -17,7 +17,6 @@ class GetAllowedCharacterAffiliationsService extends GetCharacterAffiliationsSer
 
     public function getQuery() : Builder
     {
-
         $type = AffiliationType::ALLOWED;
         $alias = sprintf('%s_entities', $type->value());
 

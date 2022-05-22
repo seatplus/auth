@@ -4,8 +4,8 @@ namespace Seatplus\Auth\Traits;
 
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Seatplus\Auth\Models\User;
-use Seatplus\Auth\Services\Dtos\AffiliationsDto;
 use Seatplus\Auth\Services\CharacterAffiliations\GetAffiliatedCharacterAffiliationsService;
+use Seatplus\Auth\Services\Dtos\AffiliationsDto;
 use Seatplus\Auth\Services\LimitAffiliatedService;
 
 trait HasAffiliated
@@ -74,8 +74,6 @@ trait HasAffiliated
         )
             ->setType($type)
             ->getQuery();
-
-
     }
 
     public function setCorporationRoles(string|array $corporation_roles): void
