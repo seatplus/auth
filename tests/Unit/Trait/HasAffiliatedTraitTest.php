@@ -217,51 +217,6 @@ it('returns own character id even if it is forbidden', function () {
     expect($assets)->toHaveCount(1);
 });
 
-it('runs faster then using the helper', function () {
-    expect(Assets::all())->toHaveCount(2);
-
-    // create 500 characters
-    $characters = CharacterInfo::factory()->count(10)->create();
-
-    $characters->each(fn (CharacterInfo $character) => Assets::factory()
-        ->count(100)
-        ->create([
-        'assetable_id' => $character->character_id,
-        'assetable_type' => CharacterInfo::class,
-    ]));
-
-    expect(Assets::query()->count())->toBe(100 * 10 + 2);
-
-    test()->createAffiliation(
-        test()->secondary_character->corporation->corporation_id,
-        CorporationInfo::class,
-        'forbidden'
-    );
-
-    test()->actingAs(test()->test_user);
-
-    $start = microtime(true);
-
-    $ids = getAffiliatedIdsByClass(\Seatplus\Eveapi\Models\Assets\Asset::class);
-
-    Assets::query()
-        ->whereIn('assetable_id', $ids)
-        ->get();
-
-    $time_elapsed_helper = microtime(true) - $start;
-
-    // And now the helper
-    $start = microtime(true);
-
-    Assets::query()
-        ->affiliatedCharacters('assetable_id', test()->permission->name)
-        ->get();
-
-    $time_elapsed_trait = microtime(true) - $start;
-
-    expect($time_elapsed_trait)->toBeLessThan($time_elapsed_helper);
-});
-
 it('return corporation owned assets for ($character_role, $corporation_role) ', function (string $character_role, string $corporation_role, bool $can_find_asset) {
 
     // give test_character corporation role

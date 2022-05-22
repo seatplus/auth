@@ -3,13 +3,10 @@
 namespace Seatplus\Auth\Traits;
 
 use Illuminate\Contracts\Database\Eloquent\Builder;
-use Illuminate\Database\Query\Builder as QueryBuilder;
-use Illuminate\Database\Query\JoinClause;
 use Seatplus\Auth\Models\User;
 use Seatplus\Auth\Services\Dtos\AffiliationsDto;
-use Seatplus\Auth\Services\GetAffiliatedCharacterAffiliationsService;
-use Seatplus\Auth\Services\GetForbiddenCharacterAffiliationsService;
-use Seatplus\Auth\Services\GetOwnedCharacterAffiliationsService;
+use Seatplus\Auth\Services\CharacterAffiliations\GetAffiliatedCharacterAffiliationsService;
+use Seatplus\Auth\Services\LimitAffiliatedService;
 
 trait HasAffiliated
 {
@@ -69,30 +66,16 @@ trait HasAffiliated
 
         $this->setAffiliationsDto();
 
-        $character_affiliations = $this->getOwnedCharacterAffiliations()
-            ->union($this->getAffiliatedCharacterAffiliations());
-
-        $forbidden = $this->getForbiddenAffiliatedCharacterAffiliations();
-
-        return $query->joinSub(
-            $character_affiliations,
-            'character_affiliations',
-            fn (JoinClause $join) => $join
-            ->on($this->getTable() . ".$column", '=', "character_affiliations.${type}_id")
+        return LimitAffiliatedService::make(
+            $this->getAffiliationsDto(),
+            $query,
+            $this->getTable(),
+            $column
         )
-            ->whereNotIn(
-                "character_affiliations.${type}_id",
-                fn (QueryBuilder $query) => $query
-                ->fromSub($forbidden, 'forbidden_entities')
-                ->select("forbidden_entities.${type}_id")
-            )
-            ->select($this->getTable() . ".*");
-    }
-
-    private function getOwnedCharacterAffiliations() : Builder
-    {
-        return GetOwnedCharacterAffiliationsService::make($this->getAffiliationsDto())
+            ->setType($type)
             ->getQuery();
+
+
     }
 
     public function setCorporationRoles(string|array $corporation_roles): void
@@ -124,12 +107,6 @@ trait HasAffiliated
         }
 
         return $this->user;
-    }
-
-    private function getForbiddenAffiliatedCharacterAffiliations() : Builder
-    {
-        return GetForbiddenCharacterAffiliationsService::make($this->getAffiliationsDto())
-            ->getQuery();
     }
 
     /**

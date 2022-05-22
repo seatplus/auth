@@ -1,6 +1,6 @@
 <?php
 
-namespace Seatplus\Auth\Services;
+namespace Seatplus\Auth\Services\CharacterAffiliations;
 
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Query\JoinClause;
