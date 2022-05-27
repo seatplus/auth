@@ -1,8 +1,9 @@
 <?php
 
-namespace Seatplus\Auth\Services;
+namespace Seatplus\Auth\Services\CharacterAffiliations;
 
 use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Query\JoinClause;
 use Seatplus\Auth\Models\Permissions\Affiliation;
 use Seatplus\Auth\Services\Dtos\AffiliationsDto;
@@ -10,7 +11,7 @@ use Seatplus\Eveapi\Models\Alliance\AllianceInfo;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 
-class GetCharacterAffiliationsServiceBase
+abstract class GetCharacterAffiliationsServiceBase
 {
     private Builder $affiliation;
 
@@ -44,5 +45,22 @@ class GetCharacterAffiliationsServiceBase
         $this->affiliation = Affiliation::query()
             ->whereRelation('role.permissions', 'name', $this->affiliationsDto->permission)
             ->whereRelation('role.members', 'user_id', $this->affiliationsDto->user->getAuthIdentifier());
+    }
+
+    protected function removeForbiddenAffiliations(Builder $query) : Builder
+    {
+        $forbidden = GetForbiddenCharacterAffiliationsService::make($this->affiliationsDto)->getQuery();
+
+        return $query
+            ->when(
+                $forbidden->count(),
+                fn (Builder $query) => $query
+                    ->whereNotIn(
+                        'character_affiliations.character_id',
+                        fn (QueryBuilder $query) => $query
+                            ->fromSub($forbidden, 'forbidden_entities')
+                            ->select('forbidden_entities.character_id')
+                    )
+            );
     }
 }
