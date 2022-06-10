@@ -12,7 +12,7 @@ return static function (RectorConfig $rectorConfig): void {
     $rectorConfig->sets([
         //SetList::CODE_QUALITY,
         LaravelSetList::LARAVEL_90,
-        //LaravelSetList::LARAVEL_CODE_QUALITY
+        LaravelSetList::LARAVEL_CODE_QUALITY
     ]);
     // paths to refactor; solid alternative to CLI arguments
     $rectorConfig->paths([__DIR__ . '/src', __DIR__ . '/tests']);
