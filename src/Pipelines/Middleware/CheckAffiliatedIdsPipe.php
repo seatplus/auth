@@ -7,7 +7,6 @@ use Seatplus\Auth\Services\Affiliations\GetAffiliatedIdsService;
 
 class CheckAffiliatedIdsPipe extends CheckPermissionAffiliationPipeline
 {
-
     protected function check(CheckPermissionAffiliationDto $checkPermissionAffiliationDto): CheckPermissionAffiliationDto
     {
         $validated_ids = GetAffiliatedIdsService::make($checkPermissionAffiliationDto->affiliationsDto)
@@ -15,8 +14,7 @@ class CheckAffiliatedIdsPipe extends CheckPermissionAffiliationPipeline
             ->pluck('affiliated_id')
             ->intersect($checkPermissionAffiliationDto->requested_ids);
 
-        if($validated_ids->isEmpty()) {
-
+        if ($validated_ids->isEmpty()) {
             $affiliated_ids = GetAffiliatedIdsService::make($checkPermissionAffiliationDto->affiliationsDto)
                 ->getQuery()
                 ->get();
@@ -31,7 +29,6 @@ class CheckAffiliatedIdsPipe extends CheckPermissionAffiliationPipeline
 
     protected function shouldBeChecked(CheckPermissionAffiliationDto $checkPermissionAffiliationDto): bool
     {
-
-        return !$checkPermissionAffiliationDto->allIdsValidated();
+        return ! $checkPermissionAffiliationDto->allIdsValidated();
     }
 }

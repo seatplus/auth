@@ -9,8 +9,6 @@ use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 
 beforeEach(function () {
-
-
     test()->role = Role::create(['name' => faker()->name]);
     test()->permission = Permission::create(['name' => faker()->company]);
 
@@ -282,7 +280,6 @@ it('supports array of corporation roles ', function (string $character_role, str
 
 function createContact(int $character_id = null) : \Seatplus\Eveapi\Models\Contacts\Contact
 {
-
     return \Seatplus\Eveapi\Models\Contacts\Contact::factory()->create([
         'contactable_id' => $character_id ?? CharacterInfo::factory(),
         'contactable_type' => CharacterInfo::class,

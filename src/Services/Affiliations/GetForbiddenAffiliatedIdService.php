@@ -10,7 +10,6 @@ use Seatplus\Auth\Enums\AffiliationType;
 use Seatplus\Auth\Services\Dtos\AffiliationsDto;
 use Seatplus\Eveapi\Models\Alliance\AllianceInfo;
 use Seatplus\Eveapi\Models\Character\CharacterAffiliation;
-use function Pest\Laravel\get;
 
 class GetForbiddenAffiliatedIdService extends GetAffiliatedIdsServiceBase
 {

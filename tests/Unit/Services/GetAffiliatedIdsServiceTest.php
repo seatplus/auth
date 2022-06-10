@@ -3,8 +3,6 @@
 use Seatplus\Auth\Models\Permissions\Permission;
 use Seatplus\Auth\Models\Permissions\Role;
 use Seatplus\Auth\Services\Affiliations\GetAffiliatedIdsService;
-use Seatplus\Auth\Services\Affiliations\GetInvertedAffiliatedIdsService;
-use Seatplus\Eveapi\Models\Alliance\AllianceInfo;
 use Seatplus\Eveapi\Models\Character\CharacterAffiliation;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
@@ -30,10 +28,10 @@ beforeEach(function () {
 
     CharacterAffiliation::query()
         ->updateOrCreate([
-            'character_id' => test()->secondary_character->character_id
+            'character_id' => test()->secondary_character->character_id,
         ], [
             'corporation_id' => test()->test_character->corporation->corporation_id,
-            'alliance_id' => test()->test_character->corporation->alliance_id
+            'alliance_id' => test()->test_character->corporation->alliance_id,
         ]);
 
     // {character_id: 2, corporation_id: A, alliance_id: B}
@@ -42,9 +40,9 @@ beforeEach(function () {
 
     CharacterAffiliation::query()
         ->updateOrCreate([
-            'character_id' => test()->tertiary_character->character_id
+            'character_id' => test()->tertiary_character->character_id,
         ], [
-            'alliance_id' => test()->test_character->corporation->alliance_id
+            'alliance_id' => test()->test_character->corporation->alliance_id,
         ]);
 
     // {character_id: 3, corporation_id: C, alliance_id: B}
@@ -54,7 +52,7 @@ beforeEach(function () {
         ->whereNotIn('character_id', [
             test()->test_character->character_id,
             test()->secondary_character->character_id,
-            test()->tertiary_character->character_id
+            test()->tertiary_character->character_id,
         ])->delete();
 
     // {character_id: 1, corporation_id: A, alliance_id: B}
@@ -64,11 +62,9 @@ beforeEach(function () {
         ->not()->toBe(test()->secondary_character->corporation->corporation_id)
         ->and(test()->tertiary_character->alliance->alliance_id)
         ->toBe(test()->test_character->alliance->alliance_id);
-
 });
 
 it('returns inverse affiliated_ids via GetAffiliatedIdsService', function () {
-
     test()->createAffiliation(
         test()->role,
         test()->secondary_character->character_id,
@@ -91,11 +87,9 @@ it('returns inverse affiliated_ids via GetAffiliatedIdsService', function () {
         ->contains(test()->test_character->character_id)->toBeTrue()
         ->contains(test()->secondary_character->character_id)->toBeFalse()
         ->contains(test()->tertiary_character->character_id)->toBeTrue();
-
 });
 
 it('returns allowed ids from affiliated corporation but not the forbidden character_id', function () {
-
     test()->createAffiliation(
         test()->role,
         test()->secondary_character->corporation->corporation_id,
@@ -128,7 +122,4 @@ it('returns allowed ids from affiliated corporation but not the forbidden charac
         ->contains(test()->tertiary_character->character_id)->toBeFalse()
         ->contains(test()->tertiary_character->corporation->corporation_id)->toBeFalse()
     ;
-
 });
-
-

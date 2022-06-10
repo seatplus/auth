@@ -29,10 +29,10 @@ beforeEach(function () {
 
     CharacterAffiliation::query()
         ->updateOrCreate([
-            'character_id' => test()->secondary_character->character_id
+            'character_id' => test()->secondary_character->character_id,
         ], [
             'corporation_id' => test()->test_character->corporation->corporation_id,
-            'alliance_id' => test()->test_character->corporation->alliance_id
+            'alliance_id' => test()->test_character->corporation->alliance_id,
         ]);
 
     // {character_id: 2, corporation_id: A, alliance_id: B}
@@ -41,9 +41,9 @@ beforeEach(function () {
 
     CharacterAffiliation::query()
         ->updateOrCreate([
-            'character_id' => test()->tertiary_character->character_id
+            'character_id' => test()->tertiary_character->character_id,
         ], [
-            'alliance_id' => test()->test_character->corporation->alliance_id
+            'alliance_id' => test()->test_character->corporation->alliance_id,
         ]);
 
     // {character_id: 3, corporation_id: C, alliance_id: B}
@@ -53,7 +53,7 @@ beforeEach(function () {
         ->whereNotIn('character_id', [
             test()->test_character->character_id,
             test()->secondary_character->character_id,
-            test()->tertiary_character->character_id
+            test()->tertiary_character->character_id,
         ])->delete();
 
     // {character_id: 1, corporation_id: A, alliance_id: B}
@@ -63,11 +63,9 @@ beforeEach(function () {
         ->not()->toBe(test()->secondary_character->corporation->corporation_id)
         ->and(test()->tertiary_character->alliance->alliance_id)
         ->toBe(test()->test_character->alliance->alliance_id);
-
 });
 
 it('returns inversed ids from affiliated character', function () {
-
     test()->createAffiliation(
         test()->role,
         test()->secondary_character->character_id,
@@ -90,11 +88,9 @@ it('returns inversed ids from affiliated character', function () {
         ->contains(test()->test_character->character_id)->toBeTrue()
         ->contains(test()->secondary_character->character_id)->toBeFalse()
         ->contains(test()->tertiary_character->character_id)->toBeTrue();
-
 });
 
 it('returns inverted ids from affiliated corporation', function () {
-
     test()->createAffiliation(
         test()->role,
         test()->secondary_character->corporation->corporation_id,
@@ -120,11 +116,9 @@ it('returns inverted ids from affiliated corporation', function () {
         ->contains(test()->tertiary_character->character_id)->toBeTrue()
         ->contains(test()->tertiary_character->corporation->corporation_id)->toBeTrue()
     ;
-
 });
 
 it('returns inverted ids from affiliated alliance', function () {
-
     test()->createAffiliation(
         test()->role,
         test()->secondary_character->corporation->alliance_id,
@@ -160,6 +154,4 @@ it('returns inverted ids from affiliated alliance', function () {
         ->contains(test()->tertiary_character->alliance->alliance_id)->toBeFalse()
         ->contains($random_affiliation->alliance_id)->toBeTrue()
     ;
-
 });
-

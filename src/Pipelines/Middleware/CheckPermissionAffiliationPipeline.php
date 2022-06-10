@@ -9,7 +9,7 @@ abstract class CheckPermissionAffiliationPipeline implements CheckPermissionAffi
 {
     public function handle(CheckPermissionAffiliationDto $checkPermissionAffiliationDto, Closure $next) : CheckPermissionAffiliationDto
     {
-        if(!$this->shouldBeChecked($checkPermissionAffiliationDto)) {
+        if (! $this->shouldBeChecked($checkPermissionAffiliationDto)) {
             return $next($checkPermissionAffiliationDto);
         }
 

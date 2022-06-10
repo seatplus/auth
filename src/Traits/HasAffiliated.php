@@ -4,11 +4,9 @@ namespace Seatplus\Auth\Traits;
 
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Seatplus\Auth\Models\User;
-use Seatplus\Auth\Services\Affiliations\GetAffiliatedCharacterAffiliationsService;
 use Seatplus\Auth\Services\Affiliations\GetAffiliatedIdsService;
 use Seatplus\Auth\Services\Affiliations\GetOwnedAffiliatedIdsService;
 use Seatplus\Auth\Services\Dtos\AffiliationsDto;
-use Seatplus\Auth\Services\LimitAffiliatedService;
 
 trait HasAffiliated
 {
@@ -23,8 +21,7 @@ trait HasAffiliated
      */
     public function getAffiliationsDto(): AffiliationsDto
     {
-
-        if(!isset($this->affiliationsDto)) {
+        if (! isset($this->affiliationsDto)) {
             $this->setAffiliationsDto();
         }
 
@@ -43,7 +40,7 @@ trait HasAffiliated
     {
         $this->setPermission($permission);
 
-        if($corporation_roles) {
+        if ($corporation_roles) {
             $this->setCorporationRoles($corporation_roles);
         }
 
@@ -79,7 +76,6 @@ trait HasAffiliated
                 'affiliated.affiliated_id'
             )
             ->select($this->getTable() . ".*");
-
     }
 
     public function setCorporationRoles(string|array $corporation_roles): void

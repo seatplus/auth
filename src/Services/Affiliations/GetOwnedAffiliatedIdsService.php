@@ -22,11 +22,9 @@ class GetOwnedAffiliatedIdsService
 
     public function getQuery() : Builder
     {
-
         $character_query = $this->getCharacterQuery();
 
-        if(!$this->affiliationsDto->corporation_roles) {
-
+        if (! $this->affiliationsDto->corporation_roles) {
             return $character_query;
         }
 
@@ -34,7 +32,6 @@ class GetOwnedAffiliatedIdsService
 
         return $character_query
             ->union($corporation_query);
-
     }
 
     private function getCharacterQuery() : Builder

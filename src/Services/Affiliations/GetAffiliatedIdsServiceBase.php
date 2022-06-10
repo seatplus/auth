@@ -10,7 +10,6 @@ use Seatplus\Auth\Services\Dtos\AffiliationsDto;
 use Seatplus\Eveapi\Models\Alliance\AllianceInfo;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
-use function Pest\Laravel\get;
 
 abstract class GetAffiliatedIdsServiceBase
 {
@@ -65,7 +64,11 @@ abstract class GetAffiliatedIdsServiceBase
                 $forbidden->count(),
                 fn (QueryBuilder $query) => $query
                     ->leftJoinSub(
-                        $forbidden, 'remove_forbidden', 'remove_forbidden.forbidden_id', '=', 'affiliations.affiliated_id'
+                        $forbidden,
+                        'remove_forbidden',
+                        'remove_forbidden.forbidden_id',
+                        '=',
+                        'affiliations.affiliated_id'
                     )
                     ->whereNull('forbidden_id')
             )

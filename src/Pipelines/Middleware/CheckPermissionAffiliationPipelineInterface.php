@@ -7,6 +7,5 @@ use Seatplus\Auth\DataTransferObjects\CheckPermissionAffiliationDto;
 
 interface CheckPermissionAffiliationPipelineInterface
 {
-
     public function handle(CheckPermissionAffiliationDto $checkPermissionAffiliationDto, Closure $next) : CheckPermissionAffiliationDto;
 }

@@ -2,7 +2,6 @@
 
 use Seatplus\Auth\Models\Permissions\Permission;
 use Seatplus\Auth\Models\Permissions\Role;
-use Seatplus\Auth\Services\Affiliations\GetAllowedAffiliatedIdsService;
 use Seatplus\Auth\Services\Affiliations\GetForbiddenAffiliatedIdService;
 use Seatplus\Eveapi\Models\Alliance\AllianceInfo;
 use Seatplus\Eveapi\Models\Character\CharacterAffiliation;
@@ -30,10 +29,10 @@ beforeEach(function () {
 
     CharacterAffiliation::query()
         ->updateOrCreate([
-            'character_id' => test()->secondary_character->character_id
+            'character_id' => test()->secondary_character->character_id,
         ], [
             'corporation_id' => test()->test_character->corporation->corporation_id,
-            'alliance_id' => test()->test_character->corporation->alliance_id
+            'alliance_id' => test()->test_character->corporation->alliance_id,
         ]);
 
     // {character_id: 2, corporation_id: A, alliance_id: B}
@@ -42,9 +41,9 @@ beforeEach(function () {
 
     CharacterAffiliation::query()
         ->updateOrCreate([
-            'character_id' => test()->tertiary_character->character_id
+            'character_id' => test()->tertiary_character->character_id,
         ], [
-            'alliance_id' => test()->test_character->corporation->alliance_id
+            'alliance_id' => test()->test_character->corporation->alliance_id,
         ]);
 
     // {character_id: 3, corporation_id: C, alliance_id: B}
@@ -56,12 +55,9 @@ beforeEach(function () {
         ->not()->toBe(test()->secondary_character->corporation->corporation_id)
         ->and(test()->tertiary_character->alliance->alliance_id)
         ->toBe(test()->test_character->alliance->alliance_id);
-
-
 });
 
 it('returns forbidden ids from forbidden character', function () {
-
     test()->createAffiliation(
         test()->role,
         test()->secondary_character->character_id,
@@ -85,7 +81,6 @@ it('returns forbidden ids from forbidden character', function () {
 });
 
 it('returns forbidden ids from forbidden corporation but not owned character_id', function () {
-
     test()->createAffiliation(
         test()->role,
         test()->secondary_character->corporation->corporation_id,
@@ -110,12 +105,10 @@ it('returns forbidden ids from forbidden corporation but not owned character_id'
         ->contains(test()->secondary_character->corporation->corporation_id)->toBeTrue()
         ->contains(test()->tertiary_character->character_id)->toBeFalse()
     ;
-
 });
 
 // TODO own corporation
 it('returns forbidden ids from forbidden alliance', function () {
-
     test()->createAffiliation(
         test()->role,
         test()->secondary_character->corporation->alliance_id,
@@ -144,11 +137,9 @@ it('returns forbidden ids from forbidden alliance', function () {
         ->contains(test()->tertiary_character->corporation->corporation_id)->toBeTrue()
         ->contains(test()->secondary_character->corporation->alliance_id)->toBeTrue()
     ;
-
 });
 
 it('returns forbidden ids from forbidden alliance but not owned corporation via role', function () {
-
     test()->createAffiliation(
         test()->role,
         test()->secondary_character->corporation->alliance_id,
@@ -184,6 +175,4 @@ it('returns forbidden ids from forbidden alliance but not owned corporation via 
         ->contains(test()->tertiary_character->corporation->corporation_id)->toBeTrue()
         ->contains(test()->secondary_character->corporation->alliance_id)->toBeTrue()
     ;
-
 });
-

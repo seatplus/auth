@@ -59,7 +59,9 @@ class GetInvertedAffiliatedIdsService extends GetAffiliatedIdsServiceBase
                     ->leftJoinSub(
                         $affiliation,
                         $alias,
-                        'character_affiliations.alliance_id', '=', "$alias.affiliatable_id"
+                        'character_affiliations.alliance_id',
+                        '=',
+                        "$alias.affiliatable_id"
                     )
                     ->whereNull("$alias.affiliatable_id"),
                 fn (Builder $query) => $query->whereNull('alliance_id')

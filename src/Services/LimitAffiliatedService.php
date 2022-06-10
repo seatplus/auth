@@ -5,7 +5,6 @@ namespace Seatplus\Auth\Services;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Seatplus\Auth\Services\Affiliations\GetAffiliatedCharacterAffiliationsService;
 use Seatplus\Auth\Services\Affiliations\GetOwnedAffiliatedIdsService;
-use Seatplus\Auth\Services\Affiliations\GetOwnedCharacterAffiliationsService;
 use Seatplus\Auth\Services\Dtos\AffiliationsDto;
 
 class LimitAffiliatedService

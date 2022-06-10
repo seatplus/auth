@@ -2,9 +2,8 @@
 
 namespace Seatplus\Auth\Services\Affiliations;
 
-use Illuminate\Contracts\Database\Eloquent\Builder;
-use Seatplus\Auth\Services\Dtos\AffiliationsDto;
 use Illuminate\Database\Query\Builder as QueryBuilder;
+use Seatplus\Auth\Services\Dtos\AffiliationsDto;
 
 class GetAffiliatedIdsService extends GetAffiliatedIdsServiceBase
 {

@@ -34,14 +34,12 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
 use Seatplus\Auth\DataTransferObjects\CheckPermissionAffiliationDto;
 use Seatplus\Auth\Models\User;
-use Seatplus\Auth\Pipelines\Middleware\AddOwnedCharacterIdsPipe;
 use Seatplus\Auth\Pipelines\Middleware\CheckAffiliatedIdsPipe;
 use Seatplus\Auth\Pipelines\Middleware\CheckOwnedAffiliatedIdsPipe;
 use Seatplus\Auth\Services\Affiliations\GetOwnedCharacterAffiliationsService;
 use Seatplus\Auth\Services\Dtos\AffiliationsDto;
 use Seatplus\Web\Services\GetRecruitIdsService;
 use Seatplus\Web\Services\HasCharacterNecessaryRole;
-use Symfony\Component\HttpFoundation\InputBag;
 use Symfony\Component\HttpFoundation\ParameterBag;
 
 class CheckPermissionAffiliation
@@ -54,12 +52,11 @@ class CheckPermissionAffiliation
 
     private array $pipelines = [
         CheckOwnedAffiliatedIdsPipe::class,
-        CheckAffiliatedIdsPipe::class
+        CheckAffiliatedIdsPipe::class,
     ];
 
     public function __construct(
-    )
-    {
+    ) {
         $this->user = User::find(auth()->user()->getAuthIdentifier());
         $this->validated_ids = collect();
     }
@@ -78,7 +75,6 @@ class CheckPermissionAffiliation
         $this->validateAndSetRequestedIds($request);
 
         if ($this->getUser()->can('superuser')) {
-
             return $next($request);
         }
 
@@ -134,7 +130,6 @@ class CheckPermissionAffiliation
 
     private function validateAndSetRequestedIds(Request $request) : void
     {
-
         $current_payload = $request->input();
         $route_parameters = $request->route()->parameters();
 
@@ -159,30 +154,23 @@ class CheckPermissionAffiliation
 
     private function checkPermissionForRequestedId() : bool
     {
-
-        if($this->checkOwnedAffiliations()) {
-
+        if ($this->checkOwnedAffiliations()) {
             return true;
         }
 
-        if($this->isCharacterRequestType() && $this->getAffiliationsDto()->user->can('can accept or deny applications')) {
-
+        if ($this->isCharacterRequestType() && $this->getAffiliationsDto()->user->can('can accept or deny applications')) {
         }
-
     }
 
     private function checkOwnedAffiliations() : bool
     {
-
         $validated_ids = GetOwnedCharacterAffiliationsService::make($this->getAffiliationsDto())
             ->getQuery()
-            ->when($this->isCharacterRequestType(), fn(Builder $query) => $query->pluck('character_id'))
-            ->when($this->isCorporationRequestType(), fn(Builder $query) => $query->pluck('corporation_id'))
+            ->when($this->isCharacterRequestType(), fn (Builder $query) => $query->pluck('character_id'))
+            ->when($this->isCorporationRequestType(), fn (Builder $query) => $query->pluck('corporation_id'))
             ->intersect($this->getRequestedIds());
 
         $this->mergeValidatedIds($validated_ids);
-
-
     }
 
     /**

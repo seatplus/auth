@@ -140,7 +140,6 @@ function assignPermissionToTestUser(array|string $permission_strings)
 
 function createAffiliation(Role $role, $affiliatable_id, $affiliatable_type, $type = 'allowed'): Affiliation
 {
-
     return $role->affiliations()->create([ //test()->role
         'affiliatable_id' => $affiliatable_id,
         'affiliatable_type' => $affiliatable_type,
