@@ -212,7 +212,7 @@ it('checks affiliated ids', function (string $method, string $route, array|int $
         ['get', 'corporation.character_ids', fn () => ['corporation_ids' => [test()->secondary_character->character_id]]],
         ['get', 'corporation.corporation_ids', fn () => ['corporation_ids' => [test()->secondary_character->corporation->corporation_id]]],
         ['get', 'corporation.alliance_ids', fn () => ['alliance_ids' => [test()->secondary_character->alliance->alliance_id]]],
-    ])->only();
+    ]);
 
 // Helpers
 function mockHttpRequest(): void
