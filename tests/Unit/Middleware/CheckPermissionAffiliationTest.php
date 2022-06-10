@@ -17,7 +17,7 @@ beforeEach(function () {
     //mockHttpRequest();
 
     test()->role = Role::create(['name' => faker()->name]);
-    test()->permission = Permission::create(['name' => faker()->company]);
+    test()->permission = Permission::create(['name' => faker()->streetName()]);
 
     test()->role->givePermissionTo(test()->permission);
     test()->role->activateMember(test()->test_user);
@@ -175,16 +175,8 @@ it('checks affiliated ids', function (string $method, string $route, array|int $
 
     test()->actingAs(test()->test_user);
 
-    $affiliationsDto = new AffiliationsDto(
-        user: test()->test_user,
-        permission: test()->permission->name,
-    );
-
-    expect(GetAffiliatedIdsService::make($affiliationsDto)->getQuery()->pluck('affiliated_id'))
-        ->toContain(test()->secondary_character->character_id);
-
     $response = match ($method) {
-        'post' => post(route($route, $route_param)),
+        'post' => post(route($route), $route_param),
         'get' => get(route($route, $route_param))
     };
 

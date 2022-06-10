@@ -25,10 +25,6 @@ class CheckOwnedAffiliatedIdsPipe extends CheckPermissionAffiliationPipeline
             return false;
         }
 
-        if ($checkPermissionAffiliationDto->isCharacterRequestType()) {
-            return false;
-        }
-
         if ($checkPermissionAffiliationDto->requested_ids->count() > 1) {
             return false;
         }

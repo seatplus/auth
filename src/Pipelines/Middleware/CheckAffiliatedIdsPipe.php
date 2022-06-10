@@ -4,6 +4,7 @@ namespace Seatplus\Auth\Pipelines\Middleware;
 
 use Seatplus\Auth\DataTransferObjects\CheckPermissionAffiliationDto;
 use Seatplus\Auth\Services\Affiliations\GetAffiliatedIdsService;
+use Seatplus\Auth\Services\Affiliations\GetAllowedAffiliatedIdsService;
 
 class CheckAffiliatedIdsPipe extends CheckPermissionAffiliationPipeline
 {
@@ -13,14 +14,6 @@ class CheckAffiliatedIdsPipe extends CheckPermissionAffiliationPipeline
             ->getQuery()
             ->pluck('affiliated_id')
             ->intersect($checkPermissionAffiliationDto->requested_ids);
-
-        if ($validated_ids->isEmpty()) {
-            $affiliated_ids = GetAffiliatedIdsService::make($checkPermissionAffiliationDto->affiliationsDto)
-                ->getQuery()
-                ->get();
-
-            dd('affiliated: ', $affiliated_ids, 'requested: ', $checkPermissionAffiliationDto->requested_ids, $checkPermissionAffiliationDto->affiliationsDto);
-        }
 
         $checkPermissionAffiliationDto->mergeValidatedIds($validated_ids);
 

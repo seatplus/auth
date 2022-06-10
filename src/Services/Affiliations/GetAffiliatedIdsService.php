@@ -25,8 +25,7 @@ class GetAffiliatedIdsService extends GetAffiliatedIdsServiceBase
     private function getAllowedAffiliatedCharacterAffiliations() : QueryBuilder
     {
         $allowed_affiliations = GetAllowedAffiliatedIdsService::make($this->affiliationsDto)
-            ->getQuery()
-        ;
+            ->getQuery();
 
         return $this->removeForbiddenAffiliations($allowed_affiliations);
     }
