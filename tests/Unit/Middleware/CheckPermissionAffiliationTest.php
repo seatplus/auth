@@ -7,8 +7,6 @@ use function Pest\Laravel\post;
 use Seatplus\Auth\Http\Middleware\CheckPermissionAffiliation;
 use Seatplus\Auth\Models\Permissions\Permission;
 use Seatplus\Auth\Models\Permissions\Role;
-use Seatplus\Auth\Services\Affiliations\GetAffiliatedIdsService;
-use Seatplus\Auth\Services\Dtos\AffiliationsDto;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\Character\CharacterRole;
 
