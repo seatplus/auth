@@ -4,7 +4,6 @@ namespace Seatplus\Auth\Pipelines\Middleware;
 
 use Seatplus\Auth\DataTransferObjects\CheckPermissionAffiliationDto;
 use Seatplus\Auth\Services\Affiliations\GetAffiliatedIdsService;
-use Seatplus\Auth\Services\Affiliations\GetAllowedAffiliatedIdsService;
 
 class CheckAffiliatedIdsPipe extends CheckPermissionAffiliationPipeline
 {

@@ -82,7 +82,6 @@ class CheckPermissionAffiliation
         abort_unless($all_requested_ids_validated, 401, 'You are not allowed to access the requested entity');
 
         return $next($request);
-
     }
 
     private function validateAndSetRequestedIds(Request $request) : void
