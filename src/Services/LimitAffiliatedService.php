@@ -3,8 +3,9 @@
 namespace Seatplus\Auth\Services;
 
 use Illuminate\Contracts\Database\Eloquent\Builder;
-use Seatplus\Auth\Services\CharacterAffiliations\GetAffiliatedCharacterAffiliationsService;
-use Seatplus\Auth\Services\CharacterAffiliations\GetOwnedCharacterAffiliationsService;
+use Seatplus\Auth\Services\Affiliations\GetAffiliatedCharacterAffiliationsService;
+use Seatplus\Auth\Services\Affiliations\GetOwnedAffiliatedIdsService;
+use Seatplus\Auth\Services\Affiliations\GetOwnedCharacterAffiliationsService;
 use Seatplus\Auth\Services\Dtos\AffiliationsDto;
 
 class LimitAffiliatedService
@@ -44,7 +45,7 @@ class LimitAffiliatedService
 
     private function getOwnedCharacterAffiliations() : Builder
     {
-        return GetOwnedCharacterAffiliationsService::make($this->getAffiliationsDto())
+        return GetOwnedAffiliatedIdsService::make($this->getAffiliationsDto())
             ->getQuery();
     }
 

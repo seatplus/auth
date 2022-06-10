@@ -4,7 +4,9 @@ namespace Seatplus\Auth\Traits;
 
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Seatplus\Auth\Models\User;
-use Seatplus\Auth\Services\CharacterAffiliations\GetAffiliatedCharacterAffiliationsService;
+use Seatplus\Auth\Services\Affiliations\GetAffiliatedCharacterAffiliationsService;
+use Seatplus\Auth\Services\Affiliations\GetAffiliatedIdsService;
+use Seatplus\Auth\Services\Affiliations\GetOwnedAffiliatedIdsService;
 use Seatplus\Auth\Services\Dtos\AffiliationsDto;
 use Seatplus\Auth\Services\LimitAffiliatedService;
 
@@ -21,6 +23,11 @@ trait HasAffiliated
      */
     public function getAffiliationsDto(): AffiliationsDto
     {
+
+        if(!isset($this->affiliationsDto)) {
+            $this->setAffiliationsDto();
+        }
+
         return $this->affiliationsDto;
     }
 
@@ -32,19 +39,15 @@ trait HasAffiliated
         return $this->corporation_roles;
     }
 
-    public function scopeAffiliatedCharacters(Builder $query, string $column, null|string $permission = null)
+    public function scopeIsAffiliated(Builder $query, string $column, null|string $permission = null, string|array $corporation_roles = []) : Builder
     {
         $this->setPermission($permission);
 
-        return $this->buildQuery('character', $query, $column);
-    }
+        if($corporation_roles) {
+            $this->setCorporationRoles($corporation_roles);
+        }
 
-    public function scopeAffiliatedCorporations(Builder $query, string $column, null|string $permission = null, string|array $corporation_roles = []) : Builder
-    {
-        $this->setPermission($permission);
-        $this->setCorporationRoles($corporation_roles);
-
-        return $this->buildQuery('corporation', $query, $column);
+        return $this->buildQuery($query, $column);
     }
 
     private function setAffiliationsDto()
@@ -56,7 +59,7 @@ trait HasAffiliated
         );
     }
 
-    private function buildQuery(string $type, Builder $query, string $column) : Builder
+    private function buildQuery(Builder $query, string $column) : Builder
     {
         throw_if(auth()->guest(), 'Unauthenticated');
 
@@ -64,16 +67,19 @@ trait HasAffiliated
             return $query;
         }
 
-        $this->setAffiliationsDto();
+        $affiliated_ids_query = GetOwnedAffiliatedIdsService::make($this->getAffiliationsDto())->getQuery();
+        $owned_ids_query = GetAffiliatedIdsService::make($this->getAffiliationsDto())->getQuery();
 
-        return LimitAffiliatedService::make(
-            $this->getAffiliationsDto(),
-            $query,
-            $this->getTable(),
-            $column
-        )
-            ->setType($type)
-            ->getQuery();
+        return $query
+            ->joinSub(
+                $affiliated_ids_query->union($owned_ids_query),
+                'affiliated',
+                sprintf("%s.%s", $this->getTable(), $column),
+                '=',
+                'affiliated.affiliated_id'
+            )
+            ->select($this->getTable() . ".*");
+
     }
 
     public function setCorporationRoles(string|array $corporation_roles): void
@@ -90,12 +96,6 @@ trait HasAffiliated
         }
 
         return $permission;
-    }
-
-    private function getAffiliatedCharacterAffiliations() : Builder
-    {
-        return GetAffiliatedCharacterAffiliationsService::make($this->getAffiliationsDto())
-            ->getQuery();
     }
 
     private function getUser(): User

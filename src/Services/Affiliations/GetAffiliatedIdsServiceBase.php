@@ -1,6 +1,6 @@
 <?php
 
-namespace Seatplus\Auth\Services\CharacterAffiliations;
+namespace Seatplus\Auth\Services\Affiliations;
 
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Builder as QueryBuilder;
@@ -10,8 +10,9 @@ use Seatplus\Auth\Services\Dtos\AffiliationsDto;
 use Seatplus\Eveapi\Models\Alliance\AllianceInfo;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
+use function Pest\Laravel\get;
 
-abstract class GetCharacterAffiliationsServiceBase
+abstract class GetAffiliatedIdsServiceBase
 {
     private Builder $affiliation;
 
@@ -25,6 +26,13 @@ abstract class GetCharacterAffiliationsServiceBase
         return $join
             ->on('character_affiliations.character_id', '=', "$alias.affiliatable_id")->where("$alias.affiliatable_type", CharacterInfo::class)
             ->orOn('character_affiliations.corporation_id', '=', "$alias.affiliatable_id")->where("$alias.affiliatable_type", CorporationInfo::class)
+            ->orOn('character_affiliations.alliance_id', '=', "$alias.affiliatable_id")->where("$alias.affiliatable_type", AllianceInfo::class);
+    }
+
+    protected function joinAffiliatedCorporationAffiliations(JoinClause $join, string $alias) : JoinClause
+    {
+        return $join
+            ->on('character_affiliations.corporation_id', '=', "$alias.affiliatable_id")->where("$alias.affiliatable_type", CorporationInfo::class)
             ->orOn('character_affiliations.alliance_id', '=', "$alias.affiliatable_id")->where("$alias.affiliatable_type", AllianceInfo::class);
     }
 
@@ -47,20 +55,21 @@ abstract class GetCharacterAffiliationsServiceBase
             ->whereRelation('role.members', 'user_id', $this->affiliationsDto->user->getAuthIdentifier());
     }
 
-    protected function removeForbiddenAffiliations(Builder $query) : Builder
+    protected function removeForbiddenAffiliations(Builder $query) : QueryBuilder
     {
-        $forbidden = GetForbiddenCharacterAffiliationsService::make($this->affiliationsDto)->getQuery();
+        $forbidden = GetForbiddenAffiliatedIdService::make($this->affiliationsDto)->getQuery();
 
-        return $query
+        return \DB::query()
+            ->fromSub($query, 'affiliations')
             ->when(
                 $forbidden->count(),
-                fn (Builder $query) => $query
-                    ->whereNotIn(
-                        'character_affiliations.character_id',
-                        fn (QueryBuilder $query) => $query
-                            ->fromSub($forbidden, 'forbidden_entities')
-                            ->select('forbidden_entities.character_id')
+                fn (QueryBuilder $query) => $query
+                    ->leftJoinSub(
+                        $forbidden, 'remove_forbidden', 'remove_forbidden.forbidden_id', '=', 'affiliations.affiliated_id'
                     )
-            );
+                    ->whereNull('forbidden_id')
+            )
+            ->select('affiliated_id')
+            ;
     }
 }

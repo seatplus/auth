@@ -4,7 +4,9 @@ use Faker\Factory;
 use Illuminate\Support\Facades\Event;
 use Laravel\Socialite\Two\User as SocialiteUser;
 use Seatplus\Auth\Containers\EveUser;
+use Seatplus\Auth\Models\Permissions\Affiliation;
 use Seatplus\Auth\Models\Permissions\Permission;
+use Seatplus\Auth\Models\Permissions\Role;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 use Seatplus\Eveapi\Models\RefreshToken;
 use Seatplus\Eveapi\Models\SsoScopes;
@@ -134,4 +136,14 @@ function assignPermissionToTestUser(array|string $permission_strings)
 
     // now re-register all the roles and permissions
     app()->make(PermissionRegistrar::class)->registerPermissions();
+}
+
+function createAffiliation(Role $role, $affiliatable_id, $affiliatable_type, $type = 'allowed'): Affiliation
+{
+
+    return $role->affiliations()->create([ //test()->role
+        'affiliatable_id' => $affiliatable_id,
+        'affiliatable_type' => $affiliatable_type,
+        'type' => $type,
+    ]);
 }

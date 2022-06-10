@@ -3,12 +3,14 @@
 use Seatplus\Auth\Models\Permissions\Affiliation;
 use Seatplus\Auth\Models\Permissions\Permission;
 use Seatplus\Auth\Models\Permissions\Role;
-use Seatplus\Auth\Tests\Stubs\Assets;
+use Seatplus\Auth\Tests\Stubs\Contact;
 use Seatplus\Eveapi\Models\Alliance\AllianceInfo;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 
 beforeEach(function () {
+
+
     test()->role = Role::create(['name' => faker()->name]);
     test()->permission = Permission::create(['name' => faker()->company]);
 
@@ -17,39 +19,39 @@ beforeEach(function () {
 
     \Illuminate\Support\Facades\Queue::fake();
 
-    expect(Assets::all())->toHaveCount(0);
+    expect(Contact::all())->toHaveCount(0);
 
-    test()->secondary_character = createAsset()->assetable;
-    test()->tertiary_character = createAsset()->assetable;
+    test()->secondary_character = createContact()->contactable;
+    test()->tertiary_character = createContact()->contactable;
 
-    expect(Assets::all())->toHaveCount(2);
+    expect(Contact::all())->toHaveCount(2);
 });
 
 it('trows Unauthenticated exception if used without a session', function () {
-    $assets = Assets::query()
-        ->affiliatedCharacters('assetable_id')
+    $contacts = Contact::query()
+        ->isAffiliated('contactable_id')
         ->get();
 })->throws('Unauthenticated');
 
-it('returns owned assets', function () {
-    createAsset(test()->test_character->character_id);
+it('returns owned contacts', function () {
+    createContact(test()->test_character->character_id);
 
-    expect(Assets::all())->toHaveCount(3);
+    expect(Contact::all())->toHaveCount(3);
 
     // do the same for test_user
     test()->actingAs(test()->test_user);
 
-    $assets = Assets::query()
-        ->affiliatedCharacters('assetable_id')
+    $contacts = Contact::query()
+        ->isAffiliated('contactable_id')
         ->get();
 
-    expect($assets)->toHaveCount(1);
+    expect($contacts)->toHaveCount(1);
 });
 
-it('return all assets for superuser', function () {
+it('return all contacts for superuser', function () {
 
-    // test to only have 2 (2nd and 3rd character) assets
-    expect(Assets::all())->toHaveCount(2);
+    // test to only have 2 (2nd and 3rd character) contacts
+    expect(Contact::all())->toHaveCount(2);
 
     test()->assignPermissionToTestUser('superuser');
 
@@ -57,20 +59,21 @@ it('return all assets for superuser', function () {
 
     test()->actingAs(test()->test_user);
 
-    $assets = Assets::query()
-        ->affiliatedCharacters('assetable_id')
+    $contacts = Contact::query()
+        ->isAffiliated('contactable_id')
         ->get();
 
-    expect($assets)->toHaveCount(2);
+    expect($contacts)->toHaveCount(2);
 });
 
-it('returns assets of allowed and own character', function () {
-    createAsset(test()->test_character->character_id);
+it('returns contacts of allowed and own character', function () {
+    createContact(test()->test_character->character_id);
 
-    // test to have test_character, 2nd and 3rd character assets
-    expect(Assets::all())->toHaveCount(3);
+    // test to have test_character, 2nd and 3rd character contacts
+    expect(Contact::all())->toHaveCount(3);
 
     test()->createAffiliation(
+        test()->role,
         test()->secondary_character->character_id,
         CharacterInfo::class,
         'allowed'
@@ -78,19 +81,20 @@ it('returns assets of allowed and own character', function () {
 
     test()->actingAs(test()->test_user);
 
-    $assets = Assets::query()
-        ->affiliatedCharacters('assetable_id', test()->permission->name)
+    $contacts = Contact::query()
+        ->isAffiliated('contactable_id', test()->permission->name)
         ->get();
 
-    expect($assets)->toHaveCount(2);
+    expect($contacts)->toHaveCount(2);
 });
 
-it('returns assets of allowed entities', function (int $affiliatable_id, string $affiliatable_type) {
+it('returns contacts of allowed entities', function (int $affiliatable_id, string $affiliatable_type) {
 
-    // test to only have 2 (2nd and 3rd character) assets
-    expect(Assets::all())->toHaveCount(2);
+    // test to only have 2 (2nd and 3rd character) contacts
+    expect(Contact::all())->toHaveCount(2);
 
     test()->createAffiliation(
+        test()->role,
         $affiliatable_id,
         $affiliatable_type,
         'allowed'
@@ -98,23 +102,24 @@ it('returns assets of allowed entities', function (int $affiliatable_id, string 
 
     test()->actingAs(test()->test_user);
 
-    $assets = Assets::query()
-        ->affiliatedCharacters('assetable_id', test()->permission->name)
+    $contacts = Contact::query()
+        ->isAffiliated('contactable_id', test()->permission->name)
         ->get();
 
-    expect($assets)->toHaveCount(1);
+    expect($contacts)->toHaveCount(1);
 })->with([
     [fn () => test()->secondary_character->character_id, CharacterInfo::class],
     [fn () => test()->secondary_character->corporation->corporation_id, CorporationInfo::class],
     [fn () => test()->secondary_character->corporation->alliance_id, AllianceInfo::class],
 ]);
 
-it('returns assets of inverted entities', function (int $affiliatable_id, string $affiliatable_type) {
+it('returns contacts of inverted entities', function (int $affiliatable_id, string $affiliatable_type) {
 
-    // test to only have 2 (2nd and 3rd character) assets
-    expect(Assets::all())->toHaveCount(2);
+    // test to only have 2 (2nd and 3rd character) contacts
+    expect(Contact::all())->toHaveCount(2);
 
     test()->createAffiliation(
+        test()->role,
         $affiliatable_id,
         $affiliatable_type,
         'inverse'
@@ -122,24 +127,25 @@ it('returns assets of inverted entities', function (int $affiliatable_id, string
 
     test()->actingAs(test()->test_user);
 
-    $assets = Assets::query()
-        ->affiliatedCharacters('assetable_id', test()->permission->name)
+    $contacts = Contact::query()
+        ->isAffiliated('contactable_id', test()->permission->name)
         ->get();
 
-    expect($assets)->toHaveCount(1);
+    expect($contacts)->toHaveCount(1);
 })->with([
     [fn () => test()->secondary_character->character_id, CharacterInfo::class],
     [fn () => test()->secondary_character->corporation->corporation_id, CorporationInfo::class],
     [fn () => test()->secondary_character->corporation->alliance_id, AllianceInfo::class],
 ]);
 
-it('returns assets of inverted entities and own', function (int $affiliatable_id, string $affiliatable_type) {
-    createAsset(test()->test_character->character_id);
+it('returns contacts of inverted entities and own', function (int $affiliatable_id, string $affiliatable_type) {
+    createContact(test()->test_character->character_id);
 
-    // test to have 3 assets (test, 2nd and 3rd)
-    expect(Assets::all())->toHaveCount(3);
+    // test to have 3 contacts (test, 2nd and 3rd)
+    expect(Contact::all())->toHaveCount(3);
 
     test()->createAffiliation(
+        test()->role,
         $affiliatable_id,
         $affiliatable_type,
         'inverse'
@@ -147,25 +153,26 @@ it('returns assets of inverted entities and own', function (int $affiliatable_id
 
     test()->actingAs(test()->test_user);
 
-    $assets = Assets::query()
-        ->affiliatedCharacters('assetable_id', test()->permission->name)
+    $contacts = Contact::query()
+        ->isAffiliated('contactable_id', test()->permission->name)
         ->get();
 
-    expect($assets)->toHaveCount(3);
+    expect($contacts)->toHaveCount(3);
 })->with([
     [fn () => test()->test_character->character_id, CharacterInfo::class],
     [fn () => test()->test_character->corporation->corporation_id, CorporationInfo::class],
     [fn () => test()->test_character->corporation->alliance_id, AllianceInfo::class],
 ]);
 
-it('does not return assets of forbidden entities', function (int $secondary_id, string $secondary_type, int $tertiary_id, string $tertiary_type) {
+it('does not return contacts of forbidden entities', function (int $secondary_id, string $secondary_type, int $tertiary_id, string $tertiary_type) {
 
 
-    // test to only have 2 (2nd and 3rd character) assets
-    expect(Assets::all())->toHaveCount(2);
+    // test to only have 2 (2nd and 3rd character) contacts
+    expect(Contact::all())->toHaveCount(2);
 
     // invert secondary, now test user can see tert
     test()->createAffiliation(
+        test()->role,
         $secondary_id,
         $secondary_type,
         'inverse'
@@ -173,6 +180,7 @@ it('does not return assets of forbidden entities', function (int $secondary_id, 
 
     // forbid tert
     test()->createAffiliation(
+        test()->role,
         $tertiary_id,
         $tertiary_type,
         'forbidden'
@@ -182,11 +190,11 @@ it('does not return assets of forbidden entities', function (int $secondary_id, 
 
     test()->actingAs(test()->test_user);
 
-    $assets = Assets::query()
-        ->affiliatedCharacters('assetable_id', test()->permission->name)
+    $contacts = Contact::query()
+        ->isAffiliated('contactable_id', test()->permission->name)
         ->get();
 
-    expect($assets)->toHaveCount(0);
+    expect($contacts)->toHaveCount(0);
 })->with([
     [fn () => test()->secondary_character->character_id, CharacterInfo::class],
     [fn () => test()->secondary_character->corporation->corporation_id, CorporationInfo::class],
@@ -198,11 +206,12 @@ it('does not return assets of forbidden entities', function (int $secondary_id, 
 ]);
 
 it('returns own character id even if it is forbidden', function () {
-    createAsset(test()->test_character->character_id);
+    createContact(test()->test_character->character_id);
 
-    expect(Assets::all())->toHaveCount(3);
+    expect(Contact::all())->toHaveCount(3);
 
     test()->createAffiliation(
+        test()->role,
         test()->test_character->character_id,
         CharacterInfo::class,
         'forbidden'
@@ -210,14 +219,14 @@ it('returns own character id even if it is forbidden', function () {
 
     test()->actingAs(test()->test_user);
 
-    $assets = Assets::query()
-        ->affiliatedCharacters('assetable_id', test()->permission->name)
+    $contacts = Contact::query()
+        ->isAffiliated('contactable_id', test()->permission->name)
         ->get();
 
-    expect($assets)->toHaveCount(1);
+    expect($contacts)->toHaveCount(1);
 });
 
-it('return corporation owned assets for ($character_role, $corporation_role) ', function (string $character_role, string $corporation_role, bool $can_find_asset) {
+it('return corporation owned contacts for ($character_role, $corporation_role) ', function (string $character_role, string $corporation_role, bool $can_find_asset) {
 
     // give test_character corporation role
     \Seatplus\Eveapi\Models\Character\CharacterRole::factory()->create([
@@ -228,16 +237,16 @@ it('return corporation owned assets for ($character_role, $corporation_role) ', 
     //dump(\Seatplus\Eveapi\Models\Character\CharacterRole::where('character_id', test()->test_character->character_id)->get());
 
     // create corporation asset
-    createAsset(test()->test_character->corporation->corporation_id);
+    createContact(test()->test_character->corporation->corporation_id);
 
     // query asset
     test()->actingAs(test()->test_user);
 
-    $assets = Assets::query()
-        ->affiliatedCorporations('assetable_id', test()->permission->name, $corporation_role)
+    $contacts = Contact::query()
+        ->isAffiliated('contactable_id', test()->permission->name, $corporation_role)
         ->get();
 
-    expect($assets)->toHaveCount($can_find_asset ? 1 : 0);
+    expect($contacts)->toHaveCount($can_find_asset ? 1 : 0);
 })->with([
     ['Director', 'Director', true],
     ['Director', 'NoDirector', true],
@@ -255,35 +264,27 @@ it('supports array of corporation roles ', function (string $character_role, str
     //dump(\Seatplus\Eveapi\Models\Character\CharacterRole::where('character_id', test()->test_character->character_id)->get());
 
     // create corporation asset
-    createAsset(test()->test_character->corporation->corporation_id);
+    createContact(test()->test_character->corporation->corporation_id);
 
     // query asset
     test()->actingAs(test()->test_user);
 
-    $assets = Assets::query()
-        ->affiliatedCorporations('assetable_id', test()->permission->name, $corporation_role)
+    $contacts = Contact::query()
+        ->isAffiliated('contactable_id', test()->permission->name, $corporation_role)
         ->get();
 
-    expect($assets)->toHaveCount($can_find_asset ? 1 : 0);
+    expect($contacts)->toHaveCount($can_find_asset ? 1 : 0);
 })->with([
     ['Director', ['Director', 'NoDirector'], true],
     ['Director', ['NoDirector'], true],
     ['NoDirector', ['Director', 'derp'], false],
 ]);
 
-function createAffiliation($affiliatable_id, $affiliatable_type, $type = 'allowed'): Affiliation
+function createContact(int $character_id = null) : \Seatplus\Eveapi\Models\Contacts\Contact
 {
-    return test()->role->affiliations()->create([
-        'affiliatable_id' => $affiliatable_id,
-        'affiliatable_type' => $affiliatable_type,
-        'type' => $type,
-    ]);
-}
 
-function createAsset(?int $character_id = null) : \Seatplus\Eveapi\Models\Assets\Asset
-{
-    return Assets::factory()->create([
-        'assetable_id' => $character_id ?? CharacterInfo::factory(),
-        'assetable_type' => CharacterInfo::class,
+    return \Seatplus\Eveapi\Models\Contacts\Contact::factory()->create([
+        'contactable_id' => $character_id ?? CharacterInfo::factory(),
+        'contactable_type' => CharacterInfo::class,
     ]);
 }
