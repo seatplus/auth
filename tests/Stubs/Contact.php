@@ -3,9 +3,9 @@
 namespace Seatplus\Auth\Tests\Stubs;
 
 use Seatplus\Auth\Traits\HasAffiliated;
-use Seatplus\Eveapi\Models\Assets\Asset;
+use Seatplus\Eveapi\Models\Contacts\Contact as ContactOrigin;
 
-class Assets extends Asset
+class Contact extends ContactOrigin
 {
     use HasAffiliated;
 }
