@@ -12,8 +12,6 @@ use Seatplus\Eveapi\Models\Character\CharacterRole;
 
 beforeEach(function () {
 
-    //mockHttpRequest();
-
     test()->role = Role::create(['name' => faker()->name]);
     test()->permission = Permission::create(['name' => faker()->streetName()]);
 
@@ -212,19 +210,41 @@ it('checks affiliated ids', function (string $method, string $route, array|int $
         ['get', 'corporation.alliance_ids', fn () => ['alliance_ids' => [test()->secondary_character->alliance->alliance_id]]],
     ]);
 
-// Helpers
-function mockHttpRequest(): void
-{
-    test()->request = Mockery::mock(Request::class)->makePartial();
+it('returns unauthorized for non affiliated ids', function (string $method, string $route, array|int $route_param, string $status = 'ok') {
+    expect(test()->test_user->can('superuser'))->toBeFalse();
 
-    test()->next = function ($request) {
-        $request->forward();
+    test()->createAffiliation(
+        test()->role,
+        test()->secondary_character->character_id,
+        CharacterInfo::class,
+        'forbidden'
+    );
+
+    test()->actingAs(test()->test_user);
+
+    $response = match ($method) {
+        'post' => post(route($route), $route_param),
+        'get' => get(route($route, $route_param))
     };
-}
 
-function mockCheckPermissionAffiliationMiddleware()
-{
-    test()->middleware = Mockery::mock(CheckPermissionAffiliation::class, [])
-        ->makePartial()
-        ->shouldAllowMockingProtectedMethods();
-}
+    match ($status) {
+        'forbidden' => $response->assertForbidden(), //403
+        'unauthorized' => $response->assertUnauthorized(), //401
+        'ok' => $response->assertOk()
+    };
+})
+    ->with([
+        // POST
+        ['post', 'character.post', fn () => ['character_id' => test()->secondary_character->character_id], 'unauthorized'],
+        ['post', 'character.post', fn () => ['character_id' => test()->test_character->character_id], 'ok'],
+        ['post', 'character.post', fn () => ['character_ids' => [test()->secondary_character->character_id]], 'unauthorized'],
+        ['post', 'character.post', fn () => ['character_ids' => [test()->test_character->character_id]], 'ok'],
+        ['post', 'character.post', fn () => ['character_ids' => [test()->test_character->character_id, test()->secondary_character->character_id]], 'unauthorized'],
+        // GET
+        ['get', 'character.character', fn () => test()->secondary_character->character_id, 'unauthorized'],
+        ['get', 'character.character', fn () => test()->test_character->character_id, 'ok'],
+        ['get', 'character.character_ids', fn () => ['character_ids' => [test()->secondary_character->character_id]], 'unauthorized'],
+        ['get', 'character.character_ids', fn () => ['character_ids' => [test()->test_character->character_id]], 'ok'],
+        ['get', 'character.character_ids', fn () => ['character_ids' => [test()->test_character->character_id, test()->secondary_character->character_id]], 'unauthorized'],
+    ]);
+
