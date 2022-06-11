@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use function Pest\Laravel\get;
 use function Pest\Laravel\post;
@@ -11,7 +10,6 @@ use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\Character\CharacterRole;
 
 beforeEach(function () {
-
     test()->role = Role::create(['name' => faker()->name]);
     test()->permission = Permission::create(['name' => faker()->streetName()]);
 
@@ -247,4 +245,3 @@ it('returns unauthorized for non affiliated ids', function (string $method, stri
         ['get', 'character.character_ids', fn () => ['character_ids' => [test()->test_character->character_id]], 'ok'],
         ['get', 'character.character_ids', fn () => ['character_ids' => [test()->test_character->character_id, test()->secondary_character->character_id]], 'unauthorized'],
     ]);
-
