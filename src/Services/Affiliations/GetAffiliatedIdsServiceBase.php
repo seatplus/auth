@@ -13,7 +13,7 @@ use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 
 abstract class GetAffiliatedIdsServiceBase
 {
-    private Builder $affiliation;
+    private Builder $affiliations;
 
     public function __construct(
         protected AffiliationsDto $affiliationsDto
@@ -38,20 +38,29 @@ abstract class GetAffiliatedIdsServiceBase
     /**
      * @return Builder
      */
-    protected function getAffiliation(): Builder
+    protected function getAffiliations(): Builder
     {
-        if (! isset($this->affiliation)) {
-            $this->createAffiliation();
+        if (! isset($this->affiliations)) {
+            $this->createAffiliations();
         }
 
-        return clone $this->affiliation;
+        return clone $this->affiliations;
     }
 
-    protected function createAffiliation(): void
+    protected function createAffiliations(): void
     {
-        $this->affiliation = Affiliation::query()
-            ->whereRelation('role.permissions', 'name', $this->affiliationsDto->permission)
+
+        $permissions = $this->affiliationsDto->permissions;
+
+        $affiliations = Affiliation::query()
+            ->whereRelation('role.permissions', 'name', array_shift($permissions))
             ->whereRelation('role.members', 'user_id', $this->affiliationsDto->user->getAuthIdentifier());
+
+        foreach ($permissions as $permission) {
+            $affiliations->whereRelation('role.permissions', 'name', $permission);
+        }
+
+        $this->affiliations = $affiliations;
     }
 
     protected function removeForbiddenAffiliations(Builder $query) : QueryBuilder

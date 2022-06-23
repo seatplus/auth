@@ -8,7 +8,8 @@ use Spatie\DataTransferObject\DataTransferObject;
 #[Strict]
 class AffiliationsDto extends DataTransferObject
 {
-    public string $permission;
+    public array $permissions;
     public User $user;
     public ?array $corporation_roles;
+
 }

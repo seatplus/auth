@@ -26,7 +26,7 @@ class GetForbiddenAffiliatedIdService extends GetAffiliatedIdsServiceBase
         $owned_character_affiliations = GetOwnedAffiliatedIdsService::make($this->affiliationsDto)
             ->getQuery();
 
-        $affiliation = $this->getAffiliation()->where('type', $type->value())
+        $affiliation = $this->getAffiliations()->where('type', $type->value())
             /*->whereNotExists(
                 fn (QueryBuilder $query) => $query
                     ->select(DB::raw(1))

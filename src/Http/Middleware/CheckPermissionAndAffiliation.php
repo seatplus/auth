@@ -32,26 +32,21 @@ use Illuminate\Pipeline\Pipeline;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
 use Seatplus\Auth\DataTransferObjects\CheckPermissionAffiliationDto;
+use Seatplus\Auth\Models\CharacterUser;
 use Seatplus\Auth\Models\User;
 use Seatplus\Auth\Pipelines\Middleware\CheckAffiliatedIdsPipe;
 use Seatplus\Auth\Pipelines\Middleware\CheckOwnedAffiliatedIdsPipe;
 use Seatplus\Auth\Services\Dtos\AffiliationsDto;
 
-class CheckPermissionAffiliation
+class CheckPermissionAndAffiliation
 {
-    private User $user;
     private Collection $requested_ids;
-    private AffiliationsDto $affiliationsDto;
 
-    private array $pipelines = [
+    protected array $pipelines = [
         CheckOwnedAffiliatedIdsPipe::class,
         CheckAffiliatedIdsPipe::class,
     ];
 
-    public function __construct(
-    ) {
-        //$this->user = User::find(auth()->user()->getAuthIdentifier());
-    }
 
     /**
      * @return mixed
@@ -62,10 +57,17 @@ class CheckPermissionAffiliation
         // validate request and set requsted ids
         // we do this before fast tracking superuser to ensure superuser requests are valid too.
 
+        $this->checkPermissionAffiliation($request, $permissions, $corporation_role);
+
+        return $next($request);
+    }
+
+    private function checkPermissionAffiliation(Request $request, string $permissions, ?string $corporation_role): void
+    {
         $this->validateAndSetRequestedIds($request);
 
         if ($this->getUser()->can('superuser')) {
-            return $next($request);
+            return;
         }
 
         $checkPermissionAffiliationDto = new CheckPermissionAffiliationDto(
@@ -81,7 +83,44 @@ class CheckPermissionAffiliation
 
         abort_unless($all_requested_ids_validated, 401, 'You are not allowed to access the requested entity');
 
-        return $next($request);
+    }
+
+    private function checkPermission(string $permissions, ?string $corporation_role) : void
+    {
+        if ($this->getUser()->can('superuser')) {
+            return;
+        }
+
+        $permissions = explode('|', $permissions);
+
+        if($this->getUser()->hasAnyPermission($permissions)) {
+            return;
+        }
+
+        if($this->hasCorporationRole($corporation_role)) {
+
+            return;
+        }
+
+        abort('401', 'You are not authorized to perform this action');
+
+    }
+
+    private function hasCorporationRole(?string $corporation_role) : bool
+    {
+        if(is_null($corporation_role)) {
+            return false;
+        }
+
+        return CharacterUser::query()
+            ->whereHas(
+                'character.roles',
+                fn ($query) => $query
+                    ->whereJsonContains('roles', 'Director')
+                    ->orWhereJsonContains('roles', $corporation_role)
+            )
+            ->where('user_id', $this->getUser()->getAuthIdentifier())
+            ->exists();
     }
 
     private function validateAndSetRequestedIds(Request $request) : void
@@ -130,7 +169,7 @@ class CheckPermissionAffiliation
     {
         return new AffiliationsDto(
             user: $this->getUser(),
-            permission: $permissions,
+            permissions: explode('|', $permissions),
             corporation_roles: is_string($character_role) ? explode('|', $character_role) : null
         );
     }
