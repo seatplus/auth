@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use function Pest\Laravel\get;
 use function Pest\Laravel\post;
-use Seatplus\Auth\Http\Middleware\CheckPermissionAffiliation;
+use Seatplus\Auth\Http\Middleware\CheckPermissionAndAffiliation;
 use Seatplus\Auth\Models\Permissions\Permission;
 use Seatplus\Auth\Models\Permissions\Role;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
@@ -18,7 +18,7 @@ beforeEach(function () {
 
     $permission = test()->permission->name;
 
-    Route::middleware([CheckPermissionAffiliation::class . ":$permission"])
+    Route::middleware([CheckPermissionAndAffiliation::class . ":$permission"])
         ->prefix('character')
         ->name('character.')
         ->group(function () {
@@ -31,7 +31,7 @@ beforeEach(function () {
             Route::get('/alliance_ids', fn () => response('Hello World'))->name('alliance_ids');
         });
 
-    Route::middleware([CheckPermissionAffiliation::class . ":$permission,Director"])
+    Route::middleware([CheckPermissionAndAffiliation::class . ":$permission,Director"])
         ->prefix('corporation')
         ->name('corporation.')
         ->group(function () {

@@ -22,7 +22,7 @@ class GetInvertedAffiliatedIdsService extends GetAffiliatedIdsServiceBase
         $type = AffiliationType::INVERSE;
         $alias = sprintf('%s_entities', $type->value());
 
-        $affiliation = $this->getAffiliation()->where('type', $type->value());
+        $affiliation = $this->getAffiliations()->where('type', $type->value());
 
         $character_affiliations = CharacterAffiliation::query()
             ->when(
