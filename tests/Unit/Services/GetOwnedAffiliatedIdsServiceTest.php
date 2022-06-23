@@ -13,7 +13,7 @@ beforeEach(function () {
 
     test()->affiliationsDto = new \Seatplus\Auth\Services\Dtos\AffiliationsDto(
         user: test()->test_user,
-        permission: test()->permission->name,
+        permissions: [test()->permission->name],
         corporation_roles: ['Director']
     );
 
