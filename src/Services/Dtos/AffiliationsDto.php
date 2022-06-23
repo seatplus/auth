@@ -11,5 +11,4 @@ class AffiliationsDto extends DataTransferObject
     public array $permissions;
     public User $user;
     public ?array $corporation_roles;
-
 }

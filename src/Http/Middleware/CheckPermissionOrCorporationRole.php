@@ -33,14 +33,12 @@ use Seatplus\Auth\Models\User;
 
 class CheckPermissionOrCorporationRole
 {
-
     /**
      * @return mixed
      */
     public function handle(Request $request, Closure $next, string $permissions, ?string $corporation_role = null)
     {
-
-        if(! $request->user()) {
+        if (! $request->user()) {
             return abort(401);
         }
 
@@ -60,22 +58,20 @@ class CheckPermissionOrCorporationRole
 
         $permissions = explode('|', $permissions);
 
-        if($this->getUser()->hasAnyPermission($permissions)) {
+        if ($this->getUser()->hasAnyPermission($permissions)) {
             return;
         }
 
-        if($this->hasCorporationRole($corporation_role)) {
-
+        if ($this->hasCorporationRole($corporation_role)) {
             return;
         }
 
         abort('401', 'You are not authorized to perform this action');
-
     }
 
     private function hasCorporationRole(?string $corporation_role) : bool
     {
-        if(is_null($corporation_role)) {
+        if (is_null($corporation_role)) {
             return false;
         }
 
@@ -94,5 +90,4 @@ class CheckPermissionOrCorporationRole
     {
         return User::find(auth()->user()->getAuthIdentifier());
     }
-
 }

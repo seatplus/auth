@@ -49,7 +49,6 @@ abstract class GetAffiliatedIdsServiceBase
 
     protected function createAffiliations(): void
     {
-
         $permissions = $this->affiliationsDto->permissions;
 
         $affiliations = Affiliation::query()

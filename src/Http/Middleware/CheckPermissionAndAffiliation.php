@@ -47,7 +47,6 @@ class CheckPermissionAndAffiliation
         CheckAffiliatedIdsPipe::class,
     ];
 
-
     /**
      * @return mixed
      */
@@ -82,7 +81,6 @@ class CheckPermissionAndAffiliation
             ->allIdsValidated();
 
         abort_unless($all_requested_ids_validated, 401, 'You are not allowed to access the requested entity');
-
     }
 
     private function checkPermission(string $permissions, ?string $corporation_role) : void
@@ -93,22 +91,20 @@ class CheckPermissionAndAffiliation
 
         $permissions = explode('|', $permissions);
 
-        if($this->getUser()->hasAnyPermission($permissions)) {
+        if ($this->getUser()->hasAnyPermission($permissions)) {
             return;
         }
 
-        if($this->hasCorporationRole($corporation_role)) {
-
+        if ($this->hasCorporationRole($corporation_role)) {
             return;
         }
 
         abort('401', 'You are not authorized to perform this action');
-
     }
 
     private function hasCorporationRole(?string $corporation_role) : bool
     {
-        if(is_null($corporation_role)) {
+        if (is_null($corporation_role)) {
             return false;
         }
 
