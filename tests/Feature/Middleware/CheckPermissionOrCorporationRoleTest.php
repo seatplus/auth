@@ -16,30 +16,25 @@ beforeEach(function () {
         ->get('/', function () {
             return 'test';
         })->name('test');
-
 });
 
 it('returns a 401 if user is not authenticated', function () {
-
     $response = $this->get(route('test'));
     $response->assertStatus(401);
 });
 
 it('returns a 200 if user has permission', function (string $permission) {
-
     test()->actingAs(test()->test_user);
     test()->assignPermissionToTestUser($permission);
 
     $response = $this->get(route('test'));
     $response->assertStatus(200);
-
 })->with([
     'superuser' => 'superuser',
-    'accountant' => fn() => test()->permission->name,
+    'accountant' => fn () => test()->permission->name,
 ]);
 
 it('return a 200 if user has corporation_role', function (string $corporation_role) {
-
     test()->actingAs(test()->test_user);
     CharacterRole::query()->delete();
 
@@ -56,12 +51,9 @@ it('return a 200 if user has corporation_role', function (string $corporation_ro
 ]);
 
 it('return a 401 if user is missing corporation_role', function () {
-
     test()->actingAs(test()->test_user);
     CharacterRole::query()->delete();
 
     $response = $this->get(route('test'));
     $response->assertStatus(401);
 });
-
-
