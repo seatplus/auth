@@ -21,11 +21,8 @@ class CheckOwnedAffiliatedIdsPipe extends CheckPermissionAffiliationPipeline
 
     protected function shouldBeChecked(CheckPermissionAffiliationDto $checkPermissionAffiliationDto): bool
     {
-        if ($checkPermissionAffiliationDto->allIdsValidated()) {
-            return false;
-        }
 
-        if ($checkPermissionAffiliationDto->requested_ids->count() > 1) {
+        if ($checkPermissionAffiliationDto->allIdsValidated()) {
             return false;
         }
 
