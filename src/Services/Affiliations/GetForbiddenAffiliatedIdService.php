@@ -80,6 +80,6 @@ class GetForbiddenAffiliatedIdService extends GetAffiliatedIdsServiceBase
         return $character_affiliations
             ->union($corporation_affiliations)
             ->union($alliance_affiliations)
-            ;
+        ;
     }
 }

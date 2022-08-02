@@ -68,7 +68,7 @@ it('returns allowed ids from affiliated character', function () {
 
     $allowed_ids = GetAllowedAffiliatedIdsService::make(test()->affiliationsDto)
         ->getQuery()
-        ;
+    ;
 
     // {character_id: 1, corporation_id: A, alliance_id: B}
     // {character_id: 2, corporation_id: A, alliance_id: B}

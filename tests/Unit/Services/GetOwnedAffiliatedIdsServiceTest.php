@@ -34,7 +34,7 @@ it('returns own character ids', function () {
     $allowed_ids = GetOwnedAffiliatedIdsService::make(test()->affiliationsDto)
         ->getQuery()
         ->pluck('affiliated_id')
-        ;
+    ;
 
     // {character_id: 1, corporation_id: A, alliance_id: B}
     // result: [1]
@@ -42,7 +42,7 @@ it('returns own character ids', function () {
         ->toHaveCount(1)
         ->toBeCollection()
         ->contains(test()->test_character->character_id)->toBeTrue()
-       ;
+    ;
 });
 
 it('returns owned character_id and corporation_id if corp role exists', function () {
