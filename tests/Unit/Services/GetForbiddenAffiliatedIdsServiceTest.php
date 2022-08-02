@@ -68,7 +68,7 @@ it('returns forbidden ids from forbidden character', function () {
     $forbidden_ids = GetForbiddenAffiliatedIdService::make(test()->affiliationsDto)
         ->getQuery()
         ->pluck('forbidden_id')
-        ;
+    ;
 
     // {character_id: 1, corporation_id: A, alliance_id: B}
     // {character_id: 2, corporation_id: A, alliance_id: B}

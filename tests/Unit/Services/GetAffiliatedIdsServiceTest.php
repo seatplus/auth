@@ -75,7 +75,7 @@ it('returns inverse affiliated_ids via GetAffiliatedIdsService', function () {
     $affiliated_ids = GetAffiliatedIdsService::make(test()->affiliationsDto)
         ->getQuery()
         ->pluck('affiliated_id')
-        ;
+    ;
 
     // {character_id: 1, corporation_id: A, alliance_id: B}
     // {character_id: 2, corporation_id: A, alliance_id: B}

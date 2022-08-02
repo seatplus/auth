@@ -81,6 +81,6 @@ abstract class GetAffiliatedIdsServiceBase
                     ->whereNull('forbidden_id')
             )
             ->select('affiliated_id')
-            ;
+        ;
     }
 }
