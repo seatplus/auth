@@ -34,7 +34,6 @@ beforeEach(function () {
 });
 
 test('one can request another scope', function () {
-
     // 1. Create refresh_token
     createRefreshTokenWithScopes(['a', 'b']);
 
@@ -55,7 +54,6 @@ test('one can request another scope', function () {
 });
 
 test('one can request another scope for a deleted token', function () {
-
     // Delete the token
     $token = test()->test_character->refresh_token;
     $token->delete();

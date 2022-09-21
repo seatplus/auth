@@ -132,7 +132,6 @@ class SsoController extends Controller
      */
     public function loginUser(User $user): bool
     {
-
         // Login and "remember" the given user...
         auth()->login($user, true);
 

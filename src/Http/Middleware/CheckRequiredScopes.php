@@ -80,7 +80,6 @@ class CheckRequiredScopes
 
     private function getCharactersWithMissingScopes(): Collection
     {
-
         // Get user level required scopes
         $user_scopes = BuildUserLevelRequiredScopes::get($this->user);
 

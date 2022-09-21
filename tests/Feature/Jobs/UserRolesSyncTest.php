@@ -41,7 +41,6 @@ it('gives automatic role', function () {
 });
 
 it('removes automatic role', function () {
-
     // Update role to be automatic
     test()->role->update(['type' => 'automatic']);
 
