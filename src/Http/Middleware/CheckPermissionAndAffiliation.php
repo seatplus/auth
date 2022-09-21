@@ -53,7 +53,7 @@ class CheckPermissionAndAffiliation
     public function handle(Request $request, Closure $next, string $permissions, ?string $corporation_role = null)
     {
 
-        // validate request and set requsted ids
+        // validate request and set requested ids
         // we do this before fast tracking superuser to ensure superuser requests are valid too.
 
         $this->checkPermissionAffiliation($request, $permissions, $corporation_role);
