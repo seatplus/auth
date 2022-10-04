@@ -30,7 +30,6 @@ use Seatplus\Auth\Actions\GetAffiliatedIdsByPermissionArray;
  * @deprecated deprecated since version 2.0
  */
 if (! function_exists('getAffiliatedIdsByClass')) {
-
     /**
      * A helper to get all affiliated Characters.
      *
@@ -51,7 +50,6 @@ if (! function_exists('getAffiliatedIdsByClass')) {
  * @deprecated deprecated since version 2.0
  */
 if (! function_exists('getAffiliatedIdsByPermission')) {
-
     /**
      * A helper to get all affiliated Characters.
      *

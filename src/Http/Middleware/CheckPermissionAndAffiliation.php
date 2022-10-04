@@ -29,6 +29,7 @@ namespace Seatplus\Auth\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Pipeline\Pipeline;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
 use Seatplus\Auth\DataTransferObjects\CheckPermissionAffiliationDto;
@@ -52,7 +53,6 @@ class CheckPermissionAndAffiliation
      */
     public function handle(Request $request, Closure $next, string $permissions, ?string $corporation_role = null)
     {
-
         // validate request and set requsted ids
         // we do this before fast tracking superuser to ensure superuser requests are valid too.
 
@@ -121,7 +121,14 @@ class CheckPermissionAndAffiliation
 
     private function validateAndSetRequestedIds(Request $request) : void
     {
-        $current_payload = $request->input();
+        // validate request and set requsted ids
+        // ignore non-validated payload
+        $current_payload = Arr::where($request->input(), fn ($value, $key) => in_array($key, [
+            'character_id', 'character_ids',
+            'corporation_id', 'corporation_ids',
+            'alliance_id', 'alliance_ids',
+        ]));
+
         $route_parameters = $request->route()->parameters();
 
         $constructed_payload = collect($current_payload)

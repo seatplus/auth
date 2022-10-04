@@ -48,7 +48,6 @@ class AuthenticationServiceProvider extends ServiceProvider
 {
     public function boot()
     {
-
         //Add Migrations
         $this->loadMigrationsFrom(__DIR__ . '/database/migrations/');
 
