@@ -33,7 +33,6 @@ use Seatplus\Auth\Http\Controllers\MainCharacterController;
 Route::prefix('auth')
     ->middleware('web')
     ->group(function () {
-
         // Auth
         Route::get('login', [LoginController::class, 'showLoginForm'])->name('auth.login');
 

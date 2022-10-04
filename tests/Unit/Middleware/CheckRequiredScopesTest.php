@@ -55,7 +55,6 @@ it('lets request through if no scopes are required', function () {
 });
 
 it('lets request through if required scopes are present', function () {
-
     // 1. Create RefreshToken for Character
     createRefreshTokenWithScopes(['a', 'b']);
 
@@ -78,7 +77,6 @@ it('lets request through if required scopes are present', function () {
 });
 
 it('stops request if required scopes are missing', function () {
-
     // 1. Create RefreshToken for Character
     createRefreshTokenWithScopes(['a', 'b']);
 
@@ -101,7 +99,6 @@ it('stops request if required scopes are missing', function () {
 });
 
 it('stops request if required corporation role scopes is missing', function () {
-
     // 1. Create RefreshToken for Character
     createRefreshTokenWithScopes(['a', 'b']);
 
@@ -121,7 +118,6 @@ it('stops request if required corporation role scopes is missing', function () {
 });
 
 it('lets request through if required corporation role scopes is present', function () {
-
     // 1. Create RefreshToken for Character
     createRefreshTokenWithScopes(['a', 'b', 'esi-characters.read_corporation_roles.v1']);
 
@@ -163,7 +159,6 @@ it('forwards request if user misses global scopes', function () {
 });
 
 it('lets request through if required global scopes are present', function () {
-
     // 1. Create RefreshToken for Character
     createRefreshTokenWithScopes(['a', 'b']);
 
@@ -183,7 +178,6 @@ it('lets request through if required global scopes are present', function () {
 });
 
 it('stops request if user scopes is missing', function () {
-
     // Create RefreshToken for Character
     createRefreshTokenWithScopes(['a', 'b']);
 
@@ -232,7 +226,6 @@ it('stops request if user scopes is missing', function () {
 });
 
 it('lets request through if user scopes is present', function () {
-
     // Create RefreshToken for Character
     createRefreshTokenWithScopes(['a', 'b']);
 
@@ -373,7 +366,6 @@ it('caches characters_with_missing_scopes', function () {
 });
 
 it('it get caches characters_with_missing_scopes', function () {
-
     // prepare
     test()->actingAs(test()->test_user);
     $user_id = test()->test_user->id;

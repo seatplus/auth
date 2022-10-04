@@ -48,7 +48,6 @@ test('create new user', function () {
 });
 
 test('find existing user with two character', function () {
-
     // add 3 characters to test_user
     test()->test_user->character_users()->createMany(
         CharacterUser::factory()->count(3)->make()->toArray()
@@ -103,7 +102,6 @@ test('deal with changed owner hash', function () {
 });
 
 test('deal with two characters with one changed owner hash', function () {
-
     // 1. Create secondary character
     $secondary_user = CharacterUser::factory()->make();
 
