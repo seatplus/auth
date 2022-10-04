@@ -245,3 +245,14 @@ it('returns unauthorized for non affiliated ids', function (string $method, stri
         ['get', 'character.character_ids', fn () => ['character_ids' => [test()->test_character->character_id]], 'ok'],
         ['get', 'character.character_ids', fn () => ['character_ids' => [test()->test_character->character_id, test()->secondary_character->character_id]], 'unauthorized'],
     ]);
+
+it('works with duplication of params', function () {
+    expect(test()->test_user->can('superuser'))->toBeFalse();
+
+    test()->actingAs(test()->test_user);
+
+    get(route('character.character', [
+        'character_id' => test()->test_character->character_id,
+        '0' => test()->test_character->character_id,
+    ]))->assertOk();
+})->only();
