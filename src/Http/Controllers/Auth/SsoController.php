@@ -76,13 +76,14 @@ class SsoController extends Controller
         $socialite_user = $social->driver('eveonline')->user();
         $rurl = session()->pull('rurl');
 
+        /** @noinspection PhpUndefinedFieldInspection */
         $eve_data = new EveUser([
-            'character_id' => data_get($socialite_user, 'character_id'),
-            'character_owner_hash' => data_get($socialite_user, 'character_owner_hash'),
-            'token' => data_get($socialite_user, 'token'),
-            'refreshToken' => data_get($socialite_user, 'refreshToken'),
-            'expiresIn' => data_get($socialite_user, 'expiresIn'),
-            'user' => data_get($socialite_user, 'user'),
+            'character_id' => $socialite_user->character_id,
+            'character_owner_hash' => $socialite_user->character_owner_hash,
+            'token' => $socialite_user->token,
+            'refreshToken' => $socialite_user->refreshToken,
+            'expiresIn' => $socialite_user->expiresIn,
+            'user' => $socialite_user->user,
         ]);
 
         // if return url was set, set the intended URL
