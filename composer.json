@@ -37,7 +37,7 @@
         "nunomaduro/collision": "^6.1",
         "pestphp/pest": "^1.18",
         "pestphp/pest-plugin-laravel": "^1.2",
-        "rector/rector": "^0.13.5"
+        "rector/rector": "^0.15.15"
     },
     "extra": {
         "laravel": {
