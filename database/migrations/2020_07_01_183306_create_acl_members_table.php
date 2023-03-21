@@ -28,7 +28,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateAffiliationsTable extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -37,11 +37,10 @@ class CreateAffiliationsTable extends Migration
      */
     public function up()
     {
-        Schema::create('affiliations', function (Blueprint $table) {
+        Schema::create('acl_members', function (Blueprint $table) {
             $table->bigInteger('role_id')->unsigned();
-            $table->bigInteger('affiliatable_id');
-            $table->string('affiliatable_type');
-            $table->enum('type', ['allowed', 'inverse', 'forbidden']);
+            $table->bigInteger('user_id')->unsigned();
+            $table->enum('status', ['member', 'waitlist', 'paused'])->default('member');
             $table->timestamps();
         });
     }
@@ -53,6 +52,6 @@ class CreateAffiliationsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('affiliations');
+        Schema::dropIfExists('acl_members');
     }
-}
+};

@@ -28,7 +28,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddTypeToRolesTable extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -37,8 +37,15 @@ class AddTypeToRolesTable extends Migration
      */
     public function up()
     {
-        Schema::table('roles', function (Blueprint $table) {
-            $table->enum('type', ['manual', 'automatic', 'opt-in', 'on-request'])->default('manual');
+        Schema::create('users', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->bigInteger('main_character_id')->unique()->nullable();
+            $table->boolean('active')->default(true);
+            $table->dateTime('last_login')->nullable();
+            $table->string('last_login_source')->nullable();
+            $table->rememberToken();
+
+            $table->timestamps();
         });
     }
 
@@ -49,7 +56,6 @@ class AddTypeToRolesTable extends Migration
      */
     public function down()
     {
-        Schema::table('roles', function (Blueprint $table) {
-        });
+        Schema::dropIfExists('users');
     }
-}
+};

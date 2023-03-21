@@ -24,22 +24,34 @@
  * SOFTWARE.
  */
 
-namespace Seatplus\Auth\database\factories;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
-use Seatplus\Auth\Models\CharacterUser;
-use Seatplus\Eveapi\Models\Character\CharacterInfo;
-
-class CharacterUserFactory extends Factory
+return new class extends Migration
 {
-    protected $model = CharacterUser::class;
-
-    public function definition()
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
     {
-        return [
-            'user_id' => $this->faker->numberBetween(90000000, 98000000),
-            'character_id' => CharacterInfo::factory(),
-            'character_owner_hash' => sha1($this->faker->text),
-        ];
+        Schema::create('acl_affiliations', function (Blueprint $table) {
+            $table->bigInteger('role_id');
+            $table->morphs('affiliatable');
+            $table->boolean('can_moderate')->default(false);
+            $table->timestamps();
+        });
     }
-}
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('acl_affiliations');
+    }
+};
