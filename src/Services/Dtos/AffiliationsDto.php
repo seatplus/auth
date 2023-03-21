@@ -3,12 +3,15 @@
 namespace Seatplus\Auth\Services\Dtos;
 
 use Seatplus\Auth\Models\User;
-use Spatie\DataTransferObject\DataTransferObject;
-
-#[Strict]
-class AffiliationsDto extends DataTransferObject
+class AffiliationsDto
 {
-    public array $permissions;
-    public User $user;
-    public ?array $corporation_roles;
+    public function __construct(
+        public array $permissions,
+        public User $user,
+        public ?array $corporation_roles = null,
+    )
+    {
+    }
+
+
 }

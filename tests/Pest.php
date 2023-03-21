@@ -114,14 +114,14 @@ function createEveUser(int $character_id = null, string $character_owner_hash = 
 {
     $faker = faker();
 
-    return new EveUser([
-        'character_id' => $character_id ?? $faker->numberBetween(90000000, 98000000),
-        'character_owner_hash' => $character_owner_hash ?? sha1($faker->text),
-        'token' => sha1($faker->text),
-        'refreshToken' => sha1($faker->text),
-        'expiresIn' => $faker->numberBetween(1, 20),
-        'user' => ['user'],
-    ]);
+    return new EveUser(
+        character_id: $character_id ?? $faker->numberBetween(90000000, 98000000),
+        character_owner_hash: $character_owner_hash ?? sha1($faker->text),
+        token: sha1($faker->text),
+        refreshToken: sha1($faker->text),
+        expiresIn: $faker->numberBetween(1, 20),
+        user: ['user'],
+    );
 }
 
 function assignPermissionToTestUser(array|string $permission_strings)
