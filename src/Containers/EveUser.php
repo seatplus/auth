@@ -35,8 +35,7 @@ class EveUser
         public string $refreshToken,
         public int $expiresIn,
         public array $user,
-    )
-    {
+    ) {
     }
 
     public function getScopes(): array

@@ -26,7 +26,6 @@
 
 namespace Seatplus\Auth\Models;
 
-use auth\database\factories\CharacterUserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
