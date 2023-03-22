@@ -255,4 +255,4 @@ it('works with duplication of params', function () {
         'character_id' => test()->test_character->character_id,
         '0' => test()->test_character->character_id,
     ]))->assertOk();
-})->only();
+});

@@ -11,7 +11,8 @@
     ],
     "autoload": {
         "psr-4": {
-            "Seatplus\\Auth\\": "src/"
+            "Seatplus\\Auth\\": "src/",
+            "Seatplus\\Auth\\Database\\Factories\\": "database/factories/"
         },
         "files": [
             "src/Helpers/helpers.php"
@@ -22,21 +23,21 @@
             "Seatplus\\Auth\\Tests\\": "tests/"
         }
     },
-    "minimum-stability": "alpha",
+    "minimum-stability": "stable",
     "prefer-stable": true,
     "require": {
         "php": "^8.1",
-        "laravel/framework": "^9.0",
+        "laravel/framework": "^10.0",
         "laravel/socialite": "^5.0",
-        "seatplus/eveapi": "^2.0",
+        "seatplus/eveapi": "^3.0",
         "spatie/laravel-permission": "^5.4",
         "socialiteproviders/eveonline": "^4.0"
     },
     "require-dev": {
-        "orchestra/testbench": "^7.0",
-        "nunomaduro/collision": "^6.1",
-        "pestphp/pest": "^1.18",
-        "pestphp/pest-plugin-laravel": "^1.2",
+        "orchestra/testbench": "^8.0",
+        "nunomaduro/collision": "^7.0",
+        "pestphp/pest": "^2.0",
+        "pestphp/pest-plugin-laravel": "^2.0",
         "rector/rector": "^0.13.5"
     },
     "extra": {

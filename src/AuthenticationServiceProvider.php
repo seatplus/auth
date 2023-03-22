@@ -49,10 +49,10 @@ class AuthenticationServiceProvider extends ServiceProvider
     public function boot()
     {
         //Add Migrations
-        $this->loadMigrationsFrom(__DIR__ . '/database/migrations/');
+        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations/');
 
         // Add routes
-        $this->loadRoutesFrom(__DIR__ . '/Http/routes.php');
+        $this->loadRoutesFrom(__DIR__ . '/../routes/routes.php');
 
         // Add event listeners
         $this->addEventListeners();
@@ -96,9 +96,9 @@ class AuthenticationServiceProvider extends ServiceProvider
             }
         );
 
-        $this->mergeConfigFrom(__DIR__ . '/config/permission.php', 'permission');
-        $this->mergeConfigFrom(__DIR__ . '/config/auth.updateJobs.php', 'seatplus.updateJobs');
-        $this->mergeConfigFrom(__DIR__ . '/config/auth.services.php', 'services');
+        $this->mergeConfigFrom(__DIR__ . '/../config/permission.php', 'permission');
+        $this->mergeConfigFrom(__DIR__ . '/../config/auth.updateJobs.php', 'seatplus.updateJobs');
+        $this->mergeConfigFrom(__DIR__ . '/../config/auth.services.php', 'services');
     }
 
     private function addEventListeners()

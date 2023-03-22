@@ -24,34 +24,40 @@
  * SOFTWARE.
  */
 
-namespace Seatplus\Auth\database\factories;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
-use Seatplus\Auth\Models\CharacterUser;
-use Seatplus\Auth\Models\User;
-use Seatplus\Eveapi\Models\Character\CharacterInfo;
-
-class UserFactory extends Factory
+return new class extends Migration
 {
-    protected $model = User::class;
-
     /**
-     * Configure the model factory.
+     * Run the migrations.
      *
-     * @return $this
+     * @return void
      */
-    public function configure()
+    public function up()
     {
-        return $this->afterCreating(function (User $user) {
-            $user->character_users()->save(CharacterUser::factory()->make());
+        Schema::create('character_users', function (Blueprint $table) {
+            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('character_id');
+            $table->string('character_owner_hash');
+            $table->timestamps();
+
+            $table->foreign('user_id')
+                ->references('id')->on('users')
+                ->onDelete('cascade');
+
+            $table->unique(['user_id', 'character_id']);
         });
     }
 
-    public function definition()
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
     {
-        return [
-            'main_character_id' => CharacterInfo::factory(),
-            'active' => true,
-        ];
+        Schema::dropIfExists('character_users');
     }
-}
+};

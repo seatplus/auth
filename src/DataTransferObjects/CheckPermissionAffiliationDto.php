@@ -4,20 +4,15 @@ namespace Seatplus\Auth\DataTransferObjects;
 
 use Illuminate\Support\Collection;
 use Seatplus\Auth\Services\Dtos\AffiliationsDto;
-use Spatie\DataTransferObject\DataTransferObject;
 
-class CheckPermissionAffiliationDto extends DataTransferObject
+class CheckPermissionAffiliationDto
 {
-    public Collection $requested_ids;
-    public AffiliationsDto $affiliationsDto;
-
-    private Collection $validated_ids;
-
-    public function __construct(...$args)
-    {
+    public function __construct(
+        public Collection $requested_ids,
+        public AffiliationsDto $affiliationsDto,
+        private ?Collection $validated_ids = null,
+    ) {
         $this->validated_ids = collect();
-
-        parent::__construct($args);
     }
 
     public function allIdsValidated() : bool

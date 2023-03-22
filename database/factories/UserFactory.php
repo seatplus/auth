@@ -24,34 +24,34 @@
  * SOFTWARE.
  */
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+namespace Seatplus\Auth\Database\Factories;
 
-class CreateAclMembersTable extends Migration
+use Illuminate\Database\Eloquent\Factories\Factory;
+use Seatplus\Auth\Models\CharacterUser;
+use Seatplus\Auth\Models\User;
+use Seatplus\Eveapi\Models\Character\CharacterInfo;
+
+class UserFactory extends Factory
 {
+    protected $model = User::class;
+
     /**
-     * Run the migrations.
+     * Configure the model factory.
      *
-     * @return void
+     * @return $this
      */
-    public function up()
+    public function configure()
     {
-        Schema::create('acl_members', function (Blueprint $table) {
-            $table->bigInteger('role_id')->unsigned();
-            $table->bigInteger('user_id')->unsigned();
-            $table->enum('status', ['member', 'waitlist', 'paused'])->default('member');
-            $table->timestamps();
+        return $this->afterCreating(function (User $user) {
+            $user->character_users()->save(CharacterUser::factory()->make());
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function definition()
     {
-        Schema::dropIfExists('acl_members');
+        return [
+            'main_character_id' => CharacterInfo::factory(),
+            'active' => true,
+        ];
     }
 }

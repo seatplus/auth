@@ -77,14 +77,14 @@ class SsoController extends Controller
         $rurl = session()->pull('rurl');
 
         /** @noinspection PhpUndefinedFieldInspection */
-        $eve_data = new EveUser([
-            'character_id' => $socialite_user->character_id,
-            'character_owner_hash' => $socialite_user->character_owner_hash,
-            'token' => $socialite_user->token,
-            'refreshToken' => $socialite_user->refreshToken,
-            'expiresIn' => $socialite_user->expiresIn,
-            'user' => $socialite_user->user,
-        ]);
+        $eve_data = new EveUser(
+            character_id: $socialite_user->character_id,
+            character_owner_hash: $socialite_user->character_owner_hash,
+            token: $socialite_user->token,
+            refreshToken: $socialite_user->refreshToken,
+            expiresIn: $socialite_user->expiresIn,
+            user: $socialite_user->user,
+        );
 
         // if return url was set, set the intended URL
         if ($rurl) {

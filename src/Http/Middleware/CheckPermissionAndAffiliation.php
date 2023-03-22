@@ -171,8 +171,8 @@ class CheckPermissionAndAffiliation
     public function getAffiliationsDto(string $permissions, ?string $character_role = null): AffiliationsDto
     {
         return new AffiliationsDto(
-            user: $this->getUser(),
             permissions: explode('|', $permissions),
+            user: $this->getUser(),
             corporation_roles: is_string($character_role) ? explode('|', $character_role) : null
         );
     }

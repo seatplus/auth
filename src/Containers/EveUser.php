@@ -26,21 +26,17 @@
 
 namespace Seatplus\Auth\Containers;
 
-use Spatie\DataTransferObject\Attributes\Strict;
-
-#[Strict]
-class EveUser extends \Spatie\DataTransferObject\DataTransferObject
+class EveUser
 {
-    public int $character_id;
-    public string $character_owner_hash;
-
-    // Token related
-    public string $token;
-    public string $refreshToken;
-    public int $expiresIn;
-
-    //jwt payload
-    public array $user;
+    public function __construct(
+        public int $character_id,
+        public string $character_owner_hash,
+        public string $token,
+        public string $refreshToken,
+        public int $expiresIn,
+        public array $user,
+    ) {
+    }
 
     public function getScopes(): array
     {
