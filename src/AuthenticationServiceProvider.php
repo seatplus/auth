@@ -31,6 +31,7 @@ use Illuminate\Support\ServiceProvider;
 use Laravel\Socialite\SocialiteManager;
 use Seatplus\Auth\Listeners\ReactOnFreshRefreshToken;
 use Seatplus\Auth\Listeners\UpdatingRefreshTokenListener;
+use Seatplus\Auth\Models\User;
 use Seatplus\Auth\Observers\ApplicationObserver;
 use Seatplus\Auth\Observers\CharacterAffiliationObserver;
 use Seatplus\Auth\Observers\SsoScopeObserver;
@@ -99,10 +100,18 @@ class AuthenticationServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__ . '/../config/permission.php', 'permission');
         $this->mergeConfigFrom(__DIR__ . '/../config/auth.updateJobs.php', 'seatplus.updateJobs');
         $this->mergeConfigFrom(__DIR__ . '/../config/auth.services.php', 'services');
+
+        $this->setUserModel();
     }
 
     private function addEventListeners()
     {
         $this->app->events->listen(SocialiteWasCalled::class, EveonlineExtendSocialite::class);
+    }
+
+    private function setUserModel()
+    {
+        // Set the User Model
+        $this->app->config->set('auth.providers.users.model', User::class);
     }
 }
