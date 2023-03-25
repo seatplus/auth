@@ -111,7 +111,6 @@ class AuthenticationServiceProvider extends ServiceProvider
 
     private function setUserModel()
     {
-
         // Set the User Model
         $this->app->config->set('auth.providers.users.model', User::class);
     }
