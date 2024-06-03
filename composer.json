@@ -30,7 +30,7 @@
         "laravel/framework": "^10.0",
         "laravel/socialite": "^5.0",
         "seatplus/eveapi": "^3.0",
-        "spatie/laravel-permission": "^5.4",
+        "spatie/laravel-permission": "^6.7",
         "socialiteproviders/eveonline": "^4.0"
     },
     "require-dev": {
