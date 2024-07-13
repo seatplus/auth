@@ -1,6 +1,5 @@
 <?php
 
-
 use Illuminate\Support\Facades\Queue;
 use Seatplus\Auth\Jobs\DispatchUserRoleSync;
 use Seatplus\Auth\Jobs\UserRolesSync;
@@ -135,7 +134,6 @@ test('roles without acl affiliations are not impacted by job', function () {
 
     //assure that role is of type auto
     expect(test()->role->type)->toEqual('automatic');
-
 
     expect(test()->test_user->hasRole(test()->role))->toBeFalse();
 

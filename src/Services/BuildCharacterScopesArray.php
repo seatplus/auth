@@ -32,12 +32,11 @@ use Seatplus\Eveapi\Models\Character\CharacterInfo;
 class BuildCharacterScopesArray
 {
     private array $user_scopes;
+
     private CharacterInfo $character;
+
     private bool $withUserScope = false;
 
-    /**
-     * @return array
-     */
     public function getUserScopes(): array
     {
         if (! $this->withUserScope) {
@@ -47,9 +46,6 @@ class BuildCharacterScopesArray
         return $this->user_scopes;
     }
 
-    /**
-     * @return CharacterInfo
-     */
     public function getCharacter(): CharacterInfo
     {
         return $this->character;

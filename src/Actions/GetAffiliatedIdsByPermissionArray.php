@@ -49,9 +49,6 @@ class GetAffiliatedIdsByPermissionArray
      */
     private $cache_key;
 
-    /**
-     * @return string
-     */
     public function getCacheKey(): string
     {
         return $this->cache_key;
@@ -79,8 +76,6 @@ class GetAffiliatedIdsByPermissionArray
     }
 
     /**
-     * @return array
-     *
      * @throws \Exception
      */
     private function getResult(): array
@@ -139,12 +134,12 @@ class GetAffiliatedIdsByPermissionArray
             ->get()
             ->whenNotEmpty(
                 fn ($collection) => $collection
-                ->first()
-                ->characters
-                // for owned corporation tokens, we need to add the affiliation as long as the character has the required role
-                ->map(fn ($character) => [$this->getCorporationId($character), $character->character_id])
-                ->flatten()
-                ->filter()
+                    ->first()
+                    ->characters
+                    // for owned corporation tokens, we need to add the affiliation as long as the character has the required role
+                    ->map(fn ($character) => [$this->getCorporationId($character), $character->character_id])
+                    ->flatten()
+                    ->filter()
             )
             ->flatten()->unique();
     }

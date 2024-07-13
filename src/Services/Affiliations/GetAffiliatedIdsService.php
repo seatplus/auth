@@ -12,7 +12,7 @@ class GetAffiliatedIdsService extends GetAffiliatedIdsServiceBase
         return new static($affiliationsDto);
     }
 
-    public function getQuery() : QueryBuilder
+    public function getQuery(): QueryBuilder
     {
         $allowed = $this->getAllowedAffiliatedCharacterAffiliations();
         $inverted = $this->getInvertedAffiliatedCharacterAffiliations();
@@ -22,7 +22,7 @@ class GetAffiliatedIdsService extends GetAffiliatedIdsServiceBase
             ->distinct();
     }
 
-    private function getAllowedAffiliatedCharacterAffiliations() : QueryBuilder
+    private function getAllowedAffiliatedCharacterAffiliations(): QueryBuilder
     {
         $allowed_affiliations = GetAllowedAffiliatedIdsService::make($this->affiliationsDto)
             ->getQuery();
@@ -30,7 +30,7 @@ class GetAffiliatedIdsService extends GetAffiliatedIdsServiceBase
         return $this->removeForbiddenAffiliations($allowed_affiliations);
     }
 
-    private function getInvertedAffiliatedCharacterAffiliations() : QueryBuilder
+    private function getInvertedAffiliatedCharacterAffiliations(): QueryBuilder
     {
         $inverse_affiliations = GetInvertedAffiliatedIdsService::make($this->affiliationsDto)
             ->getQuery();

@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use Rector\Core\ValueObject\PhpVersion;
 use Rector\Config\RectorConfig;
+use Rector\Core\ValueObject\PhpVersion;
 use RectorLaravel\Set\LaravelSetList;
 
 return static function (RectorConfig $rectorConfig): void {
@@ -12,10 +12,10 @@ return static function (RectorConfig $rectorConfig): void {
     $rectorConfig->sets([
         //SetList::CODE_QUALITY,
         LaravelSetList::LARAVEL_100,
-        LaravelSetList::LARAVEL_CODE_QUALITY
+        LaravelSetList::LARAVEL_CODE_QUALITY,
     ]);
     // paths to refactor; solid alternative to CLI arguments
-    $rectorConfig->paths([__DIR__ . '/src', __DIR__ . '/tests']);
+    $rectorConfig->paths([__DIR__.'/src', __DIR__.'/tests']);
 
     // is your PHP version different from the one you refactor to? [default: your PHP version], uses PHP_VERSION_ID format
     $rectorConfig->phpVersion(PhpVersion::PHP_81);

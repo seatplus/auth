@@ -75,8 +75,7 @@ it('returns inversed ids from affiliated character', function () {
 
     $allowed_ids = GetInvertedAffiliatedIdsService::make(test()->affiliationsDto)
         ->getQuery()
-        ->pluck('affiliated_id')
-    ;
+        ->pluck('affiliated_id');
 
     // {character_id: 1, corporation_id: A, alliance_id: B}
     // {character_id: 2, corporation_id: A, alliance_id: B}
@@ -100,8 +99,7 @@ it('returns inverted ids from affiliated corporation', function () {
 
     $allowed_ids = GetInvertedAffiliatedIdsService::make(test()->affiliationsDto)
         ->getQuery()
-        ->pluck('affiliated_id')
-    ;
+        ->pluck('affiliated_id');
 
     // {character_id: 1, corporation_id: A, alliance_id: B}
     // {character_id: 2, corporation_id: A, alliance_id: B}
@@ -114,8 +112,7 @@ it('returns inverted ids from affiliated corporation', function () {
         ->contains(test()->secondary_character->character_id)->toBeFalse()
         ->contains(test()->secondary_character->corporation->corporation_id)->toBeFalse()
         ->contains(test()->tertiary_character->character_id)->toBeTrue()
-        ->contains(test()->tertiary_character->corporation->corporation_id)->toBeTrue()
-    ;
+        ->contains(test()->tertiary_character->corporation->corporation_id)->toBeTrue();
 });
 
 it('returns inverted ids from affiliated alliance', function () {
@@ -134,8 +131,7 @@ it('returns inverted ids from affiliated alliance', function () {
     $allowed_ids = GetInvertedAffiliatedIdsService::make(test()->affiliationsDto)
         ->getQuery()
 
-        ->pluck('affiliated_id')
-    ;
+        ->pluck('affiliated_id');
 
     // {character_id: 1, corporation_id: A, alliance_id: B}
     // {character_id: 2, corporation_id: A, alliance_id: B}
@@ -152,6 +148,5 @@ it('returns inverted ids from affiliated alliance', function () {
         ->contains(test()->secondary_character->corporation->corporation_id)->toBeFalse()
         ->contains(test()->tertiary_character->corporation->corporation_id)->toBeFalse()
         ->contains(test()->tertiary_character->alliance->alliance_id)->toBeFalse()
-        ->contains($random_affiliation->alliance_id)->toBeTrue()
-    ;
+        ->contains($random_affiliation->alliance_id)->toBeTrue();
 });

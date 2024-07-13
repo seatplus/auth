@@ -11,7 +11,7 @@ beforeEach(function () {
 
     $permission = test()->permission->name;
 
-    Route::middleware([CheckPermissionOrCorporationRole::class . ":$permission,Accountant"])
+    Route::middleware([CheckPermissionOrCorporationRole::class.":$permission,Accountant"])
         ->prefix('test')
         ->get('/', function () {
             return 'test';

@@ -42,8 +42,6 @@ class SsoController extends Controller
     /**
      * Redirect the user to the Eve Online authentication page.
      *
-     * @param  \Laravel\Socialite\Contracts\Factory  $social
-     * @param  \Seatplus\Auth\Services\GetRequiredScopes  $required_scopes
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
     public function redirectToProvider(Socialite $social, GetRequiredScopes $required_scopes)
@@ -63,9 +61,6 @@ class SsoController extends Controller
     /**
      * Obtain the user information from Eve Online.
      *
-     * @param  \Laravel\Socialite\Contracts\Factory  $social
-     * @param  \Seatplus\Auth\Http\Actions\Sso\FindOrCreateUserAction  $find_or_create_user_action
-     * @param  \Seatplus\Auth\Http\Actions\Sso\UpdateRefreshTokenAction  $update_refresh_token_action
      * @return \Illuminate\Http\RedirectResponse
      */
     public function handleProviderCallback(
@@ -127,9 +122,6 @@ class SsoController extends Controller
      * This method returns a boolean as a status flag for the
      * login routine. If a false is returned, it might mean
      * that that account is not allowed to sign in.
-     *
-     * @param  \Seatplus\Auth\Models\User  $user
-     * @return bool
      */
     public function loginUser(User $user): bool
     {

@@ -74,8 +74,7 @@ it('returns inverse affiliated_ids via GetAffiliatedIdsService', function () {
 
     $affiliated_ids = GetAffiliatedIdsService::make(test()->affiliationsDto)
         ->getQuery()
-        ->pluck('affiliated_id')
-    ;
+        ->pluck('affiliated_id');
 
     // {character_id: 1, corporation_id: A, alliance_id: B}
     // {character_id: 2, corporation_id: A, alliance_id: B}
@@ -106,8 +105,7 @@ it('returns allowed ids from affiliated corporation but not the forbidden charac
 
     $allowed_ids = GetAffiliatedIdsService::make(test()->affiliationsDto)
         ->getQuery()
-        ->pluck('affiliated_id')
-    ;
+        ->pluck('affiliated_id');
 
     // {character_id: 1, corporation_id: A, alliance_id: B}
     // {character_id: 2, corporation_id: A, alliance_id: B}
@@ -120,6 +118,5 @@ it('returns allowed ids from affiliated corporation but not the forbidden charac
         ->contains(test()->secondary_character->character_id)->toBeFalse()
         ->contains(test()->secondary_character->corporation->corporation_id)->toBeTrue()
         ->contains(test()->tertiary_character->character_id)->toBeFalse()
-        ->contains(test()->tertiary_character->corporation->corporation_id)->toBeFalse()
-    ;
+        ->contains(test()->tertiary_character->corporation->corporation_id)->toBeFalse();
 });

@@ -17,7 +17,7 @@ class GetInvertedAffiliatedIdsService extends GetAffiliatedIdsServiceBase
         return new static($affiliationsDto);
     }
 
-    public function getQuery() : Builder
+    public function getQuery(): Builder
     {
         $type = AffiliationType::INVERSE;
         $alias = sprintf('%s_entities', $type->value());

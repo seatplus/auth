@@ -18,7 +18,7 @@ class GetForbiddenAffiliatedIdService extends GetAffiliatedIdsServiceBase
         return new static($affiliationsDto);
     }
 
-    public function getQuery() : Builder
+    public function getQuery(): Builder
     {
         $type = AffiliationType::FORBIDDEN;
         $alias = sprintf('%s_entities', $type->value());
@@ -26,14 +26,13 @@ class GetForbiddenAffiliatedIdService extends GetAffiliatedIdsServiceBase
         $owned_character_affiliations = GetOwnedAffiliatedIdsService::make($this->affiliationsDto)
             ->getQuery();
 
-        $affiliation = $this->getAffiliations()->where('type', $type->value())
-            /*->whereNotExists(
-                fn (QueryBuilder $query) => $query
-                    ->select(DB::raw(1))
-                    ->fromSub($owned_character_affiliations, 'owned')
-                    ->whereColumn('affiliations.affiliatable_id', 'owned.affiliated_id')
-            )*/
-        ;
+        $affiliation = $this->getAffiliations()->where('type', $type->value());
+        /*->whereNotExists(
+            fn (QueryBuilder $query) => $query
+                ->select(DB::raw(1))
+                ->fromSub($owned_character_affiliations, 'owned')
+                ->whereColumn('affiliations.affiliatable_id', 'owned.affiliated_id')
+        )*/
 
         $character_affiliations = CharacterAffiliation::query()
             ->when(
@@ -79,7 +78,6 @@ class GetForbiddenAffiliatedIdService extends GetAffiliatedIdsServiceBase
 
         return $character_affiliations
             ->union($corporation_affiliations)
-            ->union($alliance_affiliations)
-        ;
+            ->union($alliance_affiliations);
     }
 }

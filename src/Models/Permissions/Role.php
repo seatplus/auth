@@ -126,9 +126,6 @@ class Role extends SpatieRole
             ->isNotEmpty();
     }
 
-    /**
-     * @return array
-     */
     public function getAffiliatedIdsAttribute(): array
     {
         //eager load relations for preventing n+1 queries
@@ -141,9 +138,6 @@ class Role extends SpatieRole
             ->all();
     }
 
-    /**
-     * @return array
-     */
     public function getAclAffiliatedIdsAttribute(): array
     {
         $acl_affiliations = $this->acl_affiliations()
@@ -161,9 +155,6 @@ class Role extends SpatieRole
             ->toArray();
     }
 
-    /**
-     * @return array
-     */
     public function getModeratorIdsAttribute(): array
     {
         //eager load relations for preventing n+1 queries

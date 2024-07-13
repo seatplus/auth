@@ -37,8 +37,8 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasRoles;
     use HasFactory;
+    use HasRoles;
 
     /**
      * The primary key associated with the table.
@@ -106,7 +106,7 @@ class User extends Authenticatable
     public function scopeSearch(Builder $query, string $query_string): Builder
     {
         return $query->whereHas('characters', function (Builder $query) use ($query_string) {
-            $query->where('name', 'like', '%' . $query_string . '%');
+            $query->where('name', 'like', '%'.$query_string.'%');
         });
     }
 

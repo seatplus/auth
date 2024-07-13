@@ -10,6 +10,5 @@ class AffiliationsDto
         public array $permissions,
         public User $user,
         public ?array $corporation_roles = null,
-    ) {
-    }
+    ) {}
 }

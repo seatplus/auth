@@ -55,10 +55,10 @@ class GetRequiredScopes
         return $this->scopes
             ->merge(
                 collect([
-                setting('global_sso_scopes'),
-                $this->user->application->corporation->ssoScopes->selected_scopes ?? [],
-                $this->user->application->corporation->alliance->ssoScopes->selected_scopes ?? [],
-            ])
+                    setting('global_sso_scopes'),
+                    $this->user->application->corporation->ssoScopes->selected_scopes ?? [],
+                    $this->user->application->corporation->alliance->ssoScopes->selected_scopes ?? [],
+                ])
             )
             ->flatten(1)
             ->unique()

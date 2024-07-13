@@ -1,6 +1,5 @@
 <?php
 
-
 use Seatplus\Auth\Models\CharacterUser;
 
 test('one can change main character', function () {

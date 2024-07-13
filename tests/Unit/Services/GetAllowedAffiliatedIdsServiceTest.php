@@ -67,8 +67,7 @@ it('returns allowed ids from affiliated character', function () {
     );
 
     $allowed_ids = GetAllowedAffiliatedIdsService::make(test()->affiliationsDto)
-        ->getQuery()
-    ;
+        ->getQuery();
 
     // {character_id: 1, corporation_id: A, alliance_id: B}
     // {character_id: 2, corporation_id: A, alliance_id: B}
@@ -90,8 +89,7 @@ it('returns allowed ids from affiliated corporation', function () {
 
     $allowed_ids = GetAllowedAffiliatedIdsService::make(test()->affiliationsDto)
         ->getQuery()
-        ->pluck('affiliated_id')
-    ;
+        ->pluck('affiliated_id');
 
     // {character_id: 1, corporation_id: A, alliance_id: B}
     // {character_id: 2, corporation_id: A, alliance_id: B}
@@ -103,8 +101,7 @@ it('returns allowed ids from affiliated corporation', function () {
         ->contains(test()->test_character->character_id)->toBeTrue()
         ->contains(test()->secondary_character->character_id)->toBeTrue()
         ->contains(test()->secondary_character->corporation->corporation_id)->toBeTrue()
-        ->contains(test()->tertiary_character->character_id)->toBeFalse()
-    ;
+        ->contains(test()->tertiary_character->character_id)->toBeFalse();
 });
 
 it('returns allowed ids from affiliated alliance', function () {
@@ -117,8 +114,7 @@ it('returns allowed ids from affiliated alliance', function () {
 
     $allowed_ids = GetAllowedAffiliatedIdsService::make(test()->affiliationsDto)
         ->getQuery()
-        ->pluck('affiliated_id')
-    ;
+        ->pluck('affiliated_id');
 
     // {character_id: 1, corporation_id: A, alliance_id: B}
     // {character_id: 2, corporation_id: A, alliance_id: B}
@@ -131,6 +127,5 @@ it('returns allowed ids from affiliated alliance', function () {
         ->contains(test()->tertiary_character->character_id)->toBeTrue()
         ->contains(test()->test_character->corporation->corporation_id)->toBeTrue()
         ->contains(test()->secondary_character->corporation->corporation_id)->toBeTrue()
-        ->contains(test()->tertiary_character->corporation->corporation_id)->toBeTrue()
-    ;
+        ->contains(test()->tertiary_character->corporation->corporation_id)->toBeTrue();
 });

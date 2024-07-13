@@ -8,7 +8,7 @@ enum AffiliationType
     case INVERSE;
     case FORBIDDEN;
 
-    public function operator() : string
+    public function operator(): string
     {
         return match ($this) {
             self::ALLOWED, self::FORBIDDEN => '=',
@@ -16,7 +16,7 @@ enum AffiliationType
         };
     }
 
-    public function value() : string
+    public function value(): string
     {
         return match ($this) {
             self::ALLOWED => 'allowed',

@@ -15,7 +15,7 @@ class CheckPermissionAffiliationDto
         $this->validated_ids = collect();
     }
 
-    public function allIdsValidated() : bool
+    public function allIdsValidated(): bool
     {
         $different_ids = $this->requested_ids->diff($this->validated_ids);
 

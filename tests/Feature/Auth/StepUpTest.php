@@ -39,8 +39,7 @@ test('one can request another scope', function () {
 
     expect(test()->test_character->refresh_token->scopes)
         ->toBeArray()
-        ->toBe(['a','b']);
-
+        ->toBe(['a', 'b']);
 
     $add_scopes = implode(',', ['1', '2']);
 

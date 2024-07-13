@@ -34,7 +34,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Seatplus\Auth\Models\User;
 
-class DispatchUserRoleSync implements ShouldQueue, ShouldBeUnique
+class DispatchUserRoleSync implements ShouldBeUnique, ShouldQueue
 {
     use Dispatchable;
     use InteractsWithQueue;

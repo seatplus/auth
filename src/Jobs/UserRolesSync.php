@@ -37,7 +37,7 @@ use Illuminate\Queue\SerializesModels;
 use Seatplus\Auth\Models\Permissions\Role;
 use Seatplus\Auth\Models\User;
 
-class UserRolesSync implements ShouldQueue, ShouldBeUnique
+class UserRolesSync implements ShouldBeUnique, ShouldQueue
 {
     use Dispatchable;
     use InteractsWithQueue;
@@ -128,7 +128,7 @@ class UserRolesSync implements ShouldQueue, ShouldBeUnique
             ->whereHas(
                 'acl_members',
                 fn (Builder $query) => $query->where('user_id', $this->user->getAuthIdentifier())
-                ->whereIn('status', ['member', 'paused'])
+                    ->whereIn('status', ['member', 'paused'])
             )
             ->cursor();
 

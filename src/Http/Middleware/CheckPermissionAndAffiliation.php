@@ -83,7 +83,7 @@ class CheckPermissionAndAffiliation
         abort_unless($all_requested_ids_validated, 401, 'You are not allowed to access the requested entity');
     }
 
-    private function checkPermission(string $permissions, ?string $corporation_role) : void
+    private function checkPermission(string $permissions, ?string $corporation_role): void
     {
         if ($this->getUser()->can('superuser')) {
             return;
@@ -102,7 +102,7 @@ class CheckPermissionAndAffiliation
         abort('401', 'You are not authorized to perform this action');
     }
 
-    private function hasCorporationRole(?string $corporation_role) : bool
+    private function hasCorporationRole(?string $corporation_role): bool
     {
         if (is_null($corporation_role)) {
             return false;
@@ -119,7 +119,7 @@ class CheckPermissionAndAffiliation
             ->exists();
     }
 
-    private function validateAndSetRequestedIds(Request $request) : void
+    private function validateAndSetRequestedIds(Request $request): void
     {
         // validate request and set requsted ids
         // ignore non-validated payload

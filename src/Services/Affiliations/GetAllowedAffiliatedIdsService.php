@@ -16,7 +16,7 @@ class GetAllowedAffiliatedIdsService extends GetAffiliatedIdsServiceBase
         return new static($affiliationsDto);
     }
 
-    public function getQuery() : Builder
+    public function getQuery(): Builder
     {
         $type = AffiliationType::ALLOWED;
         $alias = sprintf('%s_entities', $type->value());
