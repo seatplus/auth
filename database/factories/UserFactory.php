@@ -35,19 +35,14 @@ class UserFactory extends Factory
 {
     protected $model = User::class;
 
-    /**
-     * Configure the model factory.
-     *
-     * @return $this
-     */
-    public function configure()
+    public function configure(): UserFactory
     {
         return $this->afterCreating(function (User $user) {
             $user->character_users()->save(CharacterUser::factory()->make());
         });
     }
 
-    public function definition()
+    public function definition(): array
     {
         return [
             'main_character_id' => CharacterInfo::factory(),

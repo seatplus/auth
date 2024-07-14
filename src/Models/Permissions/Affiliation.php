@@ -27,6 +27,8 @@
 namespace Seatplus\Auth\Models\Permissions;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Collection;
 use Seatplus\Eveapi\Models\Alliance\AllianceInfo;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
@@ -36,33 +38,20 @@ class Affiliation extends Model
 {
     protected $primaryKey = null;
 
-    /**
-     * @var bool
-     */
     public $incrementing = false;
 
-    /**
-     * The attributes that aren't mass assignable.
-     *
-     * @var array
-     */
     protected $guarded = [];
 
-    /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array
-     */
     protected $casts = [
         'role_id' => 'integer',
     ];
 
-    public function affiliatable()
+    public function affiliatable(): MorphTo
     {
         return $this->morphTo();
     }
 
-    public function role()
+    public function role(): BelongsTo
     {
         return $this->belongsTo(Role::class, 'role_id', 'id');
     }

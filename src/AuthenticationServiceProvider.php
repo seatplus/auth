@@ -72,9 +72,6 @@ class AuthenticationServiceProvider extends ServiceProvider
         SsoScopes::observe(SsoScopeObserver::class);
         Application::observe(ApplicationObserver::class);
 
-        // Add Event Listeners
-        $this->app->events->listen(RefreshTokenCreated::class, ReactOnFreshRefreshToken::class);
-        $this->app->events->listen(UpdatingRefreshTokenEvent::class, UpdatingRefreshTokenListener::class);
     }
 
     public function register()
@@ -106,12 +103,14 @@ class AuthenticationServiceProvider extends ServiceProvider
 
     private function addEventListeners()
     {
-        $this->app->events->listen(SocialiteWasCalled::class, EveonlineExtendSocialite::class);
+        app('events')->listen(SocialiteWasCalled::class, EveonlineExtendSocialite::class);
+        app('events')->listen(RefreshTokenCreated::class, ReactOnFreshRefreshToken::class);
+        app('events')->listen(UpdatingRefreshTokenEvent::class, UpdatingRefreshTokenListener::class);
     }
 
     private function setUserModel()
     {
         // Set the User Model
-        $this->app->config->set('auth.providers.users.model', User::class);
+        app('config')->set('auth.providers.users.model', User::class);
     }
 }

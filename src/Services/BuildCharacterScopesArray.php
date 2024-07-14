@@ -53,7 +53,7 @@ class BuildCharacterScopesArray
 
     public static function make()
     {
-        return new static();
+        return new self();
     }
 
     public function setUserScopes(array $user_scopes)

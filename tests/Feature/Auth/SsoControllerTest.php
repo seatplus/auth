@@ -43,8 +43,9 @@ it('works for non authed users', function () {
     ]);
 
     Event::fakeFor(function () {
-        $response = test()->get(route('auth.eve.callback'))
-            ->assertRedirect();
+        $response = test()->get(route('auth.eve.callback'));
+
+        $response->assertRedirect();
     });
 
     test()->assertDatabaseHas('refresh_tokens', [

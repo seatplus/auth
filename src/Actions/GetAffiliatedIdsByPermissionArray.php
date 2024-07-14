@@ -29,6 +29,7 @@ namespace Seatplus\Auth\Actions;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use Seatplus\Auth\Models\Permissions\Role;
 use Seatplus\Auth\Models\User;
 use Seatplus\Eveapi\Models\Alliance\AllianceInfo;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
@@ -39,10 +40,7 @@ use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
  */
 class GetAffiliatedIdsByPermissionArray
 {
-    /**
-     * @var \Illuminate\Contracts\Auth\Authenticatable|null
-     */
-    private $user;
+    private User $user;
 
     /**
      * @var string
@@ -56,7 +54,7 @@ class GetAffiliatedIdsByPermissionArray
 
     public function __construct(private string $permission, private string $corporation_role = '')
     {
-        $this->user = auth()->user();
+        $this->user = User::find(auth()->id());
         $this->cache_key = sprintf(
             'affiliated character ids by permission %s for user wit user_id: %s',
             $this->user->id,
@@ -71,8 +69,6 @@ class GetAffiliatedIdsByPermissionArray
         } catch (\Exception $e) {
             throw $e;
         }
-
-        return ['error'];
     }
 
     /**
@@ -106,7 +102,7 @@ class GetAffiliatedIdsByPermissionArray
             ->first();
 
         // if authenticated user has no roles, make sure to skip the roles access
-        $affiliated_ids = ! $user ? collect() : $user->roles->map(fn ($role) => $role->affiliated_ids);
+        $affiliated_ids = ! $user ? collect() : $user->roles->map(fn (Role $role) => $role->affiliated_ids);
 
         // before returning add the owned character ids
         return $affiliated_ids->merge($this->buildOwnedIds())

@@ -50,8 +50,9 @@ if (! function_exists('getAffiliatedIdsByPermission')) {
     /**
      * A helper to get all affiliated Characters.
      *
-     * @param  string  $class
-     *
+     * @param string $permission
+     * @param string $role
+     * @return array
      * @deprecated deprecated since version 2.0
      */
     function getAffiliatedIdsByPermission(string $permission, string $role = ''): array

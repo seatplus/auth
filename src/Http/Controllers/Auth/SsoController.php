@@ -34,6 +34,8 @@ use Seatplus\Auth\Http\Controllers\Controller;
 use Seatplus\Auth\Jobs\UserRolesSync;
 use Seatplus\Auth\Models\User;
 use Seatplus\Auth\Services\GetRequiredScopes;
+use SocialiteProviders\Eveonline\EveonlineExtendSocialite;
+use SocialiteProviders\Eveonline\Provider;
 
 class SsoController extends Controller
 {
@@ -44,7 +46,7 @@ class SsoController extends Controller
      *
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
-    public function redirectToProvider(Socialite $social, GetRequiredScopes $required_scopes)
+    public function redirectToProvider(Socialite $socialite, GetRequiredScopes $required_scopes)
     {
         $scopes = $required_scopes->execute()->toArray();
 
@@ -53,9 +55,9 @@ class SsoController extends Controller
             'sso_scopes' => $scopes,
         ]);
 
-        return $social->driver('eveonline')
-            ->scopes($scopes)
-            ->redirect();
+        $driver = $socialite->driver('eveonline');
+        /** @var Provider $driver */
+        return $driver->scopes($scopes)->redirect();
     }
 
     /**
@@ -71,14 +73,13 @@ class SsoController extends Controller
         $socialite_user = $social->driver('eveonline')->user();
         $rurl = session()->pull('rurl');
 
-        /** @noinspection PhpUndefinedFieldInspection */
         $eve_data = new EveUser(
-            character_id: $socialite_user->character_id,
-            character_owner_hash: $socialite_user->character_owner_hash,
-            token: $socialite_user->token,
-            refreshToken: $socialite_user->refreshToken,
-            expiresIn: $socialite_user->expiresIn,
-            user: $socialite_user->user,
+            character_id: data_get($socialite_user, 'character_id'),
+            character_owner_hash: data_get($socialite_user, 'character_owner_hash'),
+            token: data_get($socialite_user, 'token'),
+            refreshToken: data_get($socialite_user, 'refreshToken'),
+            expiresIn: data_get($socialite_user, 'expiresIn'),
+            user: data_get($socialite_user, 'user'),
         );
 
         // if return url was set, set the intended URL

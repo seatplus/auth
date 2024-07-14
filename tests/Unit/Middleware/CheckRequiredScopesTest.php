@@ -369,7 +369,7 @@ it('it get caches characters_with_missing_scopes', function () {
     // prepare
     test()->actingAs(test()->test_user);
     $user_id = test()->test_user->id;
-    $cache_key = "UserScopes:${user_id}";
+    $cache_key = "UserScopes:{$user_id}";
 
     mockMiddleware();
 

@@ -28,6 +28,7 @@ namespace Seatplus\Auth\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 
 class CharacterUser extends Model
@@ -39,23 +40,18 @@ class CharacterUser extends Model
      */
     public $incrementing = false;
 
-    protected $primaryKey = false;
+    protected $primaryKey = null;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
     protected $fillable = [
         'character_id', 'user_id', 'character_owner_hash',
     ];
 
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function character()
+    public function character(): BelongsTo
     {
         return $this->belongsTo(CharacterInfo::class, 'character_id');
     }

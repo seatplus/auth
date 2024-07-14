@@ -27,39 +27,28 @@
 namespace Seatplus\Auth\Models\AccessControl;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Collection;
 use Seatplus\Auth\Models\Permissions\Role;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 
 class AclAffiliation extends Model
 {
-    /**
-     * @var bool
-     */
     public $incrementing = false;
 
-    /**
-     * The attributes that aren't mass assignable.
-     *
-     * @var array
-     */
     protected $guarded = [];
 
-    /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array
-     */
     protected $casts = [
         'can_moderate' => 'boolean',
     ];
 
-    public function affiliatable()
+    public function affiliatable(): MorphTo
     {
         return $this->morphTo();
     }
 
-    public function role()
+    public function role(): BelongsTo
     {
         return $this->belongsTo(Role::class, 'id', 'role_id');
     }

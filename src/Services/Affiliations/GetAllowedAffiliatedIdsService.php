@@ -13,7 +13,7 @@ class GetAllowedAffiliatedIdsService extends GetAffiliatedIdsServiceBase
 {
     public static function make(AffiliationsDto $affiliationsDto)
     {
-        return new static($affiliationsDto);
+        return new self($affiliationsDto);
     }
 
     public function getQuery(): Builder

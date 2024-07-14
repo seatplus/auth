@@ -38,7 +38,8 @@ class ApplicationObserver
     {
         $user_id = match ($application->applicationable_type) {
             User::class => $application->applicationable_id,
-            CharacterInfo::class => CharacterUser::query()->firstWhere('character_id', $application->applicationable_id)->user_id
+            CharacterInfo::class => CharacterUser::query()->firstWhere('character_id', $application->applicationable_id)->user_id,
+            default => null,
         };
 
         Cache::tags(['characters_with_missing_scopes', $user_id])->flush();

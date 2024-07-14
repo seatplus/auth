@@ -37,10 +37,6 @@ class BuildUserLevelRequiredScopes
     {
         $user = $user->replicate();
 
-        if (! Arr::has($user->getAttributes(), 'global_scope')) {
-            $user->global_scope = self::getSelectedScopes();
-        }
-
         return $user
             ->characters
             ->map(fn (CharacterInfo $character) => collect([
@@ -54,7 +50,7 @@ class BuildUserLevelRequiredScopes
             ->concat([
                 'user_application_corporation_scopes' => $user->getRelation('application') ? $user->application->corporation->ssoScopes?->selected_scopes : [],
                 'user_application_alliance_scopes' => $user->getRelation('application') ? $user->application->corporation->alliance?->ssoScopes?->selected_scopes : [],
-                'global_scopes' => is_array($user->global_scope) ? $user->global_scope : (is_string($user->global_scope) ? json_decode($user->global_scope) : []),
+                'global_scopes' => self::getGlobalScopes($user),
             ])
             ->flatten()
             ->unique()
@@ -66,5 +62,14 @@ class BuildUserLevelRequiredScopes
         $query_result = SsoScopes::global()->select('selected_scopes')->first();
 
         return $query_result ? $query_result->selected_scopes : [];
+    }
+
+    private static function getGlobalScopes(User $user): array
+    {
+
+        $global_scopes = Arr::has($user->getAttributes(), 'global_scope') ?  $user->getAttribute('global_scope') : self::getSelectedScopes();
+
+        // return is_array($global_scopes) ? $global_scopes : json_decode($global_scopes, true) ?? [];
+        return is_array($global_scopes) ? $global_scopes : (is_string($global_scopes) ? json_decode($global_scopes) : []);
     }
 }

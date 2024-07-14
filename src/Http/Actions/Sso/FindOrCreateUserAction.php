@@ -71,7 +71,7 @@ class FindOrCreateUserAction
     private function getUser(): User
     {
         if (! isset($this->user)) {
-            $this->user = auth()->user() ?? User::create([
+            $this->user = auth()->user() ? User::find(auth()->user()->getAuthIdentifier()) : User::create([
                 'main_character_id' => $this->eve_user->character_id,
                 'active' => true,
             ]);

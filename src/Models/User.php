@@ -30,6 +30,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Seatplus\Eveapi\Models\Application;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
@@ -54,30 +56,15 @@ class User extends Authenticatable
      */
     public $incrementing = true;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
     protected $fillable = [
         'main_character_id', 'character_owner_hash',
     ];
 
-    /**
-     * The attributes that should be hidden for arrays.
-     *
-     * @var array
-     */
     protected $hidden = [
         'password', 'remember_token',
     ];
 
-    /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array
-     */
-    protected $casts = [
+   protected $casts = [
         'email_verified_at' => 'datetime',
     ];
 
@@ -98,7 +85,7 @@ class User extends Authenticatable
         );
     }
 
-    public function main_character()
+    public function main_character(): HasOne
     {
         return $this->hasOne(CharacterInfo::class, 'character_id', 'main_character_id');
     }
@@ -110,12 +97,12 @@ class User extends Authenticatable
         });
     }
 
-    public function application()
+    public function application(): MorphOne
     {
         return $this->morphOne(Application::class, 'applicationable')->whereStatus('open');
     }
 
-    public function changeMainCharacter(int $character_id)
+    public function changeMainCharacter(int $character_id): bool
     {
         $this->main_character_id = $character_id;
 

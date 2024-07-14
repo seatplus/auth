@@ -38,7 +38,7 @@ class MainCharacterController extends Controller
 
         $character_id = $request->get('character_id');
 
-        $user = User::whereHas('character_users', fn (Builder $query) => $query->whereCharacterId($character_id))
+        $user = User::whereHas('character_users', fn (Builder $query) => $query->where('character_id', $character_id))
             ->firstWhere('id', auth()->user()->getAuthIdentifier());
 
         if (is_null($user)) {

@@ -1,0 +1,17 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    databaseMigrationsPath:
+        - database/migrations
+        - vendor/seatplus/eveapi/database/migrations
+    level: 4
+    paths:
+        - src
+        - config
+        - database
+    tmpDir: build/phpstan
+    checkOctaneCompatibility: true
+    checkModelProperties: true
+
+

@@ -27,6 +27,7 @@
 namespace Seatplus\Auth\Models\Permissions;
 
 use Exception;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Collection;
 use Seatplus\Auth\Models\AccessControl\AclAffiliation;
@@ -36,34 +37,37 @@ use Seatplus\Eveapi\Models\Alliance\AllianceInfo;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 use Spatie\Permission\Models\Role as SpatieRole;
 
+/**
+ * @property string $type
+ */
 class Role extends SpatieRole
 {
-    public function affiliations()
+    public function affiliations(): HasMany
     {
         return $this->hasMany(Affiliation::class, 'role_id');
     }
 
-    public function acl_affiliations()
+    public function acl_affiliations(): HasMany
     {
         return $this->hasMany(AclAffiliation::class, 'role_id')
             ->where('can_moderate', false);
     }
 
-    public function moderators()
+    public function moderators(): HasMany
     {
         return $this->hasMany(AclAffiliation::class, 'role_id')
             ->where('can_moderate', true);
     }
 
-    public function acl_members()
+    public function acl_members(): HasMany
     {
         return $this->hasMany(AclMember::class, 'role_id');
     }
 
-    public function members()
+    public function members(): HasMany
     {
-        return $this->acl_members()
-            ->whereStatus('member');
+        return $this->hasMany(AclMember::class, 'role_id')
+            ->where('status', 'member');
     }
 
     public function activateMember(User $user): void
