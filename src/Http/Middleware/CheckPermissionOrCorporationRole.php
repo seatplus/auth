@@ -27,7 +27,6 @@
 namespace Seatplus\Auth\Http\Middleware;
 
 use Closure;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Http\Request;
 use Seatplus\Auth\Models\CharacterUser;
 use Seatplus\Auth\Models\User;
@@ -76,7 +75,7 @@ class CheckPermissionOrCorporationRole
         return CharacterUser::query()
             ->whereHas(
                 'character.roles',
-                fn (HasOne $query) => $query
+                fn (\Illuminate\Database\Eloquent\Builder $query) => $query
                     ->whereJsonContains('roles', 'Director')
                     ->orWhereJsonContains('roles', $corporation_role)
             )

@@ -176,9 +176,9 @@ class Role extends SpatieRole
     private function getAffiliatedIds(): Collection
     {
         return $this->affiliations
-            ->reject(fn (AclAffiliation $affiliation) => $affiliation->type === 'forbidden')
+            ->reject(fn (Affiliation $affiliation) => $affiliation->type === 'forbidden')
             // TODO get IDs instead of character_ids
-            ->map(fn (AclAffiliation $affiliation) => $affiliation->type === 'allowed' ? $affiliation->affiliated_ids : $affiliation->inverse_affiliated_ids)
+            ->map(fn (Affiliation $affiliation) => $affiliation->type === 'allowed' ? $affiliation->affiliated_ids : $affiliation->inverse_affiliated_ids)
             ->flatten()
             ->unique();
     }
@@ -187,8 +187,8 @@ class Role extends SpatieRole
     {
         return $this->affiliations
             // we are only concerned about forbidden and inverse ids
-            ->reject(fn (AclAffiliation $affiliation) => $affiliation->type === 'allowed')
-            ->map(fn (AclAffiliation $affiliation) => $affiliation->affiliated_ids)
+            ->reject(fn (Affiliation $affiliation) => $affiliation->type === 'allowed')
+            ->map(fn (Affiliation $affiliation) => $affiliation->affiliated_ids)
             ->flatten()
             ->unique();
     }

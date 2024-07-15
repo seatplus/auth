@@ -34,6 +34,11 @@ use Seatplus\Eveapi\Models\Alliance\AllianceInfo;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 
+/*
+ * @property string $type
+ * @property Collection $affiliated_ids
+ * @property Collection $inverse_affiliated_ids
+ */
 class Affiliation extends Model
 {
     protected $primaryKey = null;
