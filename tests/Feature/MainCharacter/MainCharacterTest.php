@@ -1,6 +1,5 @@
 <?php
 
-
 use Seatplus\Auth\Models\CharacterUser;
 
 test('one can change main character', function () {
@@ -30,5 +29,5 @@ test('one cannot change main character if character does not belong to user', fu
 
     test()->actingAs(test()->test_user)->post(route('change.main_character'), [
         'character_id' => $secondary->character_id,
-    ])->assertUnauthorized();
+    ])->assertForbidden();
 });

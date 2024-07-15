@@ -7,7 +7,7 @@ use Seatplus\Auth\DataTransferObjects\CheckPermissionAffiliationDto;
 
 abstract class CheckPermissionAffiliationPipeline implements CheckPermissionAffiliationPipelineInterface
 {
-    public function handle(CheckPermissionAffiliationDto $checkPermissionAffiliationDto, Closure $next) : CheckPermissionAffiliationDto
+    public function handle(CheckPermissionAffiliationDto $checkPermissionAffiliationDto, Closure $next): CheckPermissionAffiliationDto
     {
         if (! $this->shouldBeChecked($checkPermissionAffiliationDto)) {
             return $next($checkPermissionAffiliationDto);
@@ -16,7 +16,7 @@ abstract class CheckPermissionAffiliationPipeline implements CheckPermissionAffi
         return $next($this->check($checkPermissionAffiliationDto));
     }
 
-    abstract protected function check(CheckPermissionAffiliationDto $checkPermissionAffiliationDto) : CheckPermissionAffiliationDto;
+    abstract protected function check(CheckPermissionAffiliationDto $checkPermissionAffiliationDto): CheckPermissionAffiliationDto;
 
-    abstract protected function shouldBeChecked(CheckPermissionAffiliationDto $checkPermissionAffiliationDto) : bool;
+    abstract protected function shouldBeChecked(CheckPermissionAffiliationDto $checkPermissionAffiliationDto): bool;
 }

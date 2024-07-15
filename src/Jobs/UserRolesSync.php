@@ -26,59 +26,51 @@
 
 namespace Seatplus\Auth\Jobs;
 
-use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Collection;
+use Illuminate\Support\LazyCollection;
 use Seatplus\Auth\Models\Permissions\Role;
 use Seatplus\Auth\Models\User;
+use Seatplus\Eveapi\Models\Character\CharacterInfo;
 
-class UserRolesSync implements ShouldQueue, ShouldBeUnique
+class UserRolesSync implements ShouldBeUnique, ShouldQueue
 {
     use Dispatchable;
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
 
-    /**
-     * The number of times the job may be attempted.
-     *
-     * @var int
-     */
-    public $tries = 1;
+    public int $tries = 1;
 
     private array $character_ids;
 
-    /**
-     * The unique ID of the job.
-     *
-     * @return string
-     */
-    public function uniqueId()
+    public function uniqueId(): string
     {
         return implode(', ', $this->tags());
     }
 
     /**
      * The number of seconds after which the job's unique lock will be released.
-     *
-     * @var int
      */
-    public $uniqueFor = 3600;
+    public int $uniqueFor = 3600;
 
     public function __construct(
         private User $user
     ) {
-        $this->character_ids = User::has('characters.refresh_token')
-            ->with(['characters.refresh_token' => fn ($query) => $query->select('character_id')])
+        $this->character_ids = User::query()
+            ->has('characters.refresh_token')
+            ->with(['characters.refresh_token' => fn (HasOne $query) => $query->select('character_id')])
             ->whereId($this->user->id)
             ->get()
-            ->whenNotEmpty(function ($collection) {
-                return $collection->first()->characters->map(fn ($character) => $character->character_id);
+            ->whenNotEmpty(function (Collection $collection) {
+                return $collection->first()->characters->map(fn (CharacterInfo $character) => $character->character_id);
             })
             ->toArray();
     }
@@ -88,29 +80,23 @@ class UserRolesSync implements ShouldQueue, ShouldBeUnique
      * for specific tags to be monitored.
      *
      * If a job specifies the tags property, that is added.
-     *
-     * @return array
      */
-    public function tags()
+    public function tags(): array
     {
         return [
             'Roles sync',
-            sprintf('user_id: %s', $this->user->id),
-            sprintf('main_character: %s', $this->user->main_character->name ?? ''),
+            "user_id: {$this->user->id}",
+            'main_character: '.($this->user->main_character->name ?? ''),
         ];
     }
 
-    public function handle()
+    public function handle(): void
     {
-        try {
-            $this->handleAutomaticRoles();
-            $this->handleOtherRoles();
-        } catch (Exception $exception) {
-            throw $exception;
-        }
+        $this->handleAutomaticRoles();
+        $this->handleOtherRoles();
     }
 
-    private function handleAutomaticRoles()
+    private function handleAutomaticRoles(): void
     {
         $automatic_roles = Role::has('acl_affiliations')
             ->whereType('automatic')
@@ -120,22 +106,23 @@ class UserRolesSync implements ShouldQueue, ShouldBeUnique
         $this->handleMemberships($automatic_roles);
     }
 
-    private function handleOtherRoles()
+    private function handleOtherRoles(): void
     {
-        $roles = Role::has('acl_affiliations')
+        $roles = Role::query()
+            ->has('acl_affiliations')
             ->with('acl_affiliations.affiliatable.characters')
             ->whereNotIn('type', ['manual', 'automatic'])
             ->whereHas(
                 'acl_members',
                 fn (Builder $query) => $query->where('user_id', $this->user->getAuthIdentifier())
-                ->whereIn('status', ['member', 'paused'])
+                    ->whereIn('status', ['member', 'paused'])
             )
             ->cursor();
 
         $this->handleMemberships($roles);
     }
 
-    private function handleMemberships($roles)
+    private function handleMemberships(LazyCollection $roles): void
     {
         foreach ($roles as $role) {
             collect($this->character_ids)->intersect($role->acl_affiliated_ids)->isNotEmpty()

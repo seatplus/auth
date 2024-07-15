@@ -1,6 +1,5 @@
 <?php
 
-
 use Seatplus\Auth\Models\AccessControl\AclMember;
 use Seatplus\Auth\Models\Permissions\Role;
 use Seatplus\Auth\Models\User;

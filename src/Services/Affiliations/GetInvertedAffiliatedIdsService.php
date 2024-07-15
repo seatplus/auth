@@ -12,12 +12,12 @@ use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 
 class GetInvertedAffiliatedIdsService extends GetAffiliatedIdsServiceBase
 {
-    public static function make(AffiliationsDto $affiliationsDto)
+    public static function make(AffiliationsDto $affiliationsDto): self
     {
-        return new static($affiliationsDto);
+        return new self($affiliationsDto);
     }
 
-    public function getQuery() : Builder
+    public function getQuery(): Builder
     {
         $type = AffiliationType::INVERSE;
         $alias = sprintf('%s_entities', $type->value());

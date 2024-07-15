@@ -33,13 +33,10 @@ use Seatplus\Auth\Models\User;
 
 class CheckPermissionOrCorporationRole
 {
-    /**
-     * @return mixed
-     */
-    public function handle(Request $request, Closure $next, string $permissions, ?string $corporation_role = null)
+    public function handle(Request $request, Closure $next, string $permissions, ?string $corporation_role = null): mixed
     {
         if (! $request->user()) {
-            return abort(401);
+            abort(401);
         }
 
         // validate request and set requsted ids
@@ -50,7 +47,7 @@ class CheckPermissionOrCorporationRole
         return $next($request);
     }
 
-    private function checkPermission(string $permissions, ?string $corporation_role) : void
+    private function checkPermission(string $permissions, ?string $corporation_role): void
     {
         if ($this->getUser()->can('superuser')) {
             return;
@@ -69,7 +66,7 @@ class CheckPermissionOrCorporationRole
         abort('401', 'You are not authorized to perform this action');
     }
 
-    private function hasCorporationRole(?string $corporation_role) : bool
+    private function hasCorporationRole(?string $corporation_role): bool
     {
         if (is_null($corporation_role)) {
             return false;
@@ -78,7 +75,7 @@ class CheckPermissionOrCorporationRole
         return CharacterUser::query()
             ->whereHas(
                 'character.roles',
-                fn ($query) => $query
+                fn (\Illuminate\Database\Eloquent\Builder $query) => $query
                     ->whereJsonContains('roles', 'Director')
                     ->orWhereJsonContains('roles', $corporation_role)
             )

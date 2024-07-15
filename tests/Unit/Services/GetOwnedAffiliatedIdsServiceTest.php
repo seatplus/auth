@@ -33,16 +33,14 @@ it('returns own character ids', function () {
 
     $allowed_ids = GetOwnedAffiliatedIdsService::make(test()->affiliationsDto)
         ->getQuery()
-        ->pluck('affiliated_id')
-    ;
+        ->pluck('affiliated_id');
 
     // {character_id: 1, corporation_id: A, alliance_id: B}
     // result: [1]
     expect($allowed_ids)
         ->toHaveCount(1)
         ->toBeCollection()
-        ->contains(test()->test_character->character_id)->toBeTrue()
-    ;
+        ->contains(test()->test_character->character_id)->toBeTrue();
 });
 
 it('returns owned character_id and corporation_id if corp role exists', function () {
@@ -53,8 +51,7 @@ it('returns owned character_id and corporation_id if corp role exists', function
 
     $allowed_ids = GetOwnedAffiliatedIdsService::make(test()->affiliationsDto)
         ->getQuery()
-        ->pluck('affiliated_id')
-    ;
+        ->pluck('affiliated_id');
 
     // {character_id: 1, corporation_id: A, alliance_id: B}
     // result: [3, A]
@@ -62,6 +59,5 @@ it('returns owned character_id and corporation_id if corp role exists', function
         ->toHaveCount(2)
         ->toBeCollection()
         ->contains(test()->test_character->character_id)->toBeTrue()
-        ->contains(test()->test_character->corporation->corporation_id)->toBeTrue()
-    ;
+        ->contains(test()->test_character->corporation->corporation_id)->toBeTrue();
 });

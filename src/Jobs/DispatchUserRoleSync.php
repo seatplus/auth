@@ -34,36 +34,29 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Seatplus\Auth\Models\User;
 
-class DispatchUserRoleSync implements ShouldQueue, ShouldBeUnique
+class DispatchUserRoleSync implements ShouldBeUnique, ShouldQueue
 {
     use Dispatchable;
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
 
-    /**
-     * The number of times the job may be attempted.
-     *
-     * @var int
-     */
-    public $tries = 1;
+    public int $tries = 1;
 
     /**
      * Assign this job a tag so that Horizon can categorize and allow
      * for specific tags to be monitored.
      *
      * If a job specifies the tags property, that is added.
-     *
-     * @return array
      */
-    public function tags()
+    public function tags(): array
     {
         return [
             'Dispatch Role Updates',
         ];
     }
 
-    public function handle()
+    public function handle(): void
     {
         foreach (User::cursor() as $user) {
             UserRolesSync::dispatch($user)->onQueue('high');

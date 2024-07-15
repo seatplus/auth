@@ -31,22 +31,22 @@ use Seatplus\Eveapi\Models\SsoScopes;
 
 class SsoScopeObserver
 {
-    public function created(SsoScopes $ssoScopes)
+    public function created(SsoScopes $ssoScopes): void
     {
         $this->flushCache();
     }
 
-    public function updated(SsoScopes $ssoScopes)
+    public function updated(SsoScopes $ssoScopes): void
     {
         $this->flushCache();
     }
 
-    public function deleted(SsoScopes $ssoScopes)
+    public function deleted(SsoScopes $ssoScopes): void
     {
         $this->flushCache();
     }
 
-    private function flushCache()
+    private function flushCache(): void
     {
         Cache::tags(['characters_with_missing_scopes'])->flush();
     }

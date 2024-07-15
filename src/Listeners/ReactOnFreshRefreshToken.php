@@ -32,7 +32,7 @@ use Seatplus\Eveapi\Events\RefreshTokenCreated;
 
 class ReactOnFreshRefreshToken
 {
-    public function handle(RefreshTokenCreated $refresh_token_event)
+    public function handle(RefreshTokenCreated $refresh_token_event): void
     {
         $character_user = CharacterUser::query()
             ->where('character_id', $refresh_token_event->refresh_token->character_id)

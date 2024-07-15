@@ -83,7 +83,7 @@ function createCorporationSsoScope(array $array, string $type = 'default')
     ]);
 }
 
-function createSocialiteUser($character_id = null, array $scopes = ["esi-skills.read_skills.v1", "esi-skills.read_skillqueue.v1",])
+function createSocialiteUser($character_id = null, array $scopes = ['esi-skills.read_skills.v1', 'esi-skills.read_skillqueue.v1'])
 {
     $refresh_token = RefreshToken::factory()->scopes($scopes)->make();
 
@@ -110,7 +110,7 @@ function faker()
     return test()->faker;
 }
 
-function createEveUser(int $character_id = null, string $character_owner_hash = null): EveUser
+function createEveUser(?int $character_id = null, ?string $character_owner_hash = null): EveUser
 {
     $faker = faker();
 

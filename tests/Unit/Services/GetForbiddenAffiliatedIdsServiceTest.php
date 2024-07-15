@@ -67,8 +67,7 @@ it('returns forbidden ids from forbidden character', function () {
 
     $forbidden_ids = GetForbiddenAffiliatedIdService::make(test()->affiliationsDto)
         ->getQuery()
-        ->pluck('forbidden_id')
-    ;
+        ->pluck('forbidden_id');
 
     // {character_id: 1, corporation_id: A, alliance_id: B}
     // {character_id: 2, corporation_id: A, alliance_id: B}
@@ -90,8 +89,7 @@ it('returns forbidden ids from forbidden corporation but not owned character_id'
 
     $forbidden_ids = GetForbiddenAffiliatedIdService::make(test()->affiliationsDto)
         ->getQuery()
-        ->pluck('forbidden_id')
-    ;
+        ->pluck('forbidden_id');
 
     // {character_id: 1, corporation_id: A, alliance_id: B}
     // {character_id: 2, corporation_id: A, alliance_id: B}
@@ -103,8 +101,7 @@ it('returns forbidden ids from forbidden corporation but not owned character_id'
         ->contains(test()->test_character->character_id)->toBeFalse()
         ->contains(test()->secondary_character->character_id)->toBeTrue()
         ->contains(test()->secondary_character->corporation->corporation_id)->toBeTrue()
-        ->contains(test()->tertiary_character->character_id)->toBeFalse()
-    ;
+        ->contains(test()->tertiary_character->character_id)->toBeFalse();
 });
 
 // TODO own corporation
@@ -116,11 +113,9 @@ it('returns forbidden ids from forbidden alliance', function () {
         'forbidden'
     );
 
-
     $forbidden_ids = GetForbiddenAffiliatedIdService::make(test()->affiliationsDto)
         ->getQuery()
-        ->pluck('forbidden_id')
-    ;
+        ->pluck('forbidden_id');
 
     // {character_id: 1, corporation_id: A, alliance_id: B}
     // {character_id: 2, corporation_id: A, alliance_id: B}
@@ -135,8 +130,7 @@ it('returns forbidden ids from forbidden alliance', function () {
         ->contains(test()->test_character->corporation->corporation_id)->toBeTrue()
         ->contains(test()->secondary_character->corporation->corporation_id)->toBeTrue()
         ->contains(test()->tertiary_character->corporation->corporation_id)->toBeTrue()
-        ->contains(test()->secondary_character->corporation->alliance_id)->toBeTrue()
-    ;
+        ->contains(test()->secondary_character->corporation->alliance_id)->toBeTrue();
 });
 
 it('returns forbidden ids from forbidden alliance but not owned corporation via role', function () {
@@ -154,11 +148,9 @@ it('returns forbidden ids from forbidden alliance but not owned corporation via 
         'roles' => test()->affiliationsDto->corporation_roles,
     ]);
 
-
     $forbidden_ids = GetForbiddenAffiliatedIdService::make(test()->affiliationsDto)
         ->getQuery()
-        ->pluck('forbidden_id')
-    ;
+        ->pluck('forbidden_id');
 
     // {character_id: 1, corporation_id: A, alliance_id: B}
     // {character_id: 2, corporation_id: A, alliance_id: B}
@@ -173,6 +165,5 @@ it('returns forbidden ids from forbidden alliance but not owned corporation via 
         ->contains(test()->test_character->corporation->corporation_id)->toBeFalse()
         ->contains(test()->secondary_character->corporation->corporation_id)->toBeFalse()
         ->contains(test()->tertiary_character->corporation->corporation_id)->toBeTrue()
-        ->contains(test()->secondary_character->corporation->alliance_id)->toBeTrue()
-    ;
+        ->contains(test()->secondary_character->corporation->alliance_id)->toBeTrue();
 });

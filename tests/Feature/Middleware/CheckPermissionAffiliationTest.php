@@ -1,13 +1,14 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use function Pest\Laravel\get;
-use function Pest\Laravel\post;
 use Seatplus\Auth\Http\Middleware\CheckPermissionAndAffiliation;
 use Seatplus\Auth\Models\Permissions\Permission;
 use Seatplus\Auth\Models\Permissions\Role;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\Character\CharacterRole;
+
+use function Pest\Laravel\get;
+use function Pest\Laravel\post;
 
 beforeEach(function () {
     test()->role = Role::create(['name' => faker()->name]);
@@ -18,7 +19,7 @@ beforeEach(function () {
 
     $permission = test()->permission->name;
 
-    Route::middleware([CheckPermissionAndAffiliation::class . ":$permission"])
+    Route::middleware([CheckPermissionAndAffiliation::class.":$permission"])
         ->prefix('character')
         ->name('character.')
         ->group(function () {
@@ -31,7 +32,7 @@ beforeEach(function () {
             Route::get('/alliance_ids', fn () => response('Hello World'))->name('alliance_ids');
         });
 
-    Route::middleware([CheckPermissionAndAffiliation::class . ":$permission,Director"])
+    Route::middleware([CheckPermissionAndAffiliation::class.":$permission,Director"])
         ->prefix('corporation')
         ->name('corporation.')
         ->group(function () {
@@ -90,7 +91,7 @@ it('it validates parameters for superuser', function (string $method, string $ro
         ['get', 'corporation.character_ids', fn () => ['corporation_ids' => [test()->test_character->character_id]]],
         ['get', 'corporation.corporation_ids', fn () => ['corporation_ids' => [test()->test_character->corporation->corporation_id]]],
         ['get', 'corporation.alliance_ids', fn () => ['alliance_ids' => [test()->test_character->alliance->alliance_id]]],
-]);
+    ]);
 
 it('checks owned character ids', function (string $method, string $route, array|int $route_param, string $status = 'ok') {
     expect(test()->test_user->can('superuser'))->toBeFalse();
@@ -134,7 +135,7 @@ it('checks owned character ids', function (string $method, string $route, array|
         ['get', 'corporation.character_ids', fn () => ['corporation_ids' => [test()->test_character->character_id]]],
         ['get', 'corporation.corporation_ids', fn () => ['corporation_ids' => [test()->test_character->corporation->corporation_id]], 'unauthorized'],
         ['get', 'corporation.alliance_ids', fn () => ['alliance_ids' => [test()->test_character->alliance->alliance_id]], 'unauthorized'],
-]);
+    ]);
 
 it('checks owned corporation id', function (string $method, string $route, array|int $route_param) {
     expect(test()->test_user->can('superuser'))->toBeFalse();
@@ -152,10 +153,10 @@ it('checks owned corporation id', function (string $method, string $route, array
     };
 })
     ->with([
-    ['post', 'corporation.post', fn () => ['corporation_id' => test()->test_character->corporation->corporation_id]],
-    ['get', 'corporation.corporation_ids', fn () => ['character_ids' => [test()->test_character->corporation->corporation_id]]],
-    ['get', 'corporation.corporation', fn () => test()->test_character->corporation->corporation_id],
-]);
+        ['post', 'corporation.post', fn () => ['corporation_id' => test()->test_character->corporation->corporation_id]],
+        ['get', 'corporation.corporation_ids', fn () => ['character_ids' => [test()->test_character->corporation->corporation_id]]],
+        ['get', 'corporation.corporation', fn () => test()->test_character->corporation->corporation_id],
+    ]);
 
 it('checks affiliated ids', function (string $method, string $route, array|int $route_param, string $status = 'ok') {
     expect(test()->test_user->can('superuser'))->toBeFalse();

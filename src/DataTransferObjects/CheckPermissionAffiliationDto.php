@@ -15,14 +15,14 @@ class CheckPermissionAffiliationDto
         $this->validated_ids = collect();
     }
 
-    public function allIdsValidated() : bool
+    public function allIdsValidated(): bool
     {
         $different_ids = $this->requested_ids->diff($this->validated_ids);
 
         return $different_ids->isEmpty();
     }
 
-    public function mergeValidatedIds(array|Collection $validatedIds)
+    public function mergeValidatedIds(array|Collection $validatedIds): void
     {
         $this->validated_ids = $this->validated_ids
             ->merge($validatedIds)

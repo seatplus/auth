@@ -32,18 +32,16 @@ use Seatplus\Auth\Models\User;
 
 class MainCharacterController extends Controller
 {
-    public function change(Request $request)
+    public function change(Request $request): \Illuminate\Http\RedirectResponse
     {
         $request->validate(['character_id' => ['required', 'exists:character_infos,character_id']]);
 
         $character_id = $request->get('character_id');
 
-        $user = User::whereHas('character_users', fn (Builder $query) => $query->whereCharacterId($character_id))
+        $user = User::whereHas('character_users', fn (Builder $query) => $query->where('character_id', $character_id))
             ->firstWhere('id', auth()->user()->getAuthIdentifier());
 
-        if (is_null($user)) {
-            return response('Unauthorized: supplied character_id does not belong to the current user', 401);
-        }
+        abort_if(is_null($user), 403, 'Unauthorized: supplied character_id does not belong to the current user');
 
         $user->changeMainCharacter($character_id);
 

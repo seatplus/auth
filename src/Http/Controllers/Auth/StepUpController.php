@@ -28,18 +28,18 @@ namespace Seatplus\Auth\Http\Controllers\Auth;
 
 use Laravel\Socialite\Contracts\Factory as Socialite;
 use Seatplus\Auth\Http\Controllers\Controller;
+use Seatplus\Auth\Models\User;
 use Seatplus\Eveapi\Models\RefreshToken;
+use SocialiteProviders\Eveonline\Provider;
 
 class StepUpController extends Controller
 {
     /**
      * Redirect the user to the Eve Online authentication page.
      *
-     * @param  \Laravel\Socialite\Contracts\Factory  $social
-     * @param  int  $character_id
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
-    public function __invoke(Socialite $social, int $character_id)
+    public function __invoke(Socialite $socialite, int $character_id)
     {
         if (! $this->isCharacterAssociatedToCurrentUser($character_id)) {
             return redirect()->back()->with('error', 'character must belong to your account');
@@ -55,14 +55,16 @@ class StepUpController extends Controller
             'step_up' => $character_id,
         ]);
 
-        return $social
-            ->driver('eveonline')
-            ->scopes($scopes)
-            ->redirect();
+        $driver = $socialite->driver('eveonline');
+
+        /** @var Provider $driver */
+        return $driver->scopes($scopes)->redirect();
     }
 
     private function isCharacterAssociatedToCurrentUser(int $character_id): bool
     {
-        return auth()->user()->characters->pluck('character_id')->contains($character_id);
+        $user = User::query()->find(auth()->user()->getAuthIdentifier());
+
+        return $user->characters->pluck('character_id')->contains($character_id);
     }
 }

@@ -27,6 +27,7 @@
 namespace Seatplus\Auth\Http\Middleware;
 
 use Closure;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Http\Request;
 use Illuminate\Pipeline\Pipeline;
 use Illuminate\Support\Arr;
@@ -48,10 +49,7 @@ class CheckPermissionAndAffiliation
         CheckAffiliatedIdsPipe::class,
     ];
 
-    /**
-     * @return mixed
-     */
-    public function handle(Request $request, Closure $next, string $permissions, ?string $corporation_role = null)
+    public function handle(Request $request, Closure $next, string $permissions, ?string $corporation_role = null): mixed
     {
         // validate request and set requested ids
         // we do this before fast tracking superuser to ensure superuser requests are valid too.
@@ -83,7 +81,7 @@ class CheckPermissionAndAffiliation
         abort_unless($all_requested_ids_validated, 401, 'You are not allowed to access the requested entity');
     }
 
-    private function checkPermission(string $permissions, ?string $corporation_role) : void
+    private function checkPermission(string $permissions, ?string $corporation_role): void
     {
         if ($this->getUser()->can('superuser')) {
             return;
@@ -102,7 +100,7 @@ class CheckPermissionAndAffiliation
         abort('401', 'You are not authorized to perform this action');
     }
 
-    private function hasCorporationRole(?string $corporation_role) : bool
+    private function hasCorporationRole(?string $corporation_role): bool
     {
         if (is_null($corporation_role)) {
             return false;
@@ -111,7 +109,7 @@ class CheckPermissionAndAffiliation
         return CharacterUser::query()
             ->whereHas(
                 'character.roles',
-                fn ($query) => $query
+                fn (HasOne $query) => $query
                     ->whereJsonContains('roles', 'Director')
                     ->orWhereJsonContains('roles', $corporation_role)
             )
@@ -119,11 +117,11 @@ class CheckPermissionAndAffiliation
             ->exists();
     }
 
-    private function validateAndSetRequestedIds(Request $request) : void
+    private function validateAndSetRequestedIds(Request $request): void
     {
         // validate request and set requsted ids
         // ignore non-validated payload
-        $current_payload = Arr::where($request->input(), fn ($value, $key) => in_array($key, [
+        $current_payload = Arr::where($request->input(), fn (mixed $value, string $key) => in_array($key, [
             'character_id', 'character_ids',
             'corporation_id', 'corporation_ids',
             'alliance_id', 'alliance_ids',

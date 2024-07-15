@@ -52,7 +52,6 @@ beforeEach(function () {
 });
 
 /**
- *
  * @throws \Exception
  */
 it('returns own character id', function () {

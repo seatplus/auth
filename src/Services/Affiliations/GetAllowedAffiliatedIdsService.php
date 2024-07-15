@@ -11,12 +11,12 @@ use Seatplus\Eveapi\Models\Character\CharacterAffiliation;
 
 class GetAllowedAffiliatedIdsService extends GetAffiliatedIdsServiceBase
 {
-    public static function make(AffiliationsDto $affiliationsDto)
+    public static function make(AffiliationsDto $affiliationsDto): self
     {
-        return new static($affiliationsDto);
+        return new self($affiliationsDto);
     }
 
-    public function getQuery() : Builder
+    public function getQuery(): Builder
     {
         $type = AffiliationType::ALLOWED;
         $alias = sprintf('%s_entities', $type->value());

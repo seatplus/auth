@@ -34,6 +34,8 @@ use Seatplus\Auth\Http\Controllers\Controller;
 use Seatplus\Auth\Jobs\UserRolesSync;
 use Seatplus\Auth\Models\User;
 use Seatplus\Auth\Services\GetRequiredScopes;
+use SocialiteProviders\Eveonline\Provider;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class SsoController extends Controller
 {
@@ -41,12 +43,8 @@ class SsoController extends Controller
 
     /**
      * Redirect the user to the Eve Online authentication page.
-     *
-     * @param  \Laravel\Socialite\Contracts\Factory  $social
-     * @param  \Seatplus\Auth\Services\GetRequiredScopes  $required_scopes
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
-    public function redirectToProvider(Socialite $social, GetRequiredScopes $required_scopes)
+    public function redirectToProvider(Socialite $socialite, GetRequiredScopes $required_scopes): RedirectResponse
     {
         $scopes = $required_scopes->execute()->toArray();
 
@@ -55,35 +53,32 @@ class SsoController extends Controller
             'sso_scopes' => $scopes,
         ]);
 
-        return $social->driver('eveonline')
-            ->scopes($scopes)
-            ->redirect();
+        $driver = $socialite->driver('eveonline');
+
+        /** @var Provider $driver */
+        return $driver->scopes($scopes)->redirect();
     }
 
     /**
      * Obtain the user information from Eve Online.
      *
-     * @param  \Laravel\Socialite\Contracts\Factory  $social
-     * @param  \Seatplus\Auth\Http\Actions\Sso\FindOrCreateUserAction  $find_or_create_user_action
-     * @param  \Seatplus\Auth\Http\Actions\Sso\UpdateRefreshTokenAction  $update_refresh_token_action
      * @return \Illuminate\Http\RedirectResponse
      */
     public function handleProviderCallback(
         Socialite $social,
         FindOrCreateUserAction $find_or_create_user_action,
         UpdateRefreshTokenAction $update_refresh_token_action
-    ) {
+    ): RedirectResponse {
         $socialite_user = $social->driver('eveonline')->user();
         $rurl = session()->pull('rurl');
 
-        /** @noinspection PhpUndefinedFieldInspection */
         $eve_data = new EveUser(
-            character_id: $socialite_user->character_id,
-            character_owner_hash: $socialite_user->character_owner_hash,
-            token: $socialite_user->token,
-            refreshToken: $socialite_user->refreshToken,
-            expiresIn: $socialite_user->expiresIn,
-            user: $socialite_user->user,
+            character_id: data_get($socialite_user, 'character_id'),
+            character_owner_hash: data_get($socialite_user, 'character_owner_hash'),
+            token: data_get($socialite_user, 'token'),
+            refreshToken: data_get($socialite_user, 'refreshToken'),
+            expiresIn: data_get($socialite_user, 'expiresIn'),
+            user: data_get($socialite_user, 'user'),
         );
 
         // if return url was set, set the intended URL
@@ -127,9 +122,6 @@ class SsoController extends Controller
      * This method returns a boolean as a status flag for the
      * login routine. If a false is returned, it might mean
      * that that account is not allowed to sign in.
-     *
-     * @param  \Seatplus\Auth\Models\User  $user
-     * @return bool
      */
     public function loginUser(User $user): bool
     {

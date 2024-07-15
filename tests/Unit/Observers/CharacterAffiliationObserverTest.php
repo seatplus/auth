@@ -41,7 +41,6 @@ it('splits secondary user to a new user if doomsheimed', function () {
         ->characters->toHaveCount(1);
 });
 
-
 it('splits primary user to a new user if doomsheimed', function () {
     $user = test()->test_user;
     $user->main_character_id = test()->test_character->character_id;

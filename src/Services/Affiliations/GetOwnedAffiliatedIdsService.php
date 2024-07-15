@@ -12,15 +12,14 @@ class GetOwnedAffiliatedIdsService
 {
     public function __construct(
         private AffiliationsDto $affiliationsDto
-    ) {
-    }
+    ) {}
 
-    public static function make(AffiliationsDto $affiliationsDto)
+    public static function make(AffiliationsDto $affiliationsDto): self
     {
-        return new static($affiliationsDto);
+        return new self($affiliationsDto);
     }
 
-    public function getQuery() : Builder
+    public function getQuery(): Builder
     {
         $character_query = $this->getCharacterQuery();
 
@@ -34,7 +33,7 @@ class GetOwnedAffiliatedIdsService
             ->union($corporation_query);
     }
 
-    private function getCharacterQuery() : Builder
+    private function getCharacterQuery(): Builder
     {
         return CharacterAffiliation::query()
             ->join(
@@ -46,7 +45,7 @@ class GetOwnedAffiliatedIdsService
             ->select('character_affiliations.character_id as affiliated_id');
     }
 
-    private function getCorporationQuery() : Builder
+    private function getCorporationQuery(): Builder
     {
         $character_users = CharacterUser::query()
             ->whereHas(

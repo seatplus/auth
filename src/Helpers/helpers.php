@@ -33,14 +33,11 @@ if (! function_exists('getAffiliatedIdsByClass')) {
     /**
      * A helper to get all affiliated Characters.
      *
-     * @param  string  $class
-     * @param  string  $role
-     * @return array
      * @deprecated deprecated since version 2.0
      */
     function getAffiliatedIdsByClass(string $class, string $role = ''): array
     {
-        $permission_name = config('eveapi.permissions.' . $class);
+        $permission_name = config('eveapi.permissions.'.$class);
 
         return getAffiliatedIdsByPermission($permission_name, $role);
     }
@@ -53,9 +50,6 @@ if (! function_exists('getAffiliatedIdsByPermission')) {
     /**
      * A helper to get all affiliated Characters.
      *
-     * @param  string  $class
-     * @param  string  $role
-     * @return array
      * @deprecated deprecated since version 2.0
      */
     function getAffiliatedIdsByPermission(string $permission, string $role = ''): array

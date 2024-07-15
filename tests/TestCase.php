@@ -47,8 +47,8 @@ abstract class TestCase extends OrchestraTestCase
 
         Factory::guessFactoryNamesUsing(
             fn (string $modelName) => match (true) {
-                Str::startsWith($modelName, 'Seatplus\Auth') => 'Seatplus\\Auth\\Database\\Factories\\' . class_basename($modelName) . 'Factory',
-                Str::startsWith($modelName, 'Seatplus\Eveapi') => 'Seatplus\\Eveapi\\Database\\Factories\\' . class_basename($modelName) . 'Factory',
+                Str::startsWith($modelName, 'Seatplus\Auth') => 'Seatplus\\Auth\\Database\\Factories\\'.class_basename($modelName).'Factory',
+                Str::startsWith($modelName, 'Seatplus\Eveapi') => 'Seatplus\\Eveapi\\Database\\Factories\\'.class_basename($modelName).'Factory',
             }
         );
 
@@ -68,8 +68,7 @@ abstract class TestCase extends OrchestraTestCase
     /**
      * Get application providers.
      *
-     * @param \Illuminate\Foundation\Application $app
-     *
+     * @param  \Illuminate\Foundation\Application  $app
      * @return array
      */
     protected function getPackageProviders($app)
@@ -81,7 +80,7 @@ abstract class TestCase extends OrchestraTestCase
     }
 
     /**
-     * @param \Illuminate\Foundation\Application $app
+     * @param  \Illuminate\Foundation\Application  $app
      */
     private function setupDatabase($app)
     {
@@ -93,8 +92,7 @@ abstract class TestCase extends OrchestraTestCase
     /**
      * Define environment setup.
      *
-     * @param \Illuminate\Foundation\Application $app
-     *
+     * @param  \Illuminate\Foundation\Application  $app
      * @return void
      */
     protected function getEnvironmentSetUp($app)

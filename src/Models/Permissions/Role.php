@@ -27,6 +27,7 @@
 namespace Seatplus\Auth\Models\Permissions;
 
 use Exception;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Collection;
 use Seatplus\Auth\Models\AccessControl\AclAffiliation;
@@ -36,34 +37,37 @@ use Seatplus\Eveapi\Models\Alliance\AllianceInfo;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 use Spatie\Permission\Models\Role as SpatieRole;
 
+/**
+ * @property string $type
+ */
 class Role extends SpatieRole
 {
-    public function affiliations()
+    public function affiliations(): HasMany
     {
         return $this->hasMany(Affiliation::class, 'role_id');
     }
 
-    public function acl_affiliations()
+    public function acl_affiliations(): HasMany
     {
         return $this->hasMany(AclAffiliation::class, 'role_id')
             ->where('can_moderate', false);
     }
 
-    public function moderators()
+    public function moderators(): HasMany
     {
         return $this->hasMany(AclAffiliation::class, 'role_id')
             ->where('can_moderate', true);
     }
 
-    public function acl_members()
+    public function acl_members(): HasMany
     {
         return $this->hasMany(AclMember::class, 'role_id');
     }
 
-    public function members()
+    public function members(): HasMany
     {
-        return $this->acl_members()
-            ->whereStatus('member');
+        return $this->hasMany(AclMember::class, 'role_id')
+            ->where('status', 'member');
     }
 
     public function activateMember(User $user): void
@@ -126,9 +130,6 @@ class Role extends SpatieRole
             ->isNotEmpty();
     }
 
-    /**
-     * @return array
-     */
     public function getAffiliatedIdsAttribute(): array
     {
         //eager load relations for preventing n+1 queries
@@ -141,9 +142,6 @@ class Role extends SpatieRole
             ->all();
     }
 
-    /**
-     * @return array
-     */
     public function getAclAffiliatedIdsAttribute(): array
     {
         $acl_affiliations = $this->acl_affiliations()
@@ -155,15 +153,12 @@ class Role extends SpatieRole
             ->cursor();
 
         return $acl_affiliations
-            ->map(fn ($affiliation) => $affiliation->character_ids)
+            ->map(fn (AclAffiliation $affiliation) => $affiliation->character_ids)
             ->flatten()
             ->unique()
             ->toArray();
     }
 
-    /**
-     * @return array
-     */
     public function getModeratorIdsAttribute(): array
     {
         //eager load relations for preventing n+1 queries
@@ -172,7 +167,7 @@ class Role extends SpatieRole
         ]);
 
         return $role_with_relationships->moderators
-            ->map(fn ($affiliation) => $affiliation->character_ids)
+            ->map(fn (AclAffiliation $affiliation) => $affiliation->character_ids)
             ->flatten()
             ->unique()
             ->toArray();
@@ -181,9 +176,9 @@ class Role extends SpatieRole
     private function getAffiliatedIds(): Collection
     {
         return $this->affiliations
-            ->reject(fn ($affiliation) => $affiliation->type === 'forbidden')
+            ->reject(fn (Affiliation $affiliation) => $affiliation->type === 'forbidden')
             // TODO get IDs instead of character_ids
-            ->map(fn ($affiliation) => $affiliation->type === 'allowed' ? $affiliation->affiliated_ids : $affiliation->inverse_affiliated_ids)
+            ->map(fn (Affiliation $affiliation) => $affiliation->type === 'allowed' ? $affiliation->affiliated_ids : $affiliation->inverse_affiliated_ids)
             ->flatten()
             ->unique();
     }
@@ -192,13 +187,13 @@ class Role extends SpatieRole
     {
         return $this->affiliations
             // we are only concerned about forbidden and inverse ids
-            ->reject(fn ($affiliation) => $affiliation->type === 'allowed')
-            ->map(fn ($affiliation) => $affiliation->affiliated_ids)
+            ->reject(fn (Affiliation $affiliation) => $affiliation->type === 'allowed')
+            ->map(fn (Affiliation $affiliation) => $affiliation->affiliated_ids)
             ->flatten()
             ->unique();
     }
 
-    public function delete()
+    public function delete(): bool
     {
         $this->affiliations()->delete();
         $this->acl_affiliations()->delete();

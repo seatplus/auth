@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Cache;
 use Seatplus\Auth\Models\User;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 
-it('flushes cache after creation', function (User | CharacterInfo $entity) {
+it('flushes cache after creation', function (User|CharacterInfo $entity) {
     Cache::shouldReceive('tags')->with(['characters_with_missing_scopes', test()->test_user->id])->andReturnSelf();
     Cache::shouldReceive('flush')->once();
 

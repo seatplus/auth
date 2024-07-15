@@ -26,9 +26,11 @@
 
 namespace Seatplus\Auth\Actions;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use Seatplus\Auth\Models\Permissions\Role;
 use Seatplus\Auth\Models\User;
 use Seatplus\Eveapi\Models\Alliance\AllianceInfo;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
@@ -39,19 +41,10 @@ use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
  */
 class GetAffiliatedIdsByPermissionArray
 {
-    /**
-     * @var \Illuminate\Contracts\Auth\Authenticatable|null
-     */
-    private $user;
+    private User $user;
 
-    /**
-     * @var string
-     */
-    private $cache_key;
+    private string $cache_key;
 
-    /**
-     * @return string
-     */
     public function getCacheKey(): string
     {
         return $this->cache_key;
@@ -59,12 +52,8 @@ class GetAffiliatedIdsByPermissionArray
 
     public function __construct(private string $permission, private string $corporation_role = '')
     {
-        $this->user = auth()->user();
-        $this->cache_key = sprintf(
-            'affiliated character ids by permission %s for user wit user_id: %s',
-            $this->user->id,
-            $this->permission
-        );
+        $this->user = User::find(auth()->id());
+        $this->cache_key = "affiliated character ids by permission {$this->user->id} for user wit user_id: {$this->permission}";
     }
 
     public function execute(): array
@@ -74,13 +63,9 @@ class GetAffiliatedIdsByPermissionArray
         } catch (\Exception $e) {
             throw $e;
         }
-
-        return ['error'];
     }
 
     /**
-     * @return array
-     *
      * @throws \Exception
      */
     private function getResult(): array
@@ -104,14 +89,14 @@ class GetAffiliatedIdsByPermissionArray
                 //'roles.affiliations.affiliatable.characters' => fn ($query) => $query->has('characters')->select('character_infos.character_id'),
                 'roles.affiliations.affiliatable' => fn (MorphTo $morph_to) => $morph_to->morphWith([CorporationInfo::class => 'characters', AllianceInfo::class => ['characters', 'corporations']]),
             ]
-        )->whereHas('roles.permissions', function ($query) {
+        )->whereHas('roles.permissions', function (Builder $query) {
             $query->where('name', $this->permission);
         })
             ->where('id', $this->user->id)
             ->first();
 
         // if authenticated user has no roles, make sure to skip the roles access
-        $affiliated_ids = ! $user ? collect() : $user->roles->map(fn ($role) => $role->affiliated_ids);
+        $affiliated_ids = ! $user ? collect() : $user->roles->map(fn (Role $role) => $role->affiliated_ids);
 
         // before returning add the owned character ids
         return $affiliated_ids->merge($this->buildOwnedIds())
@@ -123,8 +108,8 @@ class GetAffiliatedIdsByPermissionArray
     {
         $all_ids = collect();
 
-        CharacterInfo::query()->cursor()->each(fn ($character) => $all_ids->push($character->character_id));
-        CorporationInfo::query()->cursor()->each(fn ($corporation) => $all_ids->push($corporation->corporation_id));
+        CharacterInfo::query()->cursor()->each(fn (CharacterInfo $character) => $all_ids->push($character->character_id));
+        CorporationInfo::query()->cursor()->each(fn (CorporationInfo $corporation) => $all_ids->push($corporation->corporation_id));
 
         return $all_ids;
     }
@@ -138,18 +123,18 @@ class GetAffiliatedIdsByPermissionArray
             ->with('characters.roles', 'characters.corporation')
             ->get()
             ->whenNotEmpty(
-                fn ($collection) => $collection
-                ->first()
-                ->characters
-                // for owned corporation tokens, we need to add the affiliation as long as the character has the required role
-                ->map(fn ($character) => [$this->getCorporationId($character), $character->character_id])
-                ->flatten()
-                ->filter()
+                fn (Collection $collection) => $collection
+                    ->first()
+                    ->characters
+                    // for owned corporation tokens, we need to add the affiliation as long as the character has the required role
+                    ->map(fn (CharacterInfo $character) => [$this->getCorporationId($character), $character->character_id])
+                    ->flatten()
+                    ->filter()
             )
             ->flatten()->unique();
     }
 
-    private function getCorporationId(CharacterInfo $character)
+    private function getCorporationId(CharacterInfo $character): ?int
     {
         if (! $this->corporation_role || ! $character->roles) {
             return null;

@@ -17,10 +17,9 @@ abstract class GetAffiliatedIdsServiceBase
 
     public function __construct(
         protected AffiliationsDto $affiliationsDto
-    ) {
-    }
+    ) {}
 
-    protected function joinAffiliatedCharacterAffiliations(JoinClause $join, string $alias) : JoinClause
+    protected function joinAffiliatedCharacterAffiliations(JoinClause $join, string $alias): JoinClause
     {
         return $join
             ->on('character_affiliations.character_id', '=', "$alias.affiliatable_id")->where("$alias.affiliatable_type", CharacterInfo::class)
@@ -28,16 +27,13 @@ abstract class GetAffiliatedIdsServiceBase
             ->orOn('character_affiliations.alliance_id', '=', "$alias.affiliatable_id")->where("$alias.affiliatable_type", AllianceInfo::class);
     }
 
-    protected function joinAffiliatedCorporationAffiliations(JoinClause $join, string $alias) : JoinClause
+    protected function joinAffiliatedCorporationAffiliations(JoinClause $join, string $alias): JoinClause
     {
         return $join
             ->on('character_affiliations.corporation_id', '=', "$alias.affiliatable_id")->where("$alias.affiliatable_type", CorporationInfo::class)
             ->orOn('character_affiliations.alliance_id', '=', "$alias.affiliatable_id")->where("$alias.affiliatable_type", AllianceInfo::class);
     }
 
-    /**
-     * @return Builder
-     */
     protected function getAffiliations(): Builder
     {
         if (! isset($this->affiliations)) {
@@ -62,7 +58,7 @@ abstract class GetAffiliatedIdsServiceBase
         $this->affiliations = $affiliations;
     }
 
-    protected function removeForbiddenAffiliations(Builder $query) : QueryBuilder
+    protected function removeForbiddenAffiliations(Builder $query): QueryBuilder
     {
         $forbidden = GetForbiddenAffiliatedIdService::make($this->affiliationsDto)->getQuery();
 
@@ -80,7 +76,6 @@ abstract class GetAffiliatedIdsServiceBase
                     )
                     ->whereNull('forbidden_id')
             )
-            ->select('affiliated_id')
-        ;
+            ->select('affiliated_id');
     }
 }

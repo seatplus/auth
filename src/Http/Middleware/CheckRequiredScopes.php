@@ -34,20 +34,14 @@ use Illuminate\Support\Facades\Cache;
 use Seatplus\Auth\Models\User;
 use Seatplus\Auth\Services\BuildCharacterScopesArray;
 use Seatplus\Auth\Services\BuildUserLevelRequiredScopes;
+use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\SsoScopes;
 
 class CheckRequiredScopes
 {
     private User $user;
 
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
-     * @return mixed
-     */
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next): mixed
     {
         $characters_with_missing_scopes = Cache::tags(['characters_with_missing_scopes', $this->getUserId()])->get($this->getCacheKey());
 
@@ -85,8 +79,8 @@ class CheckRequiredScopes
 
         $missing_scopes = $this->user
             ->characters
-            ->map(fn ($character) => BuildCharacterScopesArray::make()->setUserScopes($user_scopes)->setCharacter($character)->get())
-            ->filter(fn ($character) => Arr::get($character, 'missing_scopes'));
+            ->map(fn (CharacterInfo $character) => BuildCharacterScopesArray::make()->setUserScopes($user_scopes)->setCharacter($character)->get())
+            ->filter(fn (array $character_scopes) => Arr::get($character_scopes, 'missing_scopes'));
 
         Cache::tags(['characters_with_missing_scopes', $this->getUserId()])->put($this->getCacheKey(), $missing_scopes, now()->addMinutes(15));
 
@@ -108,7 +102,7 @@ class CheckRequiredScopes
     /*
      * This method should return the user to a view where he needs to handle the addition of required scopes
      */
-    protected function redirectTo(Collection $missing_character_scopes)
+    protected function redirectTo(Collection $missing_character_scopes) // @pest-ignore-type
     {
         //TODO: extend this with default view.
     }

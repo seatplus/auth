@@ -53,7 +53,7 @@ class FindOrCreateUserAction
         return $user;
     }
 
-    private function handleCharacterUserEntry(User $user, EveUser $eve_user)
+    private function handleCharacterUserEntry(User $user, EveUser $eve_user): void
     {
         // When character_user is set and found skip
         if ($this->character_user) {
@@ -71,7 +71,7 @@ class FindOrCreateUserAction
     private function getUser(): User
     {
         if (! isset($this->user)) {
-            $this->user = auth()->user() ?? User::create([
+            $this->user = auth()->user() ? User::find(auth()->user()->getAuthIdentifier()) : User::create([
                 'main_character_id' => $this->eve_user->character_id,
                 'active' => true,
             ]);
@@ -80,7 +80,7 @@ class FindOrCreateUserAction
         return $this->user;
     }
 
-    private function handleChangedOwnerHash()
+    private function handleChangedOwnerHash(): void
     {
         // If character_user is unknown or character_owner_hash did not change don't bother anymore
         if (empty($this->character_user) || ($this->character_user->character_owner_hash === $this->eve_user->character_owner_hash)) {
@@ -106,7 +106,7 @@ class FindOrCreateUserAction
         $this->character_user = null;
     }
 
-    private function setUserFromUnchangedOwnerHash()
+    private function setUserFromUnchangedOwnerHash(): void
     {
         /*
          * If user is known and character_owner_hash didn't change return the user. This might cause an exploit
