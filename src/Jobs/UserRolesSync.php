@@ -26,7 +26,6 @@
 
 namespace Seatplus\Auth\Jobs;
 
-use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -59,8 +58,6 @@ class UserRolesSync implements ShouldBeUnique, ShouldQueue
 
     /**
      * The number of seconds after which the job's unique lock will be released.
-     *
-     * @var int
      */
     public int $uniqueFor = 3600;
 
@@ -83,15 +80,13 @@ class UserRolesSync implements ShouldBeUnique, ShouldQueue
      * for specific tags to be monitored.
      *
      * If a job specifies the tags property, that is added.
-     *
-     * @return array
      */
     public function tags(): array
     {
         return [
             'Roles sync',
             "user_id: {$this->user->id}",
-            'main_character: ' . ($this->user->main_character->name ?? ''),
+            'main_character: '.($this->user->main_character->name ?? ''),
         ];
     }
 

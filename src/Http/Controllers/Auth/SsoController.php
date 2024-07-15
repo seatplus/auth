@@ -54,6 +54,7 @@ class SsoController extends Controller
         ]);
 
         $driver = $socialite->driver('eveonline');
+
         /** @var Provider $driver */
         return $driver->scopes($scopes)->redirect();
     }

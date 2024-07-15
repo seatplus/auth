@@ -29,7 +29,6 @@ namespace Seatplus\Auth\Http\Controllers;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Seatplus\Auth\Models\User;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class MainCharacterController extends Controller
 {
@@ -42,7 +41,7 @@ class MainCharacterController extends Controller
         $user = User::whereHas('character_users', fn (Builder $query) => $query->where('character_id', $character_id))
             ->firstWhere('id', auth()->user()->getAuthIdentifier());
 
-        abort_if(is_null($user), 403 ,'Unauthorized: supplied character_id does not belong to the current user');
+        abort_if(is_null($user), 403, 'Unauthorized: supplied character_id does not belong to the current user');
 
         $user->changeMainCharacter($character_id);
 

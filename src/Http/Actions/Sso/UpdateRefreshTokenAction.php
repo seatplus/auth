@@ -49,7 +49,7 @@ class UpdateRefreshTokenAction
             ]
         );
 
-        if($refresh_token->trashed()) {
+        if ($refresh_token->trashed()) {
             $refresh_token->restore();
         }
 

@@ -27,7 +27,6 @@
 namespace Seatplus\Auth\Http\Middleware;
 
 use Closure;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Http\Request;
 use Illuminate\Pipeline\Pipeline;

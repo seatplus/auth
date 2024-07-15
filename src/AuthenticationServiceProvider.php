@@ -60,7 +60,7 @@ class AuthenticationServiceProvider extends ServiceProvider
         $this->addEventListeners();
 
         // Add GateLogic
-        Gate::before(function (User $user, string $ability) : ?bool {
+        Gate::before(function (User $user, string $ability): ?bool {
             try {
                 return $user->hasPermissionTo('superuser') ? true : null;
             } catch (PermissionDoesNotExist) {

@@ -48,8 +48,6 @@ class DispatchUserRoleSync implements ShouldBeUnique, ShouldQueue
      * for specific tags to be monitored.
      *
      * If a job specifies the tags property, that is added.
-     *
-     * @return array
      */
     public function tags(): array
     {

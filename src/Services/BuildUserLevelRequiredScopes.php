@@ -68,7 +68,7 @@ class BuildUserLevelRequiredScopes
     private static function getGlobalScopes(User $user): array
     {
 
-        $global_scopes = Arr::has($user->getAttributes(), 'global_scope') ?  $user->getAttribute('global_scope') : self::getSelectedScopes();
+        $global_scopes = Arr::has($user->getAttributes(), 'global_scope') ? $user->getAttribute('global_scope') : self::getSelectedScopes();
 
         // return is_array($global_scopes) ? $global_scopes : json_decode($global_scopes, true) ?? [];
         return is_array($global_scopes) ? $global_scopes : (is_string($global_scopes) ? json_decode($global_scopes) : []);

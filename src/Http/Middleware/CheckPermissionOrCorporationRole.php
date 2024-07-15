@@ -34,9 +34,6 @@ use Seatplus\Auth\Models\User;
 
 class CheckPermissionOrCorporationRole
 {
-    /**
-     * @return mixed
-     */
     public function handle(Request $request, Closure $next, string $permissions, ?string $corporation_role = null): mixed
     {
         if (! $request->user()) {

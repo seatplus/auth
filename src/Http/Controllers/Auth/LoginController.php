@@ -33,8 +33,6 @@ class LoginController extends Controller
 {
     /**
      * Where to redirect users after login.
-     *
-     * @var string
      */
     protected string $redirectTo = '/home';
 
@@ -48,9 +46,6 @@ class LoginController extends Controller
         $this->middleware('guest')->except('logout');
     }
 
-    /**
-     * @return \Inertia\Response
-     */
     public function showLoginForm(): \Inertia\Response
     {
         // Warn if SSO has not been configured yet.
