@@ -27,6 +27,8 @@
 namespace Seatplus\Auth\Http\Middleware;
 
 use Closure;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Http\Request;
 use Illuminate\Pipeline\Pipeline;
 use Illuminate\Support\Arr;
@@ -48,10 +50,7 @@ class CheckPermissionAndAffiliation
         CheckAffiliatedIdsPipe::class,
     ];
 
-    /**
-     * @return mixed
-     */
-    public function handle(Request $request, Closure $next, string $permissions, ?string $corporation_role = null)
+    public function handle(Request $request, Closure $next, string $permissions, ?string $corporation_role = null): mixed
     {
         // validate request and set requested ids
         // we do this before fast tracking superuser to ensure superuser requests are valid too.
@@ -111,7 +110,7 @@ class CheckPermissionAndAffiliation
         return CharacterUser::query()
             ->whereHas(
                 'character.roles',
-                fn ($query) => $query
+                fn (HasOne $query) => $query
                     ->whereJsonContains('roles', 'Director')
                     ->orWhereJsonContains('roles', $corporation_role)
             )
@@ -123,7 +122,7 @@ class CheckPermissionAndAffiliation
     {
         // validate request and set requsted ids
         // ignore non-validated payload
-        $current_payload = Arr::where($request->input(), fn ($value, $key) => in_array($key, [
+        $current_payload = Arr::where($request->input(), fn (mixed $value, string $key) => in_array($key, [
             'character_id', 'character_ids',
             'corporation_id', 'corporation_ids',
             'alliance_id', 'alliance_ids',

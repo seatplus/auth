@@ -41,12 +41,7 @@ class DispatchUserRoleSync implements ShouldBeUnique, ShouldQueue
     use Queueable;
     use SerializesModels;
 
-    /**
-     * The number of times the job may be attempted.
-     *
-     * @var int
-     */
-    public $tries = 1;
+    public int $tries = 1;
 
     /**
      * Assign this job a tag so that Horizon can categorize and allow
@@ -56,14 +51,14 @@ class DispatchUserRoleSync implements ShouldBeUnique, ShouldQueue
      *
      * @return array
      */
-    public function tags()
+    public function tags(): array
     {
         return [
             'Dispatch Role Updates',
         ];
     }
 
-    public function handle()
+    public function handle(): void
     {
         foreach (User::cursor() as $user) {
             UserRolesSync::dispatch($user)->onQueue('high');

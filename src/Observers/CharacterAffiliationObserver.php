@@ -32,7 +32,7 @@ use Seatplus\Eveapi\Models\Character\CharacterAffiliation;
 
 class CharacterAffiliationObserver
 {
-    public function updated(CharacterAffiliation $affiliation)
+    public function updated(CharacterAffiliation $affiliation): void
     {
         if ($affiliation->corporation_id !== 1000001) {
             return;
@@ -53,7 +53,7 @@ class CharacterAffiliationObserver
         $is_main_character = $character_user->user->main_character_id === $affiliation->character_id;
 
         if ($is_main_character) {
-            $new_main_character_id = $character_user->user->characters->pluck('character_id')->reject(fn ($id) => $id === $affiliation->character_id)->first();
+            $new_main_character_id = $character_user->user->characters->pluck('character_id')->reject(fn (int $id) => $id === $affiliation->character_id)->first();
 
             // update user
             User::where('main_character_id', $affiliation->character_id)->update(['main_character_id' => $new_main_character_id]);

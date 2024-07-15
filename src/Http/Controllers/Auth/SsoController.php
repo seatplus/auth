@@ -34,8 +34,8 @@ use Seatplus\Auth\Http\Controllers\Controller;
 use Seatplus\Auth\Jobs\UserRolesSync;
 use Seatplus\Auth\Models\User;
 use Seatplus\Auth\Services\GetRequiredScopes;
-use SocialiteProviders\Eveonline\EveonlineExtendSocialite;
 use SocialiteProviders\Eveonline\Provider;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class SsoController extends Controller
 {
@@ -43,10 +43,8 @@ class SsoController extends Controller
 
     /**
      * Redirect the user to the Eve Online authentication page.
-     *
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
-    public function redirectToProvider(Socialite $socialite, GetRequiredScopes $required_scopes)
+    public function redirectToProvider(Socialite $socialite, GetRequiredScopes $required_scopes): RedirectResponse
     {
         $scopes = $required_scopes->execute()->toArray();
 
@@ -69,7 +67,7 @@ class SsoController extends Controller
         Socialite $social,
         FindOrCreateUserAction $find_or_create_user_action,
         UpdateRefreshTokenAction $update_refresh_token_action
-    ) {
+    ): RedirectResponse {
         $socialite_user = $social->driver('eveonline')->user();
         $rurl = session()->pull('rurl');
 

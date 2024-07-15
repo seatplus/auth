@@ -7,7 +7,7 @@ use Seatplus\Auth\Services\Dtos\AffiliationsDto;
 
 class GetAffiliatedIdsService extends GetAffiliatedIdsServiceBase
 {
-    public static function make(AffiliationsDto $affiliationsDto)
+    public static function make(AffiliationsDto $affiliationsDto): self
     {
         return new self($affiliationsDto);
     }

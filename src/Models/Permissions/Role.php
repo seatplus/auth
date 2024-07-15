@@ -153,7 +153,7 @@ class Role extends SpatieRole
             ->cursor();
 
         return $acl_affiliations
-            ->map(fn ($affiliation) => $affiliation->character_ids)
+            ->map(fn (AclAffiliation $affiliation) => $affiliation->character_ids)
             ->flatten()
             ->unique()
             ->toArray();
@@ -167,7 +167,7 @@ class Role extends SpatieRole
         ]);
 
         return $role_with_relationships->moderators
-            ->map(fn ($affiliation) => $affiliation->character_ids)
+            ->map(fn (AclAffiliation $affiliation) => $affiliation->character_ids)
             ->flatten()
             ->unique()
             ->toArray();
@@ -176,9 +176,9 @@ class Role extends SpatieRole
     private function getAffiliatedIds(): Collection
     {
         return $this->affiliations
-            ->reject(fn ($affiliation) => $affiliation->type === 'forbidden')
+            ->reject(fn (AclAffiliation $affiliation) => $affiliation->type === 'forbidden')
             // TODO get IDs instead of character_ids
-            ->map(fn ($affiliation) => $affiliation->type === 'allowed' ? $affiliation->affiliated_ids : $affiliation->inverse_affiliated_ids)
+            ->map(fn (AclAffiliation $affiliation) => $affiliation->type === 'allowed' ? $affiliation->affiliated_ids : $affiliation->inverse_affiliated_ids)
             ->flatten()
             ->unique();
     }
@@ -187,13 +187,13 @@ class Role extends SpatieRole
     {
         return $this->affiliations
             // we are only concerned about forbidden and inverse ids
-            ->reject(fn ($affiliation) => $affiliation->type === 'allowed')
-            ->map(fn ($affiliation) => $affiliation->affiliated_ids)
+            ->reject(fn (AclAffiliation $affiliation) => $affiliation->type === 'allowed')
+            ->map(fn (AclAffiliation $affiliation) => $affiliation->affiliated_ids)
             ->flatten()
             ->unique();
     }
 
-    public function delete()
+    public function delete(): bool
     {
         $this->affiliations()->delete();
         $this->acl_affiliations()->delete();

@@ -26,6 +26,7 @@
 
 namespace Seatplus\Auth;
 
+use Illuminate\Contracts\Container\Container;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Socialite\SocialiteManager;
@@ -47,7 +48,7 @@ use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 
 class AuthenticationServiceProvider extends ServiceProvider
 {
-    public function boot()
+    public function boot(): void
     {
         //Add Migrations
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations/');
@@ -59,7 +60,7 @@ class AuthenticationServiceProvider extends ServiceProvider
         $this->addEventListeners();
 
         // Add GateLogic
-        Gate::before(function ($user, $ability) {
+        Gate::before(function (User $user, string $ability) : ?bool {
             try {
                 return $user->hasPermissionTo('superuser') ? true : null;
             } catch (PermissionDoesNotExist) {
@@ -74,11 +75,11 @@ class AuthenticationServiceProvider extends ServiceProvider
 
     }
 
-    public function register()
+    public function register(): void
     {
         // Register the Socialite Factory.
         // From: Laravel\Socialite\SocialiteServiceProvider
-        $this->app->singleton('Laravel\Socialite\Contracts\Factory', function ($app) {
+        $this->app->singleton('Laravel\Socialite\Contracts\Factory', function (Container $app) {
             return new SocialiteManager($app);
         });
 
@@ -87,7 +88,7 @@ class AuthenticationServiceProvider extends ServiceProvider
 
         $socialite->extend(
             'eveonline',
-            function ($app) use ($socialite) {
+            function (Container $app) use ($socialite) {
                 $config = $app['config']['services.eveonline'];
 
                 return $socialite->buildProvider(Provider::class, $config);
@@ -101,14 +102,14 @@ class AuthenticationServiceProvider extends ServiceProvider
         $this->setUserModel();
     }
 
-    private function addEventListeners()
+    private function addEventListeners(): void
     {
         app('events')->listen(SocialiteWasCalled::class, EveonlineExtendSocialite::class);
         app('events')->listen(RefreshTokenCreated::class, ReactOnFreshRefreshToken::class);
         app('events')->listen(UpdatingRefreshTokenEvent::class, UpdatingRefreshTokenListener::class);
     }
 
-    private function setUserModel()
+    private function setUserModel(): void
     {
         // Set the User Model
         app('config')->set('auth.providers.users.model', User::class);

@@ -29,5 +29,5 @@ test('one cannot change main character if character does not belong to user', fu
 
     test()->actingAs(test()->test_user)->post(route('change.main_character'), [
         'character_id' => $secondary->character_id,
-    ])->assertUnauthorized();
+    ])->assertForbidden();
 });

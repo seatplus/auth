@@ -34,7 +34,7 @@ use Seatplus\Eveapi\Models\Character\CharacterInfo;
 
 class ApplicationObserver
 {
-    public function created(Application $application)
+    public function created(Application $application): void
     {
         $user_id = match ($application->applicationable_type) {
             User::class => $application->applicationable_id,

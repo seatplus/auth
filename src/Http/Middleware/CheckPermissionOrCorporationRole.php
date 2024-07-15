@@ -27,6 +27,7 @@
 namespace Seatplus\Auth\Http\Middleware;
 
 use Closure;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Http\Request;
 use Seatplus\Auth\Models\CharacterUser;
 use Seatplus\Auth\Models\User;
@@ -36,10 +37,10 @@ class CheckPermissionOrCorporationRole
     /**
      * @return mixed
      */
-    public function handle(Request $request, Closure $next, string $permissions, ?string $corporation_role = null)
+    public function handle(Request $request, Closure $next, string $permissions, ?string $corporation_role = null): mixed
     {
         if (! $request->user()) {
-            return abort(401);
+            abort(401);
         }
 
         // validate request and set requsted ids
@@ -78,7 +79,7 @@ class CheckPermissionOrCorporationRole
         return CharacterUser::query()
             ->whereHas(
                 'character.roles',
-                fn ($query) => $query
+                fn (HasOne $query) => $query
                     ->whereJsonContains('roles', 'Director')
                     ->orWhereJsonContains('roles', $corporation_role)
             )

@@ -36,7 +36,7 @@ class LoginController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/home';
+    protected string $redirectTo = '/home';
 
     /**
      * Create a new controller instance.
@@ -51,7 +51,7 @@ class LoginController extends Controller
     /**
      * @return \Inertia\Response
      */
-    public function showLoginForm()
+    public function showLoginForm(): \Inertia\Response
     {
         // Warn if SSO has not been configured yet.
         if (strlen(config('web.config.EVE_CLIENT_ID')) < 5 || strlen(config('web.config.EVE_CLIENT_SECRET')) < 5) {
@@ -64,7 +64,7 @@ class LoginController extends Controller
         ]);
     }
 
-    public function logout()
+    public function logout(): \Illuminate\Http\RedirectResponse
     {
         auth()->logout();
 

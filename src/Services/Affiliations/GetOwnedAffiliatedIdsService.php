@@ -14,7 +14,7 @@ class GetOwnedAffiliatedIdsService
         private AffiliationsDto $affiliationsDto
     ) {}
 
-    public static function make(AffiliationsDto $affiliationsDto)
+    public static function make(AffiliationsDto $affiliationsDto): self
     {
         return new self($affiliationsDto);
     }

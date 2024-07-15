@@ -22,7 +22,7 @@ class CheckPermissionAffiliationDto
         return $different_ids->isEmpty();
     }
 
-    public function mergeValidatedIds(array|Collection $validatedIds)
+    public function mergeValidatedIds(array|Collection $validatedIds): void
     {
         $this->validated_ids = $this->validated_ids
             ->merge($validatedIds)

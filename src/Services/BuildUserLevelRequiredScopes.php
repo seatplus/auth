@@ -27,6 +27,7 @@
 namespace Seatplus\Auth\Services;
 
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Seatplus\Auth\Models\User;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\SsoScopes;
@@ -43,8 +44,8 @@ class BuildUserLevelRequiredScopes
                 $character->corporation->ssoScopes ?? [],
                 $character->alliance->ssoScopes ?? [],
             ])->where('type', 'user'))
-            ->filter(fn ($character) => $character->isNotEmpty())
-            ->map(fn ($character) => $character->map(fn ($scope) => [
+            ->filter(fn (Collection $collection) => $collection->isNotEmpty())
+            ->map(fn (Collection $collection) => $collection->map(fn (SsoScopes $scope) => [
                 $scope->selected_scopes,
             ]))
             ->concat([

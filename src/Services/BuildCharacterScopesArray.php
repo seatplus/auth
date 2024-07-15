@@ -51,12 +51,12 @@ class BuildCharacterScopesArray
         return $this->character;
     }
 
-    public static function make()
+    public static function make(): self
     {
         return new self();
     }
 
-    public function setUserScopes(array $user_scopes)
+    public function setUserScopes(array $user_scopes): self
     {
         $this->withUserScope = true;
         $this->user_scopes = $user_scopes;
@@ -92,7 +92,7 @@ class BuildCharacterScopesArray
         $required_scopes = Arr::get($character_array, 'required_scopes');
         $token_scopes = Arr::get($character_array, 'token_scopes');
         $missing_scopes = collect($required_scopes)
-            ->reject(fn ($required_scope) => in_array($required_scope, $token_scopes))
+            ->reject(fn (string $required_scope) => in_array($required_scope, $token_scopes))
             ->toArray();
 
         return Arr::add($character_array, 'missing_scopes', array_values($missing_scopes));
