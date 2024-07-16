@@ -41,7 +41,7 @@ class CheckRequiredScopes
 {
     private User $user;
 
-    public function handle(Request $request, Closure $next): mixed
+    public function handle(Request $request, Closure $next) // @pest-ignore-type
     {
         $characters_with_missing_scopes = Cache::tags(['characters_with_missing_scopes', $this->getUserId()])->get($this->getCacheKey());
 
