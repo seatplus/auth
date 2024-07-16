@@ -88,9 +88,13 @@ function createSocialiteUser($character_id = null, array $scopes = ['esi-skills.
     $refresh_token = RefreshToken::factory()->scopes($scopes)->make();
 
     $socialiteUser = test()->createMock(SocialiteUser::class);
-    $socialiteUser->character_owner_hash = faker()->sha256;
-    //name - we don't care for that
-    $socialiteUser->character_id = $character_id ?? $refresh_token->character_id;
+
+    $attributes = (object) [
+        'character_id' => $character_id ?? $refresh_token->character_id,
+        'character_owner_hash' => faker()->sha256,
+    ];
+
+    $socialiteUser->attributes = $attributes;
     $socialiteUser->token = $refresh_token->token;
     $socialiteUser->refreshToken = $refresh_token->refresh_token;
     $socialiteUser->expiresIn = 12 * 60; //let's just say 12 minutes

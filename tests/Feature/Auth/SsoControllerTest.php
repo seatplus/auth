@@ -32,6 +32,7 @@ use Seatplus\Auth\Jobs\UserRolesSync;
 
 it('works for non authed users', function () {
     $abstractUser = createSocialiteUser();
+    $character_id = data_get($abstractUser, 'attributes.character_id');
 
     $provider = Mockery::mock(Provider::class);
     $provider->shouldReceive('user')->andReturn($abstractUser);
@@ -39,7 +40,7 @@ it('works for non authed users', function () {
     Socialite::shouldReceive('driver')->with('eveonline')->andReturn($provider);
 
     test()->assertDatabaseMissing('refresh_tokens', [
-        'character_id' => $abstractUser->character_id,
+        'character_id' => $character_id,
     ]);
 
     Event::fakeFor(function () {
@@ -49,7 +50,7 @@ it('works for non authed users', function () {
     });
 
     test()->assertDatabaseHas('refresh_tokens', [
-        'character_id' => $abstractUser->character_id,
+        'character_id' => $character_id,
     ]);
 });
 
