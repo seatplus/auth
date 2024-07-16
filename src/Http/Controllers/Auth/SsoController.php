@@ -69,12 +69,14 @@ class SsoController extends Controller
         FindOrCreateUserAction $find_or_create_user_action,
         UpdateRefreshTokenAction $update_refresh_token_action
     ): RedirectResponse {
+
+        /* @var \SocialiteProviders\Manager\OAuth2\User $socialite_user */
         $socialite_user = $social->driver('eveonline')->user();
         $rurl = session()->pull('rurl');
 
         $eve_data = new EveUser(
-            character_id: data_get($socialite_user, 'character_id'),
-            character_owner_hash: data_get($socialite_user, 'character_owner_hash'),
+            character_id: data_get($socialite_user, 'attributes.character_id'),
+            character_owner_hash: data_get($socialite_user, 'attributes.character_owner_hash'),
             token: data_get($socialite_user, 'token'),
             refreshToken: data_get($socialite_user, 'refreshToken'),
             expiresIn: data_get($socialite_user, 'expiresIn'),
