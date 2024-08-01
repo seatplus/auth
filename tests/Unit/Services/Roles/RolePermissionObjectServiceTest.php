@@ -8,6 +8,7 @@ use Seatplus\Auth\Services\Roles\RoleAffiliatedIdsService;
 
 test('role permission object service', function () {
     // Arrange
+    /** @var Role $role */
     $role = Role::create(['name' => Str::random()]);
 
     // create 3 permissions
