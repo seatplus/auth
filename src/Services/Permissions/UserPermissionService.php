@@ -54,8 +54,6 @@ class UserPermissionService
         $user->roles->each(function (Role $role) {
             $role_permissions = $this->role_permission_object_service->get($role);
 
-            dump($role_permissions);
-
             // merge on permissions. The key might exist, so we extend the array
             $this->permissions = $role_permissions
                 ->mergeRecursive($this->permissions)

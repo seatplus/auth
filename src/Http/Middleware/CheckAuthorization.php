@@ -24,26 +24,41 @@
  * SOFTWARE.
  */
 
-namespace Seatplus\Auth\Models\AccessControl;
+namespace Seatplus\Auth\Http\Middleware;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Seatplus\Auth\Models\Permissions\Role;
+use Closure;
+use Illuminate\Http\Request;
 use Seatplus\Auth\Models\User;
+use Seatplus\Auth\Services\Permissions\CanUserService;
+use Seatplus\Auth\Services\Permissions\DTO\ValidateIdsDTO;
 
-class AclMember extends Model
+
+class CheckAuthorization
 {
-    public $incrementing = false;
 
-    protected $guarded = [];
-
-    public function user(): BelongsTo
+    public function __construct(
+        private ?CanUserService $canUserService = null
+    )
     {
-        return $this->belongsTo(User::class, 'user_id');
+        $this->canUserService = $this->canUserService ?? new CanUserService();
     }
 
-    public function role(): BelongsTo
+    public function handle(Request $request, Closure $next, string $permissions, ?string $corporation_role = null): mixed
     {
-        return $this->belongsTo(Role::class, 'role_id');
+        /** @var User $user */
+        $user = auth()->user();
+        $ids_dto = ValidateIdsDTO::fromRequest($request);
+        $permissions = explode('|', $permissions);
+        $corporation_role = explode('|', $corporation_role);
+
+        abort_unless($this->canUserService->check(
+            user: $user,
+            idsDTO: $ids_dto,
+            permissions: $permissions,
+            corporation_roles:
+            $corporation_role
+        ), 403);
+
+        return $next($request);
     }
 }
