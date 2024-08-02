@@ -27,6 +27,7 @@
 namespace Seatplus\Auth\Http\Middleware;
 
 use Closure;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
@@ -34,76 +35,32 @@ use Illuminate\Support\Facades\Cache;
 use Seatplus\Auth\Models\User;
 use Seatplus\Auth\Services\BuildCharacterScopesArray;
 use Seatplus\Auth\Services\BuildUserLevelRequiredScopes;
+use Seatplus\Auth\Services\SsoScopes\IsUserCompliantService;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\SsoScopes;
 
 class CheckRequiredScopes
 {
-    private User $user;
+    public function __construct(
+        private ?IsUserCompliantService $isUserCompliantService = null,
+    )
+    {
+        $this->isUserCompliantService ??= new IsUserCompliantService();
+    }
 
     public function handle(Request $request, Closure $next) // @pest-ignore-type
     {
-        $characters_with_missing_scopes = Cache::tags(['characters_with_missing_scopes', $this->getUserId()])->get($this->getCacheKey());
 
-        if (is_null($characters_with_missing_scopes)) {
-            $this->buildUser();
-
-            $characters_with_missing_scopes = $this->getCharactersWithMissingScopes();
-        }
-
-        return $characters_with_missing_scopes->isEmpty()
+        return $this->isUserCompliantService->check($request->user())
             ? $next($request)
-            : $this->redirectTo($characters_with_missing_scopes);
-    }
-
-    public function buildUser(): void
-    {
-        /** @noinspection PhpFieldAssignmentTypeMismatchInspection */
-        $this->user = User::with(
-            'characters.alliance.ssoScopes',
-            'characters.corporation.ssoScopes',
-            'characters.alliance.ssoScopes',
-            'characters.application.corporation.ssoScopes',
-            'characters.application.corporation.alliance.ssoScopes',
-            'characters.refresh_token',
-            'application.corporation.ssoScopes',
-            'application.corporation.alliance.ssoScopes'
-        )->addSelect(['global_scope' => SsoScopes::global()->select('selected_scopes')])
-            ->find(auth()->user()->getAuthIdentifier());
-    }
-
-    private function getCharactersWithMissingScopes(): Collection
-    {
-        // Get user level required scopes
-        $user_scopes = BuildUserLevelRequiredScopes::get($this->user);
-
-        $missing_scopes = $this->user
-            ->characters
-            ->map(fn (CharacterInfo $character) => BuildCharacterScopesArray::make()->setUserScopes($user_scopes)->setCharacter($character)->get())
-            ->filter(fn (array $character_scopes) => Arr::get($character_scopes, 'missing_scopes'));
-
-        Cache::tags(['characters_with_missing_scopes', $this->getUserId()])->put($this->getCacheKey(), $missing_scopes, now()->addMinutes(15));
-
-        return $missing_scopes;
-    }
-
-    private function getCacheKey(): string
-    {
-        $user_id = $this->getUserId();
-
-        return "UserScopes:${user_id}";
-    }
-
-    private function getUserId(): string
-    {
-        return (string) isset($this->user) ? $this->user->id : auth()->user()->getAuthIdentifier();
+            : $this->redirectTo($this->isUserCompliantService->getMissingScopes($request->user()));
     }
 
     /*
      * This method should return the user to a view where he needs to handle the addition of required scopes
      */
-    protected function redirectTo(Collection $missing_character_scopes) // @pest-ignore-type
+    protected function redirectTo(array $missing_character_scopes): RedirectResponse
     {
-        //TODO: extend this with default view.
+        return redirect('/');
     }
 }
