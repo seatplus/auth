@@ -24,45 +24,23 @@
  * SOFTWARE.
  */
 
-namespace Seatplus\Auth\Http\Controllers\Auth;
+namespace Seatplus\Auth\Http\Controllers;
 
-use Inertia\Inertia;
-use Seatplus\Auth\Http\Controllers\Controller;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
+use Seatplus\Auth\Models\User;
 
-class LoginController extends Controller
+class SwitchMainCharacterController extends Controller
 {
-    /**
-     * Where to redirect users after login.
-     */
-    protected string $redirectTo = '/home';
-
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
+    public function __invoke(int $new_character_id): \Illuminate\Http\RedirectResponse
     {
-        $this->middleware('guest')->except('logout');
-    }
+        $user = User::whereHas('character_users', fn (Builder $query) => $query->where('character_id', $new_character_id))
+            ->firstWhere('id', auth()->user()->getAuthIdentifier());
 
-    public function showLoginForm(): \Inertia\Response
-    {
-        // Warn if SSO has not been configured yet.
-        if (strlen(config('web.config.EVE_CLIENT_ID')) < 5 || strlen(config('web.config.EVE_CLIENT_SECRET')) < 5) {
-            session()->flash('warning', trans('web::auth.sso_config_warning'));
-        }
+        abort_if(is_null($user), 403);
 
-        return Inertia::render('Auth/Login', [
-            'login_welcome' => trans('web::auth.login_welcome'),
-            'evesso_img_src' => asset('img/evesso.png'),
-        ]);
-    }
+        $user->changeMainCharacter($new_character_id);
 
-    public function logout(): \Illuminate\Http\RedirectResponse
-    {
-        auth()->logout();
-
-        return redirect('/');
+        return back();
     }
 }

@@ -25,26 +25,39 @@
  */
 
 use Illuminate\Support\Facades\Route;
+use Seatplus\Auth\Http\Controllers\Auth\CallbackController;
 use Seatplus\Auth\Http\Controllers\Auth\LoginController;
-use Seatplus\Auth\Http\Controllers\Auth\SsoController;
+use Seatplus\Auth\Http\Controllers\Auth\RedirectSSOController;
 use Seatplus\Auth\Http\Controllers\Auth\StepUpController;
-use Seatplus\Auth\Http\Controllers\MainCharacterController;
+use Seatplus\Auth\Http\Controllers\SwitchMainCharacterController;
 
-Route::prefix('auth')
-    ->middleware('web')
+Route::middleware('web')
     ->group(function () {
+
+        // auth/eve/callback
+        // auth/eve/redirect
+        // auth/eve/step-up/{character_id}
+        // auth/main-character/switch/{new_character_id}
+
         // Auth
-        Route::get('login', [LoginController::class, 'showLoginForm'])->name('auth.login');
+        Route::prefix('auth')
+            ->group(function () {
 
-        Route::get('logout', [LoginController::class, 'logout'])->name('auth.logout');
+                // SSO
+                Route::prefix('eve')
+                    ->group(function () {
+                        Route::get('sso', RedirectSSOController::class)->name('auth.eve');
+                        Route::get('sso/{character_id}/step_up', StepUpController::class)->name('auth.eve.step_up');
+                        Route::get('callback', CallbackController::class)->name('auth.eve.callback'); // do not change this route /auth/eve/callback - this is registered in eve application
+                    });
 
-        // SSO
-        Route::get('/eve/sso/', [SsoController::class, 'redirectToProvider'])->name('auth.eve');
-        Route::get('/eve/sso/{character_id}/step_up', StepUpController::class)->name('auth.eve.step_up');
+                // MainCharacter
+                Route::put('main-character/switch/{new_character_id}', SwitchMainCharacterController::class)
+                    ->name('change.main_character');
+            });
 
-        Route::get('/eve/callback', [SsoController::class, 'handleProviderCallback'])->name('auth.eve.callback');
+        // TODO: Add routes for creating, updating, assigning Affiliations and deleting roles, use Laravel Sanctum for API authentication
 
-        // MainCharacter
-        Route::post('main_character/change', [MainCharacterController::class, 'change'])
-            ->name('change.main_character');
     });
+
+

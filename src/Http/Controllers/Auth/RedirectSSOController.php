@@ -24,27 +24,34 @@
  * SOFTWARE.
  */
 
-namespace Seatplus\Auth\Http\Controllers;
+namespace Seatplus\Auth\Http\Controllers\Auth;
 
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\Request;
-use Seatplus\Auth\Models\User;
+use Laravel\Socialite\Contracts\Factory as Socialite;
+use Seatplus\Auth\Http\Controllers\Controller;
+use Seatplus\Auth\Services\GetRequiredScopes;
+use SocialiteProviders\Eveonline\Provider;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
-class MainCharacterController extends Controller
+class RedirectSSOController extends Controller
 {
-    public function change(Request $request): \Illuminate\Http\RedirectResponse
+
+    /**
+     * Redirect the user to the Eve Online authentication page.
+     */
+    public function __invoke(Socialite $socialite, GetRequiredScopes $required_scopes): RedirectResponse
     {
-        $request->validate(['character_id' => ['required', 'exists:character_infos,character_id']]);
+        $scopes = $required_scopes->execute()->toArray();
 
-        $character_id = $request->get('character_id');
+        session([
+            'rurl' => session()->previousUrl(),
+            'sso_scopes' => $scopes,
+        ]);
 
-        $user = User::whereHas('character_users', fn (Builder $query) => $query->where('character_id', $character_id))
-            ->firstWhere('id', auth()->user()->getAuthIdentifier());
+        $driver = $socialite->driver('eveonline');
 
-        abort_if(is_null($user), 403, 'Unauthorized: supplied character_id does not belong to the current user');
-
-        $user->changeMainCharacter($character_id);
-
-        return back();
+        /** @var Provider $driver */
+        return $driver->scopes($scopes)->redirect();
     }
+
+
 }

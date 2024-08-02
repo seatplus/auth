@@ -13,9 +13,9 @@ test('one can change main character', function () {
 
     test()->assertNotEquals($secondary->character_id, test()->test_user->main_character_id);
 
-    test()->actingAs(test()->test_user)->post(route('change.main_character'), [
-        'character_id' => $secondary->character_id,
-    ])->assertRedirect();
+    test()->actingAs(test()->test_user)->put(route('change.main_character', [
+        'new_character_id' => $secondary->character_id,
+    ]))->assertRedirect();
 
     expect(test()->test_user->refresh()->main_character_id)->toEqual($secondary->character_id);
 });
@@ -27,7 +27,7 @@ test('one cannot change main character if character does not belong to user', fu
 
     test()->assertNotEquals($secondary->character_id, test()->test_user->main_character_id);
 
-    test()->actingAs(test()->test_user)->post(route('change.main_character'), [
-        'character_id' => $secondary->character_id,
-    ])->assertForbidden();
+    test()->actingAs(test()->test_user)->put(route('change.main_character', [
+        'new_character_id' => $secondary->character_id,
+    ]))->assertForbidden();
 });

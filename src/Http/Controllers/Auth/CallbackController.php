@@ -1,78 +1,29 @@
 <?php
 
-/*
- * MIT License
- *
- * Copyright (c) 2019, 2020, 2021 Felix Huber
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
-
 namespace Seatplus\Auth\Http\Controllers\Auth;
 
 use Laravel\Socialite\Contracts\Factory as Socialite;
+use Illuminate\Http\RedirectResponse;
 use Seatplus\Auth\Containers\EveUser;
 use Seatplus\Auth\Http\Actions\Sso\FindOrCreateUserAction;
 use Seatplus\Auth\Http\Actions\Sso\UpdateRefreshTokenAction;
-use Seatplus\Auth\Http\Controllers\Controller;
 use Seatplus\Auth\Jobs\UserRolesSync;
 use Seatplus\Auth\Models\User;
-use Seatplus\Auth\Services\GetRequiredScopes;
-use SocialiteProviders\Eveonline\Provider;
-use Symfony\Component\HttpFoundation\RedirectResponse;
+use SocialiteProviders\Manager\OAuth2\User as SocialiteUser;
 
-class SsoController extends Controller
+class CallbackController
 {
     private bool $should_redirect = false;
 
-    /**
-     * Redirect the user to the Eve Online authentication page.
-     */
-    public function redirectToProvider(Socialite $socialite, GetRequiredScopes $required_scopes): RedirectResponse
-    {
-        $scopes = $required_scopes->execute()->toArray();
-
-        session([
-            'rurl' => session()->previousUrl(),
-            'sso_scopes' => $scopes,
-        ]);
-
-        $driver = $socialite->driver('eveonline');
-
-        /** @var Provider $driver */
-        return $driver->scopes($scopes)->redirect();
-    }
-
-    /**
-     * Obtain the user information from Eve Online.
-     *
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function handleProviderCallback(
+    public function __invoke(
         Socialite $social,
         FindOrCreateUserAction $find_or_create_user_action,
         UpdateRefreshTokenAction $update_refresh_token_action
     ): RedirectResponse {
 
-        /* @var \SocialiteProviders\Manager\OAuth2\User $socialite_user */
+        /* @var SocialiteUser $socialite_user */
         $socialite_user = $social->driver('eveonline')->user();
-        $rurl = session()->pull('rurl');
+        $return_url = session()->pull('rurl');
 
         $eve_data = new EveUser(
             character_id: data_get($socialite_user, 'attributes.character_id'),
@@ -84,8 +35,8 @@ class SsoController extends Controller
         );
 
         // if return url was set, set the intended URL
-        if ($rurl) {
-            redirect()->setIntendedUrl($rurl);
+        if ($return_url) {
+            redirect()->setIntendedUrl($return_url);
         }
 
         // check if the requested scopes matches the provided scopes
@@ -125,7 +76,7 @@ class SsoController extends Controller
      * login routine. If a false is returned, it might mean
      * that that account is not allowed to sign in.
      */
-    public function loginUser(User $user): bool
+    private function loginUser(User $user): bool
     {
         // Login and "remember" the given user...
         auth()->login($user, true);
@@ -156,4 +107,5 @@ class SsoController extends Controller
         session()->flash('error', 'Please make sure to select the same character to step up on CCP as on seatplus.');
         $this->should_redirect = true;
     }
+
 }

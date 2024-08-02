@@ -24,41 +24,7 @@
  * SOFTWARE.
  */
 
-namespace Seatplus\Auth\Models\AccessControl;
-
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Support\Collection;
-use Seatplus\Auth\Models\Permissions\Role;
-use Seatplus\Eveapi\Models\Character\CharacterInfo;
-
-class AclAffiliation extends Model
-{
-    public $incrementing = false;
-
-    protected $guarded = [];
-
-    protected $casts = [
-        'can_moderate' => 'boolean',
-    ];
-
-    public function affiliatable(): MorphTo
-    {
-        return $this->morphTo();
-    }
-
-    public function role(): BelongsTo
-    {
-        return $this->belongsTo(Role::class, 'id', 'role_id');
-    }
-
-    public function getCharacterIdsAttribute(): Collection
-    {
-        if (! $this->affiliatable) {
-            return collect();
-        }
-
-        return $this->affiliatable instanceof CharacterInfo ? collect($this->affiliatable->character_id) : $this->affiliatable->characters->pluck('character_id');
-    }
-}
+return [
+    'sso_config_warning'    => 'SSO does not appear to have been configured yet. Please check your .env file.',
+    'login_welcome'         => 'Welcome, please login using EVE Online SSO',
+];

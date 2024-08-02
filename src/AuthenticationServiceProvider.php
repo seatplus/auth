@@ -36,6 +36,7 @@ use Seatplus\Auth\Models\User;
 use Seatplus\Auth\Observers\ApplicationObserver;
 use Seatplus\Auth\Observers\CharacterAffiliationObserver;
 use Seatplus\Auth\Observers\SsoScopeObserver;
+use Seatplus\Auth\Services\CacheService;
 use Seatplus\Eveapi\Events\RefreshTokenCreated;
 use Seatplus\Eveapi\Events\UpdatingRefreshTokenEvent;
 use Seatplus\Eveapi\Models\Application;
@@ -58,6 +59,9 @@ class AuthenticationServiceProvider extends ServiceProvider
 
         // Add event listeners
         $this->addEventListeners();
+
+        // Add translations
+        $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'auth');
 
         // Add GateLogic
         Gate::before(function (User $user, string $ability): ?bool {
@@ -89,7 +93,7 @@ class AuthenticationServiceProvider extends ServiceProvider
         $socialite->extend(
             'eveonline',
             function (Container $app) use ($socialite) {
-                $config = $app['config']['services.eveonline'];
+                $config = config('services.eveonline');
 
                 return $socialite->buildProvider(Provider::class, $config);
             }

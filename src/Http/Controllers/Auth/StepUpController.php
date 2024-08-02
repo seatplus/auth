@@ -31,15 +31,16 @@ use Seatplus\Auth\Http\Controllers\Controller;
 use Seatplus\Auth\Models\User;
 use Seatplus\Eveapi\Models\RefreshToken;
 use SocialiteProviders\Eveonline\Provider;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class StepUpController extends Controller
 {
     /**
      * Redirect the user to the Eve Online authentication page.
      *
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     * @return RedirectResponse
      */
-    public function __invoke(Socialite $socialite, int $character_id)
+    public function __invoke(Socialite $socialite, int $character_id): RedirectResponse
     {
         if (! $this->isCharacterAssociatedToCurrentUser($character_id)) {
             return redirect()->back()->with('error', 'character must belong to your account');
