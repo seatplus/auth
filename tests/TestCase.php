@@ -27,6 +27,7 @@
 namespace Seatplus\Auth\Tests;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Str;
@@ -44,6 +45,8 @@ abstract class TestCase extends OrchestraTestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        Model::shouldBeStrict();
 
         Factory::guessFactoryNamesUsing(
             fn (string $modelName) => match (true) {

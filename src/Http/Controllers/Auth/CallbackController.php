@@ -3,6 +3,7 @@
 namespace Seatplus\Auth\Http\Controllers\Auth;
 
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Contracts\Factory as Socialite;
 use Seatplus\Auth\Containers\EveUser;
 use Seatplus\Auth\Http\Actions\Sso\FindOrCreateUserAction;
@@ -79,7 +80,13 @@ class CallbackController
     private function loginUser(User $user): bool
     {
         // Login and "remember" the given user...
-        auth()->login($user, true);
+        try {
+            Auth::login($user, true);
+        } catch (\Exception $e) {
+            report($e);
+
+            return false;
+        }
 
         return true;
     }
