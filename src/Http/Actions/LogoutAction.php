@@ -15,5 +15,4 @@ class LogoutAction
 
         return redirect('/');
     }
-
 }

@@ -7,11 +7,9 @@ use Seatplus\Auth\Models\Permissions\Role;
 beforeEach(function () {
     $this->role = Role::create(['name' => 'test']);
     $this->role = $this->role->refresh();
-    $this->service = new class($this->role) extends \Seatplus\Auth\Services\Roles\AbstractRoleService {
-        public function syncMembers(): void
-        {
-            return;
-        }
+    $this->service = new class($this->role) extends \Seatplus\Auth\Services\Roles\AbstractRoleService
+    {
+        public function syncMembers(): void {}
     };
 });
 
@@ -38,7 +36,7 @@ it('affiliates role to corporation and getting role on test user', function () {
         ->and(Affiliation::first()->type)->toEqual(\Seatplus\Auth\Enums\AffiliationType::ALLOWED->value);
 });
 
-it('returns early when setting same role type', function (){
+it('returns early when setting same role type', function () {
 
     // Arrange
     $this->role->type = RoleType::AUTOMATIC->value;

@@ -2,8 +2,8 @@
 
 namespace Seatplus\Auth\Http\Controllers\Auth;
 
-use Laravel\Socialite\Contracts\Factory as Socialite;
 use Illuminate\Http\RedirectResponse;
+use Laravel\Socialite\Contracts\Factory as Socialite;
 use Seatplus\Auth\Containers\EveUser;
 use Seatplus\Auth\Http\Actions\Sso\FindOrCreateUserAction;
 use Seatplus\Auth\Http\Actions\Sso\UpdateRefreshTokenAction;
@@ -107,5 +107,4 @@ class CallbackController
         session()->flash('error', 'Please make sure to select the same character to step up on CCP as on seatplus.');
         $this->should_redirect = true;
     }
-
 }

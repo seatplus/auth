@@ -29,23 +29,15 @@ namespace Seatplus\Auth\Http\Middleware;
 use Closure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Cache;
 use Seatplus\Auth\Models\User;
-use Seatplus\Auth\Services\BuildCharacterScopesArray;
-use Seatplus\Auth\Services\BuildUserLevelRequiredScopes;
 use Seatplus\Auth\Services\SsoScopes\IsUserCompliantService;
-use Seatplus\Eveapi\Models\Character\CharacterInfo;
-use Seatplus\Eveapi\Models\SsoScopes;
 
 class CheckRequiredScopes
 {
     public function __construct(
         private ?IsUserCompliantService $isUserCompliantService = null,
-    )
-    {
-        $this->isUserCompliantService ??= new IsUserCompliantService();
+    ) {
+        $this->isUserCompliantService ??= new IsUserCompliantService;
     }
 
     public function handle(Request $request, Closure $next) // @pest-ignore-type

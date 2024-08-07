@@ -60,7 +60,7 @@ class AuthenticationServiceProvider extends ServiceProvider
         $this->addEventListeners();
 
         // Add translations
-        $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'auth');
+        $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'auth');
 
         // Add GateLogic
         Gate::before(function (User $user, string $ability): ?bool {

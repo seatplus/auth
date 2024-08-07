@@ -2,11 +2,8 @@
 
 use Seatplus\Auth\Enums\AffiliationType;
 use Seatplus\Auth\Models\Permissions\Role;
-use Seatplus\Auth\Services\Roles\BaseRoleService;
 use Seatplus\Auth\Services\Roles\RoleAffiliatedIdsService;
-use Seatplus\Eveapi\Models\Alliance\AllianceInfo;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
-use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 
 beforeEach(function () {
 
@@ -29,7 +26,7 @@ dataset('entity_types', [
 
 function getId(string $entity_type, int $character_level)
 {
-    $character = match($character_level) {
+    $character = match ($character_level) {
         1 => test()->test_character,
         2 => test()->secondary_character,
         3 => test()->tertiary_character,
@@ -42,7 +39,7 @@ function getId(string $entity_type, int $character_level)
     };
 }
 
-describe('allowed only', function (){
+describe('allowed only', function () {
     test('primary and secondary are affiliated ', function ($entity_type, $affiliation_type) {
 
         $primaray_id = getId($entity_type, 1);
@@ -63,8 +60,7 @@ describe('allowed only', function (){
     })->with('entity_types')->with([AffiliationType::ALLOWED->value]);
 });
 
-
-describe('inverse only',function () {
+describe('inverse only', function () {
     test('primary and secondary are affiliated, but not tertiary ', function ($entity_type, $affiliation_type) {
 
         $primary_id = getId($entity_type, 1);
@@ -86,7 +82,7 @@ describe('inverse only',function () {
     })->with('entity_types')->with([AffiliationType::INVERSE->value]);
 });
 
-describe('forbidden only',function () {
+describe('forbidden only', function () {
     test('primary and secondary are affiliated, but not tertiary ', function ($entity_type, $affiliation_type) {
 
         $primary_id = getId($entity_type, 1);
@@ -108,7 +104,7 @@ describe('forbidden only',function () {
     })->with('entity_types')->with([AffiliationType::FORBIDDEN->value]);
 });
 
-describe('allowed and inverse',function () {
+describe('allowed and inverse', function () {
     test('testcharacter, secondary and tertiary are affiliated, but not tertiary ', function ($entity_type) {
 
         $primary_id = getId($entity_type, 1);
@@ -132,7 +128,7 @@ describe('allowed and inverse',function () {
     })->with('entity_types');
 });
 
-describe('allowed and forbidden',function () {
+describe('allowed and forbidden', function () {
     test('primary affiliated but test_character forbidden ', function ($entity_type) {
 
         $primary_id = getId($entity_type, 1);
@@ -146,7 +142,7 @@ describe('allowed and forbidden',function () {
 
         expect($affiliated_ids)
             ->not()->toContain(test()->test_character->character_id)
-            ->when($entity_type === 'character', function ($collection)  {
+            ->when($entity_type === 'character', function ($collection) {
                 $collection->toHaveCount(0);
             })
             ->when($entity_type !== 'character', function ($collection) use ($primary_id) {
@@ -156,8 +152,7 @@ describe('allowed and forbidden',function () {
     })->with('entity_types');
 });
 
-
-describe('inverse and forbidden',function () {
+describe('inverse and forbidden', function () {
     test('test_character forbidden but primary affiliated through inverse', function ($entity_type) {
 
         $primary_id = getId($entity_type, 1);
@@ -179,7 +174,7 @@ describe('inverse and forbidden',function () {
     })->with('entity_types');
 });
 
-describe('allowed, inverse and forbidden',function () {
+describe('allowed, inverse and forbidden', function () {
     test('test_character forbidden, primary allowed, secondary inverse', function ($entity_type) {
 
         $primary_id = getId($entity_type, 1);

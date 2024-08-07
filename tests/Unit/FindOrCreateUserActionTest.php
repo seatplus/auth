@@ -34,7 +34,7 @@ test('create new user', function () {
         'main_character_id' => $eve_user->character_id,
     ]);
 
-    $action = new FindOrCreateUserAction();
+    $action = new FindOrCreateUserAction;
     $user = $action($eve_user);
 
     test()->assertDatabaseHas('users', [
@@ -63,7 +63,7 @@ test('find existing user with two character', function () {
         $secondary_character->character_owner_hash
     );
 
-    $action = new FindOrCreateUserAction();
+    $action = new FindOrCreateUserAction;
     $user = $action($eve_user);
 
     expect($user->id)->toEqual(test()->test_user->id);
@@ -82,7 +82,7 @@ test('deal with changed owner hash', function () {
         'anotherHashValue'
     );
 
-    $action = new FindOrCreateUserAction();
+    $action = new FindOrCreateUserAction;
     $user = $action($eve_user);
 
     test()->assertDatabaseHas('users', [
@@ -117,7 +117,7 @@ test('deal with two characters with one changed owner hash', function () {
         'anotherHashValue'
     );
 
-    $action = new FindOrCreateUserAction();
+    $action = new FindOrCreateUserAction;
     $user = $action($eve_user);
 
     expect($user->character_users->count())->toEqual(1);
@@ -156,7 +156,7 @@ it('returns authed user', function () {
         $secondary_user->character_owner_hash
     );
 
-    $action = new FindOrCreateUserAction();
+    $action = new FindOrCreateUserAction;
 
     // act as test user
     test()->actingAs(test()->test_user);

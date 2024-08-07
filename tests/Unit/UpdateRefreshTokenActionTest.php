@@ -31,7 +31,7 @@ use Seatplus\Eveapi\Models\RefreshToken;
 test('create refresh token', function () {
     $eve_data = createEveUser(test()->test_user->id);
 
-    $action = new UpdateRefreshTokenAction();
+    $action = new UpdateRefreshTokenAction;
     Event::fakeFor(fn () => $action($eve_data));
 
     test()->assertDatabaseHas('refresh_tokens', [
@@ -45,7 +45,7 @@ it('does update refresh token active sessions', function () {
     // create RefreshToken
     $eveUser = createEveUser();
 
-    $action = new UpdateRefreshTokenAction();
+    $action = new UpdateRefreshTokenAction;
     Event::fakeFor(fn () => $action($eveUser));
 
     test()->assertDatabaseHas('refresh_tokens', [
@@ -71,7 +71,7 @@ it('does not update refresh token for new session of a valid refresh token user'
     // create RefreshToken
     $eveUser = createEveUser();
 
-    $action = new UpdateRefreshTokenAction();
+    $action = new UpdateRefreshTokenAction;
     Event::fakeFor(fn () => $action($eveUser));
 
     test()->assertDatabaseHas('refresh_tokens', [
@@ -98,7 +98,7 @@ test('restore trashed refresh token', function () {
     // create RefreshToken
     $eveUser = createEveUser();
 
-    $action = new UpdateRefreshTokenAction();
+    $action = new UpdateRefreshTokenAction;
     Event::fakeFor(fn () => $action($eveUser));
 
     test()->assertDatabaseHas('refresh_tokens', [

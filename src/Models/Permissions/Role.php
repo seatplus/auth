@@ -26,14 +26,8 @@
 
 namespace Seatplus\Auth\Models\Permissions;
 
-use Exception;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Seatplus\Auth\Models\AccessControl\RoleMembership;
-use Seatplus\Auth\Models\User;
-use Seatplus\Auth\Services\Roles\RoleAffiliatedIdsService;
-use Seatplus\Eveapi\Models\Alliance\AllianceInfo;
-use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 use Spatie\Permission\Models\Role as SpatieRole;
 
 /**

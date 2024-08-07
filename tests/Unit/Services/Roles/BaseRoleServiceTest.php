@@ -6,7 +6,7 @@ use Seatplus\Auth\Services\Roles\BaseRoleService;
 beforeEach(function () {
     $this->role = Role::create(['name' => faker()->name()]);
     $this->role = $this->role->refresh();
-    $this->service = new BaseRoleService();
+    $this->service = new BaseRoleService;
 });
 
 describe('make', function () {

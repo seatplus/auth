@@ -88,10 +88,3 @@ it('sets role type to automatic', function () {
 
     expect($this->role->type)->toBe('automatic');
 });
-
-
-
-
-
-
-

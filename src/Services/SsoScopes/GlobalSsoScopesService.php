@@ -21,5 +21,4 @@ class GlobalSsoScopesService
             ->pluck('selected_scopes')
             ->toArray();
     }
-
 }

@@ -8,24 +8,23 @@ use Seatplus\Eveapi\Models\SsoScopes;
 
 class BuildScopesArrayService
 {
-
-    const USER_RELATIONS= [
+    const USER_RELATIONS = [
         'characters' => self::CHARACTER_RELATIONS,
         'application.corporation' => ['ssoScopes', 'alliance.ssoScopes'],
     ];
+
     const CHARACTER_RELATIONS = [
         'alliance.ssoScopes',
         'corporation.ssoScopes',
         'application.corporation' => ['ssoScopes', 'alliance.ssoScopes'],
-        'refresh_token'
+        'refresh_token',
     ];
 
     public function __construct(
         private readonly bool $with_application_scopes = true,
         private ?GlobalSsoScopesService $globalSsoScopesService = null
-    )
-    {
-        $this->globalSsoScopesService = $globalSsoScopesService ?? new GlobalSsoScopesService();
+    ) {
+        $this->globalSsoScopesService = $globalSsoScopesService ?? new GlobalSsoScopesService;
     }
 
     private function getUserRequiredScopes(User $user): array
@@ -34,7 +33,7 @@ class BuildScopesArrayService
 
         $required_scopes = $this->getUserScopes($user);
 
-        if($this->isWithApplicationScopes()) {
+        if ($this->isWithApplicationScopes()) {
             $required_scopes['user_application_corporation_scopes'] = $user->application->corporation->ssoScopes->selected_scopes ?? [];
             $required_scopes['user_application_alliance_scopes'] = $user->application->corporation->alliance->ssoScopes->selected_scopes ?? [];
         }
@@ -126,8 +125,4 @@ class BuildScopesArrayService
 
         return $this->build($user);
     }
-
-
-
-
 }

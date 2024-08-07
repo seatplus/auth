@@ -27,7 +27,6 @@
 namespace Seatplus\Auth\Http\Controllers;
 
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\Request;
 use Seatplus\Auth\Models\User;
 
 class SwitchMainCharacterController extends Controller

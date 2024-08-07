@@ -2,7 +2,6 @@
 
 namespace Seatplus\Auth\Http\Actions\Roles;
 
-
 use Seatplus\Auth\Http\Requests\RoleRequest;
 use Seatplus\Auth\Services\Roles\AutomaticRoleService;
 use Seatplus\Auth\Services\Roles\BaseRoleService;
@@ -13,9 +12,8 @@ class ManageAutomaticRoleAction
 
     public function __construct(
         private ?BaseRoleService $baseRoleService = null
-    )
-    {
-        $this->baseRoleService = $baseRoleService ?? new BaseRoleService();
+    ) {
+        $this->baseRoleService = $baseRoleService ?? new BaseRoleService;
     }
 
     /**
@@ -31,12 +29,12 @@ class ManageAutomaticRoleAction
         $this->roleService = $this->baseRoleService->automatic();
 
         // if affiliated entities are provided, we affiliate them
-        if($validated['affiliated']) {
+        if ($validated['affiliated']) {
             $this->roleService->syncAffiliateManyEntities($validated['affiliated']);
         }
 
         // if entities are assigned, we assign them
-        if($validated['assigned']) {
+        if ($validated['assigned']) {
             $this->assignEntities($validated['assigned']);
         }
     }
@@ -45,12 +43,12 @@ class ManageAutomaticRoleAction
     {
 
         $corporation_ids = collect($entities)
-            ->filter(fn($entity) => $entity['entity_type'] === 'corporation')
+            ->filter(fn ($entity) => $entity['entity_type'] === 'corporation')
             ->pluck('entity_id')
             ->toArray();
 
         $alliance_ids = collect($entities)
-            ->filter(fn($entity) => $entity['entity_type'] === 'alliance')
+            ->filter(fn ($entity) => $entity['entity_type'] === 'alliance')
             ->pluck('entity_id')
             ->toArray();
 

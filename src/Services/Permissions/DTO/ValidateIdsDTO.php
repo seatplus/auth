@@ -16,9 +16,7 @@ class ValidateIdsDTO
         private ?array $character_ids = null,
         private ?array $corporation_ids = null,
         private ?array $alliance_ids = null
-    )
-    {
-    }
+    ) {}
 
     public static function fromRequest(Request $request)
     {
@@ -47,13 +45,13 @@ class ValidateIdsDTO
     {
 
         // if any of the constructor parameters is not null, we return the validated array
-        if(!array_filter(get_object_vars($this), fn($value) => !is_null($value))) {
+        if (! array_filter(get_object_vars($this), fn ($value) => ! is_null($value))) {
             return [];
         }
 
         return collect($this->validate())
             ->flatten()
-            ->map(fn($value) => (int) $value)
+            ->map(fn ($value) => (int) $value)
             ->all();
     }
 
@@ -68,7 +66,7 @@ class ValidateIdsDTO
             'alliance_id' => $this->alliance_id,
             'character_ids' => $this->character_ids,
             'corporation_ids' => $this->corporation_ids,
-            'alliance_ids' => $this->alliance_ids
+            'alliance_ids' => $this->alliance_ids,
         ])->filter()->all();
 
         $keys = [
@@ -77,13 +75,13 @@ class ValidateIdsDTO
             'alliance_id', 'alliance_ids',
         ];
 
-        $presentKeys = array_filter($keys, function($key) use ($ids) {
-            return !is_null($ids[$key] ?? null);
+        $presentKeys = array_filter($keys, function ($key) use ($ids) {
+            return ! is_null($ids[$key] ?? null);
         });
 
-        abort_unless(count($presentKeys) === 1, 403, 'Exactly one of the parameters [' . implode(', ', $keys) . '] must be present.');
+        abort_unless(count($presentKeys) === 1, 403, 'Exactly one of the parameters ['.implode(', ', $keys).'] must be present.');
 
-        $validator = Validator::make($ids,[
+        $validator = Validator::make($ids, [
             'character_id' => 'nullable|integer',
             'character_ids' => 'nullable|array',
             'character_ids.*' => 'integer',

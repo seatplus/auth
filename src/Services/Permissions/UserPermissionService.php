@@ -9,15 +9,16 @@ use Seatplus\Eveapi\Models\Character\CharacterInfo;
 class UserPermissionService
 {
     private array $corporation_roles = [];
+
     private array $permissions = [];
+
     private array $character_ids = [];
+
     public function __construct(
         private ?RolePermissionObjectService $role_permission_object_service = null
-    )
-    {
-        $this->role_permission_object_service = $role_permission_object_service ?? new RolePermissionObjectService();
+    ) {
+        $this->role_permission_object_service = $role_permission_object_service ?? new RolePermissionObjectService;
     }
-
 
     public function get(User $user): array
     {
@@ -28,12 +29,11 @@ class UserPermissionService
         $this->buildPermissions($user);
         $this->buildCharacterIds($user);
 
-
         return [
             'corporation_roles' => $this->corporation_roles,
             'permissions' => $this->permissions,
             'character_ids' => $this->character_ids,
-            'owned_character_ids' => $user->characters->pluck('character_id')->toArray()
+            'owned_character_ids' => $user->characters->pluck('character_id')->toArray(),
         ];
 
     }
@@ -66,6 +66,4 @@ class UserPermissionService
     {
         $this->character_ids = $user->characters->pluck('character_id')->toArray();
     }
-
-
 }

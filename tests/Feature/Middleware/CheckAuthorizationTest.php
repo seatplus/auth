@@ -7,8 +7,8 @@ use Seatplus\Auth\Models\Permissions\Permission;
 use Seatplus\Auth\Models\Permissions\Role;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\Character\CharacterRole;
-
 use Spatie\Permission\PermissionRegistrar;
+
 use function Pest\Laravel\get;
 use function Pest\Laravel\post;
 
@@ -75,9 +75,9 @@ describe('middleware checks permission and affiliation', function () {
             ['get', 'character.character', fn () => test()->test_character->character_id],
             ['get', 'character.corporation', fn () => test()->test_character->corporation->corporation_id],
             ['get', 'character.alliance', fn () => test()->test_character->alliance->alliance_id],
-//        ['get', 'character.character_ids', fn () => ['character_ids' => []], 'forbidden'],
-//        ['get', 'character.corporation_ids', fn () => ['corporation_ids' => []], 'forbidden'],
-//        ['get', 'character.alliance_ids', fn () => ['alliance_ids' => []], 'forbidden'],
+            //        ['get', 'character.character_ids', fn () => ['character_ids' => []], 'forbidden'],
+            //        ['get', 'character.corporation_ids', fn () => ['corporation_ids' => []], 'forbidden'],
+            //        ['get', 'character.alliance_ids', fn () => ['alliance_ids' => []], 'forbidden'],
             ['get', 'character.character_ids', fn () => ['character_ids' => [test()->test_character->character_id]]],
             ['get', 'character.corporation_ids', fn () => ['corporation_ids' => [test()->test_character->corporation->corporation_id]]],
             ['get', 'character.corporation_ids', fn () => ['alliance_ids' => [test()->test_character->alliance->alliance_id]]],
@@ -88,9 +88,9 @@ describe('middleware checks permission and affiliation', function () {
             ['get', 'corporation.character', fn () => test()->test_character->character_id],
             ['get', 'corporation.corporation', fn () => test()->test_character->corporation->corporation_id],
             ['get', 'corporation.alliance', fn () => test()->test_character->alliance->alliance_id],
-//        ['get', 'corporation.character_ids', fn () => ['corporation_ids' => []], 'forbidden'],
-//        ['get', 'corporation.corporation_ids', fn () => ['corporation_ids' => []], 'forbidden'],
-//        ['get', 'corporation.alliance_ids', fn () => ['alliance_ids' => []], 'forbidden'],
+            //        ['get', 'corporation.character_ids', fn () => ['corporation_ids' => []], 'forbidden'],
+            //        ['get', 'corporation.corporation_ids', fn () => ['corporation_ids' => []], 'forbidden'],
+            //        ['get', 'corporation.alliance_ids', fn () => ['alliance_ids' => []], 'forbidden'],
             ['get', 'corporation.character_ids', fn () => ['corporation_ids' => [test()->test_character->character_id]]],
             ['get', 'corporation.corporation_ids', fn () => ['corporation_ids' => [test()->test_character->corporation->corporation_id]]],
             ['get', 'corporation.alliance_ids', fn () => ['alliance_ids' => [test()->test_character->alliance->alliance_id]]],
@@ -309,7 +309,7 @@ describe('middleware checks permission or corporation role test', function () {
 function createAffiliation(Role $role, int|string $affiliatable_id, string $affiliatable_type, \Seatplus\Auth\Enums\AffiliationType $type): Affiliation
 {
     /** @var Affiliation $affiliation */
-    $affiliation =  Affiliation::query()->create([
+    $affiliation = Affiliation::query()->create([
         'role_id' => $role->id,
         'affiliatable_id' => $affiliatable_id,
         'affiliatable_type' => $affiliatable_type,

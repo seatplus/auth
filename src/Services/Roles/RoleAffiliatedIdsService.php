@@ -4,7 +4,6 @@ namespace Seatplus\Auth\Services\Roles;
 
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\App;
 use Seatplus\Auth\Enums\AffiliationType;
 use Seatplus\Auth\Models\Permissions\Affiliation;
 use Seatplus\Auth\Models\Permissions\Role;
@@ -14,8 +13,6 @@ use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 
 class RoleAffiliatedIdsService
 {
-
-
     public static function get(Role $role): array
     {
 
@@ -61,12 +58,11 @@ class RoleAffiliatedIdsService
     public function loadMissingRelationships(Role $role): Role
     {
         return $role->loadMissing([
-            'affiliations.affiliatable' => fn(MorphTo $morph_to) => $morph_to
+            'affiliations.affiliatable' => fn (MorphTo $morph_to) => $morph_to
                 ->morphWith([
                     CorporationInfo::class => 'characters',
-                    AllianceInfo::class => ['characters', 'corporations']
+                    AllianceInfo::class => ['characters', 'corporations'],
                 ]),
         ]);
     }
-
 }

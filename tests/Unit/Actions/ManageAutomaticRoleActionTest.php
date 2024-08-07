@@ -13,7 +13,7 @@ it('invokes role service with valid role id', function () {
         $mock->shouldReceive('validated')->once()->andReturn(['role_id' => $role->refresh()->id, 'affiliated' => [], 'assigned' => []]);
     });
 
-    $action = new \Seatplus\Auth\Http\Actions\Roles\ManageAutomaticRoleAction();
+    $action = new \Seatplus\Auth\Http\Actions\Roles\ManageAutomaticRoleAction;
 
     $action($request);
 });

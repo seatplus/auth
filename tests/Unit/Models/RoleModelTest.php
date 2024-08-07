@@ -96,7 +96,6 @@ it('has role memberships', function () {
         'entity_type' => CorporationInfo::class,
     ]);
 
-
     expect(test()->role->role_memberships->first()->entity)->toBeInstanceOf(CorporationInfo::class);
 });
 

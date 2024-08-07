@@ -4,7 +4,6 @@ namespace Seatplus\Auth\Http\Actions;
 
 class LoginAssetsAction
 {
-
     /**
      * Return the assets needed for the login page
      * adds a warning if the SSO is not configured yet

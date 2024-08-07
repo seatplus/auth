@@ -2,16 +2,13 @@
 
 namespace Seatplus\Auth\Services\Roles;
 
-use Seatplus\Auth\Enums\RoleType;
 use Seatplus\Auth\Models\Permissions\Role;
 
 class BaseRoleService
 {
     public function __construct(
         private ?Role $role = null
-    )
-    {
-    }
+    ) {}
 
     public static function make(Role|string|int $role): self
     {
@@ -37,7 +34,4 @@ class BaseRoleService
     {
         return new AutomaticRoleService($this->role);
     }
-
-
-
 }

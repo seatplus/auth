@@ -56,5 +56,3 @@ Route::middleware('web')
             });
 
     });
-
-

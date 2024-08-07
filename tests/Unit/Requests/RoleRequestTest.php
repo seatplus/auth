@@ -5,30 +5,30 @@ use Seatplus\Auth\Http\Requests\RoleRequest;
 
 function validate(array $data): bool
 {
-    $request = new RoleRequest();
+    $request = new RoleRequest;
     $validator = Validator::make($data, $request->rules());
 
     return $validator->passes();
 }
 
 dataset('role request', [
-    fn() => [
+    fn () => [
         'role_id' => 1,
         'affiliated' => [
             [
                 'entity_id' => 1,
                 'entity_type' => 'corporation',
-                'affiliation_type' => AffiliationType::cases()[fake()->randomElement([0,1,2])]->value
-            ]
+                'affiliation_type' => AffiliationType::cases()[fake()->randomElement([0, 1, 2])]->value,
+            ],
         ],
         'assigned' => [
             [
                 'entity_id' => 1,
                 'entity_type' => fake()->randomElement(['corporation', 'alliance']),
-                'can_moderate' => fake()->boolean()
-            ]
-        ]
-    ]
+                'can_moderate' => fake()->boolean(),
+            ],
+        ],
+    ],
 ]);
 
 it('can validate role request', function ($data) {

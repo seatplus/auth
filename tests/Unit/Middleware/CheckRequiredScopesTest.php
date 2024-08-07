@@ -25,7 +25,6 @@
  */
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
 use Seatplus\Auth\Http\Middleware\CheckRequiredScopes;
 use Seatplus\Auth\Models\CharacterUser;
@@ -40,8 +39,6 @@ beforeEach(function () {
 
     Event::fake();
 });
-
-
 
 describe('redirect request', function () {
     it('if required scopes are missing', function () {
@@ -174,7 +171,7 @@ describe('redirect request', function () {
     });
 });
 
-describe('passes middleware', function (){
+describe('passes middleware', function () {
     it('lets request through if no scopes are required', function () {
         createRefreshTokenWithScopes(['a', 'b']);
 

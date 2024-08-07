@@ -21,7 +21,7 @@ test('role permission object service', function () {
     $role->syncPermissions($permissions);
 
     $mock = mock(RoleAffiliatedIdsService::class, function ($mock) {
-        $mock->shouldReceive('get')->andReturn([1,2,3]);
+        $mock->shouldReceive('get')->andReturn([1, 2, 3]);
     });
 
     // Act
@@ -32,7 +32,7 @@ test('role permission object service', function () {
     // Assert
     expect($result)->toHaveCount(3)
         ->toHaveKeys([$permissions[0]->name, $permissions[1]->name, $permissions[2]->name])
-        ->and($result[$permissions[0]->name])->toBe([1,2,3])
-        ->and($result[$permissions[1]->name])->toBe([1,2,3])
-        ->and($result[$permissions[2]->name])->toBe([1,2,3]);
+        ->and($result[$permissions[0]->name])->toBe([1, 2, 3])
+        ->and($result[$permissions[1]->name])->toBe([1, 2, 3])
+        ->and($result[$permissions[2]->name])->toBe([1, 2, 3]);
 });

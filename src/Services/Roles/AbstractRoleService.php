@@ -22,9 +22,7 @@ abstract class AbstractRoleService implements RoleServiceInterface
 {
     public function __construct(
         protected Role $role
-    )
-    {
-    }
+    ) {}
 
     private function affiliateEntity(int|string $entity_id, string $entity_type, AffiliationType $affiliationType): void
     {
@@ -44,40 +42,31 @@ abstract class AbstractRoleService implements RoleServiceInterface
     }
 
     /**
-     * @param array $entity_sets
-     * @return void
      * @throws \Throwable
      */
     private function validateEntities(array $entity_sets): void
     {
         $validator = validator($entity_sets, [
             '*.0' => 'required|integer',
-            '*.1' => ['required', 'string', Rule::in(['character','corporation', 'alliance'])],
+            '*.1' => ['required', 'string', Rule::in(['character', 'corporation', 'alliance'])],
             '*.2' => [
                 'required',
                 'string',
-                Rule::in(array_map(fn(AffiliationType $affiliationType) => $affiliationType->value, AffiliationType::cases()))
-            ]
+                Rule::in(array_map(fn (AffiliationType $affiliationType) => $affiliationType->value, AffiliationType::cases())),
+            ],
         ]);
 
         throw_if($validator->fails(), ValidationException::withMessages($validator->errors()->toArray()));
     }
 
-    /**
-     * @param \Illuminate\Support\Collection $member_ids
-     * @return void
-     */
     private function revokeTheRolesFromUsersThatAreNotInMembers(\Illuminate\Support\Collection $member_ids): void
     {
         User::query()
-            ->whereHas('roles', fn($query) => $query->where('id', $this->role->id))
+            ->whereHas('roles', fn ($query) => $query->where('id', $this->role->id))
             ->whereNotIn('id', $member_ids)
-            ->each(fn($user) => $user->removeRole($this->role));
+            ->each(fn ($user) => $user->removeRole($this->role));
     }
 
-    /**
-     * @return \Illuminate\Support\Collection
-     */
     private function getActiveMembers(): \Illuminate\Support\Collection
     {
         return $this->role->role_memberships()
@@ -86,16 +75,12 @@ abstract class AbstractRoleService implements RoleServiceInterface
             ->pluck('entity_id');
     }
 
-    /**
-     * @param \Illuminate\Support\Collection $member_ids
-     * @return void
-     */
     private function assignTheRolesToUsersThatAreInMembers(\Illuminate\Support\Collection $member_ids): void
     {
         User::query()
-            ->whereDoesntHave('roles', fn($query) => $query->where('id', $this->role->id))
+            ->whereDoesntHave('roles', fn ($query) => $query->where('id', $this->role->id))
             ->whereIn('id', $member_ids)
-            ->each(fn($user) => $user->assignRole($this->role));
+            ->each(fn ($user) => $user->assignRole($this->role));
     }
 
     protected function resetRoleMembership(): void
@@ -122,9 +107,8 @@ abstract class AbstractRoleService implements RoleServiceInterface
     }
 
     protected function setRoleMembership(
-        int|string $entity_id, string $entity_type, bool $can_moderate = false, RoleMembershipStatus $status = null
-    ): void
-    {
+        int|string $entity_id, string $entity_type, bool $can_moderate = false, ?RoleMembershipStatus $status = null
+    ): void {
         RoleMembership::query()->updateOrInsert([
             'role_id' => $this->role->id,
             'entity_id' => $entity_id,
@@ -152,7 +136,7 @@ abstract class AbstractRoleService implements RoleServiceInterface
     protected function getUsersFromCharacterIds(array $character_ids): Collection
     {
         return User::query()
-            ->whereHas('characters', fn($query) => $query->whereIn('character_infos.character_id', $character_ids))
+            ->whereHas('characters', fn ($query) => $query->whereIn('character_infos.character_id', $character_ids))
             ->get();
     }
 
@@ -212,5 +196,4 @@ abstract class AbstractRoleService implements RoleServiceInterface
     }
 
     abstract public function syncMembers(): void;
-
 }

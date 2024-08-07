@@ -57,7 +57,7 @@ class User extends Authenticatable
     public $incrementing = true;
 
     protected $fillable = [
-        'main_character_id', 'character_owner_hash', 'active'
+        'main_character_id', 'character_owner_hash', 'active',
     ];
 
     protected $hidden = [

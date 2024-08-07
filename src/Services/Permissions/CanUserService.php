@@ -13,9 +13,8 @@ class CanUserService
 {
     public function __construct(
         private ?UserPermissionService $user_permission_service = null
-    )
-    {
-        $this->user_permission_service = $this->user_permission_service ?? new UserPermissionService();
+    ) {
+        $this->user_permission_service = $this->user_permission_service ?? new UserPermissionService;
     }
 
     /**
@@ -53,7 +52,7 @@ class CanUserService
         $ids_to_validate = $data['ids_to_validate'];
 
         // if no ids are left, we return early
-        if(empty($ids_to_validate)) {
+        if (empty($ids_to_validate)) {
             return $next($data);
         }
 
@@ -74,7 +73,7 @@ class CanUserService
                 $data['ids_to_validate'] = $ids_to_validate;
 
                 // if ids are empty, end the loop
-                if(empty($ids_to_validate)) {
+                if (empty($ids_to_validate)) {
                     break;
                 }
             }
@@ -88,7 +87,7 @@ class CanUserService
         $ids_to_validate = $data['ids_to_validate'];
 
         // if no ids are left, we return early
-        if(empty($ids_to_validate)) {
+        if (empty($ids_to_validate)) {
             return $next($data);
         }
 
@@ -104,7 +103,7 @@ class CanUserService
             $data['ids_to_validate'] = $ids_to_validate;
 
             // if ids are empty, end the loop
-            if(empty($ids_to_validate)) {
+            if (empty($ids_to_validate)) {
                 break;
             }
         }
@@ -123,9 +122,9 @@ class CanUserService
                 'corporation_roles' => $corporation_roles,
             ])
             ->through([
-                fn(array $data, Closure $next) => $this->validateOwnedCharacterIds($data, $next),
-                fn(array $data, Closure $next) => $this->validateCorporationRoles($data, $next),
-                fn(array $data, Closure $next) => $this->validatePermissions($data, $next),
+                fn (array $data, Closure $next) => $this->validateOwnedCharacterIds($data, $next),
+                fn (array $data, Closure $next) => $this->validateCorporationRoles($data, $next),
+                fn (array $data, Closure $next) => $this->validatePermissions($data, $next),
             ])->thenReturn();
 
         $ids_not_validated = $data['ids_to_validate'];
@@ -150,16 +149,11 @@ class CanUserService
         }
 
         // if any of the corporation roles is in the users corporation roles, we return true
-        return !!array_intersect($corporation_role, $users_corporation_roles);
+        return (bool) array_intersect($corporation_role, $users_corporation_roles);
     }
 
-    /**
-     * @param User $user
-     * @return mixed
-     */
     public function getUserPermissionObject(User $user): mixed
     {
-        return Cache::remember("user_permissions_{$user->id}", now()->addMinutes(5), fn() => $this->user_permission_service->get($user));
+        return Cache::remember("user_permissions_{$user->id}", now()->addMinutes(5), fn () => $this->user_permission_service->get($user));
     }
-
 }

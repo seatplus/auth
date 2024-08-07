@@ -14,9 +14,9 @@ beforeEach(function () {
 });
 
 dataset('primary entities', [
-    'character' => fn() => [test()->test_character->character_id, CharacterInfo::class],
-    'corporation' => fn() => [test()->test_character->corporation_id, CorporationInfo::class],
-    'alliance' => fn() => [test()->test_character->alliance_id, AllianceInfo::class],
+    'character' => fn () => [test()->test_character->character_id, CharacterInfo::class],
+    'corporation' => fn () => [test()->test_character->corporation_id, CorporationInfo::class],
+    'alliance' => fn () => [test()->test_character->alliance_id, AllianceInfo::class],
 ]);
 
 dataset('affiliation types', [
@@ -74,5 +74,3 @@ describe('relationship tests', function () {
         expect($affiliation->affiliatable)->toBeInstanceOf(CharacterInfo::class);
     });
 });
-
-

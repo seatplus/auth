@@ -37,8 +37,6 @@ class StepUpController extends Controller
 {
     /**
      * Redirect the user to the Eve Online authentication page.
-     *
-     * @return RedirectResponse
      */
     public function __invoke(Socialite $socialite, int $character_id): RedirectResponse
     {

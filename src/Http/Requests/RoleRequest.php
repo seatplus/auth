@@ -23,11 +23,11 @@ class RoleRequest extends FormRequest
             'affiliated.*.affiliation_type' => [
                 'required',
                 'string',
-                Rule::in(array_map(fn(AffiliationType $affiliationType) => $affiliationType->value, AffiliationType::cases()))
+                Rule::in(array_map(fn (AffiliationType $affiliationType) => $affiliationType->value, AffiliationType::cases())),
             ],
             'assigned' => 'nullable|array',
             'assigned.*.entity_id' => 'required|integer',
-            'assigned.*.entity_type' => ['required', 'string', Rule::in(['character','corporation', 'alliance'])],
+            'assigned.*.entity_type' => ['required', 'string', Rule::in(['character', 'corporation', 'alliance'])],
             'assigned.*.can_moderate' => 'nullable|boolean',
         ];
     }

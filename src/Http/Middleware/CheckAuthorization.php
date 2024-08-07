@@ -32,15 +32,12 @@ use Seatplus\Auth\Models\User;
 use Seatplus\Auth\Services\Permissions\CanUserService;
 use Seatplus\Auth\Services\Permissions\DTO\ValidateIdsDTO;
 
-
 class CheckAuthorization
 {
-
     public function __construct(
         private ?CanUserService $canUserService = null
-    )
-    {
-        $this->canUserService = $this->canUserService ?? new CanUserService();
+    ) {
+        $this->canUserService = $this->canUserService ?? new CanUserService;
     }
 
     public function handle(Request $request, Closure $next, string $permissions, ?string $corporation_role = null): mixed
@@ -55,8 +52,7 @@ class CheckAuthorization
             user: $user,
             idsDTO: $ids_dto,
             permissions: $permissions,
-            corporation_roles:
-            $corporation_role
+            corporation_roles: $corporation_role
         ), 403);
 
         return $next($request);

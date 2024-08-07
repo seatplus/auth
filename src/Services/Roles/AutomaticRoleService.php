@@ -11,7 +11,6 @@ use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 
 class AutomaticRoleService extends AbstractRoleService implements RoleServiceInterface
 {
-
     private function automaticallyAssignRoleToCorporation(int|string $corporation_id): void
     {
         $this->setRoleMembership($corporation_id, CorporationInfo::class);
@@ -52,7 +51,7 @@ class AutomaticRoleService extends AbstractRoleService implements RoleServiceInt
         $this->removeIneligibleMembers($users->pluck('id')->all());
 
         // add members that are not in role membership
-        $users->each(fn($user) => $this->setRoleMembership(
+        $users->each(fn ($user) => $this->setRoleMembership(
             entity_id: $user->id,
             entity_type: User::class,
             status: $this->isUserCompliant($user) ? RoleMembershipStatus::ACTIVE : RoleMembershipStatus::INACTIVE

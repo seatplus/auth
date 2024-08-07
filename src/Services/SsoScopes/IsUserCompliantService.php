@@ -10,8 +10,7 @@ class IsUserCompliantService
 
     public function __construct(
         private readonly bool $consider_applications = true
-    )
-    {
+    ) {
         $this->build_scopes_array_service = new BuildScopesArrayService($this->consider_applications);
     }
 
@@ -40,5 +39,4 @@ class IsUserCompliantService
 
         return $flat_missing_scopes->isEmpty();
     }
-
 }

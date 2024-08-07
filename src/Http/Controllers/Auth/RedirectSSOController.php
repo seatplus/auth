@@ -34,9 +34,9 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class RedirectSSOController extends Controller
 {
-
     /**
      * Redirect the user to the Eve Online authentication page.
+     *
      * @throws \Throwable
      */
     public function __invoke(Socialite $socialite, GlobalSsoScopesService $service): RedirectResponse
@@ -66,6 +66,4 @@ class RedirectSSOController extends Controller
             ->filter()
             ->all();
     }
-
-
 }

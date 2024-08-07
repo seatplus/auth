@@ -65,17 +65,17 @@ class Affiliation extends Model
     public function affiliatedIds(): Attribute
     {
         return new Attribute(
-            get: function (){
+            get: function () {
                 return match (true) {
                     $this->affiliatable instanceof CharacterInfo => collect($this->affiliatable->character_id),
                     $this->affiliatable instanceof CorporationInfo => collect([
                         $this->affiliatable->corporation_id,
-                        $this->affiliatable->characters->pluck('character_id')
+                        $this->affiliatable->characters->pluck('character_id'),
                     ])->flatten(),
                     $this->affiliatable instanceof AllianceInfo => collect([
                         $this->affiliatable->alliance_id,
                         $this->affiliatable->corporations->pluck('corporation_id'),
-                        $this->affiliatable->characters->pluck('character_id')
+                        $this->affiliatable->characters->pluck('character_id'),
                     ])->flatten(),
                     default => collect(),
                 };
@@ -83,5 +83,4 @@ class Affiliation extends Model
         );
 
     }
-
 }

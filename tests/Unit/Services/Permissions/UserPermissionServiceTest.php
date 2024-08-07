@@ -67,16 +67,16 @@ it('builds permissions from user', function () {
 
     $user->assignRole([$role1, $role2]);
 
-    $role_permission_object_service = mock(RolePermissionObjectService::class, function (\Mockery\MockInterface $mock) use ($role2, $role1, $permissions) {
+    $role_permission_object_service = mock(RolePermissionObjectService::class, function (\Mockery\MockInterface $mock) use ($permissions) {
 
         $result1 = collect([
-            $permissions[0]->name => [1,2,3],
-            $permissions[1]->name => [4,5,6],
+            $permissions[0]->name => [1, 2, 3],
+            $permissions[1]->name => [4, 5, 6],
         ]);
 
         $result2 = collect([
-            $permissions[1]->name => [7,8,9],
-            $permissions[2]->name => [10,11,12],
+            $permissions[1]->name => [7, 8, 9],
+            $permissions[2]->name => [10, 11, 12],
         ]);
 
         $mock->shouldReceive('get')
@@ -93,7 +93,7 @@ it('builds permissions from user', function () {
     expect($result['permissions'])
         ->toHaveCount(3)
         ->toHaveKeys($permissions->pluck('name')->toArray())
-        ->and($result['permissions'][$permissions[0]->name])->toBe([1,2,3])
-        ->and($result['permissions'][$permissions[1]->name])->toContain(4,5,6,7,8,9)
-        ->and($result['permissions'][$permissions[2]->name])->toBe([10,11,12]);
+        ->and($result['permissions'][$permissions[0]->name])->toBe([1, 2, 3])
+        ->and($result['permissions'][$permissions[1]->name])->toContain(4, 5, 6, 7, 8, 9)
+        ->and($result['permissions'][$permissions[2]->name])->toBe([10, 11, 12]);
 });
