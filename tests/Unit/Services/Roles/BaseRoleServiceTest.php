@@ -27,7 +27,7 @@ describe('make', function () {
     it('throws exception if role not found', function () {
 
         BaseRoleService::make('abc');
-    })->expectException(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
+    })->expectException(\Spatie\Permission\Exceptions\RoleDoesNotExist::class);
 });
 
 it('can get automatic role service', function () {

@@ -21,7 +21,14 @@ class BaseRoleService
     public function for(Role|string|int $role): self
     {
 
-        $this->role = $role instanceof Role ? $role : Role::query()->findOrFail($role);
+        /* @var Role $role */
+        $role = match (true) {
+            $role instanceof Role => $role,
+            is_string($role) => Role::findByName($role),
+            is_int($role) => Role::findById($role),
+        };
+
+        $this->role = $role;
 
         return $this;
     }

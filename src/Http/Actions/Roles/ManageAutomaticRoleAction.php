@@ -11,7 +11,9 @@ class ManageAutomaticRoleAction
 {
     private AutomaticRoleService $roleService;
 
-    public function __construct(private ?BaseRoleService $baseRoleService)
+    public function __construct(
+        private ?BaseRoleService $baseRoleService = null
+    )
     {
         $this->baseRoleService = $baseRoleService ?? new BaseRoleService();
     }
