@@ -54,8 +54,8 @@ class BuildScopesArrayService
     private function getUserScopes(User $user): array
     {
         // get all corporation and alliance ids
-        $corporation_ids = $user->characters->pluck('corporation_id')->unique()->all();
-        $alliance_ids = $user->characters->pluck('alliance_id')->filter()->unique()->all();
+        $corporation_ids = $user->characters->pluck('corporation.corporation_id')->unique()->all();
+        $alliance_ids = $user->characters->pluck('alliance.alliance_id')->filter()->unique()->all();
 
         // get all scopes for the corporations and alliances
         return SsoScopes::query()
