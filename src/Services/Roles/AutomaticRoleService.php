@@ -9,15 +9,8 @@ use Seatplus\Auth\Models\User;
 use Seatplus\Eveapi\Models\Alliance\AllianceInfo;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 
-class AutomaticRoleService extends BaseRoleService implements RoleServiceInterface
+class AutomaticRoleService extends AbstractRoleService implements RoleServiceInterface
 {
-
-    public function __construct(?Role $role = null)
-    {
-        if ($role) {
-            $this->for($role);
-        }
-    }
 
     private function automaticallyAssignRoleToCorporation(int|string $corporation_id): void
     {
@@ -45,8 +38,7 @@ class AutomaticRoleService extends BaseRoleService implements RoleServiceInterfa
             $this->automaticallyAssignRoleToAlliance($alliance_id);
         }
 
-        $this->syncMembers();
-        $this->handleUsers();
+        $this->handleMembers();
     }
 
     public function syncMembers(): void

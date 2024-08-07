@@ -36,7 +36,6 @@ use Seatplus\Auth\Models\User;
 use Seatplus\Auth\Observers\ApplicationObserver;
 use Seatplus\Auth\Observers\CharacterAffiliationObserver;
 use Seatplus\Auth\Observers\SsoScopeObserver;
-use Seatplus\Auth\Services\CacheService;
 use Seatplus\Eveapi\Events\RefreshTokenCreated;
 use Seatplus\Eveapi\Events\UpdatingRefreshTokenEvent;
 use Seatplus\Eveapi\Models\Application;

@@ -15,10 +15,11 @@ use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 class RoleAffiliatedIdsService
 {
 
-    public function get(Role $role): array
+
+    public static function get(Role $role): array
     {
 
-        return $this->buildAffiliatedIds($role);
+        return (new self)->buildAffiliatedIds($role);
     }
 
     private function buildInverse(Collection $inverted): Collection

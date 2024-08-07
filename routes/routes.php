@@ -26,7 +26,6 @@
 
 use Illuminate\Support\Facades\Route;
 use Seatplus\Auth\Http\Controllers\Auth\CallbackController;
-use Seatplus\Auth\Http\Controllers\Auth\LoginController;
 use Seatplus\Auth\Http\Controllers\Auth\RedirectSSOController;
 use Seatplus\Auth\Http\Controllers\Auth\StepUpController;
 use Seatplus\Auth\Http\Controllers\SwitchMainCharacterController;
@@ -55,8 +54,6 @@ Route::middleware('web')
                 Route::put('main-character/switch/{new_character_id}', SwitchMainCharacterController::class)
                     ->name('change.main_character');
             });
-
-        // TODO: Add routes for creating, updating, assigning Affiliations and deleting roles, use Laravel Sanctum for API authentication
 
     });
 

@@ -26,6 +26,7 @@
 
 namespace Seatplus\Auth\Models\Permissions;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -61,46 +62,26 @@ class Affiliation extends Model
         return $this->belongsTo(Role::class, 'role_id', 'id');
     }
 
-    public function getAffiliatedIdsAttribute(): Collection
+    public function affiliatedIds(): Attribute
     {
-        return $this->getCharacterIds()->merge($this->getCorporationIds());
+        return new Attribute(
+            get: function (){
+                return match (true) {
+                    $this->affiliatable instanceof CharacterInfo => collect($this->affiliatable->character_id),
+                    $this->affiliatable instanceof CorporationInfo => collect([
+                        $this->affiliatable->corporation_id,
+                        $this->affiliatable->characters->pluck('character_id')
+                    ])->flatten(),
+                    $this->affiliatable instanceof AllianceInfo => collect([
+                        $this->affiliatable->alliance_id,
+                        $this->affiliatable->corporations->pluck('corporation_id'),
+                        $this->affiliatable->characters->pluck('character_id')
+                    ])->flatten(),
+                    default => collect(),
+                };
+            }
+        );
+
     }
 
-    public function getInverseAffiliatedIdsAttribute(): Collection
-    {
-        return $this->getInverseCharacterIds()->merge($this->getInverseCorporationIds());
-    }
-
-    private function getCharacterIds(): Collection
-    {
-        if (! $this->affiliatable) {
-            return collect();
-        }
-
-        return $this->affiliatable instanceof CharacterInfo ? collect($this->affiliatable->character_id) : $this->affiliatable->characters->pluck('character_id');
-    }
-
-    private function getInverseCharacterIds(): Collection
-    {
-        return CharacterInfo::query()
-            ->whereNotIn('character_id', $this->getCharacterIds()->toArray())
-            ->pluck('character_id');
-    }
-
-    private function getCorporationIds(): Collection
-    {
-        if (! $this->affiliatable) {
-            return collect();
-        }
-
-        return $this->affiliatable instanceof CorporationInfo ? collect($this->affiliatable->corporation_id)
-            : ($this->affiliatable instanceof AllianceInfo ? $this->affiliatable->corporations->pluck('corporation_id') : collect());
-    }
-
-    private function getInverseCorporationIds(): Collection
-    {
-        return CorporationInfo::query()
-            ->whereNotIn('corporation_id', $this->getCorporationIds()->toArray())
-            ->pluck('corporation_id');
-    }
 }

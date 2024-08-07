@@ -1,0 +1,320 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+use Seatplus\Auth\Http\Middleware\CheckAuthorization;
+use Seatplus\Auth\Models\Permissions\Affiliation;
+use Seatplus\Auth\Models\Permissions\Permission;
+use Seatplus\Auth\Models\Permissions\Role;
+use Seatplus\Eveapi\Models\Character\CharacterInfo;
+use Seatplus\Eveapi\Models\Character\CharacterRole;
+
+use Spatie\Permission\PermissionRegistrar;
+use function Pest\Laravel\get;
+use function Pest\Laravel\post;
+
+describe('middleware checks permission and affiliation', function () {
+    beforeEach(function () {
+        test()->role = Role::create(['name' => faker()->name]);
+        $this->permission_name = faker()->name;
+        test()->permission = Permission::create(['name' => $this->permission_name]);
+        test()->role->givePermissionTo(test()->permission);
+
+        test()->test_user->assignRole(test()->role);
+
+        app()->make(PermissionRegistrar::class)->registerPermissions();
+
+        Route::middleware([CheckAuthorization::class.":$this->permission_name"])
+            ->prefix('character')
+            ->name('character.')
+            ->group(function () {
+                Route::post('/test/', fn () => response('Hello World'))->name('post');
+                Route::get('/character/{character_id}/', fn (int $character_id) => response('Hello World'))->name('character');
+                Route::get('/corporation/{corporation_id}/', fn (int $corporation_id) => response('Hello World'))->name('corporation');
+                Route::get('/alliance/{alliance_id}/', fn (int $alliance_id) => response('Hello World'))->name('alliance');
+                Route::get('/character_ids', fn () => response('Hello World'))->name('character_ids');
+                Route::get('/corporation_ids', fn () => response('Hello World'))->name('corporation_ids');
+                Route::get('/alliance_ids', fn () => response('Hello World'))->name('alliance_ids');
+            });
+
+        Route::middleware([CheckAuthorization::class.":$this->permission_name,Director"])
+            ->prefix('corporation')
+            ->name('corporation.')
+            ->group(function () {
+                Route::post('/test/', fn () => response('Hello World'))->name('post');
+                Route::get('/character/{character_id}/', fn (int $character_id) => response('Hello World'))->name('character');
+                Route::get('/corporation/{corporation_id}/', fn (int $corporation_id) => response('Hello World'))->name('corporation');
+                Route::get('/alliance/{alliance_id}/', fn (int $alliance_id) => response('Hello World'))->name('alliance');
+                Route::get('/character_ids', fn () => response('Hello World'))->name('character_ids');
+                Route::get('/corporation_ids', fn () => response('Hello World'))->name('corporation_ids');
+                Route::get('/alliance_ids', fn () => response('Hello World'))->name('alliance_ids');
+            });
+
+        test()->secondary_character = CharacterInfo::factory()->create();
+    });
+
+    it('it validates parameters for superuser', function (string $method, string $route, int|array $route_param, string $status = 'ok') {
+        assignPermissionToTestUser(['superuser']);
+
+        test()->actingAs(test()->test_user);
+
+        $response = match ($method) {
+            'post' => post(route($route, $route_param)),
+            'get' => get(route($route, $route_param))
+        };
+
+        match ($status) {
+            'forbidden' => $response->assertForbidden(), //403
+            'ok' => $response->assertOk()
+        };
+    })
+        ->with([
+            // Character
+            ['post', 'character.post', fn () => ['character_id' => test()->test_character->character_id]],
+            ['post', 'character.post', fn () => ['corporation_id' => test()->test_character->corporation->corporation_id]],
+            ['post', 'character.post', fn () => ['alliance_id' => test()->test_character->alliance->alliance_id]],
+            ['get', 'character.character', fn () => test()->test_character->character_id],
+            ['get', 'character.corporation', fn () => test()->test_character->corporation->corporation_id],
+            ['get', 'character.alliance', fn () => test()->test_character->alliance->alliance_id],
+//        ['get', 'character.character_ids', fn () => ['character_ids' => []], 'forbidden'],
+//        ['get', 'character.corporation_ids', fn () => ['corporation_ids' => []], 'forbidden'],
+//        ['get', 'character.alliance_ids', fn () => ['alliance_ids' => []], 'forbidden'],
+            ['get', 'character.character_ids', fn () => ['character_ids' => [test()->test_character->character_id]]],
+            ['get', 'character.corporation_ids', fn () => ['corporation_ids' => [test()->test_character->corporation->corporation_id]]],
+            ['get', 'character.corporation_ids', fn () => ['alliance_ids' => [test()->test_character->alliance->alliance_id]]],
+            // Corporation Role
+            ['post', 'corporation.post', fn () => ['character_id' => test()->test_character->character_id]],
+            ['post', 'corporation.post', fn () => ['corporation_id' => test()->test_character->corporation->corporation_id]],
+            ['post', 'corporation.post', fn () => ['alliance_id' => test()->test_character->alliance->alliance_id]],
+            ['get', 'corporation.character', fn () => test()->test_character->character_id],
+            ['get', 'corporation.corporation', fn () => test()->test_character->corporation->corporation_id],
+            ['get', 'corporation.alliance', fn () => test()->test_character->alliance->alliance_id],
+//        ['get', 'corporation.character_ids', fn () => ['corporation_ids' => []], 'forbidden'],
+//        ['get', 'corporation.corporation_ids', fn () => ['corporation_ids' => []], 'forbidden'],
+//        ['get', 'corporation.alliance_ids', fn () => ['alliance_ids' => []], 'forbidden'],
+            ['get', 'corporation.character_ids', fn () => ['corporation_ids' => [test()->test_character->character_id]]],
+            ['get', 'corporation.corporation_ids', fn () => ['corporation_ids' => [test()->test_character->corporation->corporation_id]]],
+            ['get', 'corporation.alliance_ids', fn () => ['alliance_ids' => [test()->test_character->alliance->alliance_id]]],
+        ]);
+
+    it('checks owned character ids', function (string $method, string $route, array|int $route_param, string $status = 'ok') {
+        expect(test()->test_user->can('superuser'))->toBeFalse();
+
+        test()->actingAs(test()->test_user);
+
+        // Act
+        $response = match ($method) {
+            'post' => post(route($route, $route_param)),
+            'get' => get(route($route, $route_param))
+        };
+
+        // Assert
+
+        match ($status) {
+            'forbidden' => $response->assertForbidden(), //403
+            'ok' => $response->assertOk()
+        };
+    })
+        ->with([
+            ['post', 'character.post', fn () => ['character_id' => test()->test_character->character_id]],
+            ['post', 'character.post', fn () => ['corporation_id' => test()->test_character->corporation->corporation_id], 'forbidden'],
+            ['post', 'character.post', fn () => ['alliance_id' => test()->test_character->alliance->alliance_id], 'forbidden'],
+            ['get', 'character.character', fn () => test()->test_character->character_id],
+            ['get', 'character.corporation', fn () => test()->test_character->corporation->corporation_id, 'forbidden'],
+            ['get', 'character.alliance', fn () => test()->test_character->alliance->alliance_id, 'forbidden'],
+            ['get', 'character.character_ids', fn () => ['character_ids' => [test()->test_character->character_id]]],
+            ['get', 'character.corporation_ids', fn () => ['corporation_ids' => [test()->test_character->corporation->corporation_id]], 'forbidden'],
+            ['get', 'character.corporation_ids', fn () => ['alliance_ids' => [test()->test_character->alliance->alliance_id]], 'forbidden'],
+            // Corporation Role
+            ['post', 'corporation.post', fn () => ['character_id' => test()->test_character->character_id]],
+            ['post', 'corporation.post', fn () => ['corporation_id' => test()->test_character->corporation->corporation_id], 'forbidden'],
+            ['post', 'corporation.post', fn () => ['alliance_id' => test()->test_character->alliance->alliance_id], 'forbidden'],
+            ['get', 'corporation.character', fn () => test()->test_character->character_id],
+            ['get', 'corporation.corporation', fn () => test()->test_character->corporation->corporation_id, 'forbidden'],
+            ['get', 'corporation.alliance', fn () => test()->test_character->alliance->alliance_id, 'forbidden'],
+            ['get', 'corporation.character_ids', fn () => ['corporation_ids' => [test()->test_character->character_id]]],
+            ['get', 'corporation.corporation_ids', fn () => ['corporation_ids' => [test()->test_character->corporation->corporation_id]], 'forbidden'],
+            ['get', 'corporation.alliance_ids', fn () => ['alliance_ids' => [test()->test_character->alliance->alliance_id]], 'forbidden'],
+        ]);
+
+    it('checks owned corporation id', function (string $method, string $route, array|int $route_param) {
+        expect(test()->test_user->can('superuser'))->toBeFalse();
+
+        CharacterRole::factory()->create([
+            'character_id' => test()->test_character->character_id,
+            'roles' => ['Director'],
+        ]);
+
+        test()->actingAs(test()->test_user);
+
+        match ($method) {
+            'post' => post(route($route, $route_param))->assertOk(),
+            'get' => get(route($route, $route_param))->assertOk()
+        };
+    })
+        ->with([
+            ['post', 'corporation.post', fn () => ['corporation_id' => test()->test_character->corporation->corporation_id]],
+            ['get', 'corporation.corporation_ids', fn () => ['character_ids' => [test()->test_character->corporation->corporation_id]]],
+            ['get', 'corporation.corporation', fn () => test()->test_character->corporation->corporation_id],
+        ]);
+
+    it('checks affiliated ids', function (string $method, string $route, array|int $route_param, string $status = 'ok') {
+        expect(test()->test_user->can('superuser'))->toBeFalse();
+
+        createAffiliation(
+            test()->role,
+            test()->secondary_character->alliance->alliance_id,
+            \Seatplus\Eveapi\Models\Alliance\AllianceInfo::class,
+            \Seatplus\Auth\Enums\AffiliationType::ALLOWED
+        );
+
+        test()->actingAs(test()->test_user);
+
+        // Act
+        $response = match ($method) {
+            'post' => post(route($route), $route_param),
+            'get' => get(route($route, $route_param))
+        };
+
+        dump('users permissions', test()->test_user->permissions);
+
+        // Assert
+        expect(test()->test_user->roles)->toHaveCount(1)
+            ->and(test()->test_user->roles->first()->permissions->first()->name)->toBe($this->permission_name);
+
+        match ($status) {
+            'forbidden' => $response->assertForbidden(), //403
+            'ok' => $response->assertOk()
+        };
+    })
+        ->with([
+            ['post', 'character.post', fn () => ['character_id' => test()->secondary_character->character_id]],
+            ['post', 'character.post', fn () => ['corporation_id' => test()->secondary_character->corporation->corporation_id]],
+            ['post', 'character.post', fn () => ['alliance_id' => test()->secondary_character->alliance->alliance_id]],
+            ['get', 'character.character', fn () => test()->secondary_character->character_id],
+            ['get', 'character.corporation', fn () => test()->secondary_character->corporation->corporation_id],
+            ['get', 'character.alliance', fn () => test()->secondary_character->alliance->alliance_id],
+            ['get', 'character.character_ids', fn () => ['character_ids' => [test()->secondary_character->character_id]]],
+            ['get', 'character.corporation_ids', fn () => ['corporation_ids' => [test()->secondary_character->corporation->corporation_id]]],
+            ['get', 'character.corporation_ids', fn () => ['alliance_ids' => [test()->secondary_character->alliance->alliance_id]]],
+            // Corporation Role
+            ['post', 'corporation.post', fn () => ['character_id' => test()->secondary_character->character_id]],
+            ['post', 'corporation.post', fn () => ['corporation_id' => test()->secondary_character->corporation->corporation_id]],
+            ['post', 'corporation.post', fn () => ['alliance_id' => test()->secondary_character->alliance->alliance_id]],
+            ['get', 'corporation.character', fn () => test()->secondary_character->character_id],
+            ['get', 'corporation.corporation', fn () => test()->secondary_character->corporation->corporation_id],
+            ['get', 'corporation.alliance', fn () => test()->secondary_character->alliance->alliance_id],
+            ['get', 'corporation.character_ids', fn () => ['corporation_ids' => [test()->secondary_character->character_id]]],
+            ['get', 'corporation.corporation_ids', fn () => ['corporation_ids' => [test()->secondary_character->corporation->corporation_id]]],
+            ['get', 'corporation.alliance_ids', fn () => ['alliance_ids' => [test()->secondary_character->alliance->alliance_id]]],
+        ]);
+
+    it('returns forbidden for non affiliated ids', function (string $method, string $route, array|int $route_param, string $status = 'ok') {
+        expect(test()->test_user->can('superuser'))->toBeFalse();
+
+        createAffiliation(
+            test()->role,
+            test()->secondary_character->character_id,
+            CharacterInfo::class,
+            \Seatplus\Auth\Enums\AffiliationType::FORBIDDEN
+        );
+
+        test()->actingAs(test()->test_user);
+
+        $response = match ($method) {
+            'post' => post(route($route), $route_param),
+            'get' => get(route($route, $route_param))
+        };
+
+        match ($status) {
+            'forbidden' => $response->assertForbidden(), //403
+            'ok' => $response->assertOk()
+        };
+    })
+        ->with([
+            // POST
+            ['post', 'character.post', fn () => ['character_id' => test()->secondary_character->character_id], 'forbidden'],
+            ['post', 'character.post', fn () => ['character_id' => test()->test_character->character_id], 'ok'],
+            ['post', 'character.post', fn () => ['character_ids' => [test()->secondary_character->character_id]], 'forbidden'],
+            ['post', 'character.post', fn () => ['character_ids' => [test()->test_character->character_id]], 'ok'],
+            ['post', 'character.post', fn () => ['character_ids' => [test()->test_character->character_id, test()->secondary_character->character_id]], 'forbidden'],
+            // GET
+            ['get', 'character.character', fn () => test()->secondary_character->character_id, 'forbidden'],
+            ['get', 'character.character', fn () => test()->test_character->character_id, 'ok'],
+            ['get', 'character.character_ids', fn () => ['character_ids' => [test()->secondary_character->character_id]], 'forbidden'],
+            ['get', 'character.character_ids', fn () => ['character_ids' => [test()->test_character->character_id]], 'ok'],
+            ['get', 'character.character_ids', fn () => ['character_ids' => [test()->test_character->character_id, test()->secondary_character->character_id]], 'forbidden'],
+        ]);
+
+    it('works with duplication of params', function () {
+        expect(test()->test_user->can('superuser'))->toBeFalse();
+
+        test()->actingAs(test()->test_user);
+
+        get(route('character.character', [
+            'character_id' => test()->test_character->character_id,
+            '0' => test()->test_character->character_id,
+        ]))->assertOk();
+    });
+});
+
+describe('middleware checks permission or corporation role test', function () {
+    beforeEach(function () {
+        test()->role = Role::create(['name' => faker()->name]);
+        $this->permission_name = faker()->streetName();
+        test()->permission = Permission::create(['name' => $this->permission_name]);
+
+        Route::middleware([CheckAuthorization::class.":$this->permission_name,Accountant"])
+            ->prefix('test')
+            ->get('/', function () {
+                return 'test';
+            })->name('test');
+    });
+
+    it('user has permission', function (string $permission) {
+        test()->actingAs(test()->test_user);
+        test()->assignPermissionToTestUser($permission);
+
+        $response = $this->get(route('test'));
+        $response->assertStatus(200);
+    })->with([
+        'superuser' => 'superuser',
+        'accountant' => fn () => $this->permission_name,
+    ]);
+
+    it('has corporation_role', function (string $corporation_role) {
+        test()->actingAs(test()->test_user);
+        CharacterRole::query()->delete();
+
+        CharacterRole::factory()->create([
+            'character_id' => test()->test_character->character_id,
+            'roles' => [$corporation_role],
+        ]);
+
+        $response = $this->get(route('test'));
+        $response->assertStatus(200);
+    })->with([
+        'Accountant' => 'Accountant',
+        'Director' => 'Director',
+    ]);
+
+    it('is missing corporation_role', function () {
+        test()->actingAs(test()->test_user);
+        CharacterRole::query()->delete();
+
+        $response = $this->get(route('test'));
+        $response->assertStatus(403);
+    });
+});
+
+function createAffiliation(Role $role, int|string $affiliatable_id, string $affiliatable_type, \Seatplus\Auth\Enums\AffiliationType $type): Affiliation
+{
+    /** @var Affiliation $affiliation */
+    $affiliation =  Affiliation::query()->create([
+        'role_id' => $role->id,
+        'affiliatable_id' => $affiliatable_id,
+        'affiliatable_type' => $affiliatable_type,
+        'type' => $type->value,
+    ]);
+
+    return $affiliation;
+}

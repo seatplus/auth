@@ -52,7 +52,7 @@ uses(\Illuminate\Foundation\Testing\LazilyRefreshDatabase::class)->in('Unit', 'F
 */
 
 /** @link https://pestphp.com/docs/helpers */
-function createRefreshTokenWithScopes(array $scopes)
+function createRefreshTokenWithScopes(array $scopes): void
 {
     Event::fakeFor(function () use ($scopes) {
         if (test()->test_character->refresh_token) {
@@ -87,7 +87,7 @@ function createSocialiteUser($character_id = null, array $scopes = ['esi-skills.
 {
     $refresh_token = RefreshToken::factory()->scopes($scopes)->make();
 
-    $socialiteUser = test()->createMock(SocialiteUser::class);
+    $socialiteUser = Mockery::mock(SocialiteUser::class)->makePartial();
 
     $attributes = (object) [
         'character_id' => $character_id ?? $refresh_token->character_id,
@@ -140,13 +140,4 @@ function assignPermissionToTestUser(array|string $permission_strings)
 
     // now re-register all the roles and permissions
     app()->make(PermissionRegistrar::class)->registerPermissions();
-}
-
-function createAffiliation(Role $role, $affiliatable_id, $affiliatable_type, $type = 'allowed'): Affiliation
-{
-    return $role->affiliations()->create([ //test()->role
-        'affiliatable_id' => $affiliatable_id,
-        'affiliatable_type' => $affiliatable_type,
-        'type' => $type,
-    ]);
 }

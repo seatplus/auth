@@ -19,7 +19,7 @@ class RoleRequest extends FormRequest
             'role_id' => 'required|integer',
             'affiliated' => 'nullable|array',
             'affiliated.*.entity_id' => 'required|integer',
-            'affiliated.*.entity_type' => 'required|string',
+            'affiliated.*.entity_type' => ['required', 'string', Rule::in(['character', 'corporation', 'alliance'])],
             'affiliated.*.affiliation_type' => [
                 'required',
                 'string',
@@ -27,7 +27,7 @@ class RoleRequest extends FormRequest
             ],
             'assigned' => 'nullable|array',
             'assigned.*.entity_id' => 'required|integer',
-            'assigned.*.entity_type' => ['required', 'string', Rule::in(['corporation', 'alliance'])],
+            'assigned.*.entity_type' => ['required', 'string', Rule::in(['character','corporation', 'alliance'])],
             'assigned.*.can_moderate' => 'nullable|boolean',
         ];
     }

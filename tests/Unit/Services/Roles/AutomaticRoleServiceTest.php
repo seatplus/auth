@@ -8,9 +8,7 @@ use Seatplus\Auth\Services\Roles\AutomaticRoleService;
 beforeEach(function () {
     $this->role = Role::create(['name' => 'test']);
     $this->role = $this->role->refresh();
-    $this->service = new AutomaticRoleService();
-
-    $this->service->for($this->role);
+    $this->service = new AutomaticRoleService($this->role);
 });
 
 describe('assigning', function () {
@@ -23,8 +21,7 @@ describe('assigning', function () {
 
         $this->service->automaticallyAssignRoleTo(corporation_ids: [$corporation_id]);
 
-        expect(RoleMembership::get())->toHaveCount(2) // User and Character
-            ->and($this->service->getAssignedCharacterIds())->toContain($test_character->character_id)
+        expect(RoleMembership::get())->toHaveCount(2) // User and Corporation
             ->and(test()->test_user->refresh()->hasRole($this->role->name))->toBeTrue();
 
     });
@@ -36,7 +33,7 @@ describe('assigning', function () {
 
         $this->service->automaticallyAssignRoleTo(alliance_ids: [$alliance_id]);
 
-        expect($this->service->getAssignedCharacterIds())->toContain($test_character->character_id);
+        expect(test()->test_user->refresh()->hasRole($this->role->name))->toBeTrue();
     });
 
     it('role to corporation and alliance', function () {
@@ -47,7 +44,8 @@ describe('assigning', function () {
 
         $this->service->automaticallyAssignRoleTo(corporation_ids: [$corporation_id], alliance_ids: [$alliance_id]);
 
-        expect($this->service->getAssignedCharacterIds())->toContain($test_character->character_id);
+        expect(RoleMembership::get())->toHaveCount(3) // User, Corporation and Alliance
+            ->and(test()->test_user->refresh()->hasRole($this->role->name))->toBeTrue();
     });
 });
 
@@ -77,8 +75,7 @@ describe('handling Members', function () {
 
         $service->automaticallyAssignRoleTo(corporation_ids: [$corporation_id]);
 
-        expect(RoleMembership::get())->toHaveCount(2) // User and Character
-        ->and($service->getAssignedCharacterIds())->toContain($test_character->character_id)
+        expect(RoleMembership::get())->toHaveCount(2) // User and Corporation
             ->and(test()->test_user->refresh()->hasRole($role->name))->toBeTrue();
     });
 });

@@ -28,7 +28,7 @@ namespace Seatplus\Auth\Http\Controllers\Auth;
 
 use Laravel\Socialite\Contracts\Factory as Socialite;
 use Seatplus\Auth\Http\Controllers\Controller;
-use Seatplus\Auth\Services\GetRequiredScopes;
+use Seatplus\Auth\Services\SsoScopes\GlobalSsoScopesService;
 use SocialiteProviders\Eveonline\Provider;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
@@ -37,10 +37,13 @@ class RedirectSSOController extends Controller
 
     /**
      * Redirect the user to the Eve Online authentication page.
+     * @throws \Throwable
      */
-    public function __invoke(Socialite $socialite, GetRequiredScopes $required_scopes): RedirectResponse
+    public function __invoke(Socialite $socialite, GlobalSsoScopesService $service): RedirectResponse
     {
-        $scopes = $required_scopes->execute()->toArray();
+        throw_unless(auth()->guest(), \Exception::class, 'You are already authenticated');
+
+        $scopes = $this->getScopes($service);
 
         session([
             'rurl' => session()->previousUrl(),
@@ -51,6 +54,17 @@ class RedirectSSOController extends Controller
 
         /** @var Provider $driver */
         return $driver->scopes($scopes)->redirect();
+    }
+
+    private function getScopes(GlobalSsoScopesService $service): array
+    {
+        $global_scopes = $service->get();
+
+        return collect(config('eveapi.scopes.minimum'))
+            ->merge($global_scopes)
+            ->unique()
+            ->filter()
+            ->all();
     }
 
 
