@@ -50,12 +50,4 @@ class Role extends SpatieRole
     {
         return $this->hasMany(RoleMembership::class, 'role_id');
     }
-
-    public function affiliatedIds(): Attribute
-    {
-
-        return Attribute::make(
-            get: fn() => RoleAffiliatedIdsService::get($this)
-        );
-    }
 }

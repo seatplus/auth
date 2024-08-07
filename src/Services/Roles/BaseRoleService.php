@@ -21,14 +21,14 @@ class BaseRoleService
     public function for(Role|string|int $role): self
     {
 
-        /* @var Role $role */
-        $role = match (true) {
+        /* @var Role $resolved_role */
+        $resolved_role = match (true) {
             $role instanceof Role => $role,
             is_string($role) => Role::findByName($role),
             is_int($role) => Role::findById($role),
         };
 
-        $this->role = $role;
+        $this->role = $resolved_role;
 
         return $this;
     }
