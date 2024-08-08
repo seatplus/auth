@@ -97,3 +97,7 @@ it('builds permissions from user', function () {
         ->and($result['permissions'][$permissions[1]->name])->toContain(4, 5, 6, 7, 8, 9)
         ->and($result['permissions'][$permissions[2]->name])->toBe([10, 11, 12]);
 });
+
+describe('cache user permissions', function () {
+
+})->only();

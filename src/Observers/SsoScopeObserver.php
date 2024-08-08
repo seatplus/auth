@@ -27,6 +27,7 @@
 namespace Seatplus\Auth\Observers;
 
 use Illuminate\Support\Facades\Cache;
+use Seatplus\Auth\Models\User;
 use Seatplus\Eveapi\Models\SsoScopes;
 
 class SsoScopeObserver
@@ -48,6 +49,10 @@ class SsoScopeObserver
 
     private function flushCache(): void
     {
-        Cache::tags(['characters_with_missing_scopes'])->flush();
+        $user_ids = User::query()->pluck('id');
+
+        foreach ($user_ids as $user_id) {
+            Cache::forget("user_permissions_{$user_id}");
+        }
     }
 }

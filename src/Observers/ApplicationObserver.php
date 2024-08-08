@@ -42,6 +42,6 @@ class ApplicationObserver
             default => null,
         };
 
-        Cache::tags(['characters_with_missing_scopes', $user_id])->flush();
+        Cache::forget("user_permissions_{$user_id}");
     }
 }

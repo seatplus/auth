@@ -38,7 +38,6 @@ class ReactOnFreshRefreshToken
             ->where('character_id', $refresh_token_event->refresh_token->character_id)
             ->firstOrFail();
 
-        $user_id = $character_user->user_id;
-        Cache::tags(['characters_with_missing_scopes', $user_id])->flush();
+        Cache::forget("user_permissions_{$character_user->user_id}");
     }
 }

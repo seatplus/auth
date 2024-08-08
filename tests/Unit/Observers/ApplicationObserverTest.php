@@ -5,8 +5,11 @@ use Seatplus\Auth\Models\User;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 
 it('flushes cache after creation', function (User|CharacterInfo $entity) {
-    Cache::shouldReceive('tags')->with(['characters_with_missing_scopes', test()->test_user->id])->andReturnSelf();
-    Cache::shouldReceive('flush')->once();
+    $user_id = test()->test_user->id;
+
+    Cache::shouldReceive('forget')
+        ->once()
+        ->with("user_permissions_{$user_id}");
 
     $entity->application()->create([
         'corporation_id' => test()->test_character->corporation->corporation_id,
