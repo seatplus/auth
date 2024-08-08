@@ -83,10 +83,12 @@ abstract class AbstractRoleService implements RoleServiceInterface
             ->each(fn ($user) => $user->assignRole($this->role));
     }
 
-    protected function resetRoleMembership(): void
+    protected function removeRoleMembership(User $user): void
     {
         RoleMembership::query()
             ->where('role_id', $this->role->id)
+            ->where('entity_id', $user->id)
+            ->where('entity_type', User::class)
             ->delete();
     }
 
@@ -103,7 +105,7 @@ abstract class AbstractRoleService implements RoleServiceInterface
             'type' => $roleType->value,
         ]);
 
-        $this->resetRoleMembership();
+        $this->resetRoleMemberships();
     }
 
     protected function setRoleMembership(
@@ -133,20 +135,32 @@ abstract class AbstractRoleService implements RoleServiceInterface
             ->toArray();
     }
 
-    protected function getUsersFromCharacterIds(array $character_ids): Collection
+    protected function getRoleMembers(bool $moderators = false, bool $inverse = false): Collection
     {
-        return User::query()
-            ->whereHas('characters', fn ($query) => $query->whereIn('character_infos.character_id', $character_ids))
+
+        return RoleMembership::query()
+            ->where('role_id', $this->role->id)
+            ->where('entity_type', User::class)
+            ->whereHasMorph('entity', [User::class], fn (\Illuminate\Database\Eloquent\Builder $query) => $query
+                ->whereHas('characters', function ($query) use ($inverse) {
+
+                    $character_ids = $this->getAssignedCharacterIds();
+
+                    match ($inverse) {
+                        true => $query->whereNotIn('character_infos.character_id', $character_ids),
+                        default => $query->whereIn('character_infos.character_id', $character_ids),
+                    };
+                })
+            )
+            ->where('can_moderate', $moderators)
             ->get();
     }
 
-    protected function removeIneligibleMembers(array $user_ids): void
+    protected function removeUnassignedMembers(): void
     {
-        RoleMembership::query()
-            ->where('role_id', $this->role->id)
-            ->where('entity_type', User::class)
-            ->whereNotIn('entity_id', $user_ids)
-            ->delete();
+
+        $unassigned_members = $this->getRoleMembers(inverse: true);
+        $unassigned_members->each(fn ($role_membership) => $role_membership->delete());
     }
 
     public function handleMembers(): void
@@ -195,5 +209,24 @@ abstract class AbstractRoleService implements RoleServiceInterface
         }
     }
 
+    public function updateMemberStatusBasedOnUserCompliance(): void
+    {
+        RoleMembership::query()
+            ->where('role_id', $this->role->id)
+            ->where('entity_type', User::class)
+            ->whereIn('status', [RoleMembershipStatus::ACTIVE->value, RoleMembershipStatus::INACTIVE->value])
+            ->get()
+            ->each(fn (RoleMembership $role_membership) => $role_membership->updateOrFail([
+                'status' => $this->isUserCompliant($role_membership->entity) ? RoleMembershipStatus::ACTIVE : RoleMembershipStatus::INACTIVE
+            ]));
+    }
+
     abstract public function syncMembers(): void;
+
+    protected function resetRoleMemberships(): void
+    {
+        RoleMembership::query()
+            ->where('role_id', $this->role->id)
+            ->delete();
+    }
 }
