@@ -83,7 +83,7 @@ abstract class AbstractRoleService implements RoleServiceInterface
     /**
      * @throws \Throwable
      */
-    protected function addCriteria(array $entities, RoleType $roleType)
+    protected function addCriteria(array $entities, RoleType $roleType): void
     {
         $this->validateCriteria($entities);
 

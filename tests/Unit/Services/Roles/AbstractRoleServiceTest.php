@@ -44,7 +44,9 @@ it('returns early when setting same role type', function () {
 
     // Act
     $automated_role_service = new \Seatplus\Auth\Services\Roles\AutomaticRoleService($this->role);
-    $automated_role_service->automaticallyAssignRoleTo([1], [1]);
+    $automated_role_service->automaticallyAssignRoleTo([
+        [1, 'corporation'],
+    ]);
 
     // Assert
     expect($this->role->refresh()->type)->toEqual(RoleType::AUTOMATIC->value);

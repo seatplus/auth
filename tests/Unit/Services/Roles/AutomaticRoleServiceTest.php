@@ -19,7 +19,9 @@ describe('assigning', function () {
 
         expect(test()->test_user->refresh()->hasRole($this->role->name))->toBeFalse();
 
-        $this->service->automaticallyAssignRoleTo(corporation_ids: [$corporation_id]);
+        $this->service->automaticallyAssignRoleTo([
+            [$corporation_id, 'corporation']
+        ]);
 
         expect(RoleMembership::get())->toHaveCount(2) // User and Corporation
             ->and(test()->test_user->refresh()->hasRole($this->role->name))->toBeTrue();
@@ -31,7 +33,9 @@ describe('assigning', function () {
         $test_character = test()->test_character;
         $alliance_id = $test_character->alliance_id;
 
-        $this->service->automaticallyAssignRoleTo(alliance_ids: [$alliance_id]);
+        $this->service->automaticallyAssignRoleTo([
+            [$alliance_id, 'alliance']
+        ]);
 
         expect(test()->test_user->refresh()->hasRole($this->role->name))->toBeTrue();
     });
@@ -42,7 +46,10 @@ describe('assigning', function () {
         $corporation_id = $test_character->corporation_id;
         $alliance_id = $test_character->alliance_id;
 
-        $this->service->automaticallyAssignRoleTo(corporation_ids: [$corporation_id], alliance_ids: [$alliance_id]);
+        $this->service->automaticallyAssignRoleTo([
+            [$corporation_id, 'corporation'],
+            [$alliance_id, 'alliance']
+        ]);
 
         expect(RoleMembership::get())->toHaveCount(3) // User, Corporation and Alliance
             ->and(test()->test_user->refresh()->hasRole($this->role->name))->toBeTrue();
@@ -58,7 +65,7 @@ describe('handling Members', function () {
 
         expect(test()->test_user->refresh()->hasRole($this->role->name))->toBeTrue();
 
-        $this->service->automaticallyAssignRoleTo();
+        $this->service->automaticallyAssignRoleTo([]);
 
         expect(test()->test_user->refresh()->hasRole($this->role->name))->toBeFalse()
             ->and(RoleMembership::query()->count())->toBe(0);
@@ -73,7 +80,9 @@ describe('handling Members', function () {
         $test_character = test()->test_character;
         $corporation_id = $test_character->corporation_id;
 
-        $service->automaticallyAssignRoleTo(corporation_ids: [$corporation_id]);
+        $service->automaticallyAssignRoleTo([
+            [$corporation_id, 'corporation']
+        ]);
 
         expect(RoleMembership::get())->toHaveCount(2) // User and Corporation
             ->and(test()->test_user->refresh()->hasRole($role->name))->toBeTrue();
@@ -84,7 +93,7 @@ it('sets role type to automatic', function () {
 
     expect($this->role->type)->toBe('manual');
 
-    $this->service->automaticallyAssignRoleTo();
+    $this->service->automaticallyAssignRoleTo([]);
 
     expect($this->role->type)->toBe('automatic');
 });
