@@ -2,6 +2,7 @@
 
 namespace Seatplus\Auth\Services\Roles;
 
+use Seatplus\Auth\Enums\RoleType;
 use Seatplus\Auth\Models\Permissions\Role;
 
 class BaseRoleService
@@ -34,4 +35,35 @@ class BaseRoleService
     {
         return new AutomaticRoleService($this->role);
     }
+
+    public function onRequest(): OnRequestRoleService
+    {
+        return new OnRequestRoleService($this->role);
+    }
+
+    public function manual(): ManualRoleService
+    {
+        return new ManualRoleService($this->role);
+    }
+
+    public function optIn(): OptInRoleService
+    {
+        return new OptInRoleService($this->role);
+    }
+
+    public function getTypeService(): RoleServiceInterface
+    {
+        return match ($this->role->type) {
+            RoleType::AUTOMATIC->value => $this->automatic(),
+            RoleType::ON_REQUEST->value => $this->onRequest(),
+            RoleType::MANUAL->value => $this->manual(),
+            RoleType::OPT_IN->value => $this->optIn()
+        };
+    }
+
+    public function handleMembers(): void
+    {
+        $this->getTypeService()->handleMembers();
+    }
+
 }
