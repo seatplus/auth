@@ -9,7 +9,7 @@ use Seatplus\Auth\Services\Roles\OnRequestRoleService;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 
 beforeEach(function () {
-    $this->role = Role::create(['name' => 'test']);
+    $this->role = Role::create(['name' => 'test', 'type' => \Seatplus\Auth\Enums\RoleType::ON_REQUEST->value]);
     $this->role = $this->role->refresh();
 
     $this->service = new OnRequestRoleService($this->role);

@@ -4,7 +4,6 @@ namespace Seatplus\Auth\Services\Roles;
 
 use Seatplus\Auth\Enums\RoleMembershipStatus;
 use Seatplus\Auth\Enums\RoleType;
-use Seatplus\Auth\Models\AccessControl\RoleMembership;
 use Seatplus\Auth\Models\User;
 use Seatplus\Eveapi\Models\Alliance\AllianceInfo;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
@@ -21,21 +20,12 @@ class AutomaticRoleService extends AbstractRoleService implements RoleServiceInt
         $this->setRoleMembership($alliance_id, AllianceInfo::class);
     }
 
-    public function automaticallyAssignRoleTo(?array $corporation_ids = [], ?array $alliance_ids = []): void
+    /**
+     * @throws \Throwable
+     */
+    public function automaticallyAssignRoleTo(array $entities): void
     {
-        $this->setRoleType(RoleType::AUTOMATIC);
-
-        // reset all role memberships
-        $this->resetRoleMemberships();
-
-        // for each corporation_id, we assign the role to the corporation
-        foreach ($corporation_ids as $corporation_id) {
-            $this->automaticallyAssignRoleToCorporation($corporation_id);
-        }
-
-        foreach ($alliance_ids as $alliance_id) {
-            $this->automaticallyAssignRoleToAlliance($alliance_id);
-        }
+        $this->addCriteria($entities, RoleType::AUTOMATIC);
 
         $this->handleMembers();
     }

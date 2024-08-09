@@ -44,7 +44,7 @@ abstract class AbstractRoleService implements RoleServiceInterface
     /**
      * @throws \Throwable
      */
-    private function validateEntities(array $entity_sets): void
+    private function validateAffiliationEntities(array $entity_sets): void
     {
         $validator = validator($entity_sets, [
             '*.0' => 'required|integer',
@@ -57,6 +57,52 @@ abstract class AbstractRoleService implements RoleServiceInterface
         ]);
 
         throw_if($validator->fails(), ValidationException::withMessages($validator->errors()->toArray()));
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    private function validateCriteria(array $entities): void
+    {
+        $validator = validator($entities, [
+            '*.0' => 'required|integer',
+            '*.1' => ['required', 'string', Rule::in(['corporation', 'alliance'])],
+        ]);
+
+        throw_if($validator->fails(), ValidationException::withMessages($validator->errors()->toArray()));
+    }
+
+    private function resetCriteria(): void
+    {
+        RoleMembership::query()
+            ->where('role_id', $this->role->id)
+            ->whereIn('entity_type', [CorporationInfo::class, AllianceInfo::class])
+            ->delete();
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    protected function addCriteria(array $entities, RoleType $roleType)
+    {
+        $this->validateCriteria($entities);
+
+        $this->setRoleType($roleType);
+
+        $this->resetCriteria();
+
+        foreach ($entities as $entity) {
+
+            $entity_type = match ($entity[1]) {
+                'corporation' => CorporationInfo::class,
+                'alliance' => AllianceInfo::class,
+            };
+
+            $this->setRoleMembership(
+                entity_id: $entity[0],
+                entity_type: $entity_type
+            );
+        }
     }
 
     private function revokeTheRolesFromUsersThatAreNotInMembers(\Illuminate\Support\Collection $member_ids): void
@@ -172,7 +218,6 @@ abstract class AbstractRoleService implements RoleServiceInterface
 
     protected function removeUnassignedMembers(): void
     {
-
         $unassigned_members = $this->getRoleMembers(inverse: true);
         $unassigned_members->each(fn (RoleMembership $role_membership) =>$role_membership->delete());
     }
@@ -205,7 +250,7 @@ abstract class AbstractRoleService implements RoleServiceInterface
      */
     public function syncAffiliateManyEntities(array $entity_sets): void
     {
-        $this->validateEntities($entity_sets);
+        $this->validateAffiliationEntities($entity_sets);
 
         $this->resetAffiliation();
 
