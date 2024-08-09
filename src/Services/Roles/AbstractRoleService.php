@@ -2,6 +2,7 @@
 
 namespace Seatplus\Auth\Services\Roles;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Validation\Rule;
@@ -190,35 +191,27 @@ abstract class AbstractRoleService implements RoleServiceInterface
             ->toArray();
     }
 
-    protected function getRoleMembers(bool $moderators = false, bool $inverse = false): Collection
+    protected function getRoleMembers(): Collection
     {
 
         return RoleMembership::query()
             ->where('role_id', $this->role->id)
             ->where('entity_type', User::class)
-            ->whereHasMorph('entity', [User::class], fn (\Illuminate\Database\Eloquent\Builder $query) => $query
-                ->whereHas('characters', function ($query) use ($inverse) {
-
+            ->whereHasMorph('entity', [User::class], fn (Builder $query) => $query
+                ->whereHas('characters', function ($query) {
                     $character_ids = $this->getAssignedCharacterIds();
 
-                    // if character_ids are empty, we return early
-                    if (empty($character_ids)) {
-                        return;
+                    if (!empty($character_ids)) {
+                        $query->whereNotIn('character_infos.character_id', $character_ids);
                     }
-
-                    match ($inverse) {
-                        true => $query->whereNotIn('character_infos.character_id', $character_ids),
-                        default => $query->whereIn('character_infos.character_id', $character_ids),
-                    };
                 })
             )
-            ->where('can_moderate', $moderators)
             ->get();
     }
 
     protected function removeUnassignedMembers(): void
     {
-        $unassigned_members = $this->getRoleMembers(inverse: true);
+        $unassigned_members = $this->getRoleMembers();
         $unassigned_members->each(fn (RoleMembership $role_membership) =>$role_membership->delete());
     }
 
