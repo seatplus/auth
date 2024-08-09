@@ -25,6 +25,7 @@ return new class extends Migration
     private function createTables(): void
     {
         Schema::create('role_memberships', function (Blueprint $table) {
+            $table->id();
             $table->unsignedInteger('role_id');
             $table->foreign('role_id')->references('id')->on('roles')->onDelete('cascade');
             $table->morphs('entity');

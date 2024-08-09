@@ -129,6 +129,7 @@ abstract class AbstractRoleService implements RoleServiceInterface
 
         return $role
             ->role_memberships
+            ->filter(fn ($role_membership) => $role_membership->entity_type === CorporationInfo::class || $role_membership->entity_type === AllianceInfo::class)
             ->pluck('entity.characters')
             ->flatten()
             ->pluck('character_id')
@@ -146,6 +147,11 @@ abstract class AbstractRoleService implements RoleServiceInterface
 
                     $character_ids = $this->getAssignedCharacterIds();
 
+                    // if character_ids are empty, we return early
+                    if (empty($character_ids)) {
+                        return;
+                    }
+
                     match ($inverse) {
                         true => $query->whereNotIn('character_infos.character_id', $character_ids),
                         default => $query->whereIn('character_infos.character_id', $character_ids),
@@ -160,7 +166,7 @@ abstract class AbstractRoleService implements RoleServiceInterface
     {
 
         $unassigned_members = $this->getRoleMembers(inverse: true);
-        $unassigned_members->each(fn ($role_membership) => $role_membership->delete());
+        $unassigned_members->each(fn (RoleMembership $role_membership) =>$role_membership->delete());
     }
 
     public function handleMembers(): void

@@ -11,8 +11,6 @@ class RoleMembership extends Model
 {
     protected $table = 'role_memberships';
 
-    protected $primaryKey = null;
-
     public $incrementing = false;
 
     protected $casts = [
