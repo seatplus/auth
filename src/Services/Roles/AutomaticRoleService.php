@@ -5,21 +5,9 @@ namespace Seatplus\Auth\Services\Roles;
 use Seatplus\Auth\Enums\RoleMembershipStatus;
 use Seatplus\Auth\Enums\RoleType;
 use Seatplus\Auth\Models\User;
-use Seatplus\Eveapi\Models\Alliance\AllianceInfo;
-use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 
 class AutomaticRoleService extends AbstractRoleService implements RoleServiceInterface
 {
-    private function automaticallyAssignRoleToCorporation(int|string $corporation_id): void
-    {
-        $this->setRoleMembership($corporation_id, CorporationInfo::class);
-    }
-
-    private function automaticallyAssignRoleToAlliance(int|string $alliance_id): void
-    {
-        $this->setRoleMembership($alliance_id, AllianceInfo::class);
-    }
-
     /**
      * @throws \Throwable
      */
