@@ -109,16 +109,24 @@ abstract class AbstractRoleService implements RoleServiceInterface
     }
 
     protected function setRoleMembership(
-        int|string $entity_id, string $entity_type, bool $can_moderate = false, ?RoleMembershipStatus $status = null
+        int|string $entity_id,
+        string $entity_type,
+        bool $can_moderate = false,
+        ?RoleMembershipStatus $status = null
     ): void {
+
+        $values_to_update = ['can_moderate' => $can_moderate];
+
+        // if $status is set, we add it to the values to update
+        if ($status) {
+            $values_to_update['status'] = $status->value;
+        }
+
         RoleMembership::query()->updateOrInsert([
             'role_id' => $this->role->id,
             'entity_id' => $entity_id,
             'entity_type' => $entity_type,
-        ], [
-            'can_moderate' => $can_moderate,
-            'status' => $status?->value,
-        ]);
+        ], $values_to_update);
     }
 
     protected function getAssignedCharacterIds(): array
