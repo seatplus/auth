@@ -55,3 +55,31 @@ it('syncs members', function () {
 
     expect(RoleMembership::count())->toBe(0);
 });
+
+describe('it can', function () {
+   beforeEach(function (){
+       $entities = [
+           [test()->test_character->corporation_id, 'corporation']
+       ];
+
+       $this->service->addCriteriaForRole($entities);
+   });
+
+   it('can view', function () {
+       $test_user = test()->test_user;
+
+       expect($this->service->canView($test_user))->toBeTrue();
+   });
+
+    it('can join', function () {
+         $test_user = test()->test_user;
+
+         expect($this->service->canJoin($test_user))->toBeTrue();
+    });
+});
+
+it('cannot moderate', function () {
+    $test_user = test()->test_user;
+
+    expect($this->service->canModerate($test_user))->toBeFalse();
+});

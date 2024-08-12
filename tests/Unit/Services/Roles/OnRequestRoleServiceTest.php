@@ -206,4 +206,53 @@ describe('sync', function () {
     });
 });
 
+describe('can', function () {
+
+    beforeEach(function () {
+        $entities = [
+            [test()->test_character->corporation_id, 'corporation'],
+            [test()->test_character->alliance_id, 'alliance']
+        ];
+
+        $this->service->addCriteriaForRoleApplication($entities);
+    });
+
+    it('can view', function () {
+        // Act
+        $result = $this->service->canView(test()->test_user);
+
+        // Assert
+        expect($result)->toBeTrue();
+    });
+
+    it('can join', function () {
+        // Act
+        $result = $this->service->canJoin(test()->test_user);
+
+        // Assert
+        expect($result)->toBeTrue();
+    });
+
+});
+
+
+it('cannot moderate', function () {
+    // Act
+    $result = $this->service->canModerate(test()->test_user);
+
+    // Assert
+    expect($result)->toBeFalse();
+});
+
+it('can moderate', function () {
+    // Arrange
+    $user = test()->test_user;
+    $this->service->setModerator($user);
+
+    // Act
+    $result = $this->service->canModerate($user);
+
+    // Assert
+    expect($result)->toBeTrue();
+});
 

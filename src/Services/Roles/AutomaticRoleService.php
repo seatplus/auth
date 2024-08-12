@@ -41,4 +41,19 @@ class AutomaticRoleService extends AbstractRoleService implements RoleServiceInt
             status: RoleMembershipStatus::ACTIVE
         ));
     }
+
+    public function canJoin(User $user): bool
+    {
+        return false;
+    }
+
+    public function canModerate(User $user): bool
+    {
+        return false;
+    }
+
+    public function canView(User $user): bool
+    {
+        return $this->meetsCriteria($user);
+    }
 }

@@ -63,3 +63,18 @@ it('syncs members', function () {
 
     expect(RoleMembership::first())->status->toBe(RoleMembershipStatus::ACTIVE->value);
 });
+
+it('can view', function () {
+    expect($this->service->canView(test()->test_user))->toBeFalse();
+});
+
+it('can join', function () {
+    expect($this->service->canJoin(test()->test_user))->toBeFalse();
+});
+
+it('can moderate', function () {
+
+    $this->service->setModerator(test()->test_user);
+
+    expect($this->service->canModerate(test()->test_user))->toBeTrue();
+});

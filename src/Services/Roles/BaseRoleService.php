@@ -4,6 +4,7 @@ namespace Seatplus\Auth\Services\Roles;
 
 use Seatplus\Auth\Enums\RoleType;
 use Seatplus\Auth\Models\Permissions\Role;
+use Seatplus\Auth\Models\User;
 
 class BaseRoleService
 {
@@ -64,6 +65,21 @@ class BaseRoleService
     public function handleMembers(): void
     {
         $this->getTypeService()->handleMembers();
+    }
+
+    public function canView(User $user): bool
+    {
+        return $this->getTypeService()->canView($user);
+    }
+
+    public function canJoin(User $user): bool
+    {
+        return $this->getTypeService()->canJoin($user);
+    }
+
+    public function canModerate(User $user): bool
+    {
+        return $this->getTypeService()->canModerate($user);
     }
 
 }

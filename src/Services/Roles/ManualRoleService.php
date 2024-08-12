@@ -35,4 +35,19 @@ class ManualRoleService extends AbstractRoleService implements RoleServiceInterf
         // update the status of the members based on the user compliance
         $this->updateMemberStatusBasedOnUserCompliance();
     }
+
+    public function canJoin(User $user): bool
+    {
+        return false;
+    }
+
+    public function canModerate(User $user): bool
+    {
+        return $this->isModerator($user);
+    }
+
+    public function canView(User $user): bool
+    {
+        return false;
+    }
 }

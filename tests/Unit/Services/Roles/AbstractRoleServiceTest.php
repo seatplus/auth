@@ -10,6 +10,21 @@ beforeEach(function () {
     $this->service = new class($this->role) extends \Seatplus\Auth\Services\Roles\AbstractRoleService
     {
         public function syncMembers(): void {}
+
+        public function canView(\Seatplus\Auth\Models\User $user): bool
+        {
+            return false;
+        }
+
+        public function canJoin(\Seatplus\Auth\Models\User $user): bool
+        {
+            return false;
+        }
+
+        public function canModerate(\Seatplus\Auth\Models\User $user): bool
+        {
+            return false;
+        }
     };
 });
 

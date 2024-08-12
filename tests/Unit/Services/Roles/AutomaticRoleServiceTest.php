@@ -97,3 +97,26 @@ it('sets role type to automatic', function () {
 
     expect($this->role->type)->toBe('automatic');
 });
+
+it('cannot view', function () {
+    expect($this->service->canView(test()->test_user))->toBeFalse();
+});
+
+it('can view when meets criteria', function () {
+    $test_character = test()->test_character;
+    $corporation_id = $test_character->corporation_id;
+
+    $this->service->automaticallyAssignRoleTo([
+        [$corporation_id, 'corporation']
+    ]);
+
+    expect($this->service->canView(test()->test_user))->toBeTrue();
+});
+
+it('cannot join', function () {
+    expect($this->service->canJoin(test()->test_user))->toBeFalse();
+});
+
+it('cannot moderate', function () {
+    expect($this->service->canModerate(test()->test_user))->toBeFalse();
+});

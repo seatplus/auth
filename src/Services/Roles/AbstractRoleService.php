@@ -281,4 +281,30 @@ abstract class AbstractRoleService implements RoleServiceInterface
             ->where('role_id', $this->role->id)
             ->delete();
     }
+
+    protected function isModerator(User $user): bool
+    {
+        return RoleMembership::query()
+            ->where('role_id', $this->role->id)
+            ->where('entity_id', $user->id)
+            ->where('entity_type', User::class)
+            ->where('can_moderate', true)
+            ->exists();
+    }
+
+    protected function meetsCriteria(User $user): bool
+    {
+
+        $assigned_character_ids = $this->getAssignedCharacterIds();
+
+        // return early if no character is assigned
+        if (empty($assigned_character_ids)) {
+            return false;
+        }
+
+        return User::query()
+            ->where('id', $user->id)
+            ->whereHas('characters', fn (Builder $query) => $query->whereIn('character_infos.character_id', $assigned_character_ids))
+            ->exists();
+    }
 }

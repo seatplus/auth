@@ -5,8 +5,6 @@ namespace Seatplus\Auth\Services\Roles;
 use Seatplus\Auth\Enums\RoleMembershipStatus;
 use Seatplus\Auth\Enums\RoleType;
 use Seatplus\Auth\Models\User;
-use Seatplus\Eveapi\Models\Alliance\AllianceInfo;
-use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 
 class OptInRoleService extends AbstractRoleService implements RoleServiceInterface
 {
@@ -40,5 +38,20 @@ class OptInRoleService extends AbstractRoleService implements RoleServiceInterfa
 
         // update the status of the members based on the user compliance
         $this->updateMemberStatusBasedOnUserCompliance();
+    }
+
+    public function canView(User $user): bool
+    {
+        return $this->meetsCriteria($user);
+    }
+
+    public function canJoin(User $user): bool
+    {
+        return $this->meetsCriteria($user);
+    }
+
+    public function canModerate(User $user): bool
+    {
+        return false;
     }
 }
