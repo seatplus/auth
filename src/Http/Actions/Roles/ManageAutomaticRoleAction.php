@@ -2,56 +2,55 @@
 
 namespace Seatplus\Auth\Http\Actions\Roles;
 
+use Illuminate\Support\Arr;
+use Seatplus\Auth\Enums\RoleType;
 use Seatplus\Auth\Http\Requests\RoleRequest;
-use Seatplus\Auth\Services\Roles\AutomaticRoleService;
 use Seatplus\Auth\Services\Roles\BaseRoleService;
 
 class ManageAutomaticRoleAction
 {
-    private AutomaticRoleService $roleService;
 
     public function __construct(
-        private ?BaseRoleService $baseRoleService = null
+        protected BaseRoleService $baseRoleService
     ) {
-        $this->baseRoleService = $baseRoleService ?? new BaseRoleService;
     }
 
     /**
      * @throws \Throwable
      */
-    public function __invoke(RoleRequest $request): void
+    public function execute(RoleRequest $request): void
     {
-        $validated = $request->validated();
+        $this->checkPermission();
 
-        // tell the role service which role we are working with
+        $validated = $request->validated();
         $this->baseRoleService->for($validated['role_id']);
 
-        $this->roleService = $this->baseRoleService->automatic();
+        $roleService = $this->baseRoleService->automatic();
 
-        // if affiliated entities are provided, we affiliate them
-        if ($validated['affiliated']) {
-            $this->roleService->syncAffiliateManyEntities($validated['affiliated']);
+        if ($name = Arr::get($validated, 'name')) {
+            $roleService->updateRoleName($name);
         }
 
-        // if entities are assigned, we assign them
-        if ($validated['assigned']) {
-            $this->assignEntities($validated['assigned']);
+        if ($affiliated = Arr::get($validated, 'affiliated')) {
+            $roleService->syncAffiliateManyEntities($affiliated);
         }
+
+        if ($assigned = Arr::get($validated, 'assigned')) {
+            $roleService->automaticallyAssignRoleTo($assigned);
+        }
+
+        $roleService->setRoleType(RoleType::AUTOMATIC);
     }
 
-    private function assignEntities(array $entities): void
+    private function checkPermission()
     {
 
-        $corporation_ids = collect($entities)
-            ->filter(fn ($entity) => $entity['entity_type'] === 'corporation')
-            ->pluck('entity_id')
-            ->toArray();
+        $auth = auth()->user();
 
-        $alliance_ids = collect($entities)
-            ->filter(fn ($entity) => $entity['entity_type'] === 'alliance')
-            ->pluck('entity_id')
-            ->toArray();
+        throw_unless($auth, \Exception::class, 'User not authenticated');
 
-        $this->roleService->automaticallyAssignRoleTo($corporation_ids, $alliance_ids);
+        if (! auth()->user()->can('administrate access control groups')) {
+            abort(403, 'You are not allowed to administrate access control groups');
+        }
     }
 }
