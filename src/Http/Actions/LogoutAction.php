@@ -7,11 +7,13 @@ use Illuminate\Http\Request;
 
 class LogoutAction
 {
-    public function __invoke(Request $request): RedirectResponse
+    public function __invoke(): RedirectResponse
     {
-        \Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        auth()->logout();
+
+        $session = session();
+        $session->invalidate();
+        $session->regenerateToken();
 
         return redirect('/');
     }
