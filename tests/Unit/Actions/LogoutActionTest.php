@@ -1,8 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Session;
 use Seatplus\Auth\Http\Actions\LogoutAction;
 
 it('logs out the user and invalidates the session', function () {
