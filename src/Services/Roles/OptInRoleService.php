@@ -18,8 +18,14 @@ class OptInRoleService extends AbstractRoleService implements RoleServiceInterfa
         $this->syncMembers();
     }
 
+    /**
+     * @throws \Throwable
+     */
     public function joinRole(User $user): void
     {
+
+        throw_unless($this->meetsCriteria($user), \Exception::class, 'User does not meet criteria to join role');
+
         $this->setRoleMembership(
             entity_id: $user->id,
             entity_type: User::class,

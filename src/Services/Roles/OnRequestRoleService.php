@@ -4,6 +4,7 @@ namespace Seatplus\Auth\Services\Roles;
 
 use Seatplus\Auth\Enums\RoleMembershipStatus;
 use Seatplus\Auth\Enums\RoleType;
+use Seatplus\Auth\Models\AccessControl\RoleMembership;
 use Seatplus\Auth\Models\User;
 
 class OnRequestRoleService extends AbstractRoleService implements RoleServiceInterface
@@ -21,6 +22,13 @@ class OnRequestRoleService extends AbstractRoleService implements RoleServiceInt
 
     public function submitApplicationForRole(User $user): void
     {
+
+        $meets_criteria = $this->meetsCriteria($user);
+
+        if (! $meets_criteria) {
+            throw new \Exception('User does not meet criteria to join role');
+        }
+
         $this->setRoleMembership(
             entity_id: $user->id,
             entity_type: User::class,
@@ -28,8 +36,19 @@ class OnRequestRoleService extends AbstractRoleService implements RoleServiceInt
         );
     }
 
+    /**
+     * @throws \Exception
+     */
     public function approveApplicationForRole(User $user): void
     {
+
+        $meets_criteria = $this->meetsCriteria($user);
+
+        if (! $meets_criteria) {
+            $this->removeRoleMembership($user);
+            throw new \Exception('User does not meet criteria to join role');
+        }
+
         $this->setRoleMembership(
             entity_id: $user->id,
             entity_type: User::class,

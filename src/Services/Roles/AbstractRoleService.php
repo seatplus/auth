@@ -88,8 +88,6 @@ abstract class AbstractRoleService implements RoleServiceInterface
     {
         $this->validateCriteria($entities);
 
-        $this->setRoleType($roleType);
-
         $this->resetCriteria();
 
         foreach ($entities as $entity) {
@@ -139,7 +137,7 @@ abstract class AbstractRoleService implements RoleServiceInterface
             ->delete();
     }
 
-    protected function setRoleType(RoleType $roleType): void
+    public function setRoleType(RoleType $roleType): void
     {
         $originalRoleType = $this->role->type;
 
@@ -178,7 +176,7 @@ abstract class AbstractRoleService implements RoleServiceInterface
 
     protected function getAssignedCharacterIds(): array
     {
-        $role = $this->role->loadMissing(['role_memberships.entity' => function (MorphTo $morph_to) {
+        $role = $this->role->refresh()->loadMissing(['role_memberships.entity' => function (MorphTo $morph_to) {
             $morph_to->morphWith([CorporationInfo::class => 'characters', AllianceInfo::class => 'characters']);
         }]);
 
@@ -191,27 +189,33 @@ abstract class AbstractRoleService implements RoleServiceInterface
             ->toArray();
     }
 
-    protected function getRoleMembers(): Collection
+    protected function getUnassignedMembers(): Collection
     {
 
-        return RoleMembership::query()
+        $members =  RoleMembership::query()
             ->where('role_id', $this->role->id)
-            ->where('entity_type', User::class)
-            ->whereHasMorph('entity', [User::class], fn (Builder $query) => $query
-                ->whereHas('characters', function ($query) {
-                    $character_ids = $this->getAssignedCharacterIds();
+            ->where('entity_type', User::class);
 
-                    if (!empty($character_ids)) {
-                        $query->whereNotIn('character_infos.character_id', $character_ids);
-                    }
-                })
+        $character_ids = $this->getAssignedCharacterIds();
+
+        if(!array_filter($character_ids)) {
+            return $members->get();
+        }
+
+        return $members->whereDoesntHaveMorph(
+            'entity',
+            [User::class],
+            fn (Builder $query) => $query
+                ->whereHas('characters', fn ($query) => $query
+                    ->whereIn('character_infos.character_id', $character_ids)
+                )
             )
             ->get();
     }
 
     protected function removeUnassignedMembers(): void
     {
-        $unassigned_members = $this->getRoleMembers();
+        $unassigned_members = $this->getUnassignedMembers();
         $unassigned_members->each(fn (RoleMembership $role_membership) =>$role_membership->delete());
     }
 
@@ -306,5 +310,12 @@ abstract class AbstractRoleService implements RoleServiceInterface
             ->where('id', $user->id)
             ->whereHas('characters', fn (Builder $query) => $query->whereIn('character_infos.character_id', $assigned_character_ids))
             ->exists();
+    }
+
+    public function updateRoleName(string $name): void
+    {
+        $this->role->update([
+            'name' => $name,
+        ]);
     }
 }

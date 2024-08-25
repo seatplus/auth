@@ -93,7 +93,7 @@ it('sets role type to automatic', function () {
 
     expect($this->role->type)->toBe('manual');
 
-    $this->service->automaticallyAssignRoleTo([]);
+    $this->service->setRoleType(\Seatplus\Auth\Enums\RoleType::AUTOMATIC);
 
     expect($this->role->type)->toBe('automatic');
 });

@@ -26,34 +26,52 @@ it('can add criteria', function () {
 it('can join role', function () {
     $test_user = test()->test_user;
 
+    $this->service->addCriteriaForRole([
+        [test()->test_character->corporation_id, 'corporation'],
+    ]);
+
     $this->service->joinRole($test_user);
 
-    expect(RoleMembership::query()->count())->toBe(1)
-        ->and(RoleMembership::first())->entity_type->toBe(User::class);
+    expect(RoleMembership::query()->count())->toBe(2);
 });
 
 it('can leave role', function () {
     $test_user = test()->test_user;
+    $this->service->addCriteriaForRole([
+        [test()->test_character->corporation_id, 'corporation'],
+    ]);
 
     $this->service->joinRole($test_user);
 
-    expect(RoleMembership::query()->count())->toBe(1);
+    expect(RoleMembership::query()->count())->toBe(2);
 
     $this->service->leaveRole($test_user);
 
-    expect(RoleMembership::query()->count())->toBe(0);
+    expect(RoleMembership::query()->count())->toBe(1);
 });
 
 it('syncs members', function () {
     $test_user = test()->test_user;
+    $this->service->addCriteriaForRole([
+        [test()->test_character->corporation_id, 'corporation'],
+    ]);
 
     $this->service->joinRole($test_user);
 
-    expect(RoleMembership::first())->status->toBe(\Seatplus\Auth\Enums\RoleMembershipStatus::ACTIVE->value);
+    // RoleMember
+    $role_member = RoleMembership::query()->where('entity_type', User::class)->get();
+
+    expect($role_member->count())->toBe(1)
+        ->and($role_member->first())->status->toBe(\Seatplus\Auth\Enums\RoleMembershipStatus::ACTIVE->value);
+
+    // remove criteria makes the user not meet the criteria anymore
+    $this->service->addCriteriaForRole([
+        [1234, 'corporation'],
+    ]);
 
     $this->service->syncMembers();
 
-    expect(RoleMembership::count())->toBe(0);
+    expect(RoleMembership::count())->toBe(1);
 });
 
 describe('it can', function () {

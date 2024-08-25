@@ -66,3 +66,26 @@ it('returns early when setting same role type', function () {
     // Assert
     expect($this->role->refresh()->type)->toEqual(RoleType::AUTOMATIC->value);
 });
+
+it('sets role type to', function (RoleType $role_type) {
+
+    // Act
+    $this->service->setRoleType($role_type);
+
+    // Assert
+    expect($this->role->refresh()->type)->toEqual($role_type->value);
+})->with([
+    RoleType::AUTOMATIC,
+    RoleType::ON_REQUEST,
+    RoleType::OPT_IN,
+    RoleType::MANUAL,
+]);
+
+it('rename role', function () {
+
+    // Act
+    $this->service->updateRoleName('new name');
+
+    // Assert
+    expect($this->role->refresh()->name)->toEqual('new name');
+});

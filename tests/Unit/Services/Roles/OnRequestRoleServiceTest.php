@@ -73,10 +73,24 @@ describe('adding criteria for role application', function () {
     });
 });
 
+it('cannot submit application if no criteria is set', function () {
+    // arrange
+    $user = test()->test_user;
+
+    // act
+    $this->service->submitApplicationForRole($user);
+
+    // assert
+
+})->throws(\Exception::class, 'User does not meet criteria to join role');
 
 it('submits application for role', function () {
     // arrange
     $user = test()->test_user;
+
+    $this->service->addCriteriaForRoleApplication([
+        [test()->test_character->corporation_id, 'corporation'],
+    ]);
 
     // act
     $this->service->submitApplicationForRole($user);
@@ -91,16 +105,29 @@ it('submits application for role', function () {
 it('approving application for role', function () {
     // arrange
     $user = test()->test_user;
+    $this->service->addCriteriaForRoleApplication([
+        [test()->test_character->corporation_id, 'corporation'],
+    ]);
 
     // act
     $this->service->approveApplicationForRole($user);
 
     // assert
-    expect(RoleMembership::query()->where('role_id', $this->role->id)->count())->toBe(1)
+    expect(RoleMembership::query()->where('role_id', $this->role->id)->count())->toBe(2)
         ->and(RoleMembership::query()->where('role_id', $this->role->id)->where('entity_id', $user->id)->first())
         ->status->toBe(RoleMembershipStatus::ACTIVE->value)
         ->entity_id->toBe($user->id);
 });
+
+it('throws exception when approving application for role with no criteria', function () {
+    // arrange
+    $user = test()->test_user;
+
+    // act
+    $this->service->approveApplicationForRole($user);
+
+    // assert
+})->throws(\Exception::class, 'User does not meet criteria to join role');
 
 
 
