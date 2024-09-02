@@ -175,8 +175,6 @@ describe('middleware checks permission and affiliation', function () {
             'get' => get(route($route, $route_param))
         };
 
-        dump('users permissions', test()->test_user->permissions);
-
         // Assert
         expect(test()->test_user->roles)->toHaveCount(1)
             ->and(test()->test_user->roles->first()->permissions->first()->name)->toBe($this->permission_name);
