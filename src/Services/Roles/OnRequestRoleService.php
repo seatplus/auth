@@ -4,7 +4,6 @@ namespace Seatplus\Auth\Services\Roles;
 
 use Seatplus\Auth\Enums\RoleMembershipStatus;
 use Seatplus\Auth\Enums\RoleType;
-use Seatplus\Auth\Models\AccessControl\RoleMembership;
 use Seatplus\Auth\Models\User;
 
 class OnRequestRoleService extends AbstractRoleService implements RoleServiceInterface
