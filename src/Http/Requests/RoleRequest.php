@@ -8,15 +8,11 @@ use Seatplus\Auth\Enums\AffiliationType;
 
 class RoleRequest extends FormRequest
 {
-    public function authorize()
-    {
-        return true;
-    }
-
     public function rules()
     {
         return [
             'role_id' => 'required|integer',
+            'name' => 'nullable|string',
             'affiliated' => 'nullable|array',
             'affiliated.*.entity_id' => 'required|integer',
             'affiliated.*.entity_type' => ['required', 'string', Rule::in(['character', 'corporation', 'alliance'])],
