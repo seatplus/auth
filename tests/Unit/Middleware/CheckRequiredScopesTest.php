@@ -28,6 +28,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
 use Seatplus\Auth\Http\Middleware\CheckRequiredScopes;
 use Seatplus\Auth\Models\CharacterUser;
+use Seatplus\Auth\Models\User;
+use Seatplus\Auth\Services\SsoScopes\IsUserCompliantService;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\RefreshToken;
 use Seatplus\Eveapi\Models\SsoScopes;
@@ -336,6 +338,26 @@ describe('passes middleware', function () {
 
         test()->middleware->handle(test()->request, test()->next);
     });
+});
+
+it('redirects when user is not compliant', function () {
+    $this->mock(IsUserCompliantService::class, function ($mock) {
+        $mock->shouldReceive('check')->with(Mockery::type(User::class))->andReturn(false);
+        $mock->shouldReceive('getMissingScopes')->with(Mockery::type(User::class))->andReturn(['scope1', 'scope2']);
+    });
+
+    $middleware = new \Seatplus\Auth\Http\Middleware\CheckRequiredScopes(app(IsUserCompliantService::class));
+    $request = Mockery::mock(Request::class);
+    $request->shouldReceive('user')->andReturn(new User);
+
+    $next = function ($req) {
+        return 'next';
+    };
+
+    $response = $middleware->handle($request, $next);
+
+    expect($response)->toBeInstanceOf(\Illuminate\Http\RedirectResponse::class)
+        ->and($response->getTargetUrl())->toBe('http://localhost');
 });
 
 // Helpers
