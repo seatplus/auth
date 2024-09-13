@@ -65,3 +65,12 @@ it('checks if user is authenticated', function () {
 
     expect($result)->toBeTrue();
 });
+
+it('retrieves the previous URL from the session', function () {
+    $previousUrl = 'http://example.com/previous';
+    $this->sessionMock->shouldReceive('previousUrl')->andReturn($previousUrl);
+
+    $result = $this->authenticationService->getPreviousUrl();
+
+    expect($result)->toBe($previousUrl);
+});

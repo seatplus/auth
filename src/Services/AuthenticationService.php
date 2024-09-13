@@ -42,6 +42,11 @@ class AuthenticationService
         Redirect::setIntendedUrl($url);
     }
 
+    public function getPreviousUrl(): string
+    {
+        return $this->session->previousUrl();
+    }
+
     public function flashMessage(string $type, string $message): void
     {
         $this->session->flash($type, $message);
