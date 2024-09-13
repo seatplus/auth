@@ -10,11 +10,18 @@ use Seatplus\Auth\Http\Actions\Sso\FindOrCreateUserAction;
 use Seatplus\Auth\Http\Actions\Sso\UpdateRefreshTokenAction;
 use Seatplus\Auth\Jobs\UserRolesSync;
 use Seatplus\Auth\Models\User;
+use Seatplus\Auth\Services\AuthenticationService;
 use SocialiteProviders\Manager\OAuth2\User as SocialiteUser;
 
 class CallbackController
 {
     private bool $should_redirect = false;
+
+    public function __construct(
+        private AuthenticationService $authenticationService
+    )
+    {
+    }
 
     public function __invoke(
         Socialite $social,
@@ -24,7 +31,6 @@ class CallbackController
 
         /* @var SocialiteUser $socialite_user */
         $socialite_user = $social->driver('eveonline')->user();
-        $return_url = session()->pull('rurl');
 
         $eve_data = new EveUser(
             character_id: data_get($socialite_user, 'attributes.character_id'),
@@ -36,16 +42,17 @@ class CallbackController
         );
 
         // if return url was set, set the intended URL
+        $return_url = session()->pull('rurl');
         if ($return_url) {
-            redirect()->setIntendedUrl($return_url);
+            $this->authenticationService->setIntendedUrl($return_url);
         }
 
         // check if the requested scopes matches the provided scopes
-        if (auth()->user()) {
-            $this->checkForInvalidProviderCallback($eve_data);
-            $this->checkIfDifferentCharacterIdHasBeenProvided($eve_data);
+        if ($this->authenticationService->isUserAuthenticated()) {
+            $hasNotMatchingSsoScopes = $this->hasNotMatchingSsoScopes($eve_data);
+            $isDifferentCharacterIdProvided = $this->isDifferentCharacterIdProvided($eve_data);
 
-            if ($this->should_redirect) {
+            if ($isDifferentCharacterIdProvided || $hasNotMatchingSsoScopes) {
                 return redirect()->intended();
             }
         }
@@ -58,60 +65,40 @@ class CallbackController
          */
         $update_refresh_token_action($eve_data);
 
-        if (! $this->loginUser($user)) {
-            return redirect()->route('auth.login')
+        if (! $this->authenticationService->loginUser($user)) {
+            return redirect()->back()
                 ->with('error', 'Login failed. Please contact your administrator.');
         }
 
-        session()->flash('success', 'Character added/updated successfully');
+        $this->authenticationService->flashMessage('success', 'Character added/updated successfully');
 
         UserRolesSync::dispatch($user)->onQueue('high');
 
         return redirect()->intended();
     }
 
-    /**
-     * Login the user.
-     *
-     * This method returns a boolean as a status flag for the
-     * login routine. If a false is returned, it might mean
-     * that that account is not allowed to sign in.
-     */
-    private function loginUser(User $user): bool
+    private function hasNotMatchingSsoScopes(EveUser $user): bool
     {
-        // Login and "remember" the given user...
-        try {
-            Auth::login($user, true);
-        } catch (\Exception $e) {
-            report($e);
+        $sso_scopes = $this->authenticationService->getSessionValue('sso_scopes');
+        $missing_scopes = array_diff($sso_scopes, $user->getScopes());
 
+        if (!empty($missing_scopes)) {
+            $this->authenticationService->flashMessage('error', 'Something might have gone wrong. You might have changed the requested scopes on esi, please refer from doing so.');
+            return true;
+        }
+
+        return false;
+    }
+
+    private function isDifferentCharacterIdProvided(EveUser $user): bool
+    {
+        $step_up_character_id = $this->authenticationService->getSessionValue('step_up');
+
+        if (! $step_up_character_id || $step_up_character_id === $user->character_id) {
             return false;
         }
 
+        $this->authenticationService->flashMessage('error', 'Please make sure to select the same character to step up on CCP as on seatplus.');
         return true;
-    }
-
-    private function checkForInvalidProviderCallback(EveUser $user): void
-    {
-        $missing_scopes = array_diff(session()->pull('sso_scopes'), $user->getScopes());
-
-        if (empty($missing_scopes)) {
-            return;
-        }
-
-        session()->flash('error', 'Something might have gone wrong. You might have changed the requested scopes on esi, please refer from doing so.');
-        $this->should_redirect = true;
-    }
-
-    private function checkIfDifferentCharacterIdHasBeenProvided(EveUser $user): void
-    {
-        $step_up_character_id = session()->pull('step_up');
-
-        if (! $step_up_character_id || $step_up_character_id === $user->character_id) {
-            return;
-        }
-
-        session()->flash('error', 'Please make sure to select the same character to step up on CCP as on seatplus.');
-        $this->should_redirect = true;
     }
 }
