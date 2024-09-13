@@ -48,8 +48,8 @@ test('one can request another scope', function () {
         'add_scopes' => $add_scopes,
     ]));
 
-    expect(session('step_up'))->toEqual(test()->test_character->character_id);
-    expect(session('sso_scopes'))->toEqual(['a', 'b', '1', '2']);
+    expect(session('step_up'))->toEqual(test()->test_character->character_id)
+        ->and(session('sso_scopes'))->toEqual(['a', 'b', '1', '2']);
 });
 
 test('one can request another scope for a deleted token', function () {
@@ -67,6 +67,14 @@ test('one can request another scope for a deleted token', function () {
         'add_scopes' => $add_scopes,
     ]));
 
-    expect(session('step_up'))->toEqual(test()->test_character->character_id);
-    expect(session('sso_scopes'))->toEqual(['1', '2']);
+    expect(session('step_up'))->toEqual(test()->test_character->character_id)
+        ->and(session('sso_scopes'))->toEqual(['1', '2']);
+});
+
+test('one can not request another scope for a character not associated to the user', function () {
+    $response = test()->actingAs(test()->test_user)->get(route('auth.eve.step_up', [
+        'character_id' => 123,
+    ]));
+
+    $response->assertSessionHas('error', 'character must belong to your account');
 });
