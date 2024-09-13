@@ -32,9 +32,11 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Seatplus\Auth\Models\Permissions\Role;
 use Seatplus\Auth\Models\User;
+use Seatplus\Auth\Services\Roles\BaseRoleService;
 
-class DispatchUserRoleSync implements ShouldBeUnique, ShouldQueue
+class RoleMemberSync implements ShouldBeUnique, ShouldQueue
 {
     use Dispatchable;
     use InteractsWithQueue;
@@ -42,6 +44,13 @@ class DispatchUserRoleSync implements ShouldBeUnique, ShouldQueue
     use SerializesModels;
 
     public int $tries = 1;
+
+    public function __construct(
+        private ?BaseRoleService $service = null
+    )
+    {
+        $this->service = $service ?? new BaseRoleService;
+    }
 
     /**
      * Assign this job a tag so that Horizon can categorize and allow
@@ -58,8 +67,8 @@ class DispatchUserRoleSync implements ShouldBeUnique, ShouldQueue
 
     public function handle(): void
     {
-        foreach (User::cursor() as $user) {
-            UserRolesSync::dispatch($user)->onQueue('high');
-        }
+        Role::query()->each(function (Role $role) {
+            $this->service->for($role)->handleMembers();
+        });
     }
 }

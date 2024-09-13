@@ -3,13 +3,11 @@
 namespace Seatplus\Auth\Http\Controllers\Auth;
 
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Contracts\Factory as Socialite;
 use Seatplus\Auth\Containers\EveUser;
 use Seatplus\Auth\Http\Actions\Sso\FindOrCreateUserAction;
 use Seatplus\Auth\Http\Actions\Sso\UpdateRefreshTokenAction;
-use Seatplus\Auth\Jobs\UserRolesSync;
-use Seatplus\Auth\Models\User;
+use Seatplus\Auth\Jobs\RoleMemberSync;
 use Seatplus\Auth\Services\AuthenticationService;
 use SocialiteProviders\Manager\OAuth2\User as SocialiteUser;
 
@@ -72,7 +70,7 @@ class CallbackController
 
         $this->authenticationService->flashMessage('success', 'Character added/updated successfully');
 
-        UserRolesSync::dispatch($user)->onQueue('high');
+        RoleMemberSync::dispatch()->onQueue('high');
 
         return redirect()->intended();
     }

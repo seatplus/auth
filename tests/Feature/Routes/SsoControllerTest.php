@@ -28,7 +28,6 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
 use Laravel\Socialite\Contracts\Provider;
 use Laravel\Socialite\Facades\Socialite;
-use Seatplus\Auth\Jobs\UserRolesSync;
 
 it('works for non authed users', function () {
     $abstractUser = createSocialiteUser();
@@ -102,7 +101,7 @@ test('one can add another character', function () {
     $result = test()->get(route('auth.eve.callback'));
 
     // assert no UserRolesSync job has been dispatched
-    Queue::assertPushedOn('high', UserRolesSync::class);
+    Queue::assertPushedOn('high', \Seatplus\Auth\Jobs\RoleMemberSync::class);
 
     // assert that no error is present
     expect(session('error'))->toBeNull();
