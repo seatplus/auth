@@ -1,10 +1,9 @@
 <?php
 
-use Seatplus\Auth\Http\Actions\Roles\OnRequest\ApproveAction;
-use Seatplus\Auth\Services\Roles\BaseRoleService;
-use Seatplus\Auth\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Seatplus\Auth\Http\Actions\Roles\OnRequest\ApproveAction;
+use Seatplus\Auth\Models\User;
+use Seatplus\Auth\Services\Roles\BaseRoleService;
 
 it('approves role application for user successfully', function () {
 
@@ -31,5 +30,5 @@ it('throws exception if user not found during approval', function () {
 
     $action = app(ApproveAction::class, ['baseRoleService' => $roleServiceMock]);
 
-    expect(fn() => $action->execute(1, 999))->toThrow(ModelNotFoundException::class);
+    expect(fn () => $action->execute(1, 999))->toThrow(ModelNotFoundException::class);
 });

@@ -1,9 +1,9 @@
 <?php
 
-use Seatplus\Auth\Services\AuthenticationService;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Contracts\Session\Session;
 use Seatplus\Auth\Models\User;
+use Seatplus\Auth\Services\AuthenticationService;
 
 beforeEach(function () {
     $this->authMock = mock(Guard::class);

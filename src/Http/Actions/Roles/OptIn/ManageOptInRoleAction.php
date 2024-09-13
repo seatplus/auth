@@ -6,14 +6,12 @@ use Illuminate\Support\Arr;
 use Seatplus\Auth\Enums\RoleType;
 use Seatplus\Auth\Http\Requests\RoleRequest;
 use Seatplus\Auth\Services\Roles\BaseRoleService;
-use Seatplus\Auth\Services\Roles\OnRequestRoleService;
 
 class ManageOptInRoleAction
 {
     public function __construct(
         protected BaseRoleService $baseRoleService
-    ) {
-    }
+    ) {}
 
     /**
      * @throws \Throwable
@@ -47,5 +45,4 @@ class ManageOptInRoleAction
             abort(403, 'You are not allowed to administrate access control groups');
         }
     }
-
 }

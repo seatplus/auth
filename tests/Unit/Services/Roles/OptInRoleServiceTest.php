@@ -4,7 +4,7 @@ use Seatplus\Auth\Models\AccessControl\RoleMembership;
 use Seatplus\Auth\Models\Permissions\Role;
 use Seatplus\Auth\Models\User;
 
-beforeEach(function (){
+beforeEach(function () {
     $this->role = Role::create(['name' => 'test']);
     $this->role = $this->role->refresh();
 
@@ -14,7 +14,7 @@ beforeEach(function (){
 it('can add criteria', function () {
 
     $entities = [
-        [1, 'corporation']
+        [1, 'corporation'],
     ];
 
     $this->service->addCriteriaForRole($entities);
@@ -75,24 +75,24 @@ it('syncs members', function () {
 });
 
 describe('it can', function () {
-   beforeEach(function (){
-       $entities = [
-           [test()->test_character->corporation_id, 'corporation']
-       ];
+    beforeEach(function () {
+        $entities = [
+            [test()->test_character->corporation_id, 'corporation'],
+        ];
 
-       $this->service->addCriteriaForRole($entities);
-   });
+        $this->service->addCriteriaForRole($entities);
+    });
 
-   it('can view', function () {
-       $test_user = test()->test_user;
+    it('can view', function () {
+        $test_user = test()->test_user;
 
-       expect($this->service->canView($test_user))->toBeTrue();
-   });
+        expect($this->service->canView($test_user))->toBeTrue();
+    });
 
     it('can join', function () {
-         $test_user = test()->test_user;
+        $test_user = test()->test_user;
 
-         expect($this->service->canJoin($test_user))->toBeTrue();
+        expect($this->service->canJoin($test_user))->toBeTrue();
     });
 });
 

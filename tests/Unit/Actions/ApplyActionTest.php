@@ -41,5 +41,5 @@ it('throws exception if user not found', function () {
 
     $action = app(ApplyAction::class);
 
-    expect(fn() => $action->execute(1, 999))->toThrow(ModelNotFoundException::class);
+    expect(fn () => $action->execute(1, 999))->toThrow(ModelNotFoundException::class);
 });

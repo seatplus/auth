@@ -81,5 +81,4 @@ class BaseRoleService
     {
         return $this->getTypeService()->canModerate($user);
     }
-
 }

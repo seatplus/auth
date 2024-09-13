@@ -8,7 +8,6 @@ use Seatplus\Auth\Models\User;
 
 class OnRequestRoleService extends AbstractRoleService implements RoleServiceInterface
 {
-
     /**
      * @throws \Throwable
      */
@@ -85,7 +84,7 @@ class OnRequestRoleService extends AbstractRoleService implements RoleServiceInt
 
     public function canView(User $user): bool
     {
-       return $this->meetsCriteria($user);
+        return $this->meetsCriteria($user);
     }
 
     public function canJoin(User $user): bool

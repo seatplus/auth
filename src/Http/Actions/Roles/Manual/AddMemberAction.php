@@ -6,9 +6,7 @@ class AddMemberAction
 {
     public function __construct(
         private SetMemberAction $setMember
-    )
-    {
-    }
+    ) {}
 
     /**
      * @throws \Throwable
@@ -17,5 +15,4 @@ class AddMemberAction
     {
         $this->setMember->execute($role_id, $user_id, true);
     }
-
 }

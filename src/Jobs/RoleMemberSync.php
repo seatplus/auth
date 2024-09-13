@@ -33,7 +33,6 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Seatplus\Auth\Models\Permissions\Role;
-use Seatplus\Auth\Models\User;
 use Seatplus\Auth\Services\Roles\BaseRoleService;
 
 class RoleMemberSync implements ShouldBeUnique, ShouldQueue
@@ -47,8 +46,7 @@ class RoleMemberSync implements ShouldBeUnique, ShouldQueue
 
     public function __construct(
         private ?BaseRoleService $service = null
-    )
-    {
+    ) {
         $this->service = $service ?? new BaseRoleService;
     }
 

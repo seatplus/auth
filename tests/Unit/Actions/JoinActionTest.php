@@ -30,7 +30,7 @@ it('throws exception if user not found during join', function () {
 
     $action = app(\Seatplus\Auth\Http\Actions\Roles\OptIn\JoinAction::class);
 
-    expect(fn() => $action->execute(1, 999))->toThrow(ModelNotFoundException::class);
+    expect(fn () => $action->execute(1, 999))->toThrow(ModelNotFoundException::class);
 });
 
 it('throws exception if role service not found during join', function () {
@@ -42,5 +42,5 @@ it('throws exception if role service not found during join', function () {
 
     $action = app(\Seatplus\Auth\Http\Actions\Roles\OptIn\JoinAction::class);
 
-    expect(fn() => $action->execute(1, $user->id))->toThrow(\Exception::class);
+    expect(fn () => $action->execute(1, $user->id))->toThrow(\Exception::class);
 });

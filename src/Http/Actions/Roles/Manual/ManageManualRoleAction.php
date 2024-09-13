@@ -11,8 +11,7 @@ class ManageManualRoleAction
 {
     public function __construct(
         protected BaseRoleService $baseRoleService
-    ) {
-    }
+    ) {}
 
     /**
      * @throws \Throwable

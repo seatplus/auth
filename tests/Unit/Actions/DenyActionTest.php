@@ -1,9 +1,9 @@
 <?php
-use Seatplus\Auth\Http\Actions\Roles\OnRequest\DenyAction;
-use Seatplus\Auth\Services\Roles\BaseRoleService;
-use Seatplus\Auth\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Seatplus\Auth\Http\Actions\Roles\OnRequest\DenyAction;
+use Seatplus\Auth\Models\User;
+use Seatplus\Auth\Services\Roles\BaseRoleService;
 
 it('denies role application for user successfully', function () {
     $this->mock(BaseRoleService::class, function ($mock) {
@@ -29,5 +29,5 @@ it('throws exception if user not found during application', function () {
 
     $action = app(DenyAction::class);
 
-    expect(fn() => $action->execute(1, 999))->toThrow(ModelNotFoundException::class);
+    expect(fn () => $action->execute(1, 999))->toThrow(ModelNotFoundException::class);
 });

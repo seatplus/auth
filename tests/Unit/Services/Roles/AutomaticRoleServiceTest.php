@@ -20,7 +20,7 @@ describe('assigning', function () {
         expect(test()->test_user->refresh()->hasRole($this->role->name))->toBeFalse();
 
         $this->service->automaticallyAssignRoleTo([
-            [$corporation_id, 'corporation']
+            [$corporation_id, 'corporation'],
         ]);
 
         expect(RoleMembership::get())->toHaveCount(2) // User and Corporation
@@ -34,7 +34,7 @@ describe('assigning', function () {
         $alliance_id = $test_character->alliance_id;
 
         $this->service->automaticallyAssignRoleTo([
-            [$alliance_id, 'alliance']
+            [$alliance_id, 'alliance'],
         ]);
 
         expect(test()->test_user->refresh()->hasRole($this->role->name))->toBeTrue();
@@ -48,7 +48,7 @@ describe('assigning', function () {
 
         $this->service->automaticallyAssignRoleTo([
             [$corporation_id, 'corporation'],
-            [$alliance_id, 'alliance']
+            [$alliance_id, 'alliance'],
         ]);
 
         expect(RoleMembership::get())->toHaveCount(3) // User, Corporation and Alliance
@@ -81,7 +81,7 @@ describe('handling Members', function () {
         $corporation_id = $test_character->corporation_id;
 
         $service->automaticallyAssignRoleTo([
-            [$corporation_id, 'corporation']
+            [$corporation_id, 'corporation'],
         ]);
 
         expect(RoleMembership::get())->toHaveCount(2) // User and Corporation
@@ -107,7 +107,7 @@ it('can view when meets criteria', function () {
     $corporation_id = $test_character->corporation_id;
 
     $this->service->automaticallyAssignRoleTo([
-        [$corporation_id, 'corporation']
+        [$corporation_id, 'corporation'],
     ]);
 
     expect($this->service->canView(test()->test_user))->toBeTrue();

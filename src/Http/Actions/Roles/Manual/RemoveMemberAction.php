@@ -4,12 +4,9 @@ namespace Seatplus\Auth\Http\Actions\Roles\Manual;
 
 class RemoveMemberAction
 {
-
     public function __construct(
         private SetMemberAction $setMember
-    )
-    {
-    }
+    ) {}
 
     /**
      * @throws \Throwable
@@ -18,5 +15,4 @@ class RemoveMemberAction
     {
         $this->setMember->execute($role_id, $user_id, false);
     }
-
 }

@@ -3,7 +3,6 @@
 namespace Seatplus\Auth\Http\Actions;
 
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 
 class LogoutAction
 {

@@ -2,14 +2,11 @@
 
 namespace Seatplus\Auth\Http\Actions\Roles\OptIn;
 
-use Seatplus\Auth\Http\Requests\RoleRequest;
 use Seatplus\Auth\Models\User;
-use Seatplus\Auth\Services\Roles\AutomaticRoleService;
 use Seatplus\Auth\Services\Roles\BaseRoleService;
 
 class JoinAction
 {
-
     public function __construct(
         private ?BaseRoleService $baseRoleService = null
     ) {

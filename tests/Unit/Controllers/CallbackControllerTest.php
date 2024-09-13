@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Http\RedirectResponse;
+use Laravel\Socialite\Contracts\Factory as Socialite;
 use Mockery\MockInterface;
 use Seatplus\Auth\Http\Actions\Sso\FindOrCreateUserAction;
 use Seatplus\Auth\Http\Actions\Sso\UpdateRefreshTokenAction;
@@ -8,7 +9,6 @@ use Seatplus\Auth\Http\Controllers\Auth\CallbackController;
 use Seatplus\Auth\Models\User;
 use Seatplus\Auth\Services\AuthenticationService;
 use SocialiteProviders\Manager\OAuth2\User as SocialiteUser;
-use Laravel\Socialite\Contracts\Factory as Socialite;
 
 it('redirects back with error message on login failure', function () {
 

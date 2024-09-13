@@ -17,7 +17,7 @@ it('executes manage on request role action successfully', function () {
             'role_id' => $role->refresh()->id,
             'affiliated' => ['entity1', 'entity2'],
             'assigned' => ['criteria1', 'criteria2'],
-            'name' => 'New Role Name'
+            'name' => 'New Role Name',
         ]);
     });
 
@@ -41,8 +41,6 @@ it('executes manage on request role action successfully', function () {
     $action = app(ManageOptInRoleAction::class);
     $action->execute($request);
 
-
-
     expect(true)->toBeTrue(); // Just to ensure the test runs without exceptions
 });
 
@@ -59,10 +57,10 @@ it('throws exception if user does not have permission', function () {
         'role_id' => 1,
         'affiliated' => ['entity1', 'entity2'],
         'assigned' => ['criteria1', 'criteria2'],
-        'name' => 'New Role Name'
+        'name' => 'New Role Name',
     ]);
 
     $action = app(ManageOptInRoleAction::class);
 
-    expect(fn() => $action->execute($request))->toThrow(\Symfony\Component\HttpKernel\Exception\HttpException::class);
+    expect(fn () => $action->execute($request))->toThrow(\Symfony\Component\HttpKernel\Exception\HttpException::class);
 });

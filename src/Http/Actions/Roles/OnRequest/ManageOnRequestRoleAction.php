@@ -9,11 +9,9 @@ use Seatplus\Auth\Services\Roles\BaseRoleService;
 
 class ManageOnRequestRoleAction
 {
-
     public function __construct(
         protected BaseRoleService $baseRoleService
-    ) {
-    }
+    ) {}
 
     /**
      * @throws \Throwable
@@ -31,7 +29,7 @@ class ManageOnRequestRoleAction
             $roleService->syncAffiliateManyEntities($affiliated);
         }
 
-        if($assigned =  Arr::get($validated, 'assigned')) {
+        if ($assigned = Arr::get($validated, 'assigned')) {
             $roleService->addCriteriaForRoleApplication($assigned);
         }
 

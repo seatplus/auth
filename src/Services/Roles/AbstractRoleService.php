@@ -192,13 +192,13 @@ abstract class AbstractRoleService implements RoleServiceInterface
     protected function getUnassignedMembers(): Collection
     {
 
-        $members =  RoleMembership::query()
+        $members = RoleMembership::query()
             ->where('role_id', $this->role->id)
             ->where('entity_type', User::class);
 
         $character_ids = $this->getAssignedCharacterIds();
 
-        if(!array_filter($character_ids)) {
+        if (! array_filter($character_ids)) {
             return $members->get();
         }
 
@@ -209,14 +209,14 @@ abstract class AbstractRoleService implements RoleServiceInterface
                 ->whereHas('characters', fn ($query) => $query
                     ->whereIn('character_infos.character_id', $character_ids)
                 )
-            )
+        )
             ->get();
     }
 
     protected function removeUnassignedMembers(): void
     {
         $unassigned_members = $this->getUnassignedMembers();
-        $unassigned_members->each(fn (RoleMembership $role_membership) =>$role_membership->delete());
+        $unassigned_members->each(fn (RoleMembership $role_membership) => $role_membership->delete());
     }
 
     public function handleMembers(): void
@@ -273,7 +273,7 @@ abstract class AbstractRoleService implements RoleServiceInterface
             ->whereIn('status', [RoleMembershipStatus::ACTIVE->value, RoleMembershipStatus::INACTIVE->value])
             ->get()
             ->each(fn (RoleMembership $role_membership) => $role_membership->updateOrFail([
-                'status' => $this->isUserCompliant($role_membership->entity) ? RoleMembershipStatus::ACTIVE : RoleMembershipStatus::INACTIVE
+                'status' => $this->isUserCompliant($role_membership->entity) ? RoleMembershipStatus::ACTIVE : RoleMembershipStatus::INACTIVE,
             ]));
     }
 

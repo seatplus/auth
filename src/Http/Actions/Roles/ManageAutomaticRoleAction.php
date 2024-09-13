@@ -9,11 +9,9 @@ use Seatplus\Auth\Services\Roles\BaseRoleService;
 
 class ManageAutomaticRoleAction
 {
-
     public function __construct(
         protected BaseRoleService $baseRoleService
-    ) {
-    }
+    ) {}
 
     /**
      * @throws \Throwable

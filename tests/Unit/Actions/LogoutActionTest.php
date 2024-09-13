@@ -9,7 +9,7 @@ it('logs out the user and invalidates the session', function () {
 
     $this->actingAs($test_user);
 
-    $action = new LogoutAction();
+    $action = new LogoutAction;
     $response = $action();
 
     expect($response->getStatusCode())->toBe(302);

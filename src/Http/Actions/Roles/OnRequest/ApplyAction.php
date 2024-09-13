@@ -2,18 +2,14 @@
 
 namespace Seatplus\Auth\Http\Actions\Roles\OnRequest;
 
-use Seatplus\Auth\Http\Requests\RoleRequest;
 use Seatplus\Auth\Models\User;
-use Seatplus\Auth\Services\Roles\AutomaticRoleService;
 use Seatplus\Auth\Services\Roles\BaseRoleService;
 
 class ApplyAction
 {
-
     public function __construct(
         protected BaseRoleService $baseRoleService
-    ) {
-    }
+    ) {}
 
     /**
      * @throws \Throwable

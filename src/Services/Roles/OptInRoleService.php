@@ -37,6 +37,7 @@ class OptInRoleService extends AbstractRoleService implements RoleServiceInterfa
     {
         $this->removeRoleMembership($user);
     }
+
     public function syncMembers(): void
     {
         // remove all members that are not within the criteria

@@ -35,13 +35,10 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class RedirectSSOController extends Controller
 {
-
     public function __construct(
         private GlobalSsoScopesService $service,
         private AuthenticationService $authenticationService
-    )
-    {
-    }
+    ) {}
 
     /**
      * Redirect the user to the Eve Online authentication page.

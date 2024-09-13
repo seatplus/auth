@@ -58,6 +58,4 @@ it('work with the various role types', function (RoleType $role_type) {
         ->and($can_join)->toBeFalse()
         ->and($can_moderate)->toBeFalse();
 
-
-})->with( RoleType::cases());
-
+})->with(RoleType::cases());

@@ -17,9 +17,7 @@ class CallbackController
 
     public function __construct(
         private AuthenticationService $authenticationService
-    )
-    {
-    }
+    ) {}
 
     public function __invoke(
         Socialite $social,
@@ -80,8 +78,9 @@ class CallbackController
         $sso_scopes = $this->authenticationService->getSessionValue('sso_scopes');
         $missing_scopes = array_diff($sso_scopes, $user->getScopes());
 
-        if (!empty($missing_scopes)) {
+        if (! empty($missing_scopes)) {
             $this->authenticationService->flashMessage('error', 'Something might have gone wrong. You might have changed the requested scopes on esi, please refer from doing so.');
+
             return true;
         }
 
@@ -97,6 +96,7 @@ class CallbackController
         }
 
         $this->authenticationService->flashMessage('error', 'Please make sure to select the same character to step up on CCP as on seatplus.');
+
         return true;
     }
 }

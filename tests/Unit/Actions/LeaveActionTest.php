@@ -31,5 +31,5 @@ it('throws exception if user not found during leave', function () {
 
     $action = app(\Seatplus\Auth\Http\Actions\Roles\OptIn\LeaveAction::class);
 
-    expect(fn() => $action->execute(1, 999))->toThrow(ModelNotFoundException::class);
+    expect(fn () => $action->execute(1, 999))->toThrow(ModelNotFoundException::class);
 });

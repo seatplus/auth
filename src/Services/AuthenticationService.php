@@ -10,6 +10,7 @@ use Seatplus\Auth\Models\User;
 class AuthenticationService
 {
     protected Guard $auth;
+
     protected Session $session;
 
     public function __construct(Guard $auth, Session $session)
@@ -31,6 +32,7 @@ class AuthenticationService
             $this->auth->login($user, true);
         } catch (\Exception $e) {
             report($e);
+
             return false;
         }
 

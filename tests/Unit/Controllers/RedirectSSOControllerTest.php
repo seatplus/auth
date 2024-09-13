@@ -38,5 +38,5 @@ it('redirects to Eve Online authentication page when user is not authenticated',
 it('throws exception when user is already authenticated', function () {
     $this->authenticationServiceMock->shouldReceive('isUserAuthenticated')->andReturn(true);
 
-    expect(fn() => $this->controller->__invoke($this->socialiteMock))->toThrow(\Exception::class, 'You are already authenticated');
+    expect(fn () => $this->controller->__invoke($this->socialiteMock))->toThrow(\Exception::class, 'You are already authenticated');
 });

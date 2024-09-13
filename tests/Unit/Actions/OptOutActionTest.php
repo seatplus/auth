@@ -31,5 +31,5 @@ it('throws exception if user not found during opt out', function () {
 
     $action = app(\Seatplus\Auth\Http\Actions\Roles\OnRequest\OptOutAction::class);
 
-    expect(fn() => $action->execute(1, 999))->toThrow(ModelNotFoundException::class);
+    expect(fn () => $action->execute(1, 999))->toThrow(ModelNotFoundException::class);
 });

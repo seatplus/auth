@@ -12,8 +12,8 @@ class SetModeratorAction
 {
     public function __construct(
         private BaseRoleService $baseRoleService
-    ) {
-    }
+    ) {}
+
     public function execute(int $role_id, int $user_id, bool $can_moderate): void
     {
         $this->baseRoleService->for($role_id);
