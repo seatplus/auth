@@ -13,7 +13,6 @@ use SocialiteProviders\Manager\OAuth2\User as SocialiteUser;
 
 class CallbackController
 {
-
     public function __construct(
         private AuthenticationService $authenticationService
     ) {}
