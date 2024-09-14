@@ -2,6 +2,7 @@
 
 namespace Seatplus\Auth\Services\SsoScopes;
 
+use Illuminate\Database\Eloquent\Builder;
 use Seatplus\Auth\Models\User;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\SsoScopes;
@@ -67,7 +68,7 @@ class BuildScopesArrayService
             ->toArray();
     }
 
-    private function build(User $user)
+    private function build(User $user): array
     {
         $user_required_scopes = $this->getUserRequiredScopes($user);
 
@@ -119,7 +120,11 @@ class BuildScopesArrayService
     {
 
         $user = User::query()
-            ->when($entity instanceof CharacterInfo, fn ($query) => $query->whereHas('characters', fn ($query) => $query->where('character_id', $entity->character_id)))
+            ->when($entity instanceof CharacterInfo, fn (Builder $query) => $query
+                ->whereHas('characters', fn (Builder $query) => $query
+                    ->where('character_id', $entity->character_id)
+                )
+            )
             ->with(self::USER_RELATIONS)
             ->first();
 

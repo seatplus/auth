@@ -8,7 +8,7 @@ use Seatplus\Auth\Enums\AffiliationType;
 
 class RoleRequest extends FormRequest
 {
-    public function rules()
+    public function rules(): array
     {
         return [
             'role_id' => 'required|integer',

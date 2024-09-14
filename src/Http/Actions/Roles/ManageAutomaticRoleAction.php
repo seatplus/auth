@@ -40,7 +40,7 @@ class ManageAutomaticRoleAction
         $roleService->setRoleType(RoleType::AUTOMATIC);
     }
 
-    private function checkPermission()
+    private function checkPermission(): void
     {
 
         $auth = auth()->user();

@@ -107,9 +107,9 @@ abstract class AbstractRoleService implements RoleServiceInterface
     private function revokeTheRolesFromUsersThatAreNotInMembers(\Illuminate\Support\Collection $member_ids): void
     {
         User::query()
-            ->whereHas('roles', fn ($query) => $query->where('id', $this->role->id))
+            ->whereHas('roles', fn (Builder $query) => $query->where('id', $this->role->id))
             ->whereNotIn('id', $member_ids)
-            ->each(fn ($user) => $user->removeRole($this->role));
+            ->each(fn (User $user) => $user->removeRole($this->role));
     }
 
     private function getActiveMembers(): \Illuminate\Support\Collection
@@ -123,9 +123,9 @@ abstract class AbstractRoleService implements RoleServiceInterface
     private function assignTheRolesToUsersThatAreInMembers(\Illuminate\Support\Collection $member_ids): void
     {
         User::query()
-            ->whereDoesntHave('roles', fn ($query) => $query->where('id', $this->role->id))
+            ->whereDoesntHave('roles', fn (Builder $query) => $query->where('id', $this->role->id))
             ->whereIn('id', $member_ids)
-            ->each(fn ($user) => $user->assignRole($this->role));
+            ->each(fn (User $user) => $user->assignRole($this->role));
     }
 
     protected function removeRoleMembership(User $user): void
@@ -182,7 +182,7 @@ abstract class AbstractRoleService implements RoleServiceInterface
 
         return $role
             ->role_memberships
-            ->filter(fn ($role_membership) => $role_membership->entity_type === CorporationInfo::class || $role_membership->entity_type === AllianceInfo::class)
+            ->filter(fn (RoleMembership $role_membership) => $role_membership->entity_type === CorporationInfo::class || $role_membership->entity_type === AllianceInfo::class)
             ->pluck('entity.characters')
             ->flatten()
             ->pluck('character_id')
@@ -206,7 +206,7 @@ abstract class AbstractRoleService implements RoleServiceInterface
             'entity',
             [User::class],
             fn (Builder $query) => $query
-                ->whereHas('characters', fn ($query) => $query
+                ->whereHas('characters', fn (Builder $query) => $query
                     ->whereIn('character_infos.character_id', $character_ids)
                 )
         )

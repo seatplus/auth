@@ -54,7 +54,7 @@ class AuthenticationService
         $this->session->flash($type, $message);
     }
 
-    public function getSessionValue(string $key)
+    public function getSessionValue(string $key): mixed
     {
         return $this->session->pull($key);
     }

@@ -18,7 +18,7 @@ class ValidateIdsDTO
         private ?array $alliance_ids = null
     ) {}
 
-    public static function fromRequest(Request $request)
+    public static function fromRequest(Request $request): ValidateIdsDTO
     {
 
         $all_data = [...$request->all(), ...$request->route()->parameters()];
@@ -45,13 +45,13 @@ class ValidateIdsDTO
     {
 
         // if any of the constructor parameters is not null, we return the validated array
-        if (! array_filter(get_object_vars($this), fn ($value) => ! is_null($value))) {
+        if (! array_filter(get_object_vars($this), fn (null|int|array $value) => ! is_null($value))) {
             return [];
         }
 
         return collect($this->validate())
             ->flatten()
-            ->map(fn ($value) => (int) $value)
+            ->map(fn (string|int $value) => (int) $value)
             ->all();
     }
 
@@ -75,7 +75,7 @@ class ValidateIdsDTO
             'alliance_id', 'alliance_ids',
         ];
 
-        $presentKeys = array_filter($keys, function ($key) use ($ids) {
+        $presentKeys = array_filter($keys, function (string $key) use ($ids) {
             return ! is_null($ids[$key] ?? null);
         });
 

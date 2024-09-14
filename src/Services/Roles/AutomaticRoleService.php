@@ -2,6 +2,7 @@
 
 namespace Seatplus\Auth\Services\Roles;
 
+use Illuminate\Database\Eloquent\Builder;
 use Seatplus\Auth\Enums\RoleMembershipStatus;
 use Seatplus\Auth\Enums\RoleType;
 use Seatplus\Auth\Models\User;
@@ -32,10 +33,10 @@ class AutomaticRoleService extends AbstractRoleService implements RoleServiceInt
     {
         $assigned_character_ids = $this->getAssignedCharacterIds();
         $users = User::query()
-            ->whereHas('characters', fn ($query) => $query->whereIn('character_infos.character_id', $assigned_character_ids))
+            ->whereHas('characters', fn (Builder $query) => $query->whereIn('character_infos.character_id', $assigned_character_ids))
             ->get();
 
-        $users->each(fn ($user) => $this->setRoleMembership(
+        $users->each(fn (User $user) => $this->setRoleMembership(
             entity_id: $user->id,
             entity_type: User::class,
             status: RoleMembershipStatus::ACTIVE

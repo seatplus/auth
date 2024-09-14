@@ -14,7 +14,7 @@ class SetMemberAction
     /**
      * @throws \Throwable
      */
-    public function execute(int $role_id, int $user_id, $is_member): void
+    public function execute(int $role_id, int $user_id, bool $is_member): void
     {
         $this->baseRoleService->for($role_id);
         $this->checkPermission();
