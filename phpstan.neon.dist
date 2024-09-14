@@ -3,6 +3,7 @@ includes:
     - vendor/larastan/larastan/extension.neon
 
 parameters:
+    editorUrl: 'phpstorm://open?file=%%file%%&line=%%line%%'
     databaseMigrationsPath:
         - database/migrations
         - vendor/seatplus/eveapi/database/migrations

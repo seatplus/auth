@@ -36,10 +36,13 @@ class RoleAffiliatedIdsService
         $forbidden = collect();
 
         $role->affiliations->each(function (Affiliation $affiliation) use (&$allowed, &$inverted, &$forbidden) {
+
+            $affiliated_ids = $affiliation->affiliated_ids;
+
             match ($affiliation->type) {
-                AffiliationType::ALLOWED->value => $allowed = $allowed->merge($affiliation->affiliated_ids),
-                AffiliationType::INVERSE->value => $inverted = $inverted->merge($affiliation->affiliated_ids),
-                AffiliationType::FORBIDDEN->value => $forbidden = $forbidden->merge($affiliation->affiliated_ids),
+                AffiliationType::ALLOWED->value => $allowed = $allowed->merge($affiliated_ids),
+                AffiliationType::INVERSE->value => $inverted = $inverted->merge($affiliated_ids),
+                AffiliationType::FORBIDDEN->value => $forbidden = $forbidden->merge($affiliated_ids),
             };
         });
 

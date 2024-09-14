@@ -34,9 +34,17 @@ use Seatplus\Eveapi\Models\Character\CharacterInfo;
 
 class ApplicationObserver
 {
+    /**
+     * @throws \Throwable
+     */
     public function created(Application $application): void
     {
-        $user_id = match ($application->applicationable_type) {
+
+        $application_type = $application->applicationable_type;
+
+        throw_unless(in_array($application_type, [User::class, CharacterInfo::class]), new \Exception('Applicationable type not supported'));
+
+        $user_id = match ($application_type) {
             User::class => $application->applicationable_id,
             CharacterInfo::class => CharacterUser::query()->firstWhere('character_id', $application->applicationable_id)->user_id,
         };

@@ -13,7 +13,6 @@ use SocialiteProviders\Manager\OAuth2\User as SocialiteUser;
 
 class CallbackController
 {
-    private bool $should_redirect = false;
 
     public function __construct(
         private AuthenticationService $authenticationService

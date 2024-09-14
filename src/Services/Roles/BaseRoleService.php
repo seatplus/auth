@@ -52,13 +52,17 @@ class BaseRoleService
         return new OptInRoleService($this->role);
     }
 
+    /**
+     * @throws \Exception
+     */
     public function getTypeService(): RoleServiceInterface
     {
         return match ($this->role->type) {
             RoleType::AUTOMATIC->value => $this->automatic(),
             RoleType::ON_REQUEST->value => $this->onRequest(),
             RoleType::MANUAL->value => $this->manual(),
-            RoleType::OPT_IN->value => $this->optIn()
+            RoleType::OPT_IN->value => $this->optIn(),
+            default => throw new \Exception('Role type supported'),
         };
     }
 

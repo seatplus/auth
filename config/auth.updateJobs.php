@@ -24,8 +24,8 @@
  * SOFTWARE.
  */
 
-use Seatplus\Auth\Jobs\DispatchUserRoleSync;
+use Seatplus\Auth\Jobs\RoleMemberSync;
 
 return [
-    DispatchUserRoleSync::class,
+    RoleMemberSync::class,
 ];

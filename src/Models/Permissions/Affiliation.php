@@ -30,15 +30,14 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Support\Collection;
 use Seatplus\Eveapi\Models\Alliance\AllianceInfo;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 
 /*
+ * Seatplus\Auth\Models\Permissions\Affiliation
+ *
  * @property string $type
- * @property Collection $affiliated_ids
- * @property Collection $inverse_affiliated_ids
  */
 class Affiliation extends Model
 {
@@ -62,7 +61,10 @@ class Affiliation extends Model
         return $this->belongsTo(Role::class, 'role_id', 'id');
     }
 
-    public function affiliatedIds(): Attribute
+    /**
+     * @return Attribute<mixed, mixed>
+     */
+    protected function affiliatedIds(): Attribute
     {
         return new Attribute(
             get: function () {
