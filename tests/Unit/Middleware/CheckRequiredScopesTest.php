@@ -35,7 +35,7 @@ use Seatplus\Eveapi\Models\RefreshToken;
 use Seatplus\Eveapi\Models\SsoScopes;
 
 beforeEach(function () {
-    //test()->actingAs(test()->test_user);
+    // test()->actingAs(test()->test_user);
 
     mockRequest();
 
@@ -59,7 +59,7 @@ describe('redirect request', function () {
 
         mockMiddleware();
 
-        //Expect redirect
+        // Expect redirect
         test()->middleware->shouldReceive('redirectTo')->times(1);
 
         test()->middleware->handle(test()->request, test()->next);
@@ -78,7 +78,7 @@ describe('redirect request', function () {
 
         mockMiddleware();
 
-        //Expect redirect
+        // Expect redirect
         test()->middleware->shouldReceive('redirectTo')->times(1);
 
         test()->middleware->handle(test()->request, test()->next);
@@ -125,7 +125,7 @@ describe('redirect request', function () {
 
         mockMiddleware();
 
-        //Expect redirect
+        // Expect redirect
         test()->middleware->shouldReceive('redirectTo')->times(1);
 
         test()->middleware->handle(test()->request, test()->next);
@@ -144,7 +144,7 @@ describe('redirect request', function () {
 
         mockMiddleware();
 
-        //Expect redirect
+        // Expect redirect
         test()->middleware->shouldReceive('redirectTo')->times(1);
 
         test()->middleware->handle(test()->request, test()->next);
@@ -166,7 +166,7 @@ describe('redirect request', function () {
 
         mockMiddleware();
 
-        //Expect redirect
+        // Expect redirect
         test()->middleware->shouldReceive('redirectTo')->times(1);
 
         test()->middleware->handle(test()->request, test()->next);
@@ -181,7 +181,7 @@ describe('passes middleware', function () {
 
         mockMiddleware();
 
-        //test()->middleware->shouldReceive('redirectTo')->once();
+        // test()->middleware->shouldReceive('redirectTo')->once();
         test()->request->shouldReceive('forward')->times(1);
 
         test()->middleware->handle(test()->request, test()->next);
@@ -203,7 +203,7 @@ describe('passes middleware', function () {
 
         mockMiddleware();
 
-        //Expect 1 forward
+        // Expect 1 forward
         test()->request->shouldReceive('forward')->times(1);
 
         test()->middleware->handle(test()->request, test()->next);
@@ -225,7 +225,7 @@ describe('passes middleware', function () {
 
         mockMiddleware();
 
-        //Expect redirect
+        // Expect redirect
         test()->request->shouldReceive('forward')->times(1);
 
         test()->middleware->handle(test()->request, test()->next);
@@ -244,7 +244,7 @@ describe('passes middleware', function () {
 
         mockMiddleware();
 
-        //Expect 1 forward
+        // Expect 1 forward
         test()->request->shouldReceive('forward')->times(1);
 
         test()->middleware->handle(test()->request, test()->next);
@@ -292,7 +292,7 @@ describe('passes middleware', function () {
 
         mockMiddleware();
 
-        //Expect redirect
+        // Expect redirect
         test()->request->shouldReceive('forward')->times(1);
 
         test()->middleware->handle(test()->request, test()->next);
@@ -311,7 +311,7 @@ describe('passes middleware', function () {
 
         mockMiddleware();
 
-        //Expect 1 forward
+        // Expect 1 forward
         test()->request->shouldReceive('forward')->times(1);
 
         test()->middleware->handle(test()->request, test()->next);
@@ -333,7 +333,7 @@ describe('passes middleware', function () {
 
         mockMiddleware();
 
-        //Expect 1 forward
+        // Expect 1 forward
         test()->request->shouldReceive('forward')->times(1);
 
         test()->middleware->handle(test()->request, test()->next);

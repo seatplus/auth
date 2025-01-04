@@ -10,7 +10,7 @@ return static function (RectorConfig $rectorConfig): void {
     // here we can define, what sets of rules will be applied
     // tip: use "SetList" class to autocomplete sets
     $rectorConfig->sets([
-        //SetList::CODE_QUALITY,
+        // SetList::CODE_QUALITY,
         LaravelSetList::LARAVEL_100,
         LaravelSetList::LARAVEL_CODE_QUALITY,
     ]);
@@ -21,5 +21,5 @@ return static function (RectorConfig $rectorConfig): void {
     $rectorConfig->phpVersion(PhpVersion::PHP_81);
 
     // register single rule
-    //$rectorConfig->rule(TypedPropertyRector::class);
+    // $rectorConfig->rule(TypedPropertyRector::class);
 };

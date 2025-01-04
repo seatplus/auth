@@ -134,7 +134,7 @@ test('deal with two characters with one changed owner hash', function () {
 
     expect(test()->test_user->id)->not()->toBe($user->id);
 
-    //5. assert that secondary character is not affiliated to first user
+    // 5. assert that secondary character is not affiliated to first user
 
     test()->assertDatabaseMissing('character_users', [
         'user_id' => test()->test_user->id,

@@ -80,7 +80,7 @@ it('builds permissions from user', function () {
         ]);
 
         $mock->shouldReceive('get')
-            //->with($role1)
+            // ->with($role1)
             ->andReturn($result1, $result2);
     });
 

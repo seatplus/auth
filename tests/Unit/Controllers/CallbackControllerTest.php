@@ -22,7 +22,7 @@ it('redirects back with error message on login failure', function () {
     ];
     $socialite_user->token = 'token';
     $socialite_user->refreshToken = 'refreshToken';
-    $socialite_user->expiresIn = 12 * 60; //let's just say 12 minutes
+    $socialite_user->expiresIn = 12 * 60; // let's just say 12 minutes
     $socialite_user->user = [
         'scp' => ['esi-skills.read_skills.v1', 'esi-skills.read_skillqueue.v1'],
     ];
@@ -63,7 +63,7 @@ it('redirects back if different character id is provided', function () {
     ];
     $socialite_user->token = 'token';
     $socialite_user->refreshToken = 'refreshToken';
-    $socialite_user->expiresIn = 12 * 60; //let's just say 12 minutes
+    $socialite_user->expiresIn = 12 * 60; // let's just say 12 minutes
     $socialite_user->user = [
         'scp' => ['esi-skills.read_skills.v1', 'esi-skills.read_skillqueue.v1'],
     ];

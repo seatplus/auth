@@ -63,7 +63,7 @@ describe('middleware checks permission and affiliation', function () {
         };
 
         match ($status) {
-            'forbidden' => $response->assertForbidden(), //403
+            'forbidden' => $response->assertForbidden(), // 403
             'ok' => $response->assertOk()
         };
     })
@@ -110,7 +110,7 @@ describe('middleware checks permission and affiliation', function () {
         // Assert
 
         match ($status) {
-            'forbidden' => $response->assertForbidden(), //403
+            'forbidden' => $response->assertForbidden(), // 403
             'ok' => $response->assertOk()
         };
     })
@@ -180,7 +180,7 @@ describe('middleware checks permission and affiliation', function () {
             ->and(test()->test_user->roles->first()->permissions->first()->name)->toBe($this->permission_name);
 
         match ($status) {
-            'forbidden' => $response->assertForbidden(), //403
+            'forbidden' => $response->assertForbidden(), // 403
             'ok' => $response->assertOk()
         };
     })
@@ -224,7 +224,7 @@ describe('middleware checks permission and affiliation', function () {
         };
 
         match ($status) {
-            'forbidden' => $response->assertForbidden(), //403
+            'forbidden' => $response->assertForbidden(), // 403
             'ok' => $response->assertOk()
         };
     })

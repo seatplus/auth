@@ -95,7 +95,7 @@ function createSocialiteUser($character_id = null, array $scopes = ['esi-skills.
     $socialiteUser->attributes = $attributes;
     $socialiteUser->token = $refresh_token->token;
     $socialiteUser->refreshToken = $refresh_token->refresh_token;
-    $socialiteUser->expiresIn = 12 * 60; //let's just say 12 minutes
+    $socialiteUser->expiresIn = 12 * 60; // let's just say 12 minutes
     $socialiteUser->user = [
         'scp' => $scopes,
     ];

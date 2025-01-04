@@ -88,7 +88,7 @@ abstract class TestCase extends OrchestraTestCase
     private function setupDatabase($app)
     {
         // Path to our migrations to load
-        //$this->loadMigrationsFrom(__DIR__ . '/database/migrations');
+        // $this->loadMigrationsFrom(__DIR__ . '/database/migrations');
         $this->artisan('migrate');
     }
 
@@ -108,6 +108,6 @@ abstract class TestCase extends OrchestraTestCase
         // Use test User model for users provider
         $app['config']->set('auth.providers.users.model', User::class);
 
-        //$app['config']->set('cache.prefix', 'seatplus_tests---');
+        // $app['config']->set('cache.prefix', 'seatplus_tests---');
     }
 }
