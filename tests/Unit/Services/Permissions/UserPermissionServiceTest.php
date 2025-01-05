@@ -25,6 +25,8 @@ it('builds corporation_roles from user', function () {
     // Arrange
     $user = test()->test_user;
 
+    CharacterRole::query()->delete();
+
     CharacterRole::factory()->create([
         'character_id' => test()->test_character->character_id,
         'roles' => ['Director', 'Personnel Manager'],
