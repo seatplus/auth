@@ -6,8 +6,10 @@ it('creates global sso scopes with provided scopes', function () {
     $service = new \Seatplus\Auth\Services\SsoScopes\GlobalSsoScopesService;
     $service->set($scopes);
 
-    $this->assertDatabaseHas('sso_scopes', [
-        'selected_scopes' => json_encode($scopes),
-        'type' => 'global',
-    ]);
+    $sso_scopes = \Seatplus\Eveapi\Models\SsoScopes::query()
+        ->where('type', 'global')
+        ->first();
+
+
+    expect($sso_scopes->selected_scopes)->toBe($scopes);
 });
