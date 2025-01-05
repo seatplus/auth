@@ -35,6 +35,7 @@ use Orchestra\Testbench\TestCase as OrchestraTestCase;
 use Seatplus\Auth\AuthenticationServiceProvider;
 use Seatplus\Auth\Models\User;
 use Seatplus\Eveapi\EveapiServiceProvider;
+use Spatie\Permission\PermissionServiceProvider;
 
 abstract class TestCase extends OrchestraTestCase
 {
@@ -79,6 +80,7 @@ abstract class TestCase extends OrchestraTestCase
         return [
             EveapiServiceProvider::class,
             AuthenticationServiceProvider::class,
+            PermissionServiceProvider::class
         ];
     }
 
