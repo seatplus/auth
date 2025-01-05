@@ -43,7 +43,15 @@ class UserPermissionService
         $user
             ->characters
             ->each(function (CharacterInfo $character) {
-                foreach ($character->roles->roles ?? [] as $role) {
+
+                /** @var array $roles */
+                $roles = $character->roles->roles ?? [];
+
+                if (empty($roles)) {
+                    return;
+                }
+
+                foreach ($roles as $role) {
                     $this->corporation_roles[$role] = array_merge($this->corporation_roles[$role] ?? [], [$character->corporation_id]);
                 }
             });
