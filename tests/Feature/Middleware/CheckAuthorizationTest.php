@@ -139,6 +139,8 @@ describe('middleware checks permission and affiliation', function () {
     it('checks owned corporation id', function (string $method, string $route, array|int $route_param) {
         expect(test()->test_user->can('superuser'))->toBeFalse();
 
+        CharacterRole::query()->delete();
+
         CharacterRole::factory()->create([
             'character_id' => test()->test_character->character_id,
             'roles' => ['Director'],
