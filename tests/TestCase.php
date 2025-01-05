@@ -100,8 +100,6 @@ abstract class TestCase extends OrchestraTestCase
      */
     protected function getEnvironmentSetUp($app)
     {
-        config(['database.default' => 'mysql']);
-
         config(['app.debug' => true]);
         config(['activitylog.table_name' => 'activity_log']);
 
