@@ -2,35 +2,39 @@ name: Tests
 
 on:
   push:
-    branches: [ 2.x, 3.x ]
+    branches: [ 3.x, 4.x ]
   pull_request:
-    branches: [ 2.x, 3.x ]
+    branches: [ 3.x, 4.x ]
 
 jobs:
   laravel:
 
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: seatplus
+          POSTGRES_PASSWORD: secret # required for the default postgres image but not needed if connected from localhost
+          POSTGRES_DB: laravel
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
+
     steps:
     - uses: actions/checkout@v2
     - name: Setup PHP, with composer and extensions
       uses: shivammathur/setup-php@v2 #https://github.com/shivammathur/setup-php
       with:
-        php-version: '8.1'
+        php-version: '8.3'
         extensions: mbstring, dom, fileinfo
         coverage: xdebug #optional
-    - uses: getong/mariadb-action@v1.1
-      with:
-        host port: 3308 # Optional, default value is 3306. The port of host
-        mariadb version: '10.7' # Optional, default value is "latest". The version of the MariaDB
-        mysql database: 'testbench' # Optional, default value is "test". The specified database which will be create
-        mysql user: 'default' # Required if "mysql root password" is empty, default is empty. The superuser for the specified database. Can use secrets, too
-        mysql password: 'secret' # Required if "mysql user" exists. The password for the "mysql user"
-    - name: Redis Server in GitHub Actions
-      uses: supercharge/redis-github-action@1.1.0
-      with:
-        # Redis version to use
-        redis-version: 5 # optional, default is latest
     - name: Install Dependencies
       run: composer install --no-ansi --no-interaction --no-scripts --prefer-dist
     - name: Test & publish code coverage
@@ -38,5 +42,5 @@ jobs:
       env:
         CC_TEST_REPORTER_ID: dfdd27f143f73ad7911f5393e3378b9b989cfed884bf522fa3b0d9fbc2b8d4c1
       with:
-        coverageCommand: vendor/bin/pest --coverage --ci
+        coverageCommand: vendor/bin/pest --coverage --ci --min=100
         debug: false
