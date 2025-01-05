@@ -22,10 +22,17 @@ it('invokes role service with valid role id', function () {
         $mock->shouldReceive('validated')->once()->andReturn(['role_id' => $role->refresh()->id, 'affiliated' => [], 'assigned' => []]);
     });
 
-    $this->actingAs(test()->test_user);
+    $admin_permission = 'administrate access control groups';
 
     // give the user the permission to administrate access control groups
-    assignPermissionToTestUser('administrate access control groups');
+    assignPermissionToTestUser($admin_permission);
+
+    $this->actingAs(test()->test_user);
+
+    expect(test()->test_user->hasPermissionTo($admin_permission))->toBeTrue() // ok
+        ->and(auth()->user()->hasPermissionTo($admin_permission))->toBeTrue() // ok
+        ->and(auth()->user()->can($admin_permission))->toBeTrue(); // fails
+
 
     $action = app(\Seatplus\Auth\Http\Actions\Roles\ManageAutomaticRoleAction::class);
     $action->execute($request);
