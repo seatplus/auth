@@ -33,7 +33,6 @@ it('invokes role service with valid role id', function () {
         ->and(auth()->user()->hasPermissionTo($admin_permission))->toBeTrue() // ok
         ->and(auth()->user()->can($admin_permission))->toBeTrue(); // fails
 
-
     $action = app(\Seatplus\Auth\Http\Actions\Roles\ManageAutomaticRoleAction::class);
     $action->execute($request);
 });

@@ -8,7 +8,6 @@ use Seatplus\Auth\Models\Permissions\Permission;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 use Seatplus\Eveapi\Models\RefreshToken;
 use Seatplus\Eveapi\Models\SsoScopes;
-use Spatie\Permission\PermissionRegistrar;
 
 /*
 |--------------------------------------------------------------------------

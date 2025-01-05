@@ -10,6 +10,5 @@ it('creates global sso scopes with provided scopes', function () {
         ->where('type', 'global')
         ->first();
 
-
     expect($sso_scopes->selected_scopes)->toBe($scopes);
 });

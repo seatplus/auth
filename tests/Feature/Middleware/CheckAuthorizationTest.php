@@ -7,7 +7,6 @@ use Seatplus\Auth\Models\Permissions\Permission;
 use Seatplus\Auth\Models\Permissions\Role;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\Character\CharacterRole;
-use Spatie\Permission\PermissionRegistrar;
 
 use function Pest\Laravel\get;
 use function Pest\Laravel\post;

@@ -80,7 +80,7 @@ abstract class TestCase extends OrchestraTestCase
         return [
             EveapiServiceProvider::class,
             AuthenticationServiceProvider::class,
-            PermissionServiceProvider::class
+            PermissionServiceProvider::class,
         ];
     }
 
