@@ -21,7 +21,7 @@ describe('middleware checks permission and affiliation', function () {
 
         test()->test_user->assignRole(test()->role);
 
-        app()->make(PermissionRegistrar::class)->registerPermissions();
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
         Route::middleware([CheckAuthorization::class.":$this->permission_name"])
             ->prefix('character')

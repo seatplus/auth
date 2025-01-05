@@ -137,5 +137,5 @@ function assignPermissionToTestUser(array|string $permission_strings)
     }
 
     // now re-register all the roles and permissions
-    app()->make(PermissionRegistrar::class)->registerPermissions();
+    app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 }
