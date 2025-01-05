@@ -105,11 +105,7 @@ function createSocialiteUser($character_id = null, array $scopes = ['esi-skills.
 
 function faker()
 {
-    if (! isset(test()->faker)) {
-        test()->faker = Factory::create();
-    }
-
-    return test()->faker;
+    return Factory::create();
 }
 
 function createEveUser(?int $character_id = null, ?string $character_owner_hash = null): EveUser
