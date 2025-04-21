@@ -30,6 +30,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Seatplus\Auth\Models\CharacterUser;
 use Seatplus\Auth\Models\User;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
+use Illuminate\Support\Str;
 
 class UserFactory extends Factory
 {
