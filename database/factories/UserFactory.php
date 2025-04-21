@@ -47,6 +47,7 @@ class UserFactory extends Factory
         return [
             'main_character_id' => CharacterInfo::factory(),
             'active' => true,
+            'remember_token' => Str::random(10),
         ];
     }
 }
