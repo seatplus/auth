@@ -27,6 +27,7 @@
 namespace Seatplus\Auth\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 use Seatplus\Auth\Models\CharacterUser;
 use Seatplus\Auth\Models\User;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
@@ -47,6 +48,7 @@ class UserFactory extends Factory
         return [
             'main_character_id' => CharacterInfo::factory(),
             'active' => true,
+            'remember_token' => Str::random(10),
         ];
     }
 }
