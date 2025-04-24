@@ -1,5 +1,6 @@
 <?php
 
+use Seatplus\Auth\Enums\RoleType;
 use Seatplus\Auth\Models\AccessControl\RoleMembership;
 use Seatplus\Auth\Models\Permissions\Role;
 use Seatplus\Auth\Models\User;
@@ -91,11 +92,11 @@ describe('handling Members', function () {
 
 it('sets role type to automatic', function () {
 
-    expect($this->role->type)->toBe('manual');
+    expect($this->role->type)->toBe(RoleType::MANUAL);
 
-    $this->service->setRoleType(\Seatplus\Auth\Enums\RoleType::AUTOMATIC);
+    $this->service->setRoleType(RoleType::AUTOMATIC);
 
-    expect($this->role->type)->toBe('automatic');
+    expect($this->role->type)->toBe(RoleType::AUTOMATIC);
 });
 
 it('cannot view', function () {

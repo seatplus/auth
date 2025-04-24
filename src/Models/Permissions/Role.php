@@ -27,6 +27,7 @@
 namespace Seatplus\Auth\Models\Permissions;
 
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Seatplus\Auth\Enums\RoleType;
 use Seatplus\Auth\Models\AccessControl\RoleMembership;
 use Spatie\Permission\Models\Role as SpatieRole;
 
@@ -35,6 +36,10 @@ use Spatie\Permission\Models\Role as SpatieRole;
  */
 class Role extends SpatieRole
 {
+    protected $casts = [
+        'type' => RoleType::class
+    ];
+
     public function affiliations(): HasMany
     {
         return $this->hasMany(Affiliation::class, 'role_id');

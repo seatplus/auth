@@ -28,7 +28,7 @@ it('sets the role type to manual', function () {
 
     $action->execute($role_request);
 
-    expect($role->refresh()->type)->toBe('manual');
+    expect($role->refresh()->type)->toBe(\Seatplus\Auth\Enums\RoleType::MANUAL);
 });
 
 it('updates the role name', function () {

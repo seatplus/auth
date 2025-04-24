@@ -84,7 +84,7 @@ it('has polymorphic relation', function () {
 });
 
 it('has default type attribute', function () {
-    expect(test()->role->fresh()->type)->toEqual('manual');
+    expect(test()->role->fresh()->type)->toEqual(\Seatplus\Auth\Enums\RoleType::MANUAL);
 });
 
 it('has role memberships', function () {
