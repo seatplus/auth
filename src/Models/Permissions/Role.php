@@ -32,12 +32,12 @@ use Seatplus\Auth\Models\AccessControl\RoleMembership;
 use Spatie\Permission\Models\Role as SpatieRole;
 
 /**
- * @property string $type
+ * @property RoleType $type
  */
 class Role extends SpatieRole
 {
     protected $casts = [
-        'type' => RoleType::class
+        'type' => RoleType::class,
     ];
 
     public function affiliations(): HasMany
