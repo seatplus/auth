@@ -62,7 +62,6 @@ class BaseRoleService
             RoleType::ON_REQUEST => $this->onRequest(),
             RoleType::MANUAL => $this->manual(),
             RoleType::OPT_IN => $this->optIn(),
-            default => throw new \Exception('Role type supported'),
         };
     }
 
