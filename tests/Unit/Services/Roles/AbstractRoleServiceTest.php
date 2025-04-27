@@ -54,7 +54,7 @@ it('affiliates role to corporation and getting role on test user', function () {
 it('returns early when setting same role type', function () {
 
     // Arrange
-    $this->role->type = RoleType::AUTOMATIC->value;
+    $this->role->type = RoleType::AUTOMATIC;
     $this->role->save();
 
     // Act
@@ -64,7 +64,7 @@ it('returns early when setting same role type', function () {
     ]);
 
     // Assert
-    expect($this->role->refresh()->type)->toEqual(RoleType::AUTOMATIC->value);
+    expect($this->role->refresh()->type)->toEqual(RoleType::AUTOMATIC);
 });
 
 it('sets role type to', function (RoleType $role_type) {
@@ -73,7 +73,7 @@ it('sets role type to', function (RoleType $role_type) {
     $this->service->setRoleType($role_type);
 
     // Assert
-    expect($this->role->refresh()->type)->toEqual($role_type->value);
+    expect($this->role->refresh()->type)->toEqual($role_type);
 })->with([
     RoleType::AUTOMATIC,
     RoleType::ON_REQUEST,

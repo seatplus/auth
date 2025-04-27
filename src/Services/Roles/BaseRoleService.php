@@ -57,13 +57,17 @@ class BaseRoleService
      */
     public function getTypeService(): RoleServiceInterface
     {
-        return match ($this->role->type) {
-            RoleType::AUTOMATIC->value => $this->automatic(),
-            RoleType::ON_REQUEST->value => $this->onRequest(),
-            RoleType::MANUAL->value => $this->manual(),
-            RoleType::OPT_IN->value => $this->optIn(),
-            default => throw new \Exception('Role type supported'),
+        return match ($this->getType()) {
+            RoleType::AUTOMATIC => $this->automatic(),
+            RoleType::ON_REQUEST => $this->onRequest(),
+            RoleType::MANUAL => $this->manual(),
+            RoleType::OPT_IN => $this->optIn(),
         };
+    }
+
+    public function getType(): RoleType
+    {
+        return $this->role->type;
     }
 
     public function handleMembers(): void

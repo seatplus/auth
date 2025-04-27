@@ -142,12 +142,12 @@ abstract class AbstractRoleService implements RoleServiceInterface
         $originalRoleType = $this->role->type;
 
         // if the role type has not changed, we return early
-        if ($originalRoleType === $roleType->value) {
+        if ($originalRoleType === $roleType) {
             return;
         }
 
         $this->role->update([
-            'type' => $roleType->value,
+            'type' => $roleType,
         ]);
 
         $this->resetRoleMemberships();
