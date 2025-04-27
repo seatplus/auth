@@ -67,10 +67,7 @@ class BaseRoleService
 
     public function getType(): RoleType
     {
-        /* @var RoleType $role_type */
-        $role_type = $this->role->type;
-
-        return $role_type;
+        return $this->role->type;
     }
 
     public function handleMembers(): void
