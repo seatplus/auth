@@ -59,6 +59,6 @@ class OptInRoleService extends AbstractRoleService implements RoleServiceInterfa
 
     public function canModerate(User $user): bool
     {
-        return false;
+        return $this->isModerator($user);
     }
 }
