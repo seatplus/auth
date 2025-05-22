@@ -98,9 +98,13 @@ class AuthenticationServiceProvider extends ServiceProvider
             }
         );
 
-        $this->mergeConfigFrom(__DIR__.'/../config/permission.php', 'permission');
         $this->mergeConfigFrom(__DIR__.'/../config/auth.updateJobs.php', 'seatplus.updateJobs');
         $this->mergeConfigFrom(__DIR__.'/../config/auth.services.php', 'services');
+
+        config()->set('permission.models', [
+            'permission' => \Seatplus\Auth\Models\Permissions\Permission::class,
+            'role' => \Seatplus\Auth\Models\Permissions\Role::class,
+        ]);
 
         $this->setUserModel();
     }
