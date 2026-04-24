@@ -31,6 +31,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Seatplus\Auth\Models\User;
 use Seatplus\Auth\Services\SsoScopes\IsUserCompliantService;
+use Symfony\Component\HttpFoundation\Response;
 
 class CheckRequiredScopes
 {
@@ -51,7 +52,7 @@ class CheckRequiredScopes
     /*
      * This method should return the user to a view where he needs to handle the addition of required scopes
      */
-    protected function redirectTo(array $missing_character_scopes): RedirectResponse
+    protected function redirectTo(array $missing_character_scopes): Response
     {
         return redirect('/');
     }
