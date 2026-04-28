@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Seatplus\Auth\Http\Actions\Roles\OptIn;
 
 use Illuminate\Support\Arr;
@@ -21,22 +23,31 @@ class ManageOptInRoleAction
         $this->checkPermission();
 
         $validated = $request->validated();
-
         $roleService = $this->baseRoleService->for($validated['role_id'])->optIn();
+
+        $roleService->setRoleType(RoleType::OPT_IN);
 
         if ($name = Arr::get($validated, 'name')) {
             $roleService->updateRoleName($name);
         }
 
         if ($affiliated = Arr::get($validated, 'affiliated')) {
-            $roleService->syncAffiliateManyEntities($affiliated);
+            $roleService->syncAffiliateManyEntities(
+                collect($affiliated)
+                    ->map(fn (array $e) => [$e['entity_id'], $e['entity_type'], $e['affiliation_type']])
+                    ->all()
+            );
         }
 
         if ($assigned = Arr::get($validated, 'assigned')) {
-            $roleService->addCriteriaForRole($assigned);
+            $roleService->addCriteriaForRole(
+                collect($assigned)
+                    ->map(fn (array $e) => [$e['entity_id'], $e['entity_type']])
+                    ->all()
+            );
         }
 
-        $roleService->setRoleType(RoleType::OPT_IN);
+        $roleService->handleMembers();
     }
 
     private function checkPermission(): void

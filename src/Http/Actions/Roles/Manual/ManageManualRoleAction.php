@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Seatplus\Auth\Http\Actions\Roles\Manual;
 
 use Illuminate\Support\Arr;
@@ -21,14 +23,12 @@ class ManageManualRoleAction
         $validated = $request->validated();
         $roleService = $this->baseRoleService->for($validated['role_id'])->manual();
 
-        if ($affiliated = Arr::get($validated, 'affiliated')) {
-            $roleService->syncAffiliateManyEntities($affiliated);
-        }
+        $roleService->setRoleType(RoleType::MANUAL);
 
         if ($name = Arr::get($validated, 'name')) {
             $roleService->updateRoleName($name);
         }
 
-        $roleService->setRoleType(RoleType::MANUAL);
+        $roleService->handleMembers();
     }
 }

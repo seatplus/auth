@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Seatplus\Auth\Http\Actions\Roles;
 
 use Illuminate\Support\Arr;
@@ -21,28 +23,37 @@ class ManageAutomaticRoleAction
         $this->checkPermission();
 
         $validated = $request->validated();
-        $this->baseRoleService->for($validated['role_id']);
+        $roleService = $this->baseRoleService->for($validated['role_id'])->automatic();
 
-        $roleService = $this->baseRoleService->automatic();
+        // setRoleType first: if the type changes it calls resetRoleMemberships(),
+        // which would wipe any criteria written below.
+        $roleService->setRoleType(RoleType::AUTOMATIC);
 
         if ($name = Arr::get($validated, 'name')) {
             $roleService->updateRoleName($name);
         }
 
         if ($affiliated = Arr::get($validated, 'affiliated')) {
-            $roleService->syncAffiliateManyEntities($affiliated);
+            $roleService->syncAffiliateManyEntities(
+                collect($affiliated)
+                    ->map(fn (array $e) => [$e['entity_id'], $e['entity_type'], $e['affiliation_type']])
+                    ->all()
+            );
         }
 
         if ($assigned = Arr::get($validated, 'assigned')) {
-            $roleService->automaticallyAssignRoleTo($assigned);
+            $roleService->automaticallyAssignRoleTo(
+                collect($assigned)
+                    ->map(fn (array $e) => [$e['entity_id'], $e['entity_type']])
+                    ->all()
+            );
         }
 
-        $roleService->setRoleType(RoleType::AUTOMATIC);
+        $roleService->handleMembers();
     }
 
     private function checkPermission(): void
     {
-
         $auth = auth()->user();
 
         throw_unless($auth, \Exception::class, 'User not authenticated');

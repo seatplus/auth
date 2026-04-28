@@ -15,8 +15,8 @@ it('executes manage on request role action successfully', function () {
 
         $mock->shouldReceive('validated')->once()->andReturn([
             'role_id' => $role->refresh()->id,
-            'affiliated' => ['entity1', 'entity2'],
-            'assigned' => ['criteria1', 'criteria2'],
+            'affiliated' => [['entity_id' => 1, 'entity_type' => 'corporation', 'affiliation_type' => 'allowed']],
+            'assigned' => [['entity_id' => 5, 'entity_type' => 'character']],
             'name' => 'New Role Name',
         ]);
     });
@@ -27,10 +27,11 @@ it('executes manage on request role action successfully', function () {
             ->andReturn($mock);
 
         $mock->shouldReceive('optIn')->andReturn(mock(OptInRoleService::class, function ($mock) {
-            $mock->shouldReceive('syncAffiliateManyEntities')->once()->with(['entity1', 'entity2']);
-            $mock->shouldReceive('addCriteriaForRole')->once();
-            $mock->shouldReceive('updateRoleName')->once();
             $mock->shouldReceive('setRoleType')->with(\Seatplus\Auth\Enums\RoleType::OPT_IN)->once();
+            $mock->shouldReceive('updateRoleName')->once();
+            $mock->shouldReceive('syncAffiliateManyEntities')->once()->with([[1, 'corporation', 'allowed']]);
+            $mock->shouldReceive('addCriteriaForRole')->once()->with([[5, 'character']]);
+            $mock->shouldReceive('handleMembers')->once();
         }));
     });
 

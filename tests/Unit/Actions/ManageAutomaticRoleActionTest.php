@@ -39,16 +39,16 @@ it('invokes role service with valid role id', function () {
 
 it('invokes role service with affiliated entities', function () {
     $request = mock(RoleRequest::class, function (MockInterface $mock) {
-        $mock->shouldReceive('validated')->andReturn(['role_id' => 1, 'affiliated' => [['entity_id' => 1, 'entity_type' => 'corporation', 'type' => 'member']], 'assigned' => []]);
+        $mock->shouldReceive('validated')->andReturn(['role_id' => 1, 'affiliated' => [['entity_id' => 1, 'entity_type' => 'corporation', 'affiliation_type' => 'allowed']], 'assigned' => []]);
     });
 
     $this->mock(BaseRoleService::class, function (MockInterface $mock) {
-        $mock->shouldReceive('for')->with(1);
+        $mock->shouldReceive('for')->with(1)->andReturn($mock);
         $mock->shouldReceive('automatic')->andReturn(mock(AutomaticRoleService::class, function (MockInterface $mock) {
-            $mock->shouldReceive('syncAffiliateManyEntities')->once()->with([['entity_id' => 1, 'entity_type' => 'corporation', 'type' => 'member']]);
             $mock->shouldReceive('setRoleType')->once()->with(\Seatplus\Auth\Enums\RoleType::AUTOMATIC);
+            $mock->shouldReceive('syncAffiliateManyEntities')->once()->with([[1, 'corporation', 'allowed']]);
+            $mock->shouldReceive('handleMembers')->once();
         }));
-
     });
 
     $this->actingAs(test()->test_user);
@@ -61,14 +61,15 @@ it('invokes role service with affiliated entities', function () {
 
 it('invokes role service with assigned entities', function () {
     $request = mock(RoleRequest::class, function (MockInterface $mock) {
-        $mock->shouldReceive('validated')->andReturn(['role_id' => 1, 'affiliated' => [], 'assigned' => [['entity_id' => 1, 'entity_type' => 'corporation', 'type' => 'member']]]);
+        $mock->shouldReceive('validated')->andReturn(['role_id' => 1, 'affiliated' => [], 'assigned' => [['entity_id' => 1, 'entity_type' => 'corporation']]]);
     });
 
     $this->mock(BaseRoleService::class, function (MockInterface $mock) {
-        $mock->shouldReceive('for')->once()->with(1);
+        $mock->shouldReceive('for')->once()->with(1)->andReturn($mock);
         $mock->shouldReceive('automatic')->andReturn(mock(AutomaticRoleService::class, function (MockInterface $mock) {
-            $mock->shouldReceive('automaticallyAssignRoleTo')->once();
             $mock->shouldReceive('setRoleType')->once()->with(\Seatplus\Auth\Enums\RoleType::AUTOMATIC);
+            $mock->shouldReceive('automaticallyAssignRoleTo')->once()->with([[1, 'corporation']]);
+            $mock->shouldReceive('handleMembers')->once();
         }));
     });
 
@@ -86,10 +87,11 @@ it('updates name of role', function () {
     });
 
     $this->mock(BaseRoleService::class, function (MockInterface $mock) {
-        $mock->shouldReceive('for')->once()->with(1);
+        $mock->shouldReceive('for')->once()->with(1)->andReturn($mock);
         $mock->shouldReceive('automatic')->andReturn(mock(AutomaticRoleService::class, function (MockInterface $mock) {
-            $mock->shouldReceive('updateRoleName')->once()->with('new name');
             $mock->shouldReceive('setRoleType')->once()->with(\Seatplus\Auth\Enums\RoleType::AUTOMATIC);
+            $mock->shouldReceive('updateRoleName')->once()->with('new name');
+            $mock->shouldReceive('handleMembers')->once();
         }));
     });
 
