@@ -8,6 +8,7 @@ use Illuminate\Support\Arr;
 use Seatplus\Auth\Enums\RoleType;
 use Seatplus\Auth\Http\Requests\RoleRequest;
 use Seatplus\Auth\Services\Roles\BaseRoleService;
+use Seatplus\Auth\Services\Roles\DTO\AffiliationData;
 
 class ManageManualRoleAction
 {
@@ -27,6 +28,12 @@ class ManageManualRoleAction
 
         if ($name = Arr::get($validated, 'name')) {
             $roleService->updateRoleName($name);
+        }
+
+        if ($affiliated = Arr::get($validated, 'affiliated')) {
+            $roleService->syncAffiliateManyEntities(
+                ...array_map(fn (array $affiliationData) => AffiliationData::fromArray($affiliationData), $affiliated)
+            );
         }
 
         $roleService->handleMembers();
