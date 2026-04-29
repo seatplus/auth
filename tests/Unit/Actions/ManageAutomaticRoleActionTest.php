@@ -52,6 +52,8 @@ it('invokes role service with affiliated entities', function () {
             $mock->shouldReceive('syncAffiliateManyEntities')->once()->withArgs(function (AffiliationData $entity) {
                 return $entity->entity_id === 1 && $entity->entity_type === 'corporation' && $entity->affiliation_type === AffiliationType::ALLOWED;
             });
+            // assigned: [] → empty array → automaticallyAssignRoleTo called with 0 args (clears criteria)
+            $mock->shouldReceive('automaticallyAssignRoleTo')->once()->withNoArgs();
             $mock->shouldReceive('handleMembers')->once();
         }));
     });
@@ -73,6 +75,8 @@ it('invokes role service with assigned entities', function () {
         $mock->shouldReceive('for')->once()->with(1)->andReturn($mock);
         $mock->shouldReceive('automatic')->andReturn(mock(AutomaticRoleService::class, function (MockInterface $mock) {
             $mock->shouldReceive('setRoleType')->once()->with(\Seatplus\Auth\Enums\RoleType::AUTOMATIC);
+            // affiliated: [] → empty array → syncAffiliateManyEntities called with 0 args (clears scope)
+            $mock->shouldReceive('syncAffiliateManyEntities')->once()->withNoArgs();
             $mock->shouldReceive('automaticallyAssignRoleTo')->once()->withArgs(function (CriteriaData $entity) {
                 return $entity->entity_id === 1 && $entity->entity_type === 'corporation';
             });
@@ -98,6 +102,9 @@ it('updates name of role', function () {
         $mock->shouldReceive('automatic')->andReturn(mock(AutomaticRoleService::class, function (MockInterface $mock) {
             $mock->shouldReceive('setRoleType')->once()->with(\Seatplus\Auth\Enums\RoleType::AUTOMATIC);
             $mock->shouldReceive('updateRoleName')->once()->with('new name');
+            // affiliated: [] and assigned: [] → both called with 0 args
+            $mock->shouldReceive('syncAffiliateManyEntities')->once()->withNoArgs();
+            $mock->shouldReceive('automaticallyAssignRoleTo')->once()->withNoArgs();
             $mock->shouldReceive('handleMembers')->once();
         }));
     });

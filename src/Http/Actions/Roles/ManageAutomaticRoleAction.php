@@ -35,13 +35,13 @@ class ManageAutomaticRoleAction
             $roleService->updateRoleName($name);
         }
 
-        if ($affiliated = Arr::get($validated, 'affiliated')) {
+        if (is_array($affiliated = Arr::get($validated, 'affiliated'))) {
             $roleService->syncAffiliateManyEntities(
                 ...array_map(fn (array $affiliationData) => AffiliationData::fromArray($affiliationData), $affiliated)
             );
         }
 
-        if ($assigned = Arr::get($validated, 'assigned')) {
+        if (is_array($assigned = Arr::get($validated, 'assigned'))) {
             $roleService->automaticallyAssignRoleTo(
                 ...array_map(fn (array $criteriaData) => CriteriaData::fromArray($criteriaData), $assigned)
             );
