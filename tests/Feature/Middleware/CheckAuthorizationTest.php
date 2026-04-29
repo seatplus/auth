@@ -101,6 +101,10 @@ describe('middleware checks permission and affiliation', function () {
     it('checks owned character ids', function (string $method, string $route, array|int $route_param, string $status = 'ok') {
         expect(test()->test_user->can('superuser'))->toBeFalse();
 
+        // Ensure no stale character roles from other test runs pollute the permission check.
+        // This test verifies that owning a character does NOT grant corporation-level access.
+        CharacterRole::query()->delete();
+
         test()->actingAs(test()->test_user);
 
         // Act
