@@ -1,10 +1,13 @@
 <?php
 
 use Mockery\MockInterface;
+use Seatplus\Auth\Enums\AffiliationType;
 use Seatplus\Auth\Http\Requests\RoleRequest;
 use Seatplus\Auth\Models\Permissions\Role;
 use Seatplus\Auth\Services\Roles\AutomaticRoleService;
 use Seatplus\Auth\Services\Roles\BaseRoleService;
+use Seatplus\Auth\Services\Roles\DTO\AffiliationData;
+use Seatplus\Auth\Services\Roles\DTO\CriteriaData;
 
 it('throws exception when user is missing permission', function () {
     $request = mock(RoleRequest::class);
@@ -46,7 +49,9 @@ it('invokes role service with affiliated entities', function () {
         $mock->shouldReceive('for')->with(1)->andReturn($mock);
         $mock->shouldReceive('automatic')->andReturn(mock(AutomaticRoleService::class, function (MockInterface $mock) {
             $mock->shouldReceive('setRoleType')->once()->with(\Seatplus\Auth\Enums\RoleType::AUTOMATIC);
-            $mock->shouldReceive('syncAffiliateManyEntities')->once()->with([[1, 'corporation', 'allowed']]);
+            $mock->shouldReceive('syncAffiliateManyEntities')->once()->withArgs(function (AffiliationData $entity) {
+                return $entity->entity_id === 1 && $entity->entity_type === 'corporation' && $entity->affiliation_type === AffiliationType::ALLOWED;
+            });
             $mock->shouldReceive('handleMembers')->once();
         }));
     });
@@ -68,7 +73,9 @@ it('invokes role service with assigned entities', function () {
         $mock->shouldReceive('for')->once()->with(1)->andReturn($mock);
         $mock->shouldReceive('automatic')->andReturn(mock(AutomaticRoleService::class, function (MockInterface $mock) {
             $mock->shouldReceive('setRoleType')->once()->with(\Seatplus\Auth\Enums\RoleType::AUTOMATIC);
-            $mock->shouldReceive('automaticallyAssignRoleTo')->once()->with([[1, 'corporation']]);
+            $mock->shouldReceive('automaticallyAssignRoleTo')->once()->withArgs(function (CriteriaData $entity) {
+                return $entity->entity_id === 1 && $entity->entity_type === 'corporation';
+            });
             $mock->shouldReceive('handleMembers')->once();
         }));
     });

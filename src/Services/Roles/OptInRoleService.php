@@ -1,19 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Seatplus\Auth\Services\Roles;
 
 use Seatplus\Auth\Enums\RoleMembershipStatus;
-use Seatplus\Auth\Enums\RoleType;
 use Seatplus\Auth\Models\User;
+use Seatplus\Auth\Services\Roles\DTO\CriteriaData;
 
 class OptInRoleService extends AbstractRoleService implements RoleServiceInterface
 {
     /**
      * @throws \Throwable
      */
-    public function addCriteriaForRole(array $entities): void
+    public function addCriteriaForRole(CriteriaData ...$entities): void
     {
-        $this->addCriteria($entities, RoleType::OPT_IN);
+        $this->addCriteria(...$entities);
 
         $this->syncMembers();
     }

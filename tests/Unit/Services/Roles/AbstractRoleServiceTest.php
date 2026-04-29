@@ -1,8 +1,11 @@
 <?php
 
+use Seatplus\Auth\Enums\AffiliationType;
 use Seatplus\Auth\Enums\RoleType;
 use Seatplus\Auth\Models\Permissions\Affiliation;
 use Seatplus\Auth\Models\Permissions\Role;
+use Seatplus\Auth\Services\Roles\DTO\AffiliationData;
+use Seatplus\Auth\Services\Roles\DTO\CriteriaData;
 
 beforeEach(function () {
     $this->role = Role::create(['name' => 'test']);
@@ -38,11 +41,11 @@ it('affiliates role to corporation and getting role on test user', function () {
     expect(Affiliation::count())->toEqual(0);
 
     // act
-    $this->service->syncAffiliateManyEntities([
-        [$corporation_id, 'corporation', \Seatplus\Auth\Enums\AffiliationType::ALLOWED->value],
-        [$test_character->character_id, 'character', \Seatplus\Auth\Enums\AffiliationType::ALLOWED->value],
-        [$alliance_id, 'alliance', \Seatplus\Auth\Enums\AffiliationType::ALLOWED->value],
-    ]);
+    $this->service->syncAffiliateManyEntities(
+        new AffiliationData($corporation_id, 'corporation', AffiliationType::ALLOWED),
+        new AffiliationData($test_character->character_id, 'character', AffiliationType::ALLOWED),
+        new AffiliationData($alliance_id, 'alliance', AffiliationType::ALLOWED),
+    );
 
     // Test
     expect(Affiliation::count())->toEqual(3)
@@ -59,9 +62,9 @@ it('returns early when setting same role type', function () {
 
     // Act
     $automated_role_service = new \Seatplus\Auth\Services\Roles\AutomaticRoleService($this->role);
-    $automated_role_service->automaticallyAssignRoleTo([
-        [1, 'corporation'],
-    ]);
+    $automated_role_service->automaticallyAssignRoleTo(
+        new CriteriaData(1, 'corporation'),
+    );
 
     // Assert
     expect($this->role->refresh()->type)->toEqual(RoleType::AUTOMATIC);

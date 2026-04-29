@@ -8,6 +8,8 @@ use Illuminate\Support\Arr;
 use Seatplus\Auth\Enums\RoleType;
 use Seatplus\Auth\Http\Requests\RoleRequest;
 use Seatplus\Auth\Services\Roles\BaseRoleService;
+use Seatplus\Auth\Services\Roles\DTO\AffiliationData;
+use Seatplus\Auth\Services\Roles\DTO\CriteriaData;
 
 class ManageOptInRoleAction
 {
@@ -33,17 +35,13 @@ class ManageOptInRoleAction
 
         if ($affiliated = Arr::get($validated, 'affiliated')) {
             $roleService->syncAffiliateManyEntities(
-                collect($affiliated)
-                    ->map(fn (array $e) => [$e['entity_id'], $e['entity_type'], $e['affiliation_type']])
-                    ->all()
+                ...array_map(fn (array $e) => AffiliationData::fromArray($e), $affiliated)
             );
         }
 
         if ($assigned = Arr::get($validated, 'assigned')) {
             $roleService->addCriteriaForRole(
-                collect($assigned)
-                    ->map(fn (array $e) => [$e['entity_id'], $e['entity_type']])
-                    ->all()
+                ...array_map(fn (array $e) => CriteriaData::fromArray($e), $assigned)
             );
         }
 

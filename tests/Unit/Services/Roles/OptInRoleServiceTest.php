@@ -3,6 +3,7 @@
 use Seatplus\Auth\Models\AccessControl\RoleMembership;
 use Seatplus\Auth\Models\Permissions\Role;
 use Seatplus\Auth\Models\User;
+use Seatplus\Auth\Services\Roles\DTO\CriteriaData;
 
 beforeEach(function () {
     $this->role = Role::create(['name' => 'test']);
@@ -13,11 +14,9 @@ beforeEach(function () {
 
 it('can add criteria', function () {
 
-    $entities = [
-        [1, 'corporation'],
-    ];
-
-    $this->service->addCriteriaForRole($entities);
+    $this->service->addCriteriaForRole(
+        new CriteriaData(1, 'corporation'),
+    );
 
     expect(RoleMembership::query()->count())->toBe(1)
         ->and(RoleMembership::first())->entity_type->toBe(\Seatplus\Eveapi\Models\Corporation\CorporationInfo::class);
@@ -26,9 +25,9 @@ it('can add criteria', function () {
 it('can join role', function () {
     $test_user = test()->test_user;
 
-    $this->service->addCriteriaForRole([
-        [test()->test_character->corporation_id, 'corporation'],
-    ]);
+    $this->service->addCriteriaForRole(
+        new CriteriaData(test()->test_character->corporation_id, 'corporation'),
+    );
 
     $this->service->joinRole($test_user);
 
@@ -37,9 +36,9 @@ it('can join role', function () {
 
 it('can leave role', function () {
     $test_user = test()->test_user;
-    $this->service->addCriteriaForRole([
-        [test()->test_character->corporation_id, 'corporation'],
-    ]);
+    $this->service->addCriteriaForRole(
+        new CriteriaData(test()->test_character->corporation_id, 'corporation'),
+    );
 
     $this->service->joinRole($test_user);
 
@@ -52,9 +51,9 @@ it('can leave role', function () {
 
 it('syncs members', function () {
     $test_user = test()->test_user;
-    $this->service->addCriteriaForRole([
-        [test()->test_character->corporation_id, 'corporation'],
-    ]);
+    $this->service->addCriteriaForRole(
+        new CriteriaData(test()->test_character->corporation_id, 'corporation'),
+    );
 
     $this->service->joinRole($test_user);
 
@@ -65,9 +64,9 @@ it('syncs members', function () {
         ->and($role_member->first())->status->toBe(\Seatplus\Auth\Enums\RoleMembershipStatus::ACTIVE->value);
 
     // remove criteria makes the user not meet the criteria anymore
-    $this->service->addCriteriaForRole([
-        [1234, 'corporation'],
-    ]);
+    $this->service->addCriteriaForRole(
+        new CriteriaData(1234, 'corporation'),
+    );
 
     $this->service->syncMembers();
 
@@ -76,11 +75,9 @@ it('syncs members', function () {
 
 describe('it can', function () {
     beforeEach(function () {
-        $entities = [
-            [test()->test_character->corporation_id, 'corporation'],
-        ];
-
-        $this->service->addCriteriaForRole($entities);
+        $this->service->addCriteriaForRole(
+            new CriteriaData(test()->test_character->corporation_id, 'corporation'),
+        );
     });
 
     it('can view', function () {

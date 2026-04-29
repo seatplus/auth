@@ -1,10 +1,13 @@
 <?php
 
 use Mockery\MockInterface;
+use Seatplus\Auth\Enums\AffiliationType;
 use Seatplus\Auth\Http\Actions\Roles\OnRequest\ManageOnRequestRoleAction;
 use Seatplus\Auth\Http\Requests\RoleRequest;
 use Seatplus\Auth\Models\Permissions\Role;
 use Seatplus\Auth\Services\Roles\BaseRoleService;
+use Seatplus\Auth\Services\Roles\DTO\AffiliationData;
+use Seatplus\Auth\Services\Roles\DTO\CriteriaData;
 use Seatplus\Auth\Services\Roles\OnRequestRoleService;
 
 it('executes manage on request role action successfully', function () {
@@ -29,8 +32,12 @@ it('executes manage on request role action successfully', function () {
         $mock->shouldReceive('onRequest')->andReturn(mock(OnRequestRoleService::class, function ($mock) {
             $mock->shouldReceive('setRoleType')->with(\Seatplus\Auth\Enums\RoleType::ON_REQUEST)->once();
             $mock->shouldReceive('updateRoleName')->once();
-            $mock->shouldReceive('syncAffiliateManyEntities')->once()->with([[1, 'corporation', 'allowed']]);
-            $mock->shouldReceive('addCriteriaForRoleApplication')->once()->with([[5, 'character']]);
+            $mock->shouldReceive('syncAffiliateManyEntities')->once()->withArgs(function (AffiliationData $entity) {
+                return $entity->entity_id === 1 && $entity->entity_type === 'corporation' && $entity->affiliation_type === AffiliationType::ALLOWED;
+            });
+            $mock->shouldReceive('addCriteriaForRoleApplication')->once()->withArgs(function (CriteriaData $entity) {
+                return $entity->entity_id === 5 && $entity->entity_type === 'character';
+            });
             $mock->shouldReceive('handleMembers')->once();
         }));
     });
