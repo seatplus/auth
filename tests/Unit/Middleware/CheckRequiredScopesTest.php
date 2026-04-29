@@ -24,8 +24,10 @@
  * SOFTWARE.
  */
 
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Str;
 use Seatplus\Auth\Http\Middleware\CheckRequiredScopes;
 use Seatplus\Auth\Models\CharacterUser;
 use Seatplus\Auth\Models\User;
@@ -155,7 +157,7 @@ describe('redirect request', function () {
         createRefreshTokenWithScopes(['a', 'b']);
 
         // 2. create user application
-        test()->test_user->application()->create(['id' => \Illuminate\Support\Str::uuid(), 'corporation_id' => test()->test_character->corporation->corporation_id]);
+        test()->test_user->application()->create(['id' => Str::uuid(), 'corporation_id' => test()->test_character->corporation->corporation_id]);
 
         // 3. create required corp scopes
         createCorporationSsoScope(['c']);
@@ -303,7 +305,7 @@ describe('passes middleware', function () {
         createRefreshTokenWithScopes(['a', 'b']);
 
         // 2. create user application
-        test()->test_user->application()->create(['id' => \Illuminate\Support\Str::uuid(), 'corporation_id' => test()->test_character->corporation->corporation_id]);
+        test()->test_user->application()->create(['id' => Str::uuid(), 'corporation_id' => test()->test_character->corporation->corporation_id]);
 
         // TestingTime
 
@@ -322,7 +324,7 @@ describe('passes middleware', function () {
         createRefreshTokenWithScopes(['a', 'b']);
 
         // 2. create user application
-        test()->test_user->application()->create(['id' => \Illuminate\Support\Str::uuid(), 'corporation_id' => test()->test_character->corporation->corporation_id]);
+        test()->test_user->application()->create(['id' => Str::uuid(), 'corporation_id' => test()->test_character->corporation->corporation_id]);
 
         // 3. create required corp scopes
         createCorporationSsoScope(['a']);
@@ -346,7 +348,7 @@ it('redirects when user is not compliant', function () {
         $mock->shouldReceive('getMissingScopes')->with(Mockery::type(User::class))->andReturn(['scope1', 'scope2']);
     });
 
-    $middleware = new \Seatplus\Auth\Http\Middleware\CheckRequiredScopes(app(IsUserCompliantService::class));
+    $middleware = new CheckRequiredScopes(app(IsUserCompliantService::class));
     $request = Mockery::mock(Request::class);
     $request->shouldReceive('user')->andReturn(new User);
 
@@ -356,7 +358,7 @@ it('redirects when user is not compliant', function () {
 
     $response = $middleware->handle($request, $next);
 
-    expect($response)->toBeInstanceOf(\Illuminate\Http\RedirectResponse::class)
+    expect($response)->toBeInstanceOf(RedirectResponse::class)
         ->and($response->getTargetUrl())->toBe('http://localhost');
 });
 

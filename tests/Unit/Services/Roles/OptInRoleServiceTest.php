@@ -1,15 +1,18 @@
 <?php
 
+use Seatplus\Auth\Enums\RoleMembershipStatus;
 use Seatplus\Auth\Models\AccessControl\RoleMembership;
 use Seatplus\Auth\Models\Permissions\Role;
 use Seatplus\Auth\Models\User;
 use Seatplus\Auth\Services\Roles\DTO\CriteriaData;
+use Seatplus\Auth\Services\Roles\OptInRoleService;
+use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 
 beforeEach(function () {
     $this->role = Role::create(['name' => 'test']);
     $this->role = $this->role->refresh();
 
-    $this->service = new \Seatplus\Auth\Services\Roles\OptInRoleService($this->role);
+    $this->service = new OptInRoleService($this->role);
 });
 
 it('can add criteria', function () {
@@ -19,7 +22,7 @@ it('can add criteria', function () {
     );
 
     expect(RoleMembership::query()->count())->toBe(1)
-        ->and(RoleMembership::first())->entity_type->toBe(\Seatplus\Eveapi\Models\Corporation\CorporationInfo::class);
+        ->and(RoleMembership::first())->entity_type->toBe(CorporationInfo::class);
 });
 
 it('can join role', function () {
@@ -61,7 +64,7 @@ it('syncs members', function () {
     $role_member = RoleMembership::query()->where('entity_type', User::class)->get();
 
     expect($role_member->count())->toBe(1)
-        ->and($role_member->first())->status->toBe(\Seatplus\Auth\Enums\RoleMembershipStatus::ACTIVE->value);
+        ->and($role_member->first())->status->toBe(RoleMembershipStatus::ACTIVE->value);
 
     // remove criteria makes the user not meet the criteria anymore
     $this->service->addCriteriaForRole(

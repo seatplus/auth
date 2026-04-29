@@ -2,6 +2,7 @@
 
 use Mockery\MockInterface;
 use Seatplus\Auth\Enums\AffiliationType;
+use Seatplus\Auth\Enums\RoleType;
 use Seatplus\Auth\Http\Actions\Roles\OnRequest\ManageOnRequestRoleAction;
 use Seatplus\Auth\Http\Requests\RoleRequest;
 use Seatplus\Auth\Models\Permissions\Role;
@@ -9,6 +10,7 @@ use Seatplus\Auth\Services\Roles\BaseRoleService;
 use Seatplus\Auth\Services\Roles\DTO\AffiliationData;
 use Seatplus\Auth\Services\Roles\DTO\CriteriaData;
 use Seatplus\Auth\Services\Roles\OnRequestRoleService;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 it('executes manage on request role action successfully', function () {
 
@@ -30,7 +32,7 @@ it('executes manage on request role action successfully', function () {
             ->andReturn($mock);
 
         $mock->shouldReceive('onRequest')->andReturn(mock(OnRequestRoleService::class, function ($mock) {
-            $mock->shouldReceive('setRoleType')->with(\Seatplus\Auth\Enums\RoleType::ON_REQUEST)->once();
+            $mock->shouldReceive('setRoleType')->with(RoleType::ON_REQUEST)->once();
             $mock->shouldReceive('updateRoleName')->once();
             $mock->shouldReceive('syncAffiliateManyEntities')->once()->withArgs(function (AffiliationData $entity) {
                 return $entity->entity_id === 1 && $entity->entity_type === 'corporation' && $entity->affiliation_type === AffiliationType::ALLOWED;
@@ -60,7 +62,7 @@ it('throws exception if user does not have permission', function () {
 
     $this->actingAs($this->test_user);
 
-    $request = \Mockery::mock(RoleRequest::class);
+    $request = Mockery::mock(RoleRequest::class);
     $request->shouldReceive('validated')->andReturn([
         'role_id' => 1,
         'affiliated' => ['entity1', 'entity2'],
@@ -70,5 +72,5 @@ it('throws exception if user does not have permission', function () {
 
     $action = app(ManageOnRequestRoleAction::class);
 
-    expect(fn () => $action->execute($request))->toThrow(\Symfony\Component\HttpKernel\Exception\HttpException::class);
+    expect(fn () => $action->execute($request))->toThrow(HttpException::class);
 });

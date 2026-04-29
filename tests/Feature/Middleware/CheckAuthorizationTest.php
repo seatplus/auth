@@ -1,12 +1,15 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Seatplus\Auth\Enums\AffiliationType;
 use Seatplus\Auth\Http\Middleware\CheckAuthorization;
 use Seatplus\Auth\Models\Permissions\Affiliation;
 use Seatplus\Auth\Models\Permissions\Permission;
 use Seatplus\Auth\Models\Permissions\Role;
+use Seatplus\Eveapi\Models\Alliance\AllianceInfo;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\Character\CharacterRole;
+use Spatie\Permission\PermissionRegistrar;
 
 use function Pest\Laravel\get;
 use function Pest\Laravel\post;
@@ -20,7 +23,7 @@ describe('middleware checks permission and affiliation', function () {
 
         test()->test_user->assignRole(test()->role);
 
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         Route::middleware([CheckAuthorization::class.":$this->permission_name"])
             ->prefix('character')
@@ -164,8 +167,8 @@ describe('middleware checks permission and affiliation', function () {
         createAffiliation(
             test()->role,
             test()->secondary_character->alliance->alliance_id,
-            \Seatplus\Eveapi\Models\Alliance\AllianceInfo::class,
-            \Seatplus\Auth\Enums\AffiliationType::ALLOWED
+            AllianceInfo::class,
+            AffiliationType::ALLOWED
         );
 
         test()->actingAs(test()->test_user);
@@ -214,7 +217,7 @@ describe('middleware checks permission and affiliation', function () {
             test()->role,
             test()->secondary_character->character_id,
             CharacterInfo::class,
-            \Seatplus\Auth\Enums\AffiliationType::FORBIDDEN
+            AffiliationType::FORBIDDEN
         );
 
         test()->actingAs(test()->test_user);
@@ -305,7 +308,7 @@ describe('middleware checks permission or corporation role test', function () {
     });
 });
 
-function createAffiliation(Role $role, int|string $affiliatable_id, string $affiliatable_type, \Seatplus\Auth\Enums\AffiliationType $type): Affiliation
+function createAffiliation(Role $role, int|string $affiliatable_id, string $affiliatable_type, AffiliationType $type): Affiliation
 {
     /** @var Affiliation $affiliation */
     $affiliation = Affiliation::query()->create([

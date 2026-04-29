@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Mockery\MockInterface;
 use Seatplus\Auth\Enums\AffiliationType;
+use Seatplus\Auth\Enums\RoleType;
 use Seatplus\Auth\Http\Actions\Roles\Manual\ManageManualRoleAction;
 use Seatplus\Auth\Http\Requests\RoleRequest;
 use Seatplus\Auth\Models\Permissions\Role;
@@ -35,7 +36,7 @@ it('sets the role type to manual', function () {
 
     $action->execute($role_request);
 
-    expect($role->refresh()->type)->toBe(\Seatplus\Auth\Enums\RoleType::MANUAL);
+    expect($role->refresh()->type)->toBe(RoleType::MANUAL);
 });
 
 it('updates the role name', function () {

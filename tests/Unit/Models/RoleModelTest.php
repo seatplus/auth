@@ -24,6 +24,8 @@
  * SOFTWARE.
  */
 
+use Seatplus\Auth\Enums\RoleType;
+use Seatplus\Auth\Models\AccessControl\RoleMembership;
 use Seatplus\Auth\Models\Permissions\Affiliation;
 use Seatplus\Auth\Models\Permissions\Permission;
 use Seatplus\Auth\Models\Permissions\Role;
@@ -84,12 +86,12 @@ it('has polymorphic relation', function () {
 });
 
 it('has default type attribute', function () {
-    expect(test()->role->fresh()->type)->toEqual(\Seatplus\Auth\Enums\RoleType::MANUAL);
+    expect(test()->role->fresh()->type)->toEqual(RoleType::MANUAL);
 });
 
 it('has role memberships', function () {
 
-    \Seatplus\Auth\Models\AccessControl\RoleMembership::query()->create([
+    RoleMembership::query()->create([
         'role_id' => test()->role->id,
         'entity_id' => test()->test_character->corporation_id,
         'entity_type' => CorporationInfo::class,

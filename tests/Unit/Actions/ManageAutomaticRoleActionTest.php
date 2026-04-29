@@ -2,6 +2,8 @@
 
 use Mockery\MockInterface;
 use Seatplus\Auth\Enums\AffiliationType;
+use Seatplus\Auth\Enums\RoleType;
+use Seatplus\Auth\Http\Actions\Roles\ManageAutomaticRoleAction;
 use Seatplus\Auth\Http\Requests\RoleRequest;
 use Seatplus\Auth\Models\Permissions\Role;
 use Seatplus\Auth\Services\Roles\AutomaticRoleService;
@@ -14,9 +16,9 @@ it('throws exception when user is missing permission', function () {
 
     $this->actingAs(test()->test_user);
 
-    $action = app(\Seatplus\Auth\Http\Actions\Roles\ManageAutomaticRoleAction::class);
+    $action = app(ManageAutomaticRoleAction::class);
     $action->execute($request);
-})->throws(\Exception::class, 'You are not allowed to administrate access control groups');
+})->throws(Exception::class, 'You are not allowed to administrate access control groups');
 
 it('invokes role service with valid role id', function () {
     $role = Role::create(['name' => 'test']);
@@ -36,7 +38,7 @@ it('invokes role service with valid role id', function () {
         ->and(auth()->user()->hasPermissionTo($admin_permission))->toBeTrue() // ok
         ->and(auth()->user()->can($admin_permission))->toBeTrue(); // fails
 
-    $action = app(\Seatplus\Auth\Http\Actions\Roles\ManageAutomaticRoleAction::class);
+    $action = app(ManageAutomaticRoleAction::class);
     $action->execute($request);
 });
 
@@ -48,7 +50,7 @@ it('invokes role service with affiliated entities', function () {
     $this->mock(BaseRoleService::class, function (MockInterface $mock) {
         $mock->shouldReceive('for')->with(1)->andReturn($mock);
         $mock->shouldReceive('automatic')->andReturn(mock(AutomaticRoleService::class, function (MockInterface $mock) {
-            $mock->shouldReceive('setRoleType')->once()->with(\Seatplus\Auth\Enums\RoleType::AUTOMATIC);
+            $mock->shouldReceive('setRoleType')->once()->with(RoleType::AUTOMATIC);
             $mock->shouldReceive('syncAffiliateManyEntities')->once()->withArgs(function (AffiliationData $entity) {
                 return $entity->entity_id === 1 && $entity->entity_type === 'corporation' && $entity->affiliation_type === AffiliationType::ALLOWED;
             });
@@ -62,7 +64,7 @@ it('invokes role service with affiliated entities', function () {
     // give the user the permission to administrate access control groups
     assignPermissionToTestUser('administrate access control groups');
 
-    $action = app(\Seatplus\Auth\Http\Actions\Roles\ManageAutomaticRoleAction::class);
+    $action = app(ManageAutomaticRoleAction::class);
     $action->execute($request);
 });
 
@@ -74,7 +76,7 @@ it('invokes role service with assigned entities', function () {
     $this->mock(BaseRoleService::class, function (MockInterface $mock) {
         $mock->shouldReceive('for')->once()->with(1)->andReturn($mock);
         $mock->shouldReceive('automatic')->andReturn(mock(AutomaticRoleService::class, function (MockInterface $mock) {
-            $mock->shouldReceive('setRoleType')->once()->with(\Seatplus\Auth\Enums\RoleType::AUTOMATIC);
+            $mock->shouldReceive('setRoleType')->once()->with(RoleType::AUTOMATIC);
             // affiliated: [] → empty array → syncAffiliateManyEntities called with 0 args (clears scope)
             $mock->shouldReceive('syncAffiliateManyEntities')->once()->withNoArgs();
             $mock->shouldReceive('automaticallyAssignRoleTo')->once()->withArgs(function (CriteriaData $entity) {
@@ -88,7 +90,7 @@ it('invokes role service with assigned entities', function () {
     // give the user the permission to administrate access control groups
     assignPermissionToTestUser('administrate access control groups');
 
-    $action = app(\Seatplus\Auth\Http\Actions\Roles\ManageAutomaticRoleAction::class);
+    $action = app(ManageAutomaticRoleAction::class);
     $action->execute($request);
 });
 
@@ -100,7 +102,7 @@ it('updates name of role', function () {
     $this->mock(BaseRoleService::class, function (MockInterface $mock) {
         $mock->shouldReceive('for')->once()->with(1)->andReturn($mock);
         $mock->shouldReceive('automatic')->andReturn(mock(AutomaticRoleService::class, function (MockInterface $mock) {
-            $mock->shouldReceive('setRoleType')->once()->with(\Seatplus\Auth\Enums\RoleType::AUTOMATIC);
+            $mock->shouldReceive('setRoleType')->once()->with(RoleType::AUTOMATIC);
             $mock->shouldReceive('updateRoleName')->once()->with('new name');
             // affiliated: [] and assigned: [] → both called with 0 args
             $mock->shouldReceive('syncAffiliateManyEntities')->once()->withNoArgs();
@@ -113,6 +115,6 @@ it('updates name of role', function () {
     // give the user the permission to administrate access control groups
     assignPermissionToTestUser('administrate access control groups');
 
-    $action = app(\Seatplus\Auth\Http\Actions\Roles\ManageAutomaticRoleAction::class);
+    $action = app(ManageAutomaticRoleAction::class);
     $action->execute($request);
 });

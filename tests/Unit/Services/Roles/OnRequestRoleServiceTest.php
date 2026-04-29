@@ -1,6 +1,7 @@
 <?php
 
 use Seatplus\Auth\Enums\RoleMembershipStatus;
+use Seatplus\Auth\Enums\RoleType;
 use Seatplus\Auth\Models\AccessControl\RoleMembership;
 use Seatplus\Auth\Models\Permissions\Role;
 use Seatplus\Auth\Models\User;
@@ -9,7 +10,7 @@ use Seatplus\Auth\Services\Roles\OnRequestRoleService;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 
 beforeEach(function () {
-    $this->role = Role::create(['name' => 'test', 'type' => \Seatplus\Auth\Enums\RoleType::ON_REQUEST->value]);
+    $this->role = Role::create(['name' => 'test', 'type' => RoleType::ON_REQUEST->value]);
     $this->role = $this->role->refresh();
 
     $this->service = new OnRequestRoleService($this->role);
@@ -37,7 +38,7 @@ describe('adding criteria for role application', function () {
             new CriteriaData(test()->test_character->corporation_id, 'corporation'),
             new CriteriaData(test()->test_character->alliance_id, 'invalid'),
         );
-    })->throws(\ValueError::class);
+    })->throws(ValueError::class);
 
     it('resets criterias', function () {
         // Arrange
@@ -78,7 +79,7 @@ it('cannot submit application if no criteria is set', function () {
 
     // assert
 
-})->throws(\Exception::class, 'User does not meet criteria to join role');
+})->throws(Exception::class, 'User does not meet criteria to join role');
 
 it('submits application for role', function () {
     // arrange
@@ -123,7 +124,7 @@ it('throws exception when approving application for role with no criteria', func
     $this->service->approveApplicationForRole($user);
 
     // assert
-})->throws(\Exception::class, 'User does not meet criteria to join role');
+})->throws(Exception::class, 'User does not meet criteria to join role');
 
 it('denies application for role', function () {
     // arrange

@@ -1,17 +1,19 @@
 <?php
 
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Mockery\MockInterface;
 use Seatplus\Auth\Http\Actions\Roles\OnRequest\ApplyAction;
 use Seatplus\Auth\Services\Roles\BaseRoleService;
+use Seatplus\Auth\Services\Roles\OnRequestRoleService;
 
 it('applies role to user successfully', function () {
-    $this->mock(BaseRoleService::class, function (\Mockery\MockInterface $mock) {
+    $this->mock(BaseRoleService::class, function (MockInterface $mock) {
         $mock->shouldReceive('for')->with(1)
             ->andReturnSelf();
 
         $mock->shouldReceive('onRequest')
             ->once()
-            ->andReturn(mock(\Seatplus\Auth\Services\Roles\OnRequestRoleService::class, function (\Mockery\MockInterface $mock) {
+            ->andReturn(mock(OnRequestRoleService::class, function (MockInterface $mock) {
                 $mock->shouldReceive('onRequest')->andReturnSelf();
                 $mock->shouldReceive('submitApplicationForRole')->once();
             }));
@@ -27,13 +29,13 @@ it('applies role to user successfully', function () {
 });
 
 it('throws exception if user not found', function () {
-    $this->mock(BaseRoleService::class, function (\Mockery\MockInterface $mock) {
+    $this->mock(BaseRoleService::class, function (MockInterface $mock) {
         $mock->shouldReceive('for')->with(1)
             ->andReturnSelf();
 
         $mock->shouldReceive('onRequest')
             ->once()
-            ->andReturn(mock(\Seatplus\Auth\Services\Roles\OnRequestRoleService::class, function (\Mockery\MockInterface $mock) {
+            ->andReturn(mock(OnRequestRoleService::class, function (MockInterface $mock) {
                 $mock->shouldReceive('onRequest')->andReturnSelf();
                 $mock->shouldReceive('submitApplicationForRole')->never();
             }));

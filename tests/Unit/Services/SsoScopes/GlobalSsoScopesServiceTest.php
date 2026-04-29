@@ -1,12 +1,15 @@
 <?php
 
+use Seatplus\Auth\Services\SsoScopes\GlobalSsoScopesService;
+use Seatplus\Eveapi\Models\SsoScopes;
+
 it('creates global sso scopes with provided scopes', function () {
     $scopes = ['scope1', 'scope2'];
 
-    $service = new \Seatplus\Auth\Services\SsoScopes\GlobalSsoScopesService;
+    $service = new GlobalSsoScopesService;
     $service->set($scopes);
 
-    $sso_scopes = \Seatplus\Eveapi\Models\SsoScopes::query()
+    $sso_scopes = SsoScopes::query()
         ->where('type', 'global')
         ->first();
 

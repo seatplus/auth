@@ -1,11 +1,14 @@
 <?php
 
+use Seatplus\Auth\Http\Actions\Roles\Manual\AddMemberAction;
+use Seatplus\Auth\Http\Actions\Roles\Manual\SetMemberAction;
+
 it('adds a member role', function () {
-    $this->mock(\Seatplus\Auth\Http\Actions\Roles\Manual\SetMemberAction::class, function ($mock) {
+    $this->mock(SetMemberAction::class, function ($mock) {
         $mock->shouldReceive('execute')->with(1, 2, true)->once();
     });
 
-    $action = app(\Seatplus\Auth\Http\Actions\Roles\Manual\AddMemberAction::class);
+    $action = app(AddMemberAction::class);
 
     $action->execute(1, 2);
 });

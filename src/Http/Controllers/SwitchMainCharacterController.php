@@ -27,11 +27,12 @@
 namespace Seatplus\Auth\Http\Controllers;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\RedirectResponse;
 use Seatplus\Auth\Models\User;
 
 class SwitchMainCharacterController extends Controller
 {
-    public function __invoke(int $new_character_id): \Illuminate\Http\RedirectResponse
+    public function __invoke(int $new_character_id): RedirectResponse
     {
         $user = User::whereHas('character_users', fn (Builder $query) => $query->where('character_id', $new_character_id))
             ->firstWhere('id', auth()->user()->getAuthIdentifier());

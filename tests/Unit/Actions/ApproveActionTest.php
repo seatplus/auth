@@ -1,15 +1,17 @@
 <?php
 
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Mockery\MockInterface;
 use Seatplus\Auth\Http\Actions\Roles\OnRequest\ApproveAction;
 use Seatplus\Auth\Models\User;
 use Seatplus\Auth\Services\Roles\BaseRoleService;
+use Seatplus\Auth\Services\Roles\OnRequestRoleService;
 
 it('approves role application for user successfully', function () {
 
-    $this->mock(BaseRoleService::class, function (\Mockery\MockInterface $mock) {
+    $this->mock(BaseRoleService::class, function (MockInterface $mock) {
         $mock->shouldReceive('for')->with(1)->andReturnSelf();
-        $mock->shouldReceive('onRequest')->andReturn(mock(\Seatplus\Auth\Services\Roles\OnRequestRoleService::class, function (\Mockery\MockInterface $mock) {
+        $mock->shouldReceive('onRequest')->andReturn(mock(OnRequestRoleService::class, function (MockInterface $mock) {
             $mock->shouldReceive('approveApplicationForRole')->once();
         }));
     });
@@ -23,7 +25,7 @@ it('approves role application for user successfully', function () {
 it('throws exception if user not found during approval', function () {
     $roleServiceMock = $this->mock(BaseRoleService::class, function ($mock) {
         $mock->shouldReceive('for')->with(1)->andReturnSelf();
-        $mock->shouldReceive('onRequest')->andReturn(mock(\Seatplus\Auth\Services\Roles\OnRequestRoleService::class, function ($mock) {
+        $mock->shouldReceive('onRequest')->andReturn(mock(OnRequestRoleService::class, function ($mock) {
             $mock->shouldReceive('approveApplicationForRole')->never();
         }));
     });

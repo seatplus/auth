@@ -4,27 +4,31 @@ use Seatplus\Auth\Enums\AffiliationType;
 use Seatplus\Auth\Enums\RoleType;
 use Seatplus\Auth\Models\Permissions\Affiliation;
 use Seatplus\Auth\Models\Permissions\Role;
+use Seatplus\Auth\Models\User;
+use Seatplus\Auth\Services\Roles\AbstractRoleService;
+use Seatplus\Auth\Services\Roles\AutomaticRoleService;
 use Seatplus\Auth\Services\Roles\DTO\AffiliationData;
 use Seatplus\Auth\Services\Roles\DTO\CriteriaData;
+use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 
 beforeEach(function () {
     $this->role = Role::create(['name' => 'test']);
     $this->role = $this->role->refresh();
-    $this->service = new class($this->role) extends \Seatplus\Auth\Services\Roles\AbstractRoleService
+    $this->service = new class($this->role) extends AbstractRoleService
     {
         public function syncMembers(): void {}
 
-        public function canView(\Seatplus\Auth\Models\User $user): bool
+        public function canView(User $user): bool
         {
             return false;
         }
 
-        public function canJoin(\Seatplus\Auth\Models\User $user): bool
+        public function canJoin(User $user): bool
         {
             return false;
         }
 
-        public function canModerate(\Seatplus\Auth\Models\User $user): bool
+        public function canModerate(User $user): bool
         {
             return false;
         }
@@ -50,8 +54,8 @@ it('affiliates role to corporation and getting role on test user', function () {
     // Test
     expect(Affiliation::count())->toEqual(3)
         ->and(Affiliation::first()->affiliatable_id)->toEqual($corporation_id)
-        ->and(Affiliation::first()->affiliatable_type)->toEqual(\Seatplus\Eveapi\Models\Corporation\CorporationInfo::class)
-        ->and(Affiliation::first()->type)->toEqual(\Seatplus\Auth\Enums\AffiliationType::ALLOWED->value);
+        ->and(Affiliation::first()->affiliatable_type)->toEqual(CorporationInfo::class)
+        ->and(Affiliation::first()->type)->toEqual(AffiliationType::ALLOWED->value);
 });
 
 it('returns early when setting same role type', function () {
@@ -61,7 +65,7 @@ it('returns early when setting same role type', function () {
     $this->role->save();
 
     // Act
-    $automated_role_service = new \Seatplus\Auth\Services\Roles\AutomaticRoleService($this->role);
+    $automated_role_service = new AutomaticRoleService($this->role);
     $automated_role_service->automaticallyAssignRoleTo(
         new CriteriaData(1, 'corporation'),
     );

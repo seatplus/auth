@@ -2,7 +2,9 @@
 
 use Seatplus\Auth\Enums\RoleType;
 use Seatplus\Auth\Models\Permissions\Role;
+use Seatplus\Auth\Services\Roles\AutomaticRoleService;
 use Seatplus\Auth\Services\Roles\BaseRoleService;
+use Spatie\Permission\Exceptions\RoleDoesNotExist;
 
 beforeEach(function () {
     $this->role = Role::create(['name' => faker()->name()]);
@@ -28,14 +30,14 @@ describe('make', function () {
     it('throws exception if role not found', function () {
 
         BaseRoleService::make('abc');
-    })->expectException(\Spatie\Permission\Exceptions\RoleDoesNotExist::class);
+    })->expectException(RoleDoesNotExist::class);
 });
 
 it('can get automatic role service', function () {
 
     $service = BaseRoleService::make($this->role)->automatic();
 
-    expect($service)->toBeInstanceOf(\Seatplus\Auth\Services\Roles\AutomaticRoleService::class);
+    expect($service)->toBeInstanceOf(AutomaticRoleService::class);
 });
 
 it('work with the various role types', function (RoleType $role_type) {

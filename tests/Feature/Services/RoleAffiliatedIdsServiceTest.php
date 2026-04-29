@@ -1,14 +1,16 @@
 <?php
 
+use Illuminate\Support\Facades\Event;
 use Seatplus\Auth\Enums\AffiliationType;
 use Seatplus\Auth\Models\Permissions\Role;
+use Seatplus\Auth\Services\Roles\AutomaticRoleService;
 use Seatplus\Auth\Services\Roles\DTO\AffiliationData;
 use Seatplus\Auth\Services\Roles\RoleAffiliatedIdsService;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 
 beforeEach(function () {
 
-    \Illuminate\Support\Facades\Event::fake();
+    Event::fake();
 
     test()->secondary_character = CharacterInfo::factory()->create();
 
@@ -16,7 +18,7 @@ beforeEach(function () {
 
     test()->role = Role::create(['name' => 'derp']);
 
-    $this->service = new \Seatplus\Auth\Services\Roles\AutomaticRoleService($this->role);
+    $this->service = new AutomaticRoleService($this->role);
 });
 
 dataset('entity_types', [
