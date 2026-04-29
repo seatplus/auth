@@ -1,11 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Seatplus\Auth\Http\Actions\Roles\OnRequest;
 
 use Illuminate\Support\Arr;
 use Seatplus\Auth\Enums\RoleType;
 use Seatplus\Auth\Http\Requests\RoleRequest;
 use Seatplus\Auth\Services\Roles\BaseRoleService;
+use Seatplus\Auth\Services\Roles\DTO\AffiliationData;
+use Seatplus\Auth\Services\Roles\DTO\CriteriaData;
 
 class ManageOnRequestRoleAction
 {
@@ -21,23 +25,27 @@ class ManageOnRequestRoleAction
         $this->checkPermission();
 
         $validated = $request->validated();
-        $this->baseRoleService->for($validated['role_id']);
+        $roleService = $this->baseRoleService->for($validated['role_id'])->onRequest();
 
-        $roleService = $this->baseRoleService->onRequest();
-
-        if ($affiliated = Arr::get($validated, 'affiliated')) {
-            $roleService->syncAffiliateManyEntities($affiliated);
-        }
-
-        if ($assigned = Arr::get($validated, 'assigned')) {
-            $roleService->addCriteriaForRoleApplication($assigned);
-        }
+        $roleService->setRoleType(RoleType::ON_REQUEST);
 
         if ($name = Arr::get($validated, 'name')) {
             $roleService->updateRoleName($name);
         }
 
-        $roleService->setRoleType(RoleType::ON_REQUEST);
+        if (is_array($affiliated = Arr::get($validated, 'affiliated'))) {
+            $roleService->syncAffiliateManyEntities(
+                ...array_map(fn (array $affiliationData) => AffiliationData::fromArray($affiliationData), $affiliated)
+            );
+        }
+
+        if (is_array($assigned = Arr::get($validated, 'assigned'))) {
+            $roleService->addCriteriaForRoleApplication(
+                ...array_map(fn (array $criteriaData) => CriteriaData::fromArray($criteriaData), $assigned)
+            );
+        }
+
+        $roleService->handleMembers();
     }
 
     private function checkPermission(): void

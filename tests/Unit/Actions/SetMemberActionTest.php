@@ -1,11 +1,13 @@
 <?php
 
+use Mockery\MockInterface;
 use Seatplus\Auth\Http\Actions\Roles\Manual\SetMemberAction;
 use Seatplus\Auth\Services\Roles\BaseRoleService;
+use Seatplus\Auth\Services\Roles\ManualRoleService;
 
 it('throws exception if user cannot moderate', function () {
 
-    $this->mock(BaseRoleService::class, function (\Mockery\MockInterface $mock) {
+    $this->mock(BaseRoleService::class, function (MockInterface $mock) {
 
         $mock->shouldReceive('for')
             ->once()
@@ -24,7 +26,7 @@ it('throws exception if user cannot moderate', function () {
 
 it('sets member', function (bool $is_member) {
 
-    $this->mock(BaseRoleService::class, function (\Mockery\MockInterface $mock) use ($is_member) {
+    $this->mock(BaseRoleService::class, function (MockInterface $mock) use ($is_member) {
 
         $mock->shouldReceive('for')
             ->once()
@@ -36,7 +38,7 @@ it('sets member', function (bool $is_member) {
 
         $mock->shouldReceive('manual')
             ->once()
-            ->andReturn(mock(\Seatplus\Auth\Services\Roles\ManualRoleService::class, function (\Mockery\MockInterface $mock) use ($is_member) {
+            ->andReturn(mock(ManualRoleService::class, function (MockInterface $mock) use ($is_member) {
 
                 if ($is_member) {
                     $mock->shouldReceive('addMember')

@@ -4,11 +4,12 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Seatplus\Auth\Http\Actions\Roles\OnRequest\DenyAction;
 use Seatplus\Auth\Models\User;
 use Seatplus\Auth\Services\Roles\BaseRoleService;
+use Seatplus\Auth\Services\Roles\OnRequestRoleService;
 
 it('denies role application for user successfully', function () {
     $this->mock(BaseRoleService::class, function ($mock) {
         $mock->shouldReceive('for')->with(1)->andReturnSelf();
-        $mock->shouldReceive('onRequest')->andReturn(mock(\Seatplus\Auth\Services\Roles\OnRequestRoleService::class, function ($mock) {
+        $mock->shouldReceive('onRequest')->andReturn(mock(OnRequestRoleService::class, function ($mock) {
             $mock->shouldReceive('denyApplication')->once();
         }));
     });
@@ -22,7 +23,7 @@ it('denies role application for user successfully', function () {
 it('throws exception if user not found during application', function () {
     $this->mock(BaseRoleService::class, function ($mock) {
         $mock->shouldReceive('for')->with(1)->andReturnSelf();
-        $mock->shouldReceive('onRequest')->andReturn(mock(\Seatplus\Auth\Services\Roles\OnRequestRoleService::class, function ($mock) {
+        $mock->shouldReceive('onRequest')->andReturn(mock(OnRequestRoleService::class, function ($mock) {
             $mock->shouldReceive('submitApplicationForRole')->never();
         }));
     });

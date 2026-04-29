@@ -1,15 +1,16 @@
 <?php
 
-use Illuminate\Validation\ValidationException;
 use Seatplus\Auth\Enums\RoleMembershipStatus;
+use Seatplus\Auth\Enums\RoleType;
 use Seatplus\Auth\Models\AccessControl\RoleMembership;
 use Seatplus\Auth\Models\Permissions\Role;
 use Seatplus\Auth\Models\User;
+use Seatplus\Auth\Services\Roles\DTO\CriteriaData;
 use Seatplus\Auth\Services\Roles\OnRequestRoleService;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 
 beforeEach(function () {
-    $this->role = Role::create(['name' => 'test', 'type' => \Seatplus\Auth\Enums\RoleType::ON_REQUEST->value]);
+    $this->role = Role::create(['name' => 'test', 'type' => RoleType::ON_REQUEST->value]);
     $this->role = $this->role->refresh();
 
     $this->service = new OnRequestRoleService($this->role);
@@ -18,28 +19,26 @@ beforeEach(function () {
 describe('adding criteria for role application', function () {
     it('adds criteria for role application with valid entities', function () {
         // Arrange
-        $entities = [
-            [test()->test_character->corporation_id, 'corporation'],
-            [test()->test_character->alliance_id, 'alliance'],
-        ];
+        $corporation_id = test()->test_character->corporation_id;
+        $alliance_id = test()->test_character->alliance_id;
 
         // Act
-        $this->service->addCriteriaForRoleApplication($entities);
+        $this->service->addCriteriaForRoleApplication(
+            new CriteriaData($corporation_id, 'corporation'),
+            new CriteriaData($alliance_id, 'alliance'),
+        );
 
         // Assert
         expect(RoleMembership::query()->count())->toBe(2);
     });
 
     it('throws validation exception for invalid entities', function () {
-        // Arrange
-        $entities = [
-            [test()->test_character->corporation_id, 'corporation'],
-            [test()->test_character->alliance_id, 'invalid'],
-        ];
-
         // Act
-        $this->service->addCriteriaForRoleApplication($entities);
-    })->expectException(ValidationException::class);
+        $this->service->addCriteriaForRoleApplication(
+            new CriteriaData(test()->test_character->corporation_id, 'corporation'),
+            new CriteriaData(test()->test_character->alliance_id, 'invalid'),
+        );
+    })->throws(ValueError::class);
 
     it('resets criterias', function () {
         // Arrange
@@ -58,13 +57,11 @@ describe('adding criteria for role application', function () {
             'entity_type' => User::class,
         ]);
 
-        $entities = [
-            [test()->test_character->corporation_id, 'corporation'],
-            [test()->test_character->alliance_id, 'alliance'],
-        ];
-
         // Act
-        $this->service->addCriteriaForRoleApplication($entities);
+        $this->service->addCriteriaForRoleApplication(
+            new CriteriaData(test()->test_character->corporation_id, 'corporation'),
+            new CriteriaData(test()->test_character->alliance_id, 'alliance'),
+        );
 
         // Assert
         expect(RoleMembership::query()->count())->toBe(3)
@@ -82,15 +79,15 @@ it('cannot submit application if no criteria is set', function () {
 
     // assert
 
-})->throws(\Exception::class, 'User does not meet criteria to join role');
+})->throws(Exception::class, 'User does not meet criteria to join role');
 
 it('submits application for role', function () {
     // arrange
     $user = test()->test_user;
 
-    $this->service->addCriteriaForRoleApplication([
-        [test()->test_character->corporation_id, 'corporation'],
-    ]);
+    $this->service->addCriteriaForRoleApplication(
+        new CriteriaData(test()->test_character->corporation_id, 'corporation'),
+    );
 
     // act
     $this->service->submitApplicationForRole($user);
@@ -105,9 +102,9 @@ it('submits application for role', function () {
 it('approving application for role', function () {
     // arrange
     $user = test()->test_user;
-    $this->service->addCriteriaForRoleApplication([
-        [test()->test_character->corporation_id, 'corporation'],
-    ]);
+    $this->service->addCriteriaForRoleApplication(
+        new CriteriaData(test()->test_character->corporation_id, 'corporation'),
+    );
 
     // act
     $this->service->approveApplicationForRole($user);
@@ -127,7 +124,7 @@ it('throws exception when approving application for role with no criteria', func
     $this->service->approveApplicationForRole($user);
 
     // assert
-})->throws(\Exception::class, 'User does not meet criteria to join role');
+})->throws(Exception::class, 'User does not meet criteria to join role');
 
 it('denies application for role', function () {
     // arrange
@@ -233,12 +230,10 @@ describe('sync', function () {
 describe('can', function () {
 
     beforeEach(function () {
-        $entities = [
-            [test()->test_character->corporation_id, 'corporation'],
-            [test()->test_character->alliance_id, 'alliance'],
-        ];
-
-        $this->service->addCriteriaForRoleApplication($entities);
+        $this->service->addCriteriaForRoleApplication(
+            new CriteriaData(test()->test_character->corporation_id, 'corporation'),
+            new CriteriaData(test()->test_character->alliance_id, 'alliance'),
+        );
     });
 
     it('can view', function () {

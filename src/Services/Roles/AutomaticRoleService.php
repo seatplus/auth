@@ -1,20 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Seatplus\Auth\Services\Roles;
 
 use Illuminate\Database\Eloquent\Builder;
 use Seatplus\Auth\Enums\RoleMembershipStatus;
-use Seatplus\Auth\Enums\RoleType;
 use Seatplus\Auth\Models\User;
+use Seatplus\Auth\Services\Roles\DTO\CriteriaData;
 
 class AutomaticRoleService extends AbstractRoleService implements RoleServiceInterface
 {
     /**
      * @throws \Throwable
      */
-    public function automaticallyAssignRoleTo(array $entities): void
+    public function automaticallyAssignRoleTo(CriteriaData ...$entities): void
     {
-        $this->addCriteria($entities, RoleType::AUTOMATIC);
+        $this->addCriteria(...$entities);
 
         $this->handleMembers();
     }

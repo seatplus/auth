@@ -1,5 +1,6 @@
 <?php
 
+use Mockery\MockInterface;
 use Seatplus\Auth\Models\Permissions\Permission;
 use Seatplus\Auth\Models\Permissions\Role;
 use Seatplus\Auth\Services\Permissions\RolePermissionObjectService;
@@ -69,7 +70,7 @@ it('builds permissions from user', function () {
 
     $user->assignRole([$role1, $role2]);
 
-    $role_permission_object_service = mock(RolePermissionObjectService::class, function (\Mockery\MockInterface $mock) use ($permissions) {
+    $role_permission_object_service = mock(RolePermissionObjectService::class, function (MockInterface $mock) use ($permissions) {
 
         $result1 = collect([
             $permissions[0]->name => [1, 2, 3],

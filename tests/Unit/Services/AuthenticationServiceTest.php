@@ -26,7 +26,7 @@ it('logs in user successfully', function () {
 
 it('fails to log in user and reports exception', function () {
     $user = mock(User::class);
-    $this->authMock->shouldReceive('login')->with($user, true)->andThrow(new \Exception);
+    $this->authMock->shouldReceive('login')->with($user, true)->andThrow(new Exception);
 
     $result = $this->authenticationService->loginUser($user);
 

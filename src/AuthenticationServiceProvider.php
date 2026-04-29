@@ -32,6 +32,8 @@ use Illuminate\Support\ServiceProvider;
 use Laravel\Socialite\SocialiteManager;
 use Seatplus\Auth\Listeners\ReactOnFreshRefreshToken;
 use Seatplus\Auth\Listeners\UpdatingRefreshTokenListener;
+use Seatplus\Auth\Models\Permissions\Permission;
+use Seatplus\Auth\Models\Permissions\Role;
 use Seatplus\Auth\Models\User;
 use Seatplus\Auth\Observers\ApplicationObserver;
 use Seatplus\Auth\Observers\CharacterAffiliationObserver;
@@ -102,8 +104,8 @@ class AuthenticationServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__.'/../config/auth.services.php', 'services');
 
         config()->set('permission.models', [
-            'permission' => \Seatplus\Auth\Models\Permissions\Permission::class,
-            'role' => \Seatplus\Auth\Models\Permissions\Role::class,
+            'permission' => Permission::class,
+            'role' => Role::class,
         ]);
 
         $this->setUserModel();

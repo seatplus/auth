@@ -1,19 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Seatplus\Auth\Services\Roles;
 
 use Seatplus\Auth\Enums\RoleMembershipStatus;
-use Seatplus\Auth\Enums\RoleType;
 use Seatplus\Auth\Models\User;
+use Seatplus\Auth\Services\Roles\DTO\CriteriaData;
 
 class OnRequestRoleService extends AbstractRoleService implements RoleServiceInterface
 {
     /**
      * @throws \Throwable
      */
-    public function addCriteriaForRoleApplication(array $entities): void
+    public function addCriteriaForRoleApplication(CriteriaData ...$entities): void
     {
-        $this->addCriteria($entities, RoleType::ON_REQUEST);
+        $this->addCriteria(...$entities);
 
         $this->syncMembers();
     }

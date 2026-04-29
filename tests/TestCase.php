@@ -28,6 +28,7 @@ namespace Seatplus\Auth\Tests;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Str;
@@ -72,7 +73,7 @@ abstract class TestCase extends OrchestraTestCase
     /**
      * Get application providers.
      *
-     * @param  \Illuminate\Foundation\Application  $app
+     * @param  Application  $app
      * @return array
      */
     protected function getPackageProviders($app)
@@ -85,7 +86,7 @@ abstract class TestCase extends OrchestraTestCase
     }
 
     /**
-     * @param  \Illuminate\Foundation\Application  $app
+     * @param  Application  $app
      */
     private function setupDatabase($app)
     {
@@ -97,7 +98,7 @@ abstract class TestCase extends OrchestraTestCase
     /**
      * Define environment setup.
      *
-     * @param  \Illuminate\Foundation\Application  $app
+     * @param  Application  $app
      * @return void
      */
     protected function getEnvironmentSetUp($app)

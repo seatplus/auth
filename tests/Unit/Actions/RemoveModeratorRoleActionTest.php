@@ -2,6 +2,7 @@
 
 namespace Seatplus\Auth\Tests\Unit\Actions;
 
+use Seatplus\Auth\Http\Actions\Roles\RemoveModeratorRoleAction;
 use Seatplus\Auth\Http\Actions\Roles\SetModeratorAction;
 
 it('adds a moderator role', function () {
@@ -9,7 +10,7 @@ it('adds a moderator role', function () {
         $mock->shouldReceive('execute')->with(1, 2, false)->once();
     });
 
-    $action = app(\Seatplus\Auth\Http\Actions\Roles\RemoveModeratorRoleAction::class);
+    $action = app(RemoveModeratorRoleAction::class);
 
     $action->execute(1, 2);
 });

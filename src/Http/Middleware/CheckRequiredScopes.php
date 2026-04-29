@@ -27,7 +27,6 @@
 namespace Seatplus\Auth\Http\Middleware;
 
 use Closure;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Seatplus\Auth\Models\User;
 use Seatplus\Auth\Services\SsoScopes\IsUserCompliantService;

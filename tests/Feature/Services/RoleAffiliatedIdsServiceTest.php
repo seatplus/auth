@@ -1,13 +1,16 @@
 <?php
 
+use Illuminate\Support\Facades\Event;
 use Seatplus\Auth\Enums\AffiliationType;
 use Seatplus\Auth\Models\Permissions\Role;
+use Seatplus\Auth\Services\Roles\AutomaticRoleService;
+use Seatplus\Auth\Services\Roles\DTO\AffiliationData;
 use Seatplus\Auth\Services\Roles\RoleAffiliatedIdsService;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 
 beforeEach(function () {
 
-    \Illuminate\Support\Facades\Event::fake();
+    Event::fake();
 
     test()->secondary_character = CharacterInfo::factory()->create();
 
@@ -15,7 +18,7 @@ beforeEach(function () {
 
     test()->role = Role::create(['name' => 'derp']);
 
-    $this->service = new \Seatplus\Auth\Services\Roles\AutomaticRoleService($this->role);
+    $this->service = new AutomaticRoleService($this->role);
 });
 
 dataset('entity_types', [
@@ -46,10 +49,10 @@ describe('allowed only', function () {
 
         $secondary_id = getId($entity_type, 2);
 
-        $this->service->syncAffiliateManyEntities([
-            [$primaray_id, $entity_type, $affiliation_type],
-            [$secondary_id, $entity_type, $affiliation_type],
-        ]);
+        $this->service->syncAffiliateManyEntities(
+            new AffiliationData($primaray_id, $entity_type, AffiliationType::from($affiliation_type)),
+            new AffiliationData($secondary_id, $entity_type, AffiliationType::from($affiliation_type)),
+        );
 
         $affiliated_ids = (new RoleAffiliatedIdsService)->get(test()->role);
 
@@ -67,9 +70,9 @@ describe('inverse only', function () {
         $secondary_id = getId($entity_type, 2);
         $tertiary_id = getId($entity_type, 3);
 
-        $this->service->syncAffiliateManyEntities([
-            [$tertiary_id, $entity_type, $affiliation_type],
-        ]);
+        $this->service->syncAffiliateManyEntities(
+            new AffiliationData($tertiary_id, $entity_type, AffiliationType::from($affiliation_type)),
+        );
 
         $affiliated_ids = (new RoleAffiliatedIdsService)->get(test()->role);
 
@@ -89,9 +92,9 @@ describe('forbidden only', function () {
         $secondary_id = getId($entity_type, 2);
         $tertiary_id = getId($entity_type, 3);
 
-        $this->service->syncAffiliateManyEntities([
-            [$tertiary_id, $entity_type, $affiliation_type],
-        ]);
+        $this->service->syncAffiliateManyEntities(
+            new AffiliationData($tertiary_id, $entity_type, AffiliationType::from($affiliation_type)),
+        );
 
         $affiliated_ids = (new RoleAffiliatedIdsService)->get(test()->role);
 
@@ -111,10 +114,10 @@ describe('allowed and inverse', function () {
         $secondary_id = getId($entity_type, 2);
         $tertiary_id = getId($entity_type, 3);
 
-        $this->service->syncAffiliateManyEntities([
-            [test()->test_character->character_id, 'character', AffiliationType::ALLOWED->value],
-            [$primary_id, $entity_type, AffiliationType::INVERSE->value],
-        ]);
+        $this->service->syncAffiliateManyEntities(
+            new AffiliationData(test()->test_character->character_id, 'character', AffiliationType::ALLOWED),
+            new AffiliationData($primary_id, $entity_type, AffiliationType::INVERSE),
+        );
 
         $affiliated_ids = (new RoleAffiliatedIdsService)->get(test()->role);
 
@@ -133,10 +136,10 @@ describe('allowed and forbidden', function () {
 
         $primary_id = getId($entity_type, 1);
 
-        $this->service->syncAffiliateManyEntities([
-            [test()->test_character->character_id, 'character', AffiliationType::FORBIDDEN->value],
-            [$primary_id, $entity_type, AffiliationType::ALLOWED->value],
-        ]);
+        $this->service->syncAffiliateManyEntities(
+            new AffiliationData(test()->test_character->character_id, 'character', AffiliationType::FORBIDDEN),
+            new AffiliationData($primary_id, $entity_type, AffiliationType::ALLOWED),
+        );
 
         $affiliated_ids = (new RoleAffiliatedIdsService)->get(test()->role);
 
@@ -158,10 +161,10 @@ describe('inverse and forbidden', function () {
         $primary_id = getId($entity_type, 1);
         $secondary_id = getId($entity_type, 2);
 
-        $this->service->syncAffiliateManyEntities([
-            [test()->test_character->character_id, 'character', AffiliationType::FORBIDDEN->value],
-            [$secondary_id, $entity_type, AffiliationType::INVERSE->value],
-        ]);
+        $this->service->syncAffiliateManyEntities(
+            new AffiliationData(test()->test_character->character_id, 'character', AffiliationType::FORBIDDEN),
+            new AffiliationData($secondary_id, $entity_type, AffiliationType::INVERSE),
+        );
 
         $affiliated_ids = (new RoleAffiliatedIdsService)->get(test()->role);
 
@@ -180,11 +183,11 @@ describe('allowed, inverse and forbidden', function () {
         $primary_id = getId($entity_type, 1);
         $secondary_id = getId($entity_type, 2);
 
-        $this->service->syncAffiliateManyEntities([
-            [test()->test_character->character_id, 'character', AffiliationType::FORBIDDEN->value],
-            [$primary_id, $entity_type, AffiliationType::ALLOWED->value],
-            [$secondary_id, $entity_type, AffiliationType::INVERSE->value],
-        ]);
+        $this->service->syncAffiliateManyEntities(
+            new AffiliationData(test()->test_character->character_id, 'character', AffiliationType::FORBIDDEN),
+            new AffiliationData($primary_id, $entity_type, AffiliationType::ALLOWED),
+            new AffiliationData($secondary_id, $entity_type, AffiliationType::INVERSE),
+        );
 
         $affiliated_ids = (new RoleAffiliatedIdsService)->get(test()->role);
 

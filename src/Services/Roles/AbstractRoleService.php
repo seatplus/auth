@@ -5,8 +5,6 @@ namespace Seatplus\Auth\Services\Roles;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Validation\Rule;
-use Illuminate\Validation\ValidationException;
 use Seatplus\Auth\Enums\AffiliationType;
 use Seatplus\Auth\Enums\RoleMembershipStatus;
 use Seatplus\Auth\Enums\RoleType;
@@ -14,9 +12,10 @@ use Seatplus\Auth\Models\AccessControl\RoleMembership;
 use Seatplus\Auth\Models\Permissions\Affiliation;
 use Seatplus\Auth\Models\Permissions\Role;
 use Seatplus\Auth\Models\User;
+use Seatplus\Auth\Services\Roles\DTO\AffiliationData;
+use Seatplus\Auth\Services\Roles\DTO\CriteriaData;
 use Seatplus\Auth\Services\SsoScopes\IsUserCompliantService;
 use Seatplus\Eveapi\Models\Alliance\AllianceInfo;
-use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 
 abstract class AbstractRoleService implements RoleServiceInterface
@@ -45,32 +44,16 @@ abstract class AbstractRoleService implements RoleServiceInterface
     /**
      * @throws \Throwable
      */
-    private function validateAffiliationEntities(array $entity_sets): void
+    protected function addCriteria(CriteriaData ...$entities): void
     {
-        $validator = validator($entity_sets, [
-            '*.0' => 'required|integer',
-            '*.1' => ['required', 'string', Rule::in(['character', 'corporation', 'alliance'])],
-            '*.2' => [
-                'required',
-                'string',
-                Rule::in(array_map(fn (AffiliationType $affiliationType) => $affiliationType->value, AffiliationType::cases())),
-            ],
-        ]);
+        $this->resetCriteria();
 
-        throw_if($validator->fails(), ValidationException::withMessages($validator->errors()->toArray()));
-    }
-
-    /**
-     * @throws \Throwable
-     */
-    private function validateCriteria(array $entities): void
-    {
-        $validator = validator($entities, [
-            '*.0' => 'required|integer',
-            '*.1' => ['required', 'string', Rule::in(['corporation', 'alliance'])],
-        ]);
-
-        throw_if($validator->fails(), ValidationException::withMessages($validator->errors()->toArray()));
+        foreach ($entities as $entity) {
+            $this->setRoleMembership(
+                entity_id: $entity->entity_id,
+                entity_type: $entity->entityClass()
+            );
+        }
     }
 
     private function resetCriteria(): void
@@ -79,29 +62,6 @@ abstract class AbstractRoleService implements RoleServiceInterface
             ->where('role_id', $this->role->id)
             ->whereIn('entity_type', [CorporationInfo::class, AllianceInfo::class])
             ->delete();
-    }
-
-    /**
-     * @throws \Throwable
-     */
-    protected function addCriteria(array $entities, RoleType $roleType): void
-    {
-        $this->validateCriteria($entities);
-
-        $this->resetCriteria();
-
-        foreach ($entities as $entity) {
-
-            $entity_type = match ($entity[1]) {
-                'corporation' => CorporationInfo::class,
-                'alliance' => AllianceInfo::class,
-            };
-
-            $this->setRoleMembership(
-                entity_id: $entity[0],
-                entity_type: $entity_type
-            );
-        }
     }
 
     private function revokeTheRolesFromUsersThatAreNotInMembers(\Illuminate\Support\Collection $member_ids): void
@@ -245,23 +205,12 @@ abstract class AbstractRoleService implements RoleServiceInterface
     /**
      * @throws \Throwable
      */
-    public function syncAffiliateManyEntities(array $entity_sets): void
+    public function syncAffiliateManyEntities(AffiliationData ...$entity_sets): void
     {
-        $this->validateAffiliationEntities($entity_sets);
-
         $this->resetAffiliation();
 
         foreach ($entity_sets as $entity_set) {
-
-            [$entity_id, $entity_type, $affiliation_type] = $entity_set;
-
-            $entity_type = match ($entity_type) {
-                'character' => CharacterInfo::class,
-                'corporation' => CorporationInfo::class,
-                'alliance' => AllianceInfo::class,
-            };
-
-            $this->affiliateEntity($entity_id, $entity_type, AffiliationType::from($affiliation_type));
+            $this->affiliateEntity($entity_set->entity_id, $entity_set->entityClass(), $entity_set->affiliation_type);
         }
     }
 

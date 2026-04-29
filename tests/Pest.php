@@ -1,13 +1,16 @@
 <?php
 
 use Faker\Factory;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Laravel\Socialite\Two\User as SocialiteUser;
 use Seatplus\Auth\Containers\EveUser;
 use Seatplus\Auth\Models\Permissions\Permission;
+use Seatplus\Auth\Tests\TestCase;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 use Seatplus\Eveapi\Models\RefreshToken;
 use Seatplus\Eveapi\Models\SsoScopes;
+use Spatie\Permission\PermissionRegistrar;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,8 +24,8 @@ use Seatplus\Eveapi\Models\SsoScopes;
 */
 
 /** @link https://pestphp.com/docs/underlying-test-case */
-uses(\Seatplus\Auth\Tests\TestCase::class)->in('Unit', 'Feature');
-uses(\Illuminate\Foundation\Testing\LazilyRefreshDatabase::class)->in('Unit', 'Feature');
+uses(TestCase::class)->in('Unit', 'Feature');
+uses(LazilyRefreshDatabase::class)->in('Unit', 'Feature');
 
 /*
 |--------------------------------------------------------------------------
@@ -132,5 +135,5 @@ function assignPermissionToTestUser(array|string $permission_strings)
     }
 
     // now re-register all the roles and permissions
-    app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+    app()[PermissionRegistrar::class]->forgetCachedPermissions();
 }

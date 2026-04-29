@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Seatplus\Auth\Http\Actions\Roles\OnRequest\OptOutAction;
 use Seatplus\Auth\Models\User;
 use Seatplus\Auth\Services\Roles\BaseRoleService;
 use Seatplus\Auth\Services\Roles\OnRequestRoleService;
@@ -15,7 +16,7 @@ it('executes opt out action successfully', function () {
 
     $user = User::factory()->create();
 
-    $action = app(\Seatplus\Auth\Http\Actions\Roles\OnRequest\OptOutAction::class);
+    $action = app(OptOutAction::class);
     $action->execute(1, $user->id);
 
     expect(true)->toBeTrue(); // Just to ensure the test runs without exceptions
@@ -29,7 +30,7 @@ it('throws exception if user not found during opt out', function () {
         }));
     });
 
-    $action = app(\Seatplus\Auth\Http\Actions\Roles\OnRequest\OptOutAction::class);
+    $action = app(OptOutAction::class);
 
     expect(fn () => $action->execute(1, 999))->toThrow(ModelNotFoundException::class);
 });

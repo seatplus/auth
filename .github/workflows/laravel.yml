@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  push:
+    branches: [ 3.x, 4.x ]
+  pull_request:
+    branches: [ 3.x, 4.x ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  laravel:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: seatplus
+          POSTGRES_PASSWORD: secret
+          POSTGRES_DB: laravel
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, dom, fileinfo, pgsql, pdo_pgsql, redis
+          coverage: xdebug
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install Dependencies
+        run: composer install --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+
+      - name: Check Coding Standards
+        run: composer run test:lint
+
+      - name: Static Analysis
+        run: composer run test:types
+
+      - name: Type Coverage
+        run: composer run test:type-coverage
+
+      - name: Run Tests
+        env:
+          XDEBUG_MODE: coverage
+        run: vendor/bin/pest --coverage --min=100 --colors=always

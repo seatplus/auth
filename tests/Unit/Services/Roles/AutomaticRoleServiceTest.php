@@ -5,6 +5,7 @@ use Seatplus\Auth\Models\AccessControl\RoleMembership;
 use Seatplus\Auth\Models\Permissions\Role;
 use Seatplus\Auth\Models\User;
 use Seatplus\Auth\Services\Roles\AutomaticRoleService;
+use Seatplus\Auth\Services\Roles\DTO\CriteriaData;
 
 beforeEach(function () {
     $this->role = Role::create(['name' => 'test']);
@@ -20,9 +21,9 @@ describe('assigning', function () {
 
         expect(test()->test_user->refresh()->hasRole($this->role->name))->toBeFalse();
 
-        $this->service->automaticallyAssignRoleTo([
-            [$corporation_id, 'corporation'],
-        ]);
+        $this->service->automaticallyAssignRoleTo(
+            new CriteriaData($corporation_id, 'corporation'),
+        );
 
         expect(RoleMembership::get())->toHaveCount(2) // User and Corporation
             ->and(test()->test_user->refresh()->hasRole($this->role->name))->toBeTrue();
@@ -34,9 +35,9 @@ describe('assigning', function () {
         $test_character = test()->test_character;
         $alliance_id = $test_character->alliance_id;
 
-        $this->service->automaticallyAssignRoleTo([
-            [$alliance_id, 'alliance'],
-        ]);
+        $this->service->automaticallyAssignRoleTo(
+            new CriteriaData($alliance_id, 'alliance'),
+        );
 
         expect(test()->test_user->refresh()->hasRole($this->role->name))->toBeTrue();
     });
@@ -47,10 +48,10 @@ describe('assigning', function () {
         $corporation_id = $test_character->corporation_id;
         $alliance_id = $test_character->alliance_id;
 
-        $this->service->automaticallyAssignRoleTo([
-            [$corporation_id, 'corporation'],
-            [$alliance_id, 'alliance'],
-        ]);
+        $this->service->automaticallyAssignRoleTo(
+            new CriteriaData($corporation_id, 'corporation'),
+            new CriteriaData($alliance_id, 'alliance'),
+        );
 
         expect(RoleMembership::get())->toHaveCount(3) // User, Corporation and Alliance
             ->and(test()->test_user->refresh()->hasRole($this->role->name))->toBeTrue();
@@ -66,7 +67,7 @@ describe('handling Members', function () {
 
         expect(test()->test_user->refresh()->hasRole($this->role->name))->toBeTrue();
 
-        $this->service->automaticallyAssignRoleTo([]);
+        $this->service->automaticallyAssignRoleTo();
 
         expect(test()->test_user->refresh()->hasRole($this->role->name))->toBeFalse()
             ->and(RoleMembership::query()->count())->toBe(0);
@@ -81,9 +82,9 @@ describe('handling Members', function () {
         $test_character = test()->test_character;
         $corporation_id = $test_character->corporation_id;
 
-        $service->automaticallyAssignRoleTo([
-            [$corporation_id, 'corporation'],
-        ]);
+        $service->automaticallyAssignRoleTo(
+            new CriteriaData($corporation_id, 'corporation'),
+        );
 
         expect(RoleMembership::get())->toHaveCount(2) // User and Corporation
             ->and(test()->test_user->refresh()->hasRole($role->name))->toBeTrue();
@@ -107,9 +108,9 @@ it('can view when meets criteria', function () {
     $test_character = test()->test_character;
     $corporation_id = $test_character->corporation_id;
 
-    $this->service->automaticallyAssignRoleTo([
-        [$corporation_id, 'corporation'],
-    ]);
+    $this->service->automaticallyAssignRoleTo(
+        new CriteriaData($corporation_id, 'corporation'),
+    );
 
     expect($this->service->canView(test()->test_user))->toBeTrue();
 });
