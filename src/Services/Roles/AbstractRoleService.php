@@ -16,7 +16,6 @@ use Seatplus\Auth\Services\Roles\DTO\AffiliationData;
 use Seatplus\Auth\Services\Roles\DTO\CriteriaData;
 use Seatplus\Auth\Services\SsoScopes\IsUserCompliantService;
 use Seatplus\Eveapi\Models\Alliance\AllianceInfo;
-use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 
 abstract class AbstractRoleService implements RoleServiceInterface
@@ -50,15 +49,9 @@ abstract class AbstractRoleService implements RoleServiceInterface
         $this->resetCriteria();
 
         foreach ($entities as $entity) {
-
-            $entity_type = match ($entity->entity_type) {
-                'corporation' => CorporationInfo::class,
-                'alliance' => AllianceInfo::class,
-            };
-
             $this->setRoleMembership(
                 entity_id: $entity->entity_id,
-                entity_type: $entity_type
+                entity_type: $entity->entityClass()
             );
         }
     }
@@ -217,14 +210,7 @@ abstract class AbstractRoleService implements RoleServiceInterface
         $this->resetAffiliation();
 
         foreach ($entity_sets as $entity_set) {
-
-            $entity_type = match ($entity_set->entity_type) {
-                'character' => CharacterInfo::class,
-                'corporation' => CorporationInfo::class,
-                'alliance' => AllianceInfo::class,
-            };
-
-            $this->affiliateEntity($entity_set->entity_id, $entity_type, $entity_set->affiliation_type);
+            $this->affiliateEntity($entity_set->entity_id, $entity_set->entityClass(), $entity_set->affiliation_type);
         }
     }
 

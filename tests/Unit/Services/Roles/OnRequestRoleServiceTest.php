@@ -37,7 +37,7 @@ describe('adding criteria for role application', function () {
             new CriteriaData(test()->test_character->corporation_id, 'corporation'),
             new CriteriaData(test()->test_character->alliance_id, 'invalid'),
         );
-    })->throws(\UnhandledMatchError::class);
+    })->throws(\ValueError::class);
 
     it('resets criterias', function () {
         // Arrange
