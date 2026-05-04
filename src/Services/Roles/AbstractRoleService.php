@@ -220,6 +220,7 @@ abstract class AbstractRoleService implements RoleServiceInterface
             ->where('role_id', $this->role->id)
             ->where('entity_type', User::class)
             ->whereIn('status', [RoleMembershipStatus::ACTIVE->value, RoleMembershipStatus::INACTIVE->value])
+            ->with('entity')
             ->get()
             ->each(fn (RoleMembership $role_membership) => $role_membership->updateOrFail([
                 'status' => $this->isUserCompliant($role_membership->entity) ? RoleMembershipStatus::ACTIVE : RoleMembershipStatus::INACTIVE,
