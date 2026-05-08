@@ -35,8 +35,10 @@ it('redirects to Eve Online authentication page when user is not authenticated',
     expect($response->getTargetUrl())->toBe('http://example.com/redirect');
 });
 
-it('throws exception when user is already authenticated', function () {
+it('redirects home when user is already authenticated', function () {
     $this->authenticationServiceMock->shouldReceive('isUserAuthenticated')->andReturn(true);
 
-    expect(fn () => $this->controller->__invoke($this->socialiteMock))->toThrow(Exception::class, 'You are already authenticated');
+    $response = $this->controller->__invoke($this->socialiteMock);
+
+    expect($response)->toBeInstanceOf(RedirectResponse::class);
 });
