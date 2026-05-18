@@ -13,11 +13,14 @@ class RoleMembership extends Model
 
     public $incrementing = false;
 
-    protected $casts = [
-        'role_id' => 'integer',
-        'entity_id' => 'integer',
-        'can_moderate' => 'boolean',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'role_id' => 'integer',
+            'entity_id' => 'integer',
+            'can_moderate' => 'boolean',
+        ];
+    }
 
     protected $fillable = [
         'role_id',
