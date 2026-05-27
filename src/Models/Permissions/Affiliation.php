@@ -47,9 +47,12 @@ class Affiliation extends Model
 
     protected $guarded = [];
 
-    protected $casts = [
-        'role_id' => 'integer',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'role_id' => 'integer',
+        ];
+    }
 
     public function affiliatable(): MorphTo
     {

@@ -25,7 +25,7 @@ it('flushes cache after updated', function () {
         ->with("user_permissions_{$user_id}");
 
     $ssoScopes = SsoScopes::first();
-    $ssoScopes->morphable_id = faker()->randomNumber();
+    $ssoScopes->morphable_id = faker()->randomNumber(5);
     $ssoScopes->save();
 });
 

@@ -36,9 +36,12 @@ use Spatie\Permission\Models\Role as SpatieRole;
  */
 class Role extends SpatieRole
 {
-    protected $casts = [
-        'type' => RoleType::class,
-    ];
+    protected function casts(): array
+    {
+        return [
+            'type' => RoleType::class,
+        ];
+    }
 
     public function affiliations(): HasMany
     {

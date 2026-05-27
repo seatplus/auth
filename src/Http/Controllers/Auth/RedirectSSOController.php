@@ -47,7 +47,9 @@ class RedirectSSOController extends Controller
      */
     public function __invoke(Socialite $socialite): RedirectResponse
     {
-        throw_if($this->authenticationService->isUserAuthenticated(), \Exception::class, 'You are already authenticated');
+        if ($this->authenticationService->isUserAuthenticated()) {
+            return redirect('/');
+        }
 
         $scopes = $this->getScopes();
 

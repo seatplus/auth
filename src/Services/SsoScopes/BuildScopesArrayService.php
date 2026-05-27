@@ -9,12 +9,14 @@ use Seatplus\Eveapi\Models\SsoScopes;
 
 class BuildScopesArrayService
 {
-    const USER_RELATIONS = [
+    /** @var array<int|string, string|array<int|string, string|list<string>>> */
+    const array USER_RELATIONS = [
         'characters' => self::CHARACTER_RELATIONS,
         'application.corporation' => ['ssoScopes', 'alliance.ssoScopes'],
     ];
 
-    const CHARACTER_RELATIONS = [
+    /** @var array<int|string, list<string>|string> */
+    const array CHARACTER_RELATIONS = [
         'alliance.ssoScopes',
         'corporation.ssoScopes',
         'application.corporation' => ['ssoScopes', 'alliance.ssoScopes'],

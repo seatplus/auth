@@ -1,11 +1,61 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Consider using bind method instead or pass a closure\\.$#"
+			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
+			identifier: larastan.noEnvCallsOutsideOfConfig
+			count: 3
+			path: config/auth.services.php
+
+		-
+			message: '#^Consider using bind method instead or pass a closure\.$#'
+			identifier: larastan.octaneCompatibility
 			count: 1
 			path: src/AuthenticationServiceProvider.php
 
 		-
-			message: "#^Property Seatplus\\\\Auth\\\\Services\\\\Roles\\\\BaseRoleService\\:\\:\\$role \\(Seatplus\\\\Auth\\\\Models\\\\Permissions\\\\Role\\|null\\) does not accept Spatie\\\\Permission\\\\Contracts\\\\Role\\.$#"
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$characters\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Http/Actions/Sso/FindOrCreateUserAction.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$main_character_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Http/Actions/Sso/FindOrCreateUserAction.php
+
+		-
+			message: '#^Property Seatplus\\Auth\\Http\\Actions\\Sso\\FindOrCreateUserAction\:\:\$user \(Seatplus\\Auth\\Models\\User\) does not accept Illuminate\\Database\\Eloquent\\Model\|null\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: src/Http/Actions/Sso/FindOrCreateUserAction.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>scopes" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: src/Http/Controllers/Auth/StepUpController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$active\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Observers/CharacterAffiliationObserver.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$characters\.$#'
+			identifier: property.notFound
+			count: 2
+			path: src/Observers/CharacterAffiliationObserver.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$main_character_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Observers/CharacterAffiliationObserver.php
+
+		-
+			message: '#^Property Seatplus\\Auth\\Services\\Roles\\BaseRoleService\:\:\$role \(Seatplus\\Auth\\Models\\Permissions\\Role\|null\) does not accept Spatie\\Permission\\Contracts\\Role\.$#'
+			identifier: assign.propertyType
 			count: 1
 			path: src/Services/Roles/BaseRoleService.php
