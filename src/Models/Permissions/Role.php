@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * MIT License
  *
@@ -40,11 +42,13 @@ class Role extends SpatieRole
         'type' => RoleType::class,
     ];
 
+    /** @return HasMany<Affiliation, $this> */
     public function affiliations(): HasMany
     {
         return $this->hasMany(Affiliation::class, 'role_id');
     }
 
+    /** @return HasMany<RoleMembership, $this> */
     public function role_memberships(): HasMany
     {
         return $this->hasMany(RoleMembership::class, 'role_id');

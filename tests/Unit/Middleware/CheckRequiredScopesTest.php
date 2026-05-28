@@ -371,6 +371,8 @@ function mockRequest(): void
 
     test()->next = function ($request) {
         $request->forward();
+
+        return response('OK');
     };
 }
 
