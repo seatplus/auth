@@ -27,10 +27,8 @@ class BuildScopesArrayService
 
     public function __construct(
         private readonly bool $with_application_scopes = true,
-        private ?GlobalSsoScopesService $globalSsoScopesService = null
-    ) {
-        $this->globalSsoScopesService = $globalSsoScopesService ?? new GlobalSsoScopesService;
-    }
+        private readonly GlobalSsoScopesService $globalSsoScopesService = new GlobalSsoScopesService,
+    ) {}
 
     private function getUserRequiredScopes(User $user): array
     {

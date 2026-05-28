@@ -10,10 +10,8 @@ use Seatplus\Auth\Services\Roles\BaseRoleService;
 class DenyAction
 {
     public function __construct(
-        private ?BaseRoleService $baseRoleService = null
-    ) {
-        $this->baseRoleService = $baseRoleService ?? new BaseRoleService;
-    }
+        private readonly BaseRoleService $baseRoleService = new BaseRoleService,
+    ) {}
 
     /**
      * @throws \Throwable
