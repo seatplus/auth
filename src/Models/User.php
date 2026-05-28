@@ -71,7 +71,7 @@ class User extends Authenticatable
     ];
 
     /** @return HasMany<CharacterUser, $this> */
-    public function character_users(): HasMany
+    public function characterUsers(): HasMany
     {
         return $this->hasMany(CharacterUser::class, 'user_id', 'id');
     }
@@ -90,7 +90,7 @@ class User extends Authenticatable
     }
 
     /** @return HasOne<CharacterInfo, $this> */
-    public function main_character(): HasOne
+    public function mainCharacter(): HasOne
     {
         return $this->hasOne(CharacterInfo::class, 'character_id', 'main_character_id');
     }

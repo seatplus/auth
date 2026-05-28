@@ -10,14 +10,14 @@ use Seatplus\Eveapi\Models\Character\CharacterInfo;
 
 class UserPermissionService
 {
-    private array $corporation_roles = [];
+    private array $corporationRoles = [];
 
     private array $permissions = [];
 
-    private array $character_ids = [];
+    private array $characterIds = [];
 
     public function __construct(
-        private readonly RolePermissionObjectService $role_permission_object_service = new RolePermissionObjectService,
+        private readonly RolePermissionObjectService $rolePermissionObjectService = new RolePermissionObjectService,
     ) {}
 
     public function get(User $user): array
@@ -30,9 +30,9 @@ class UserPermissionService
         $this->buildCharacterIds($user);
 
         return [
-            'corporation_roles' => $this->corporation_roles,
+            'corporation_roles' => $this->corporationRoles,
             'permissions' => $this->permissions,
-            'character_ids' => $this->character_ids,
+            'character_ids' => $this->characterIds,
             'owned_character_ids' => $user->characters->pluck('character_id')->toArray(),
         ];
 
@@ -52,7 +52,7 @@ class UserPermissionService
                 }
 
                 foreach ($roles as $role) {
-                    $this->corporation_roles[$role] = array_merge($this->corporation_roles[$role] ?? [], [$character->corporation_id]);
+                    $this->corporationRoles[$role] = array_merge($this->corporationRoles[$role] ?? [], [$character->corporation_id]);
                 }
             });
     }
@@ -60,7 +60,7 @@ class UserPermissionService
     private function buildPermissions(User $user): void
     {
         $user->roles->each(function (Role $role) {
-            $role_permissions = $this->role_permission_object_service->get($role);
+            $role_permissions = $this->rolePermissionObjectService->get($role);
 
             // merge on permissions. The key might exist, so we extend the array
             $this->permissions = $role_permissions
@@ -72,6 +72,6 @@ class UserPermissionService
 
     private function buildCharacterIds(User $user): void
     {
-        $this->character_ids = $user->characters->pluck('character_id')->toArray();
+        $this->characterIds = $user->characters->pluck('character_id')->toArray();
     }
 }

@@ -52,9 +52,9 @@ class CharacterAffiliationObserver
             return;
         }
 
-        $is_main_character = $character_user->user->main_character_id === $affiliation->character_id;
+        $is_mainCharacter = $character_user->user->main_character_id === $affiliation->character_id;
 
-        if ($is_main_character) {
+        if ($is_mainCharacter) {
             $new_main_character_id = $character_user->user->characters->pluck('character_id')->reject(fn (int $id) => $id === $affiliation->character_id)->first();
 
             // update user
