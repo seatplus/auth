@@ -49,14 +49,14 @@ test('create new user', function () {
 
 test('find existing user with two character', function () {
     // add 3 characters to test_user
-    test()->test_user->character_users()->createMany(
+    test()->test_user->characterUsers()->createMany(
         CharacterUser::factory()->count(3)->make()->toArray()
     );
 
-    expect(test()->test_user->character_users->count())->toEqual(4);
+    expect(test()->test_user->characterUsers->count())->toEqual(4);
 
     // select last character to login
-    $secondary_character = test()->test_user->character_users->last();
+    $secondary_character = test()->test_user->characterUsers->last();
 
     $eve_user = createEveUser(
         $secondary_character->character_id,
@@ -75,10 +75,10 @@ test('find existing user with two character', function () {
 });
 
 test('deal with changed owner hash', function () {
-    expect(1)->toEqual(test()->test_user->character_users->count());
+    expect(1)->toEqual(test()->test_user->characterUsers->count());
 
     $eve_user = createEveUser(
-        test()->test_user->character_users->first()->character_id,
+        test()->test_user->characterUsers->first()->character_id,
         'anotherHashValue'
     );
 
@@ -106,9 +106,9 @@ test('deal with two characters with one changed owner hash', function () {
     $secondary_user = CharacterUser::factory()->make();
 
     // 2. assign secondary user to test_user
-    test()->test_user->character_users()->save($secondary_user);
+    test()->test_user->characterUsers()->save($secondary_user);
 
-    expect(test()->test_user->character_users->count())->toEqual(2);
+    expect(test()->test_user->characterUsers->count())->toEqual(2);
 
     // 3. find user
 
@@ -120,7 +120,7 @@ test('deal with two characters with one changed owner hash', function () {
     $action = new FindOrCreateUserAction;
     $user = $action($eve_user);
 
-    expect($user->character_users->count())->toEqual(1);
+    expect($user->characterUsers->count())->toEqual(1);
 
     expect(CharacterUser::all()->count())->toEqual(2);
 
@@ -172,5 +172,5 @@ it('returns authed user', function () {
         'character_id' => $secondary_user->character_id,
     ]);
 
-    expect(test()->test_user->character_users->count())->toEqual(2);
+    expect(test()->test_user->characterUsers->count())->toEqual(2);
 });

@@ -12,14 +12,14 @@ use Seatplus\Auth\Services\Roles\RoleAffiliatedIdsService;
 class RolePermissionObjectService
 {
     public function __construct(
-        private readonly RoleAffiliatedIdsService $role_affiliated_ids_service = new RoleAffiliatedIdsService,
+        private readonly RoleAffiliatedIdsService $roleAffiliatedIdsService = new RoleAffiliatedIdsService,
     ) {}
 
     public function get(Role $role): Collection
     {
         $role = $role->loadMissing('permissions');
 
-        $affiliated_ids = $this->role_affiliated_ids_service->get($role);
+        $affiliated_ids = $this->roleAffiliatedIdsService->get($role);
 
         return $role->permissions
             ->mapWithKeys(fn (Permission $permission) => [$permission->name => $affiliated_ids]);

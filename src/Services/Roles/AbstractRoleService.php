@@ -77,7 +77,7 @@ abstract class AbstractRoleService implements RoleServiceInterface
 
     private function getActiveMembers(): \Illuminate\Support\Collection
     {
-        return $this->role->role_memberships()
+        return $this->role->roleMemberships()
             ->where('entity_type', User::class)
             ->where('status', RoleMembershipStatus::ACTIVE)
             ->pluck('entity_id');
@@ -139,12 +139,12 @@ abstract class AbstractRoleService implements RoleServiceInterface
 
     protected function getAssignedCharacterIds(): array
     {
-        $role = $this->role->refresh()->loadMissing(['role_memberships.entity' => function (MorphTo $morph_to) {
+        $role = $this->role->refresh()->loadMissing(['roleMemberships.entity' => function (MorphTo $morph_to) {
             $morph_to->morphWith([CorporationInfo::class => 'characters', AllianceInfo::class => 'characters']);
         }]);
 
         return $role
-            ->role_memberships
+            ->roleMemberships
             ->filter(fn (RoleMembership $role_membership) => $role_membership->entity_type === CorporationInfo::class || $role_membership->entity_type === AllianceInfo::class)
             ->pluck('entity.characters')
             ->flatten()
