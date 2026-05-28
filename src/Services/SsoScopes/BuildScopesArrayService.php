@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Seatplus\Auth\Services\SsoScopes;
 
 use Illuminate\Database\Eloquent\Builder;
@@ -120,7 +122,6 @@ class BuildScopesArrayService
 
     public function get(User|CharacterInfo $entity): array
     {
-
         $user = User::query()
             ->when($entity instanceof CharacterInfo, fn (Builder $query) => $query
                 ->whereHas('characters', fn (Builder $query) => $query
@@ -129,6 +130,10 @@ class BuildScopesArrayService
             )
             ->with(self::USER_RELATIONS)
             ->first();
+
+        if ($user === null) {
+            return [];
+        }
 
         return $this->build($user);
     }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Seatplus\Auth\Services\Roles;
 
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -58,7 +60,7 @@ class RoleAffiliatedIdsService
         return $allowed->all();
     }
 
-    public function loadMissingRelationships(Role $role): Role
+    private function loadMissingRelationships(Role $role): Role
     {
         return $role->loadMissing([
             'affiliations.affiliatable' => fn (MorphTo $morph_to) => $morph_to
