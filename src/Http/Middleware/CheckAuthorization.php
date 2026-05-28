@@ -37,10 +37,8 @@ use Seatplus\Auth\Services\Permissions\DTO\ValidateIdsDTO;
 class CheckAuthorization
 {
     public function __construct(
-        private ?CanUserService $canUserService = null
-    ) {
-        $this->canUserService = $this->canUserService ?? new CanUserService;
-    }
+        private readonly CanUserService $canUserService = new CanUserService,
+    ) {}
 
     public function handle(Request $request, Closure $next, string $permissions, ?string $corporation_role = null): mixed
     {

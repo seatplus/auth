@@ -12,10 +12,8 @@ use Seatplus\Auth\Services\Roles\RoleAffiliatedIdsService;
 class RolePermissionObjectService
 {
     public function __construct(
-        private ?RoleAffiliatedIdsService $role_affiliated_ids_service = null
-    ) {
-        $this->role_affiliated_ids_service = $role_affiliated_ids_service ?? new RoleAffiliatedIdsService;
-    }
+        private readonly RoleAffiliatedIdsService $role_affiliated_ids_service = new RoleAffiliatedIdsService,
+    ) {}
 
     public function get(Role $role): Collection
     {

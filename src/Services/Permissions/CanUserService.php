@@ -14,10 +14,8 @@ use Seatplus\Auth\Services\Permissions\DTO\ValidateIdsDTO;
 class CanUserService
 {
     public function __construct(
-        private ?UserPermissionService $user_permission_service = null
-    ) {
-        $this->user_permission_service = $this->user_permission_service ?? new UserPermissionService;
-    }
+        private readonly UserPermissionService $user_permission_service = new UserPermissionService,
+    ) {}
 
     /**
      * @throws ValidationException
