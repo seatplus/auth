@@ -23,12 +23,6 @@
     },
     "minimum-stability": "stable",
     "prefer-stable": true,
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/seatplus/esi-schema.git"
-        }
-    ],
     "require": {
         "php": "^8.5",
         "laravel/framework": "^13.0",
