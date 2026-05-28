@@ -14,7 +14,7 @@ class CanUserService
     public function __construct(
         private ?UserPermissionService $user_permission_service = null
     ) {
-        $this->user_permission_service = $this->user_permission_service ?? new UserPermissionService;
+        $this->user_permission_service ??= new UserPermissionService;
     }
 
     /**

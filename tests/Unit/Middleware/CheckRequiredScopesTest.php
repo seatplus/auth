@@ -352,9 +352,7 @@ it('redirects when user is not compliant', function () {
     $request = Mockery::mock(Request::class);
     $request->shouldReceive('user')->andReturn(new User);
 
-    $next = function ($req) {
-        return 'next';
-    };
+    $next = (fn ($req) => 'next');
 
     $response = $middleware->handle($request, $next);
 

@@ -116,9 +116,9 @@ function createEveUser(?int $character_id = null, ?string $character_owner_hash 
 
     return new EveUser(
         character_id: $character_id ?? $faker->numberBetween(90000000, 98000000),
-        character_owner_hash: $character_owner_hash ?? sha1($faker->text),
-        token: sha1($faker->text),
-        refreshToken: sha1($faker->text),
+        character_owner_hash: $character_owner_hash ?? sha1((string) $faker->text),
+        token: sha1((string) $faker->text),
+        refreshToken: sha1((string) $faker->text),
         expiresIn: $faker->numberBetween(1, 20),
         user: ['user'],
     );

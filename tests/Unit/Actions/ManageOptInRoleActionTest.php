@@ -34,12 +34,8 @@ it('executes manage on request role action successfully', function () {
         $mock->shouldReceive('optIn')->andReturn(mock(OptInRoleService::class, function ($mock) {
             $mock->shouldReceive('setRoleType')->with(RoleType::OPT_IN)->once();
             $mock->shouldReceive('updateRoleName')->once();
-            $mock->shouldReceive('syncAffiliateManyEntities')->once()->withArgs(function (AffiliationData $entity) {
-                return $entity->entity_id === 1 && $entity->entity_type === 'corporation' && $entity->affiliation_type === AffiliationType::ALLOWED;
-            });
-            $mock->shouldReceive('addCriteriaForRole')->once()->withArgs(function (CriteriaData $entity) {
-                return $entity->entity_id === 5 && $entity->entity_type === 'character';
-            });
+            $mock->shouldReceive('syncAffiliateManyEntities')->once()->withArgs(fn (AffiliationData $entity) => $entity->entity_id === 1 && $entity->entity_type === 'corporation' && $entity->affiliation_type === AffiliationType::ALLOWED);
+            $mock->shouldReceive('addCriteriaForRole')->once()->withArgs(fn (CriteriaData $entity) => $entity->entity_id === 5 && $entity->entity_type === 'character');
             $mock->shouldReceive('handleMembers')->once();
         }));
     });

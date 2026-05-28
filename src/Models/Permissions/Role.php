@@ -36,6 +36,7 @@ use Spatie\Permission\Models\Role as SpatieRole;
  */
 class Role extends SpatieRole
 {
+    #[\Override]
     protected function casts(): array
     {
         return [

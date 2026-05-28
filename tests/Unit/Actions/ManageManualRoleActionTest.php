@@ -81,11 +81,9 @@ it('affiliates many entities', function () {
         $mock->shouldReceive('manual')
             ->andReturn(mock(ManualRoleService::class, function (MockInterface $mock) {
                 $mock->shouldReceive('setRoleType')->once();
-                $mock->shouldReceive('syncAffiliateManyEntities')->once()->withArgs(function (AffiliationData $affiliationData) {
-                    return $affiliationData->entity_id === 1
-                        && $affiliationData->entity_type === 'corporation'
-                        && $affiliationData->affiliation_type === AffiliationType::ALLOWED;
-                });
+                $mock->shouldReceive('syncAffiliateManyEntities')->once()->withArgs(fn (AffiliationData $affiliationData) => $affiliationData->entity_id === 1
+                    && $affiliationData->entity_type === 'corporation'
+                    && $affiliationData->affiliation_type === AffiliationType::ALLOWED);
                 $mock->shouldReceive('handleMembers')->once();
             }));
     });

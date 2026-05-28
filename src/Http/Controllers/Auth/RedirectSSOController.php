@@ -36,8 +36,8 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 class RedirectSSOController extends Controller
 {
     public function __construct(
-        private GlobalSsoScopesService $service,
-        private AuthenticationService $authenticationService
+        private readonly GlobalSsoScopesService $service,
+        private readonly AuthenticationService $authenticationService
     ) {}
 
     /**

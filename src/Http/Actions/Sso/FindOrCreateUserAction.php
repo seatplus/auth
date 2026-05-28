@@ -34,7 +34,7 @@ class FindOrCreateUserAction
 {
     private EveUser $eve_user;
 
-    private ?CharacterUser $character_user;
+    private ?CharacterUser $character_user = null;
 
     private User $user;
 

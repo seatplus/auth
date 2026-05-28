@@ -51,9 +51,7 @@ it('invokes role service with affiliated entities', function () {
         $mock->shouldReceive('for')->with(1)->andReturn($mock);
         $mock->shouldReceive('automatic')->andReturn(mock(AutomaticRoleService::class, function (MockInterface $mock) {
             $mock->shouldReceive('setRoleType')->once()->with(RoleType::AUTOMATIC);
-            $mock->shouldReceive('syncAffiliateManyEntities')->once()->withArgs(function (AffiliationData $entity) {
-                return $entity->entity_id === 1 && $entity->entity_type === 'corporation' && $entity->affiliation_type === AffiliationType::ALLOWED;
-            });
+            $mock->shouldReceive('syncAffiliateManyEntities')->once()->withArgs(fn (AffiliationData $entity) => $entity->entity_id === 1 && $entity->entity_type === 'corporation' && $entity->affiliation_type === AffiliationType::ALLOWED);
             // assigned: [] → empty array → automaticallyAssignRoleTo called with 0 args (clears criteria)
             $mock->shouldReceive('automaticallyAssignRoleTo')->once()->withNoArgs();
             $mock->shouldReceive('handleMembers')->once();
@@ -79,9 +77,7 @@ it('invokes role service with assigned entities', function () {
             $mock->shouldReceive('setRoleType')->once()->with(RoleType::AUTOMATIC);
             // affiliated: [] → empty array → syncAffiliateManyEntities called with 0 args (clears scope)
             $mock->shouldReceive('syncAffiliateManyEntities')->once()->withNoArgs();
-            $mock->shouldReceive('automaticallyAssignRoleTo')->once()->withArgs(function (CriteriaData $entity) {
-                return $entity->entity_id === 1 && $entity->entity_type === 'corporation';
-            });
+            $mock->shouldReceive('automaticallyAssignRoleTo')->once()->withArgs(fn (CriteriaData $entity) => $entity->entity_id === 1 && $entity->entity_type === 'corporation');
             $mock->shouldReceive('handleMembers')->once();
         }));
     });

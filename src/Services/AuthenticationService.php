@@ -9,15 +9,7 @@ use Seatplus\Auth\Models\User;
 
 class AuthenticationService
 {
-    protected Guard $auth;
-
-    protected Session $session;
-
-    public function __construct(Guard $auth, Session $session)
-    {
-        $this->auth = $auth;
-        $this->session = $session;
-    }
+    public function __construct(protected Guard $auth, protected Session $session) {}
 
     /**
      * Login the user.

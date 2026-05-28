@@ -3,23 +3,21 @@
 declare(strict_types=1);
 
 use Rector\Config\RectorConfig;
-use Rector\Core\ValueObject\PhpVersion;
-use RectorLaravel\Set\LaravelSetList;
+use Rector\Set\ValueObject\LevelSetList;
+use RectorLaravel\Rector\Class_\TablePropertyToTableAttributeRector;
+use RectorLaravel\Set\LaravelLevelSetList;
 
-return static function (RectorConfig $rectorConfig): void {
-    // here we can define, what sets of rules will be applied
-    // tip: use "SetList" class to autocomplete sets
-    $rectorConfig->sets([
-        // SetList::CODE_QUALITY,
-        LaravelSetList::LARAVEL_100,
-        LaravelSetList::LARAVEL_CODE_QUALITY,
+return RectorConfig::configure()
+    ->withSets([
+        LaravelLevelSetList::UP_TO_LARAVEL_130,
+        LevelSetList::UP_TO_PHP_85,
+    ])
+    ->withSkip([
+        TablePropertyToTableAttributeRector::class,
+    ])
+    ->withPaths([
+        __DIR__.'/config',
+        __DIR__.'/src',
+        __DIR__.'/tests',
+        __DIR__.'/database',
     ]);
-    // paths to refactor; solid alternative to CLI arguments
-    $rectorConfig->paths([__DIR__.'/src', __DIR__.'/tests']);
-
-    // is your PHP version different from the one you refactor to? [default: your PHP version], uses PHP_VERSION_ID format
-    $rectorConfig->phpVersion(PhpVersion::PHP_81);
-
-    // register single rule
-    // $rectorConfig->rule(TypedPropertyRector::class);
-};

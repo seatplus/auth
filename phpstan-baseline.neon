@@ -7,12 +7,6 @@ parameters:
 			path: config/auth.services.php
 
 		-
-			message: '#^Consider using bind method instead or pass a closure\.$#'
-			identifier: larastan.octaneCompatibility
-			count: 1
-			path: src/AuthenticationServiceProvider.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$characters\.$#'
 			identifier: property.notFound
 			count: 1

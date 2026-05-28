@@ -6,7 +6,7 @@ use Seatplus\Auth\Models\User;
 
 class IsUserCompliantService
 {
-    private BuildScopesArrayService $build_scopes_array_service;
+    private readonly BuildScopesArrayService $build_scopes_array_service;
 
     public function __construct(
         private readonly bool $consider_applications = true

@@ -10,12 +10,12 @@ use Illuminate\Validation\ValidationException;
 class ValidateIdsDTO
 {
     public function __construct(
-        private ?int $character_id = null,
-        private ?int $corporation_id = null,
-        private ?int $alliance_id = null,
-        private ?array $character_ids = null,
-        private ?array $corporation_ids = null,
-        private ?array $alliance_ids = null
+        private readonly ?int $character_id = null,
+        private readonly ?int $corporation_id = null,
+        private readonly ?int $alliance_id = null,
+        private readonly ?array $character_ids = null,
+        private readonly ?array $corporation_ids = null,
+        private readonly ?array $alliance_ids = null
     ) {}
 
     public static function fromRequest(Request $request): ValidateIdsDTO
@@ -75,9 +75,7 @@ class ValidateIdsDTO
             'alliance_id', 'alliance_ids',
         ];
 
-        $presentKeys = array_filter($keys, function (string $key) use ($ids) {
-            return ! is_null($ids[$key] ?? null);
-        });
+        $presentKeys = array_filter($keys, fn (string $key) => ! is_null($ids[$key] ?? null));
 
         abort_unless(count($presentKeys) === 1, 403, 'Exactly one of the parameters ['.implode(', ', $keys).'] must be present.');
 
