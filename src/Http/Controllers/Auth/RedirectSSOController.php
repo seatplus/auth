@@ -36,8 +36,8 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 class RedirectSSOController extends Controller
 {
     public function __construct(
-        private GlobalSsoScopesService $service,
-        private AuthenticationService $authenticationService
+        private readonly GlobalSsoScopesService $service,
+        private readonly AuthenticationService $authenticationService
     ) {}
 
     /**
@@ -47,7 +47,9 @@ class RedirectSSOController extends Controller
      */
     public function __invoke(Socialite $socialite): RedirectResponse
     {
-        throw_if($this->authenticationService->isUserAuthenticated(), \Exception::class, 'You are already authenticated');
+        if ($this->authenticationService->isUserAuthenticated()) {
+            return redirect('/');
+        }
 
         $scopes = $this->getScopes();
 

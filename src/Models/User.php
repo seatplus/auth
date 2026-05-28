@@ -26,6 +26,9 @@
 
 namespace Seatplus\Auth\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -37,6 +40,12 @@ use Seatplus\Eveapi\Models\Application;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Spatie\Permission\Traits\HasRoles;
 
+#[Fillable([
+    'main_character_id', 'character_owner_hash', 'active',
+])]
+#[Hidden([
+    'password', 'remember_token',
+])]
 class User extends Authenticatable
 {
     use HasFactory;
@@ -47,6 +56,7 @@ class User extends Authenticatable
      *
      * @var string
      */
+    #[\Override]
     protected $primaryKey = 'id';
 
     /**
@@ -54,19 +64,16 @@ class User extends Authenticatable
      *
      * @var bool
      */
+    #[\Override]
     public $incrementing = true;
 
-    protected $fillable = [
-        'main_character_id', 'character_owner_hash', 'active',
-    ];
-
-    protected $hidden = [
-        'password', 'remember_token',
-    ];
-
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-    ];
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+        ];
+    }
 
     public function character_users(): HasMany
     {
@@ -90,7 +97,8 @@ class User extends Authenticatable
         return $this->hasOne(CharacterInfo::class, 'character_id', 'main_character_id');
     }
 
-    public function scopeSearch(Builder $query, string $query_string): Builder
+    #[Scope]
+    protected function search(Builder $query, string $query_string): Builder
     {
         return $query->whereHas('characters', function (Builder $query) use ($query_string) {
             $query->where('name', 'like', '%'.$query_string.'%');
@@ -102,6 +110,7 @@ class User extends Authenticatable
         return $this->morphOne(Application::class, 'applicationable')->whereStatus('open');
     }
 
+    #[\Override]
     public function getAuthPassword(): string
     {
         return '';

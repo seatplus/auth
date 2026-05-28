@@ -13,7 +13,7 @@ it('forgets user permission object when a new character is added', function () {
 
     $character_user = CharacterUser::factory()->create([
         'user_id' => $user_id,
-        'character_id' => faker()->randomNumber(),
+        'character_id' => faker()->randomNumber(5),
     ]);
 
     RefreshToken::factory()->create(['character_id' => $character_user->character_id]);

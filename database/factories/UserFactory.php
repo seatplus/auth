@@ -32,10 +32,15 @@ use Seatplus\Auth\Models\CharacterUser;
 use Seatplus\Auth\Models\User;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 
+/**
+ * @extends Factory<User>
+ */
 class UserFactory extends Factory
 {
+    #[\Override]
     protected $model = User::class;
 
+    #[\Override]
     public function configure(): UserFactory
     {
         return $this->afterCreating(function (User $user) {

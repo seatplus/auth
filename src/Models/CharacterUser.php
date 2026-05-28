@@ -26,31 +26,31 @@
 
 namespace Seatplus\Auth\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\WithoutIncrementing;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 
+#[Fillable([
+    'character_id', 'user_id', 'character_owner_hash',
+])]
+#[WithoutIncrementing]
 class CharacterUser extends Model
 {
     use HasFactory;
 
-    /**
-     * @var bool
-     */
-    public $incrementing = false;
-
+    #[\Override]
     protected $primaryKey = null;
 
-    protected $fillable = [
-        'character_id', 'user_id', 'character_owner_hash',
-    ];
-
+    /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /** @return BelongsTo<CharacterInfo, $this> */
     public function character(): BelongsTo
     {
         return $this->belongsTo(CharacterInfo::class, 'character_id');

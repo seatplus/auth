@@ -5,7 +5,7 @@ namespace Seatplus\Auth\Http\Actions\Roles;
 class RemoveModeratorRoleAction
 {
     public function __construct(
-        private SetModeratorAction $action
+        private readonly SetModeratorAction $action
     ) {}
 
     /**

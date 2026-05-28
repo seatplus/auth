@@ -37,7 +37,7 @@ class CheckAuthorization
     public function __construct(
         private ?CanUserService $canUserService = null
     ) {
-        $this->canUserService = $this->canUserService ?? new CanUserService;
+        $this->canUserService ??= new CanUserService;
     }
 
     public function handle(Request $request, Closure $next, string $permissions, ?string $corporation_role = null): mixed
@@ -46,7 +46,7 @@ class CheckAuthorization
         $user = auth()->user();
         $ids_dto = ValidateIdsDTO::fromRequest($request);
         $permissions = explode('|', $permissions);
-        $corporation_role = explode('|', $corporation_role);
+        $corporation_role = explode('|', (string) $corporation_role);
 
         abort_unless($this->canUserService->check(
             user: $user,

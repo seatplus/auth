@@ -46,7 +46,8 @@ class StepUpController extends Controller
 
         $add_scopes = explode(',', request()->query('add_scopes'));
 
-        $scopes = collect(RefreshToken::find($character_id)?->scopes ?? [])->merge($add_scopes)->toArray();
+        $token = RefreshToken::find($character_id);
+        $scopes = collect($token !== null ? $token->scopes : [])->merge($add_scopes)->toArray();
 
         session([
             'rurl' => url()->previous(),

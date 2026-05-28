@@ -40,6 +40,15 @@ class OptInRoleService extends AbstractRoleService implements RoleServiceInterfa
         $this->removeRoleMembership($user);
     }
 
+    public function setModerator(User $user, bool $can_moderate = true): void
+    {
+        $this->setRoleMembership(
+            entity_id: $user->id,
+            entity_type: User::class,
+            can_moderate: $can_moderate
+        );
+    }
+
     public function syncMembers(): void
     {
         // remove all members that are not within the criteria

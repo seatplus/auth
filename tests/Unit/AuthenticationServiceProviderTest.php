@@ -1,9 +1,10 @@
 <?php
 
+use Laravel\Socialite\Contracts\Factory;
 use SocialiteProviders\Eveonline\Provider;
 
 it('builds provider with valid config', function () {
-    $socialite = app('Laravel\Socialite\Contracts\Factory');
+    $socialite = app(Factory::class);
 
     $driver = $socialite->driver('eveonline');
 

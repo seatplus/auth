@@ -34,12 +34,8 @@ it('executes manage on request role action successfully', function () {
         $mock->shouldReceive('onRequest')->andReturn(mock(OnRequestRoleService::class, function ($mock) {
             $mock->shouldReceive('setRoleType')->with(RoleType::ON_REQUEST)->once();
             $mock->shouldReceive('updateRoleName')->once();
-            $mock->shouldReceive('syncAffiliateManyEntities')->once()->withArgs(function (AffiliationData $entity) {
-                return $entity->entity_id === 1 && $entity->entity_type === 'corporation' && $entity->affiliation_type === AffiliationType::ALLOWED;
-            });
-            $mock->shouldReceive('addCriteriaForRoleApplication')->once()->withArgs(function (CriteriaData $entity) {
-                return $entity->entity_id === 5 && $entity->entity_type === 'character';
-            });
+            $mock->shouldReceive('syncAffiliateManyEntities')->once()->withArgs(fn (AffiliationData $entity) => $entity->entity_id === 1 && $entity->entity_type === 'corporation' && $entity->affiliation_type === AffiliationType::ALLOWED);
+            $mock->shouldReceive('addCriteriaForRoleApplication')->once()->withArgs(fn (CriteriaData $entity) => $entity->entity_id === 5 && $entity->entity_type === 'character');
             $mock->shouldReceive('handleMembers')->once();
         }));
     });

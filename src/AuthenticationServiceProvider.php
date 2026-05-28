@@ -29,6 +29,7 @@ namespace Seatplus\Auth;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Socialite\Contracts\Factory;
 use Laravel\Socialite\SocialiteManager;
 use Seatplus\Auth\Listeners\ReactOnFreshRefreshToken;
 use Seatplus\Auth\Listeners\UpdatingRefreshTokenListener;
@@ -80,16 +81,15 @@ class AuthenticationServiceProvider extends ServiceProvider
 
     }
 
+    #[\Override]
     public function register(): void
     {
         // Register the Socialite Factory.
         // From: Laravel\Socialite\SocialiteServiceProvider
-        $this->app->singleton('Laravel\Socialite\Contracts\Factory', function (Container $app) {
-            return new SocialiteManager($app);
-        });
+        $this->app->singleton(fn (Container $app): Factory => new SocialiteManager($app));
 
         // Slap in the Eveonline Socialite Provider
-        $socialite = $this->app->make('Laravel\Socialite\Contracts\Factory');
+        $socialite = $this->app->make(Factory::class);
 
         $socialite->extend(
             'eveonline',

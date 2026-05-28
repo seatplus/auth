@@ -1,0 +1,36 @@
+name: Formats
+
+on:
+  push:
+    paths:
+      - '**.php'
+  pull_request:
+    branches: [ 4.x ]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: mbstring, dom, fileinfo
+
+      - name: Install Composer dependencies
+        run: composer update --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+
+      - name: Coding Style Checks
+        run: composer test:lint
+
+      - name: Type Checks
+        run: composer test:types
+
+      - name: Type Coverage Checks
+        run: composer test:type-coverage
+        env:
+          FORK_MEM_PER_PROC: 107374182400

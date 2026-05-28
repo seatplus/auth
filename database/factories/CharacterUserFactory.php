@@ -30,16 +30,20 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Seatplus\Auth\Models\CharacterUser;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 
+/**
+ * @extends Factory<CharacterUser>
+ */
 class CharacterUserFactory extends Factory
 {
+    #[\Override]
     protected $model = CharacterUser::class;
 
     public function definition()
     {
         return [
-            'user_id' => $this->faker->numberBetween(90000000, 98000000),
+            'user_id' => fake()->numberBetween(90000000, 98000000),
             'character_id' => CharacterInfo::factory(),
-            'character_owner_hash' => sha1($this->faker->text),
+            'character_owner_hash' => sha1(fake()->text),
         ];
     }
 }

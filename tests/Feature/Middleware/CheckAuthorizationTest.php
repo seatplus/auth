@@ -271,9 +271,7 @@ describe('middleware checks permission or corporation role test', function () {
 
         Route::middleware([CheckAuthorization::class.":$this->permission_name,Accountant"])
             ->prefix('test')
-            ->get('/', function () {
-                return 'test';
-            })->name('test');
+            ->get('/', fn () => 'test')->name('test');
     });
 
     it('user has permission', function (string $permission) {

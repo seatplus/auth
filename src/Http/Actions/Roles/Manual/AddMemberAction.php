@@ -5,7 +5,7 @@ namespace Seatplus\Auth\Http\Actions\Roles\Manual;
 class AddMemberAction
 {
     public function __construct(
-        private SetMemberAction $setMember
+        private readonly SetMemberAction $setMember
     ) {}
 
     /**

@@ -101,3 +101,15 @@ it('cannot moderate', function () {
 
     expect($this->service->canModerate($test_user))->toBeFalse();
 });
+
+it('sets moderator status for user', function (bool $can_moderate) {
+    $user = test()->test_user;
+
+    $this->service->setModerator($user, $can_moderate);
+
+    expect(RoleMembership::query()->where('role_id', $this->role->id)->where('entity_id', $user->id)->first())
+        ->can_moderate->toBe($can_moderate);
+})->with([
+    true,
+    false,
+]);

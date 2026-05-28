@@ -17,7 +17,7 @@ class LoginAssetsAction
         $client_secret = $config['client_secret'];
 
         // check if the client_id and client_secret are set and longer than 5 characters
-        if (strlen($client_id) < 5 || strlen($client_secret) < 5) {
+        if (strlen((string) $client_id) < 5 || strlen((string) $client_secret) < 5) {
             // Warn if SSO has not been configured yet.
             session()->flash('warning', trans('auth::auth.sso_config_warning'));
         }

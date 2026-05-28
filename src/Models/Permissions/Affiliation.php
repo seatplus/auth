@@ -26,6 +26,8 @@
 
 namespace Seatplus\Auth\Models\Permissions;
 
+use Illuminate\Database\Eloquent\Attributes\Unguarded;
+use Illuminate\Database\Eloquent\Attributes\WithoutIncrementing;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -39,17 +41,20 @@ use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
  *
  * @property string $type
  */
+#[WithoutIncrementing]
+#[Unguarded]
 class Affiliation extends Model
 {
+    #[\Override]
     protected $primaryKey = null;
 
-    public $incrementing = false;
-
-    protected $guarded = [];
-
-    protected $casts = [
-        'role_id' => 'integer',
-    ];
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'role_id' => 'integer',
+        ];
+    }
 
     public function affiliatable(): MorphTo
     {
@@ -67,20 +72,18 @@ class Affiliation extends Model
     protected function affiliatedIds(): Attribute
     {
         return new Attribute(
-            get: function () {
-                return match (true) {
-                    $this->affiliatable instanceof CharacterInfo => collect($this->affiliatable->character_id),
-                    $this->affiliatable instanceof CorporationInfo => collect([
-                        $this->affiliatable->corporation_id,
-                        $this->affiliatable->characters->pluck('character_id'),
-                    ])->flatten(),
-                    $this->affiliatable instanceof AllianceInfo => collect([
-                        $this->affiliatable->alliance_id,
-                        $this->affiliatable->corporations->pluck('corporation_id'),
-                        $this->affiliatable->characters->pluck('character_id'),
-                    ])->flatten(),
-                    default => collect(),
-                };
+            get: fn () => match (true) {
+                $this->affiliatable instanceof CharacterInfo => collect($this->affiliatable->character_id),
+                $this->affiliatable instanceof CorporationInfo => collect([
+                    $this->affiliatable->corporation_id,
+                    $this->affiliatable->characters->pluck('character_id'),
+                ])->flatten(),
+                $this->affiliatable instanceof AllianceInfo => collect([
+                    $this->affiliatable->alliance_id,
+                    $this->affiliatable->corporations->pluck('corporation_id'),
+                    $this->affiliatable->characters->pluck('character_id'),
+                ])->flatten(),
+                default => collect(),
             }
         );
 

@@ -35,13 +35,13 @@ class ManageOnRequestRoleAction
 
         if (is_array($affiliated = Arr::get($validated, 'affiliated'))) {
             $roleService->syncAffiliateManyEntities(
-                ...array_map(fn (array $affiliationData) => AffiliationData::fromArray($affiliationData), $affiliated)
+                ...array_map(AffiliationData::fromArray(...), $affiliated)
             );
         }
 
         if (is_array($assigned = Arr::get($validated, 'assigned'))) {
             $roleService->addCriteriaForRoleApplication(
-                ...array_map(fn (array $criteriaData) => CriteriaData::fromArray($criteriaData), $assigned)
+                ...array_map(CriteriaData::fromArray(...), $assigned)
             );
         }
 

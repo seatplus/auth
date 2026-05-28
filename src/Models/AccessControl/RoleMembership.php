@@ -2,30 +2,35 @@
 
 namespace Seatplus\Auth\Models\AccessControl;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\WithoutIncrementing;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Seatplus\Auth\Models\Permissions\Role;
 
+#[Fillable([
+    'role_id',
+    'entity_type',
+    'entity_id',
+    'can_moderate',
+    'status',
+])]
+#[WithoutIncrementing]
 class RoleMembership extends Model
 {
+    #[\Override]
     protected $table = 'role_memberships';
 
-    public $incrementing = false;
-
-    protected $casts = [
-        'role_id' => 'integer',
-        'entity_id' => 'integer',
-        'can_moderate' => 'boolean',
-    ];
-
-    protected $fillable = [
-        'role_id',
-        'entity_type',
-        'entity_id',
-        'can_moderate',
-        'status',
-    ];
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'role_id' => 'integer',
+            'entity_id' => 'integer',
+            'can_moderate' => 'boolean',
+        ];
+    }
 
     public function role(): BelongsTo
     {

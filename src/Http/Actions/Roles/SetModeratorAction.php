@@ -7,11 +7,12 @@ use Seatplus\Auth\Services\Roles\AbstractRoleService;
 use Seatplus\Auth\Services\Roles\BaseRoleService;
 use Seatplus\Auth\Services\Roles\ManualRoleService;
 use Seatplus\Auth\Services\Roles\OnRequestRoleService;
+use Seatplus\Auth\Services\Roles\OptInRoleService;
 
 class SetModeratorAction
 {
     public function __construct(
-        private BaseRoleService $baseRoleService
+        private readonly BaseRoleService $baseRoleService
     ) {}
 
     public function execute(int $role_id, int $user_id, bool $can_moderate): void
@@ -19,7 +20,7 @@ class SetModeratorAction
         $this->baseRoleService->for($role_id);
         $this->checkPermission();
 
-        /** @var OnRequestRoleService|ManualRoleService $roleService */
+        /** @var OnRequestRoleService|ManualRoleService|OptInRoleService $roleService */
         $roleService = $this->baseRoleService->getTypeService();
 
         $this->validateRoleType($roleService);
@@ -45,7 +46,7 @@ class SetModeratorAction
 
     private function validateRoleType(AbstractRoleService $roleService): void
     {
-        if (! $roleService instanceof ManualRoleService && ! $roleService instanceof OnRequestRoleService) {
+        if (! $roleService instanceof ManualRoleService && ! $roleService instanceof OnRequestRoleService && ! $roleService instanceof OptInRoleService) {
             abort(403, 'This action is not allowed');
         }
     }
