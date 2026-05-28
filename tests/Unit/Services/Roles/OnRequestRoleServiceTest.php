@@ -2,6 +2,7 @@
 
 use Seatplus\Auth\Enums\RoleMembershipStatus;
 use Seatplus\Auth\Enums\RoleType;
+use Seatplus\Auth\Exceptions\CriteriaNotMetException;
 use Seatplus\Auth\Models\AccessControl\RoleMembership;
 use Seatplus\Auth\Models\Permissions\Role;
 use Seatplus\Auth\Models\User;
@@ -79,7 +80,7 @@ it('cannot submit application if no criteria is set', function () {
 
     // assert
 
-})->throws(Exception::class, 'User does not meet criteria to join role');
+})->throws(CriteriaNotMetException::class, 'User does not meet criteria to join role');
 
 it('submits application for role', function () {
     // arrange
@@ -124,7 +125,7 @@ it('throws exception when approving application for role with no criteria', func
     $this->service->approveApplicationForRole($user);
 
     // assert
-})->throws(Exception::class, 'User does not meet criteria to join role');
+})->throws(CriteriaNotMetException::class, 'User does not meet criteria to join role');
 
 it('denies application for role', function () {
     // arrange
