@@ -50,6 +50,7 @@ class CharacterUser extends Model
         return $this->belongsTo(User::class);
     }
 
+    /** @return BelongsTo<CharacterInfo, $this> */
     public function character(): BelongsTo
     {
         return $this->belongsTo(CharacterInfo::class, 'character_id');
