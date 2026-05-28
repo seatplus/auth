@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Seatplus\Auth\Enums;
 
 enum RoleType: string

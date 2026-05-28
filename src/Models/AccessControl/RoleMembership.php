@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Seatplus\Auth\Models\AccessControl;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -32,11 +34,13 @@ class RoleMembership extends Model
         ];
     }
 
+    /** @return BelongsTo<Role, $this> */
     public function role(): BelongsTo
     {
         return $this->belongsTo(Role::class, 'role_id');
     }
 
+    /** @return MorphTo<Model, $this> */
     public function entity(): MorphTo
     {
         return $this->morphTo();

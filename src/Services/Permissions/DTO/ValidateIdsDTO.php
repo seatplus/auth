@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Seatplus\Auth\Services\Permissions\DTO;
 
 use Illuminate\Http\Request;
@@ -20,16 +22,18 @@ class ValidateIdsDTO
 
     public static function fromRequest(Request $request): ValidateIdsDTO
     {
-
         $all_data = [...$request->all(), ...$request->route()->parameters()];
 
+        $toInt = fn (mixed $v): ?int => $v !== null ? (int) $v : null;
+        $toIntArray = fn (mixed $v): ?array => $v !== null ? array_map('intval', (array) $v) : null;
+
         return new self(
-            character_id: Arr::get($all_data, 'character_id'),
-            corporation_id: Arr::get($all_data, 'corporation_id'),
-            alliance_id: Arr::get($all_data, 'alliance_id'),
-            character_ids: Arr::get($all_data, 'character_ids'),
-            corporation_ids: Arr::get($all_data, 'corporation_ids'),
-            alliance_ids: Arr::get($all_data, 'alliance_ids')
+            character_id: $toInt(Arr::get($all_data, 'character_id')),
+            corporation_id: $toInt(Arr::get($all_data, 'corporation_id')),
+            alliance_id: $toInt(Arr::get($all_data, 'alliance_id')),
+            character_ids: $toIntArray(Arr::get($all_data, 'character_ids')),
+            corporation_ids: $toIntArray(Arr::get($all_data, 'corporation_ids')),
+            alliance_ids: $toIntArray(Arr::get($all_data, 'alliance_ids')),
         );
     }
 

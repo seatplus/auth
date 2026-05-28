@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * MIT License
  *
@@ -40,7 +42,7 @@ class CheckRequiredScopes
         $this->isUserCompliantService ??= new IsUserCompliantService;
     }
 
-    public function handle(Request $request, Closure $next) // @pest-ignore-type
+    public function handle(Request $request, Closure $next): Response
     {
 
         return $this->isUserCompliantService->check($request->user())
