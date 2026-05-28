@@ -5,7 +5,7 @@ use Seatplus\Auth\Models\CharacterUser;
 test('one can change main character', function () {
     $secondary = CharacterUser::factory()->make();
 
-    test()->test_user->character_users()->save($secondary);
+    test()->test_user->characterUsers()->save($secondary);
 
     test()->test_user = test()->test_user->refresh();
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * MIT License
  *
@@ -35,12 +37,10 @@ use Symfony\Component\HttpFoundation\Response;
 class CheckRequiredScopes
 {
     public function __construct(
-        private ?IsUserCompliantService $isUserCompliantService = null,
-    ) {
-        $this->isUserCompliantService ??= new IsUserCompliantService;
-    }
+        private readonly IsUserCompliantService $isUserCompliantService = new IsUserCompliantService,
+    ) {}
 
-    public function handle(Request $request, Closure $next) // @pest-ignore-type
+    public function handle(Request $request, Closure $next): Response
     {
 
         return $this->isUserCompliantService->check($request->user())

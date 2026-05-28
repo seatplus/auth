@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Seatplus\Auth\Services\Permissions;
 
 use Closure;
@@ -12,10 +14,8 @@ use Seatplus\Auth\Services\Permissions\DTO\ValidateIdsDTO;
 class CanUserService
 {
     public function __construct(
-        private ?UserPermissionService $user_permission_service = null
-    ) {
-        $this->user_permission_service ??= new UserPermissionService;
-    }
+        private readonly UserPermissionService $userPermissionService = new UserPermissionService,
+    ) {}
 
     /**
      * @throws ValidationException
@@ -152,8 +152,8 @@ class CanUserService
         return (bool) array_intersect($corporation_role, $users_corporation_roles);
     }
 
-    public function getUserPermissionObject(User $user): mixed
+    public function getUserPermissionObject(User $user): array
     {
-        return Cache::remember("user_permissions_{$user->id}", now()->addMinutes(5), fn () => $this->user_permission_service->get($user));
+        return Cache::remember("user_permissions_{$user->id}", now()->addMinutes(5), fn () => $this->userPermissionService->get($user));
     }
 }

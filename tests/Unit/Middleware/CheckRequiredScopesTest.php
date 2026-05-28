@@ -98,7 +98,7 @@ describe('redirect request', function () {
         // Create secondary character
         $secondary_character = Event::fakeFor(function () {
             $character_user = CharacterUser::factory()->make();
-            test()->test_user->character_users()->save($character_user);
+            test()->test_user->characterUsers()->save($character_user);
 
             return CharacterInfo::find($character_user->character_id);
         });
@@ -264,7 +264,7 @@ describe('passes middleware', function () {
         // Create secondary character
         $secondary_character = Event::fakeFor(function () {
             $character_user = CharacterUser::factory()->make();
-            test()->test_user->character_users()->save($character_user);
+            test()->test_user->characterUsers()->save($character_user);
 
             return CharacterInfo::find($character_user->character_id);
         });
@@ -369,6 +369,8 @@ function mockRequest(): void
 
     test()->next = function ($request) {
         $request->forward();
+
+        return response('OK');
     };
 }
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Seatplus\Auth\Services\SsoScopes;
 
 use Illuminate\Database\Eloquent\Builder;
@@ -24,11 +26,9 @@ class BuildScopesArrayService
     ];
 
     public function __construct(
-        private readonly bool $with_application_scopes = true,
-        private ?GlobalSsoScopesService $globalSsoScopesService = null
-    ) {
-        $this->globalSsoScopesService = $globalSsoScopesService ?? new GlobalSsoScopesService;
-    }
+        private readonly bool $withApplicationScopes = true,
+        private readonly GlobalSsoScopesService $globalSsoScopesService = new GlobalSsoScopesService,
+    ) {}
 
     private function getUserRequiredScopes(User $user): array
     {
@@ -115,12 +115,11 @@ class BuildScopesArrayService
 
     private function isWithApplicationScopes(): bool
     {
-        return $this->with_application_scopes;
+        return $this->withApplicationScopes;
     }
 
     public function get(User|CharacterInfo $entity): array
     {
-
         $user = User::query()
             ->when($entity instanceof CharacterInfo, fn (Builder $query) => $query
                 ->whereHas('characters', fn (Builder $query) => $query
@@ -129,6 +128,10 @@ class BuildScopesArrayService
             )
             ->with(self::USER_RELATIONS)
             ->first();
+
+        if ($user === null) {
+            return [];
+        }
 
         return $this->build($user);
     }

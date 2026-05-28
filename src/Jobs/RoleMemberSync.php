@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * MIT License
  *
@@ -39,10 +41,8 @@ class RoleMemberSync implements ShouldBeUnique, ShouldQueue
     public int $tries = 1;
 
     public function __construct(
-        private ?BaseRoleService $service = null
-    ) {
-        $this->service = $service ?? new BaseRoleService;
-    }
+        private readonly BaseRoleService $service = new BaseRoleService,
+    ) {}
 
     /**
      * Assign this job a tag so that Horizon can categorize and allow

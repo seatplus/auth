@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * MIT License
  *
@@ -75,11 +77,13 @@ class User extends Authenticatable
         ];
     }
 
-    public function character_users(): HasMany
+    /** @return HasMany<CharacterUser, $this> */
+    public function characterUsers(): HasMany
     {
         return $this->hasMany(CharacterUser::class, 'user_id', 'id');
     }
 
+    /** @return HasManyThrough<CharacterInfo, CharacterUser, $this> */
     public function characters(): HasManyThrough
     {
         return $this->hasManyThrough(
@@ -92,7 +96,8 @@ class User extends Authenticatable
         );
     }
 
-    public function main_character(): HasOne
+    /** @return HasOne<CharacterInfo, $this> */
+    public function mainCharacter(): HasOne
     {
         return $this->hasOne(CharacterInfo::class, 'character_id', 'main_character_id');
     }
@@ -105,6 +110,7 @@ class User extends Authenticatable
         });
     }
 
+    /** @return MorphOne<Application, $this> */
     public function application(): MorphOne
     {
         return $this->morphOne(Application::class, 'applicationable')->whereStatus('open');

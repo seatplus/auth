@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Seatplus\Auth\Http\Actions\Roles\OnRequest;
 
 use Seatplus\Auth\Models\User;
@@ -8,10 +10,8 @@ use Seatplus\Auth\Services\Roles\BaseRoleService;
 class ApproveAction
 {
     public function __construct(
-        private ?BaseRoleService $baseRoleService = null
-    ) {
-        $this->baseRoleService = $baseRoleService ?? new BaseRoleService;
-    }
+        private readonly BaseRoleService $baseRoleService = new BaseRoleService,
+    ) {}
 
     /**
      * @throws \Throwable

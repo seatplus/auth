@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * MIT License
  *
@@ -28,6 +30,7 @@ namespace Seatplus\Auth\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use InvalidArgumentException;
 use Seatplus\Auth\Models\User;
 use Seatplus\Auth\Services\Permissions\CanUserService;
 use Seatplus\Auth\Services\Permissions\DTO\ValidateIdsDTO;
@@ -35,16 +38,20 @@ use Seatplus\Auth\Services\Permissions\DTO\ValidateIdsDTO;
 class CheckAuthorization
 {
     public function __construct(
-        private ?CanUserService $canUserService = null
-    ) {
-        $this->canUserService ??= new CanUserService;
-    }
+        private readonly CanUserService $canUserService = new CanUserService,
+    ) {}
 
     public function handle(Request $request, Closure $next, string $permissions, ?string $corporation_role = null): mixed
     {
         /** @var User $user */
         $user = auth()->user();
-        $ids_dto = ValidateIdsDTO::fromRequest($request);
+
+        try {
+            $ids_dto = ValidateIdsDTO::fromRequest($request);
+        } catch (InvalidArgumentException) {
+            abort(403);
+        }
+
         $permissions = explode('|', $permissions);
         $corporation_role = explode('|', (string) $corporation_role);
 

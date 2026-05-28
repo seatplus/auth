@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Seatplus\Auth\Services\Roles;
 
 use Seatplus\Auth\Enums\RoleMembershipStatus;
+use Seatplus\Auth\Exceptions\CriteriaNotMetException;
 use Seatplus\Auth\Models\User;
 use Seatplus\Auth\Services\Roles\DTO\CriteriaData;
 
@@ -26,7 +27,7 @@ class OnRequestRoleService extends AbstractRoleService implements RoleServiceInt
         $meets_criteria = $this->meetsCriteria($user);
 
         if (! $meets_criteria) {
-            throw new \Exception('User does not meet criteria to join role');
+            throw new CriteriaNotMetException;
         }
 
         $this->setRoleMembership(
@@ -37,7 +38,7 @@ class OnRequestRoleService extends AbstractRoleService implements RoleServiceInt
     }
 
     /**
-     * @throws \Exception
+     * @throws CriteriaNotMetException
      */
     public function approveApplicationForRole(User $user): void
     {
@@ -46,7 +47,7 @@ class OnRequestRoleService extends AbstractRoleService implements RoleServiceInt
 
         if (! $meets_criteria) {
             $this->removeRoleMembership($user);
-            throw new \Exception('User does not meet criteria to join role');
+            throw new CriteriaNotMetException;
         }
 
         $this->setRoleMembership(

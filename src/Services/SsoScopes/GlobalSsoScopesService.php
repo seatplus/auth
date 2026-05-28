@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Seatplus\Auth\Services\SsoScopes;
 
 use Seatplus\Eveapi\Models\SsoScopes;

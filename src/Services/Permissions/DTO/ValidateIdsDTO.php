@@ -1,11 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Seatplus\Auth\Services\Permissions\DTO;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use InvalidArgumentException;
 
 class ValidateIdsDTO
 {
@@ -20,16 +23,18 @@ class ValidateIdsDTO
 
     public static function fromRequest(Request $request): ValidateIdsDTO
     {
-
         $all_data = [...$request->all(), ...$request->route()->parameters()];
 
+        $toInt = fn (mixed $v): ?int => $v !== null ? (int) $v : null;
+        $toIntArray = fn (mixed $v): ?array => $v !== null ? array_map('intval', (array) $v) : null;
+
         return new self(
-            character_id: Arr::get($all_data, 'character_id'),
-            corporation_id: Arr::get($all_data, 'corporation_id'),
-            alliance_id: Arr::get($all_data, 'alliance_id'),
-            character_ids: Arr::get($all_data, 'character_ids'),
-            corporation_ids: Arr::get($all_data, 'corporation_ids'),
-            alliance_ids: Arr::get($all_data, 'alliance_ids')
+            character_id: $toInt(Arr::get($all_data, 'character_id')),
+            corporation_id: $toInt(Arr::get($all_data, 'corporation_id')),
+            alliance_id: $toInt(Arr::get($all_data, 'alliance_id')),
+            character_ids: $toIntArray(Arr::get($all_data, 'character_ids')),
+            corporation_ids: $toIntArray(Arr::get($all_data, 'corporation_ids')),
+            alliance_ids: $toIntArray(Arr::get($all_data, 'alliance_ids')),
         );
     }
 
@@ -77,7 +82,9 @@ class ValidateIdsDTO
 
         $presentKeys = array_filter($keys, fn (string $key) => ! is_null($ids[$key] ?? null));
 
-        abort_unless(count($presentKeys) === 1, 403, 'Exactly one of the parameters ['.implode(', ', $keys).'] must be present.');
+        if (count($presentKeys) !== 1) {
+            throw new InvalidArgumentException('Exactly one of the parameters ['.implode(', ', $keys).'] must be present.');
+        }
 
         $validator = Validator::make($ids, [
             'character_id' => 'nullable|integer',
@@ -91,7 +98,9 @@ class ValidateIdsDTO
             'alliance_ids.*' => 'integer',
         ]);
 
-        abort_if($validator->fails(), 403, implode(', ', $validator->errors()->all()));
+        if ($validator->fails()) {
+            throw new InvalidArgumentException(implode(', ', $validator->errors()->all()));
+        }
 
         return $validator->validated();
     }

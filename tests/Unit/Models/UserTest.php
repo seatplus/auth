@@ -37,18 +37,18 @@ beforeEach(function () {
 it('has main character relationship', function () {
     $test_user = User::factory()->create();
 
-    expect($test_user->main_character)->toBeInstanceOf(CharacterInfo::class);
+    expect($test_user->mainCharacter)->toBeInstanceOf(CharacterInfo::class);
 });
 
 it('has characters relationship', function () {
     $test_user = User::factory()->create();
 
     test()->assertDatabaseHas('character_users', [
-        'character_id' => $test_user->character_users->first()->character_id,
+        'character_id' => $test_user->characterUsers->first()->character_id,
     ]);
 
     test()->assertDatabaseHas('character_infos', [
-        'character_id' => $test_user->character_users->first()->character_id,
+        'character_id' => $test_user->characterUsers->first()->character_id,
     ]);
 
     expect($test_user->characters->first())->toBeInstanceOf(CharacterInfo::class);

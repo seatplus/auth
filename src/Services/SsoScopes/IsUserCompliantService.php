@@ -1,17 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Seatplus\Auth\Services\SsoScopes;
 
 use Seatplus\Auth\Models\User;
 
 class IsUserCompliantService
 {
-    private readonly BuildScopesArrayService $build_scopes_array_service;
+    private readonly BuildScopesArrayService $buildScopesArrayService;
 
     public function __construct(
-        private readonly bool $consider_applications = true
+        private readonly bool $considerApplications = true
     ) {
-        $this->build_scopes_array_service = new BuildScopesArrayService($this->consider_applications);
+        $this->buildScopesArrayService = new BuildScopesArrayService($this->considerApplications);
     }
 
     public function check(User $user): bool
@@ -23,7 +25,7 @@ class IsUserCompliantService
 
     public function getMissingScopes(User $user): array
     {
-        $scopes = $this->build_scopes_array_service
+        $scopes = $this->buildScopesArrayService
             ->get($user);
 
         return collect($scopes)

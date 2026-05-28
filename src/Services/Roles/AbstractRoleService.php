@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Seatplus\Auth\Services\Roles;
 
 use Illuminate\Database\Eloquent\Builder;
@@ -21,7 +23,8 @@ use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 abstract class AbstractRoleService implements RoleServiceInterface
 {
     public function __construct(
-        protected Role $role
+        protected Role $role,
+        private readonly IsUserCompliantService $isUserCompliantService = new IsUserCompliantService(false),
     ) {}
 
     private function affiliateEntity(int|string $entity_id, string $entity_type, AffiliationType $affiliationType): void
@@ -74,7 +77,7 @@ abstract class AbstractRoleService implements RoleServiceInterface
 
     private function getActiveMembers(): \Illuminate\Support\Collection
     {
-        return $this->role->role_memberships()
+        return $this->role->roleMemberships()
             ->where('entity_type', User::class)
             ->where('status', RoleMembershipStatus::ACTIVE)
             ->pluck('entity_id');
@@ -136,12 +139,12 @@ abstract class AbstractRoleService implements RoleServiceInterface
 
     protected function getAssignedCharacterIds(): array
     {
-        $role = $this->role->refresh()->loadMissing(['role_memberships.entity' => function (MorphTo $morph_to) {
+        $role = $this->role->refresh()->loadMissing(['roleMemberships.entity' => function (MorphTo $morph_to) {
             $morph_to->morphWith([CorporationInfo::class => 'characters', AllianceInfo::class => 'characters']);
         }]);
 
         return $role
-            ->role_memberships
+            ->roleMemberships
             ->filter(fn (RoleMembership $role_membership) => $role_membership->entity_type === CorporationInfo::class || $role_membership->entity_type === AllianceInfo::class)
             ->pluck('entity.characters')
             ->flatten()
@@ -196,10 +199,7 @@ abstract class AbstractRoleService implements RoleServiceInterface
 
     protected function isUserCompliant(User $user): bool
     {
-        // build a service to check if user is compliant. We do not consider applications here
-        $is_user_compliant_service = new IsUserCompliantService(false);
-
-        return $is_user_compliant_service->check($user);
+        return $this->isUserCompliantService->check($user);
     }
 
     /**
