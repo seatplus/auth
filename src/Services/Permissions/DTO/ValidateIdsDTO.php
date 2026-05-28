@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use InvalidArgumentException;
 
 class ValidateIdsDTO
 {
@@ -83,7 +84,9 @@ class ValidateIdsDTO
             return ! is_null($ids[$key] ?? null);
         });
 
-        abort_unless(count($presentKeys) === 1, 403, 'Exactly one of the parameters ['.implode(', ', $keys).'] must be present.');
+        if (count($presentKeys) !== 1) {
+            throw new InvalidArgumentException('Exactly one of the parameters ['.implode(', ', $keys).'] must be present.');
+        }
 
         $validator = Validator::make($ids, [
             'character_id' => 'nullable|integer',
@@ -97,7 +100,9 @@ class ValidateIdsDTO
             'alliance_ids.*' => 'integer',
         ]);
 
-        abort_if($validator->fails(), 403, implode(', ', $validator->errors()->all()));
+        if ($validator->fails()) {
+            throw new InvalidArgumentException(implode(', ', $validator->errors()->all()));
+        }
 
         return $validator->validated();
     }
