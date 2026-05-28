@@ -23,7 +23,8 @@ use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 abstract class AbstractRoleService implements RoleServiceInterface
 {
     public function __construct(
-        protected Role $role
+        protected Role $role,
+        private readonly IsUserCompliantService $isUserCompliantService = new IsUserCompliantService(false),
     ) {}
 
     private function affiliateEntity(int|string $entity_id, string $entity_type, AffiliationType $affiliationType): void
@@ -198,10 +199,7 @@ abstract class AbstractRoleService implements RoleServiceInterface
 
     protected function isUserCompliant(User $user): bool
     {
-        // build a service to check if user is compliant. We do not consider applications here
-        $is_user_compliant_service = new IsUserCompliantService(false);
-
-        return $is_user_compliant_service->check($user);
+        return $this->isUserCompliantService->check($user);
     }
 
     /**

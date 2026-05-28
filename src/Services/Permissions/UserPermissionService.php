@@ -17,10 +17,8 @@ class UserPermissionService
     private array $character_ids = [];
 
     public function __construct(
-        private ?RolePermissionObjectService $role_permission_object_service = null
-    ) {
-        $this->role_permission_object_service = $role_permission_object_service ?? new RolePermissionObjectService;
-    }
+        private readonly RolePermissionObjectService $role_permission_object_service = new RolePermissionObjectService,
+    ) {}
 
     public function get(User $user): array
     {
