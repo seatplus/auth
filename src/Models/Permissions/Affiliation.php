@@ -26,6 +26,7 @@
 
 namespace Seatplus\Auth\Models\Permissions;
 
+use Illuminate\Database\Eloquent\Attributes\Unguarded;
 use Illuminate\Database\Eloquent\Attributes\WithoutIncrementing;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
@@ -41,13 +42,11 @@ use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
  * @property string $type
  */
 #[WithoutIncrementing]
+#[Unguarded]
 class Affiliation extends Model
 {
     #[\Override]
     protected $primaryKey = null;
-
-    #[\Override]
-    protected $guarded = [];
 
     #[\Override]
     protected function casts(): array
