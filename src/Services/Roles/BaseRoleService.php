@@ -20,7 +20,7 @@ class BaseRoleService
     public function for(Role|string|int $role): self
     {
 
-        /* @var Role $resolved_role */
+        /** @var Role $resolved_role */
         $resolved_role = match (true) {
             $role instanceof Role => $role,
             is_string($role) => Role::findByName($role),
