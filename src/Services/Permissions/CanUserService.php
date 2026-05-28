@@ -14,7 +14,7 @@ use Seatplus\Auth\Services\Permissions\DTO\ValidateIdsDTO;
 class CanUserService
 {
     public function __construct(
-        private readonly UserPermissionService $user_permission_service = new UserPermissionService,
+        private readonly UserPermissionService $userPermissionService = new UserPermissionService,
     ) {}
 
     /**
@@ -154,6 +154,6 @@ class CanUserService
 
     public function getUserPermissionObject(User $user): array
     {
-        return Cache::remember("user_permissions_{$user->id}", now()->addMinutes(5), fn () => $this->user_permission_service->get($user));
+        return Cache::remember("user_permissions_{$user->id}", now()->addMinutes(5), fn () => $this->userPermissionService->get($user));
     }
 }

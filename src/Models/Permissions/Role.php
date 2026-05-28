@@ -53,7 +53,7 @@ class Role extends SpatieRole
     }
 
     /** @return HasMany<RoleMembership, $this> */
-    public function role_memberships(): HasMany
+    public function roleMemberships(): HasMany
     {
         return $this->hasMany(RoleMembership::class, 'role_id');
     }

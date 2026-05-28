@@ -94,7 +94,7 @@ test('one can add another character', function () {
     ]);
 
     // expect test_user only to have one character
-    expect(test()->test_user->character_users)->toHaveCount(1);
+    expect(test()->test_user->characterUsers)->toHaveCount(1);
 
     // assert no UserRolesSync job has been dispatched
     Queue::assertNothingPushed();
@@ -109,5 +109,5 @@ test('one can add another character', function () {
 
     expect(session('success'))->toBe('Character added/updated successfully');
 
-    expect(test()->test_user->refresh()->character_users)->toHaveCount(2);
+    expect(test()->test_user->refresh()->characterUsers)->toHaveCount(2);
 });

@@ -26,7 +26,7 @@ class BuildScopesArrayService
     ];
 
     public function __construct(
-        private readonly bool $with_application_scopes = true,
+        private readonly bool $withApplicationScopes = true,
         private readonly GlobalSsoScopesService $globalSsoScopesService = new GlobalSsoScopesService,
     ) {}
 
@@ -115,7 +115,7 @@ class BuildScopesArrayService
 
     private function isWithApplicationScopes(): bool
     {
-        return $this->with_application_scopes;
+        return $this->withApplicationScopes;
     }
 
     public function get(User|CharacterInfo $entity): array
