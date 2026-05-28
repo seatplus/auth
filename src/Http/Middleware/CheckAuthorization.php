@@ -53,7 +53,7 @@ class CheckAuthorization
         }
 
         $permissions = explode('|', $permissions);
-        $corporation_role = explode('|', $corporation_role);
+        $corporation_role = explode('|', (string) $corporation_role);
 
         abort_unless($this->canUserService->check(
             user: $user,
