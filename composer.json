@@ -27,7 +27,7 @@
         "php": "^8.5",
         "laravel/framework": "^13.0",
         "laravel/socialite": "^5.0",
-        "seatplus/eveapi": "^4.1",
+        "seatplus/eveapi": "^4.1.4",
         "spatie/laravel-permission": "^6.10",
         "socialiteproviders/eveonline": "^4.0"
     },
