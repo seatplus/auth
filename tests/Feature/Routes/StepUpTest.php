@@ -37,7 +37,7 @@ test('one can request another scope', function () {
     // 1. Create refresh_token
     createRefreshTokenWithScopes(['a', 'b']);
 
-    expect(test()->test_character->refresh_token->scopes)
+    expect(test()->test_character->refreshToken->scopes)
         ->toBeArray()
         ->toBe(['a', 'b']);
 
@@ -54,10 +54,10 @@ test('one can request another scope', function () {
 
 test('one can request another scope for a deleted token', function () {
     // Delete the token
-    $token = test()->test_character->refresh_token;
+    $token = test()->test_character->refreshToken;
     $token->delete();
 
-    expect(test()->test_character->refresh()->refresh_token)
+    expect(test()->test_character->refresh()->refreshToken)
         ->toBeNull();
 
     $add_scopes = implode(',', ['1', '2']);

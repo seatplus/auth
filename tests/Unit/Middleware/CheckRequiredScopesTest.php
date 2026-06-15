@@ -115,7 +115,7 @@ describe('redirect request', function () {
                 'character_id' => $secondary_character->character_id,
             ]);
 
-            $refresh_token = $secondary_character->refresh_token;
+            $refresh_token = $secondary_character->refreshToken;
             $refresh_token->token = $helper_token->token;
             $refresh_token->save();
         });
@@ -281,7 +281,7 @@ describe('passes middleware', function () {
                 'character_id' => $secondary_character->character_id,
             ]);
 
-            $refresh_token = $secondary_character->refresh_token;
+            $refresh_token = $secondary_character->refreshToken;
             $refresh_token->token = $helper_token->token;
             $refresh_token->save();
         });

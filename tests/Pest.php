@@ -55,8 +55,8 @@ uses(LazilyRefreshDatabase::class)->in('Unit', 'Feature');
 function createRefreshTokenWithScopes(array $scopes): void
 {
     Event::fakeFor(function () use ($scopes) {
-        if (test()->test_character->refresh_token) {
-            $refresh_token = test()->test_character->refresh_token;
+        if (test()->test_character->refreshToken) {
+            $refresh_token = test()->test_character->refreshToken;
             $helper_token = RefreshToken::factory()->scopes($scopes)->make([
                 'character_id' => $refresh_token->character_id,
             ]);
