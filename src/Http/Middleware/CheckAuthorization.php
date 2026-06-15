@@ -46,21 +46,23 @@ class CheckAuthorization
         /** @var User $user */
         $user = auth()->user();
 
-        try {
-            $ids_dto = ValidateIdsDTO::fromRequest($request);
-        } catch (InvalidArgumentException) {
-            abort(403);
-        }
-
         $permissions = explode('|', $permissions);
         $corporation_role = explode('|', (string) $corporation_role);
 
-        abort_unless($this->canUserService->check(
-            user: $user,
-            idsDTO: $ids_dto,
-            permissions: $permissions,
-            corporation_roles: $corporation_role
-        ), 403);
+        // ValidateIdsDTO validation runs inside CanUserService::check(); guard it
+        // here so malformed/conflicting id parameters yield a 403 instead of a 500.
+        try {
+            $ids_dto = ValidateIdsDTO::fromRequest($request);
+
+            abort_unless($this->canUserService->check(
+                user: $user,
+                idsDTO: $ids_dto,
+                permissions: $permissions,
+                corporation_roles: $corporation_role
+            ), 403);
+        } catch (InvalidArgumentException) {
+            abort(403);
+        }
 
         return $next($request);
     }

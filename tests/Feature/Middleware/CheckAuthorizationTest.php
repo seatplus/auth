@@ -54,6 +54,17 @@ describe('middleware checks permission and affiliation', function () {
         test()->secondary_character = CharacterInfo::factory()->create();
     });
 
+    it('returns forbidden when conflicting id parameters are provided', function () {
+        assignPermissionToTestUser(['superuser']);
+
+        test()->actingAs(test()->test_user);
+
+        post(route('character.post'), [
+            'character_id' => test()->test_character->character_id,
+            'corporation_id' => test()->test_character->corporation->corporation_id,
+        ])->assertForbidden();
+    });
+
     it('it validates parameters for superuser', function (string $method, string $route, int|array $route_param, string $status = 'ok') {
         assignPermissionToTestUser(['superuser']);
 

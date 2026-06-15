@@ -123,7 +123,7 @@ class BuildScopesArrayService
         $user = User::query()
             ->when($entity instanceof CharacterInfo, fn (Builder $query) => $query
                 ->whereHas('characters', fn (Builder $query) => $query
-                    ->where('character_id', $entity->character_id)
+                    ->where('character_infos.character_id', $entity->character_id)
                 )
             )
             ->with(self::USER_RELATIONS)
