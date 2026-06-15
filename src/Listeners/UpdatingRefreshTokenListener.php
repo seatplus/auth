@@ -37,7 +37,7 @@ class UpdatingRefreshTokenListener
 {
     public function handle(UpdatingRefreshTokenEvent $refresh_token_event): void
     {
-        $refresh_token = $refresh_token_event->refresh_token;
+        $refresh_token = $refresh_token_event->refreshToken;
         $original_scopes = $refresh_token->getOriginal('scopes');
         $new_scopes = $this->getScopes($refresh_token->token);
 

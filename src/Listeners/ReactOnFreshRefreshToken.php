@@ -37,7 +37,7 @@ class ReactOnFreshRefreshToken
     public function handle(RefreshTokenCreated $refresh_token_event): void
     {
         $character_user = CharacterUser::query()
-            ->where('character_id', $refresh_token_event->refresh_token->character_id)
+            ->where('character_id', $refresh_token_event->refreshToken->character_id)
             ->firstOrFail();
 
         Cache::forget("user_permissions_{$character_user->user_id}");

@@ -26,7 +26,7 @@ it('forgets user permission object when refresh_token scopes are updated', funct
         ->once()
         ->with("user_permissions_{$user_id}");
 
-    $refresh_token = test()->test_character->refresh_token;
+    $refresh_token = test()->test_character->refreshToken;
     $refresh_token->token = createSocialiteUser($refresh_token->character_id, ['foo', 'bar'])->token;
 
     $refresh_token->save();

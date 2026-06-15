@@ -22,7 +22,7 @@ class BuildScopesArrayService
         'alliance.ssoScopes',
         'corporation.ssoScopes',
         'application.corporation' => ['ssoScopes', 'alliance.ssoScopes'],
-        'refresh_token',
+        'refreshToken',
     ];
 
     public function __construct(
@@ -78,7 +78,7 @@ class BuildScopesArrayService
             ->map(function (CharacterInfo $character) use ($user_required_scopes) {
 
                 $required_scopes = [...$user_required_scopes, ...$this->getCharacterRequiredScopes($character)];
-                $token_scopes = $character->refresh_token->scopes ?? [];
+                $token_scopes = $character->refreshToken->scopes ?? [];
                 $missing_scopes = array_diff($required_scopes, $token_scopes);
 
                 return [
@@ -123,7 +123,7 @@ class BuildScopesArrayService
         $user = User::query()
             ->when($entity instanceof CharacterInfo, fn (Builder $query) => $query
                 ->whereHas('characters', fn (Builder $query) => $query
-                    ->where('character_id', $entity->character_id)
+                    ->where('character_infos.character_id', $entity->character_id)
                 )
             )
             ->with(self::USER_RELATIONS)
