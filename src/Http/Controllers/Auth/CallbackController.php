@@ -29,7 +29,8 @@ class CallbackController
         $socialite_user = $social->driver('eveonline')->user();
 
         $eve_data = new EveUser(
-            character_id: data_get($socialite_user, 'attributes.character_id'),
+            // EVE SSO returns character_id as a string; EveUser (strict_types) expects int.
+            character_id: (int) data_get($socialite_user, 'attributes.character_id'),
             character_owner_hash: data_get($socialite_user, 'attributes.character_owner_hash'),
             token: data_get($socialite_user, 'token'),
             refreshToken: data_get($socialite_user, 'refreshToken'),
