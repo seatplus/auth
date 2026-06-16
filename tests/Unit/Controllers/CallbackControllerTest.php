@@ -17,7 +17,7 @@ it('redirects back with error message on login failure', function () {
     });
 
     $socialite_user->attributes = (object) [
-        'character_id' => 1,
+        'character_id' => '1', // EVE SSO provider returns this as a string
         'character_owner_hash' => faker()->sha256,
     ];
     $socialite_user->token = 'token';
@@ -58,7 +58,7 @@ it('redirects back if different character id is provided', function () {
     });
 
     $socialite_user->attributes = (object) [
-        'character_id' => 1,
+        'character_id' => '1', // EVE SSO provider returns this as a string
         'character_owner_hash' => faker()->sha256,
     ];
     $socialite_user->token = 'token';
