@@ -43,7 +43,7 @@ use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Spatie\Permission\Traits\HasRoles;
 
 #[Fillable([
-    'main_character_id', 'character_owner_hash', 'active',
+    'main_character_id', 'character_owner_hash', 'active', 'locale',
 ])]
 #[Hidden([
     'password', 'remember_token',
