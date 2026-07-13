@@ -49,10 +49,9 @@ class RedirectSSOController extends Controller
      */
     public function __invoke(Socialite $socialite): RedirectResponse
     {
-        if ($this->authenticationService->isUserAuthenticated()) {
-            return redirect('/');
-        }
-
+        // Note: authenticated users are intentionally NOT short-circuited here — hitting this route
+        // while logged in is the "add another character" flow. CallbackController links the newly
+        // authenticated character onto the current user. Bouncing authenticated users home broke it.
         $scopes = $this->getScopes();
 
         session([

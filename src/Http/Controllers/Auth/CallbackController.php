@@ -38,19 +38,26 @@ class CallbackController
             user: data_get($socialite_user, 'user'),
         );
 
-        // if return url was set, set the intended URL
+        // Decide where to land the user after the callback:
+        //   - add character (authenticated, not a step-up) → always the dashboard ('/'),
+        //     never the page the "Add characters" button happened to be on;
+        //   - step-up / fresh login → the return url the user came from (via the intended url).
         $return_url = session()->pull('rurl');
-        if ($return_url) {
+        $stepUpCharacterId = $this->authenticationService->getSessionValue('step_up');
+        $isAuthenticated = $this->authenticationService->isUserAuthenticated();
+        $isAddCharacter = $isAuthenticated && $stepUpCharacterId === null;
+
+        if ($return_url && ! $isAddCharacter) {
             $this->authenticationService->setIntendedUrl($return_url);
         }
 
         // check if the requested scopes matches the provided scopes
-        if ($this->authenticationService->isUserAuthenticated()) {
+        if ($isAuthenticated) {
             $hasNotMatchingSsoScopes = $this->hasNotMatchingSsoScopes($eve_data);
-            $isDifferentCharacterIdProvided = $this->isDifferentCharacterIdProvided($eve_data);
+            $isDifferentCharacterIdProvided = $this->isDifferentCharacterIdProvided($eve_data, $stepUpCharacterId);
 
             if ($isDifferentCharacterIdProvided || $hasNotMatchingSsoScopes) {
-                return redirect()->intended();
+                return $isAddCharacter ? redirect('/') : redirect()->intended();
             }
         }
 
@@ -71,7 +78,7 @@ class CallbackController
 
         RoleMemberSync::dispatch()->onQueue('high');
 
-        return redirect()->intended();
+        return $isAddCharacter ? redirect('/') : redirect()->intended();
     }
 
     private function hasNotMatchingSsoScopes(EveUser $user): bool
@@ -88,10 +95,8 @@ class CallbackController
         return false;
     }
 
-    private function isDifferentCharacterIdProvided(EveUser $user): bool
+    private function isDifferentCharacterIdProvided(EveUser $user, ?int $step_up_character_id): bool
     {
-        $step_up_character_id = $this->authenticationService->getSessionValue('step_up');
-
         if (! $step_up_character_id || $step_up_character_id === $user->character_id) {
             return false;
         }

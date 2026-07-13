@@ -101,6 +101,9 @@ test('one can add another character', function () {
 
     $result = test()->get(route('auth.eve.callback'));
 
+    // adding a character always lands on the dashboard, not the page the button was on (rurl)
+    $result->assertRedirect('/');
+
     // assert no UserRolesSync job has been dispatched
     Queue::assertPushedOn('high', RoleMemberSync::class);
 
