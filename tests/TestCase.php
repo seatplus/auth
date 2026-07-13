@@ -46,6 +46,15 @@ abstract class TestCase extends OrchestraTestCase
 
     protected function setUp(): void
     {
+        // Hard stop: never run the suite against the dev database. The phpunit
+        // <env DB_DATABASE="laravel" force="true"> override has been observed to be bypassed
+        // in the local dev container (the shell exports DB_DATABASE=seatplus), in which case
+        // RefreshDatabase would migrate:fresh the dev DB and wipe it. Abort loudly before
+        // parent::setUp() boots anything or a factory touches the connection.
+        if (env('DB_DATABASE') === 'seatplus') {
+            throw new \RuntimeException('Test suite resolved DB_DATABASE=seatplus (the dev database) — aborting to avoid wiping dev data. The phpunit force override did not hold.');
+        }
+
         parent::setUp();
 
         Model::shouldBeStrict();
