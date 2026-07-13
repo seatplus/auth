@@ -35,10 +35,19 @@ it('redirects to Eve Online authentication page when user is not authenticated',
     expect($response->getTargetUrl())->toBe('http://example.com/redirect');
 });
 
-it('redirects home when user is already authenticated', function () {
-    $this->authenticationServiceMock->shouldReceive('isUserAuthenticated')->andReturn(true);
+it('redirects to Eve Online authentication page even when already authenticated (add character)', function () {
+    // An authenticated user hitting this route is adding another character; they must still be sent
+    // to EVE SSO (CallbackController links the new character), not bounced home.
+    $this->authenticationServiceMock->shouldReceive('getPreviousUrl')->andReturn('http://example.com/previous');
+    $this->serviceMock->shouldReceive('get')->andReturn(['scope1', 'scope2']);
+    $this->socialiteMock->shouldReceive('driver')
+        ->with('eveonline')
+        ->andReturn(mock(Provider::class, function (MockInterface $mock) {
+            $mock->shouldReceive('scopes')->andReturnSelf();
+            $mock->shouldReceive('redirect')->andReturn(new RedirectResponse('http://example.com/redirect'));
+        }));
 
     $response = $this->controller->__invoke($this->socialiteMock);
 
-    expect($response)->toBeInstanceOf(RedirectResponse::class);
+    expect($response->getTargetUrl())->toBe('http://example.com/redirect');
 });
