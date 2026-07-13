@@ -35,10 +35,15 @@ class UpdateRefreshTokenAction
 {
     public function __invoke(EveUser $eve_data)
     {
-        // To prevent overwriting a perfectly fine refresh_token of users without a valid session
-        //
-        if (auth()->guest() && RefreshToken::query()->where('character_id', $eve_data->character_id)->exists()) {
-            return;
+        // Don't clobber a healthy refresh_token for a request without an active session (guest) —
+        // UNLESS the incoming grant adds scopes the stored token lacks. A scope-widening re-auth
+        // must persist, otherwise the character stays stuck on the old, narrower grant.
+        if (auth()->guest()) {
+            $existing = RefreshToken::query()->where('character_id', $eve_data->character_id)->first();
+
+            if ($existing !== null && ! $this->grantWidensScopes($eve_data, $existing)) {
+                return;
+            }
         }
 
         /* @var RefreshToken $refresh_token */
@@ -56,5 +61,24 @@ class UpdateRefreshTokenAction
         }
 
         // TODO: if user was deactivated reactivate him https://github.com/eveseat/web/blob/a0c1dd6a73c10e91813276cd57b5b51460bdfc43/src/Http/Controllers/Auth/SsoController.php#L264
+    }
+
+    /**
+     * Whether the incoming grant carries scopes the stored token does not already have.
+     * array_filter drops empty/null entries so an unscoped payload never counts as widening.
+     */
+    private function grantWidensScopes(EveUser $eve_data, RefreshToken $existing): bool
+    {
+        // A stored token that isn't a decodable JWT exposes no scopes — treat it as none rather
+        // than letting the accessor blow up, so any real incoming scope counts as widening.
+        try {
+            $stored = array_filter($existing->scopes);
+        } catch (\Throwable) {
+            $stored = [];
+        }
+
+        $incoming = array_filter($eve_data->getScopes());
+
+        return ! empty(array_diff($incoming, $stored));
     }
 }

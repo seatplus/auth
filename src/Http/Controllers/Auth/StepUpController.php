@@ -52,7 +52,9 @@ class StepUpController extends Controller
         $scopes = collect($token !== null ? $token->scopes : [])->merge($add_scopes)->toArray();
 
         session([
-            'rurl' => url()->previous(),
+            // Explicit, validated origin from the caller — NOT url()->previous()/getPreviousUrl(),
+            // which on the XHR-heavy SPA is the last background fetch, not the page the user was on.
+            'rurl' => $this->returnUrl(),
             'sso_scopes' => $scopes,
             'step_up' => $character_id,
         ]);
@@ -61,6 +63,25 @@ class StepUpController extends Controller
 
         /** @var Provider $driver */
         return $driver->scopes($scopes)->redirect();
+    }
+
+    /**
+     * The local page to return to after step-up. Taken from the explicit `redirect` query param and
+     * restricted to a relative path to avoid open redirects; defaults to '/' when absent or invalid.
+     */
+    private function returnUrl(): string
+    {
+        $redirect = request()->query('redirect');
+
+        if (is_string($redirect)
+            && str_starts_with($redirect, '/')
+            && ! str_starts_with($redirect, '//')
+            && ! str_starts_with($redirect, '/\\')
+        ) {
+            return $redirect;
+        }
+
+        return '/';
     }
 
     private function isCharacterAssociatedToCurrentUser(int $character_id): bool

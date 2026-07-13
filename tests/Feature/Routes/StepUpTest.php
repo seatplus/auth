@@ -78,3 +78,31 @@ test('one can not request another scope for a character not associated to the us
 
     $response->assertSessionHas('error', 'character must belong to your account');
 });
+
+test('step-up stores the explicit redirect origin as the return url', function () {
+    createRefreshTokenWithScopes(['a', 'b']);
+
+    test()->actingAs(test()->test_user)->get(route('auth.eve.step_up', [
+        'character_id' => test()->test_character->character_id,
+        'add_scopes' => '1,2',
+        'redirect' => '/character/wallet',
+    ]));
+
+    expect(session('rurl'))->toBe('/character/wallet');
+});
+
+test('step-up rejects a non-local redirect origin and falls back to /', function (string $redirect) {
+    createRefreshTokenWithScopes(['a', 'b']);
+
+    test()->actingAs(test()->test_user)->get(route('auth.eve.step_up', [
+        'character_id' => test()->test_character->character_id,
+        'add_scopes' => '1,2',
+        'redirect' => $redirect,
+    ]));
+
+    expect(session('rurl'))->toBe('/');
+})->with([
+    'absolute url' => 'https://evil.example.com/phish',
+    'protocol-relative' => '//evil.example.com',
+    'backslash trick' => '/\\evil.example.com',
+]);

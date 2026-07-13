@@ -25,6 +25,7 @@
  */
 
 use Illuminate\Support\Facades\Event;
+use Seatplus\Auth\Containers\EveUser;
 use Seatplus\Auth\Http\Actions\Sso\UpdateRefreshTokenAction;
 use Seatplus\Eveapi\Models\RefreshToken;
 
@@ -65,6 +66,55 @@ it('does update refresh token active sessions', function () {
         'character_id' => $eveUser->character_id,
         'refresh_token' => $eveUser_changedRefreshToken->refreshToken,
     ]);
+});
+
+it('updates a guest re-auth that widens the stored token scopes', function () {
+    // Existing token for a character with no active session (guest re-auth), narrow scopes.
+    $narrow = Event::fakeFor(fn () => RefreshToken::factory()->scopes(['esi-skills.read_skills.v1'])->create());
+    $characterId = $narrow->character_id;
+
+    expect($narrow->hasScope('esi-assets.read_assets.v1'))->toBeFalse();
+
+    // Incoming re-auth grants a wider scope set.
+    $wideScopes = ['esi-skills.read_skills.v1', 'esi-assets.read_assets.v1'];
+    $incoming = RefreshToken::factory()->scopes($wideScopes)->make(['character_id' => $characterId]);
+
+    $eveUser = new EveUser(
+        character_id: $characterId,
+        character_owner_hash: sha1((string) $characterId),
+        token: $incoming->token,
+        refreshToken: $incoming->refresh_token,
+        expiresIn: 1200,
+        user: ['scp' => $wideScopes],
+    );
+
+    $action = new UpdateRefreshTokenAction;
+    Event::fakeFor(fn () => $action($eveUser)); // no actingAs → guest
+
+    expect(RefreshToken::find($characterId)->hasScope('esi-assets.read_assets.v1'))->toBeTrue();
+});
+
+it('does not update a guest re-auth that does not widen scopes', function () {
+    $scopes = ['esi-skills.read_skills.v1'];
+    $existing = Event::fakeFor(fn () => RefreshToken::factory()->scopes($scopes)->create());
+    $originalRefreshToken = $existing->refresh_token;
+
+    // Same scopes, different refresh_token — must be preserved for a guest.
+    $incoming = RefreshToken::factory()->scopes($scopes)->make(['character_id' => $existing->character_id]);
+
+    $eveUser = new EveUser(
+        character_id: $existing->character_id,
+        character_owner_hash: sha1((string) $existing->character_id),
+        token: $incoming->token,
+        refreshToken: $incoming->refresh_token,
+        expiresIn: 1200,
+        user: ['scp' => $scopes],
+    );
+
+    $action = new UpdateRefreshTokenAction;
+    Event::fakeFor(fn () => $action($eveUser)); // guest
+
+    expect(RefreshToken::find($existing->character_id)->refresh_token)->toBe($originalRefreshToken);
 });
 
 it('does not update refresh token for new session of a valid refresh token user', function () {
