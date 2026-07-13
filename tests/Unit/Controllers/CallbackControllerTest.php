@@ -97,3 +97,50 @@ it('redirects back if different character id is provided', function () {
 
     expect($response)->toBeInstanceOf(RedirectResponse::class);
 });
+
+it('sets the stored return url as the intended url on a fresh login', function () {
+    session(['rurl' => '/some/return/path']);
+
+    $socialite_user = mock(SocialiteUser::class, function (MockInterface $mock) {
+        $mock->makePartial();
+    });
+
+    $socialite_user->attributes = (object) [
+        'character_id' => '1', // EVE SSO provider returns this as a string
+        'character_owner_hash' => faker()->sha256,
+    ];
+    $socialite_user->token = 'token';
+    $socialite_user->refreshToken = 'refreshToken';
+    $socialite_user->expiresIn = 12 * 60; // let's just say 12 minutes
+    $socialite_user->user = [
+        'scp' => ['esi-skills.read_skills.v1', 'esi-skills.read_skillqueue.v1'],
+    ];
+
+    $social = mock(Socialite::class, function (MockInterface $social) use ($socialite_user) {
+        $social->shouldReceive('driver->user')->andReturn($socialite_user);
+    });
+
+    $find_or_create_user_action = mock(FindOrCreateUserAction::class, function (MockInterface $mock) {
+        $mock->shouldReceive('__invoke')->andReturn(mock(User::class));
+    });
+
+    $update_refresh_token_action = mock(UpdateRefreshTokenAction::class, function (MockInterface $mock) {
+        $mock->shouldReceive('__invoke')->andReturnNull();
+    });
+
+    // Not authenticated + no step_up => this is not an add-character flow, so the stored
+    // return url must be handed to the intended url (CallbackController line 50-52).
+    $authenticationService = mock(AuthenticationService::class, function (MockInterface $mock) {
+        $mock->shouldReceive('isUserAuthenticated')->andReturnFalse();
+        $mock->shouldReceive('getSessionValue')->with('step_up')->andReturnNull();
+        $mock->shouldReceive('setIntendedUrl')->once()->with('/some/return/path')->andReturnNull();
+        $mock->shouldReceive('loginUser')->andReturnTrue();
+        $mock->shouldReceive('flashMessage')->once()->with('success', 'Character added/updated successfully')->andReturnNull();
+    });
+
+    $controller = new CallbackController($authenticationService);
+
+    $response = $controller($social, $find_or_create_user_action, $update_refresh_token_action);
+
+    expect($response)->toBeInstanceOf(RedirectResponse::class);
+});
