@@ -41,6 +41,7 @@ it('redirects back with error message on login failure', function () {
 
     $authenticationService = mock(AuthenticationService::class, function (MockInterface $mock) {
         $mock->shouldReceive('isUserAuthenticated')->andReturnFalse();
+        $mock->shouldReceive('getSessionValue')->with('step_up')->andReturnNull();
         $mock->shouldReceive('loginUser')->andReturnFalse();
     });
 
