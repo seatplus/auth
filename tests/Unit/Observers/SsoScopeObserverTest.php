@@ -8,11 +8,13 @@ it('flushes cache after creation', function () {
 
     $user_id = test()->test_user->id;
 
-    Cache::shouldReceive('forget')
-        ->once()
-        ->with("user_permissions_{$user_id}");
+    Cache::spy();
 
     SsoScopes::factory()->create();
+
+    Cache::shouldHaveReceived('forget')
+        ->once()
+        ->with("user_permissions_{$user_id}");
 });
 
 it('flushes cache after updated', function () {
@@ -20,13 +22,15 @@ it('flushes cache after updated', function () {
 
     $user_id = test()->test_user->id;
 
-    Cache::shouldReceive('forget')
-        ->once()
-        ->with("user_permissions_{$user_id}");
+    Cache::spy();
 
     $ssoScopes = SsoScopes::first();
     $ssoScopes->morphable_id = faker()->randomNumber(5);
     $ssoScopes->save();
+
+    Cache::shouldHaveReceived('forget')
+        ->once()
+        ->with("user_permissions_{$user_id}");
 });
 
 it('flushes cache after deleted', function () {
@@ -34,10 +38,12 @@ it('flushes cache after deleted', function () {
 
     $user_id = test()->test_user->id;
 
-    Cache::shouldReceive('forget')
-        ->once()
-        ->with("user_permissions_{$user_id}");
+    Cache::spy();
 
     $ssoScopes = SsoScopes::first();
     $ssoScopes->delete();
+
+    Cache::shouldHaveReceived('forget')
+        ->once()
+        ->with("user_permissions_{$user_id}");
 });
