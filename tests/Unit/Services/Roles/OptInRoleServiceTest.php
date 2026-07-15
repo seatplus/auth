@@ -37,6 +37,24 @@ it('can join role', function () {
     expect(RoleMembership::query()->count())->toBe(2);
 });
 
+it('lets a non-affiliated user join when open to all', function () {
+    $other_user = User::factory()->create();
+
+    $this->service->addCriteriaForRole(
+        new CriteriaData(OptInRoleService::EVERYONE_CORPORATION_ID, 'corporation'),
+    );
+
+    expect($this->service->canJoin($other_user))->toBeTrue();
+
+    $this->service->joinRole($other_user);
+
+    expect(RoleMembership::query()
+        ->where('role_id', $this->role->id)
+        ->where('entity_id', $other_user->id)
+        ->where('entity_type', User::class)
+        ->exists())->toBeTrue();
+});
+
 it('can leave role', function () {
     $test_user = test()->test_user;
     $this->service->addCriteriaForRole(

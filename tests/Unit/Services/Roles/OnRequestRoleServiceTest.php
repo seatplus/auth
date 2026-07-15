@@ -100,6 +100,19 @@ it('submits application for role', function () {
         ->entity_id->toBe($user->id);
 });
 
+it('lets a non-affiliated user apply when open to all', function () {
+    $other_user = User::factory()->create();
+
+    $this->service->addCriteriaForRoleApplication(
+        new CriteriaData(OnRequestRoleService::EVERYONE_CORPORATION_ID, 'corporation'),
+    );
+
+    $this->service->submitApplicationForRole($other_user);
+
+    expect(RoleMembership::query()->where('role_id', $this->role->id)->where('entity_id', $other_user->id)->first())
+        ->status->toBe(RoleMembershipStatus::PENDING->value);
+});
+
 it('approving application for role', function () {
     // arrange
     $user = test()->test_user;

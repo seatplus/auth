@@ -22,6 +22,13 @@ use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 
 abstract class AbstractRoleService implements RoleServiceInterface
 {
+    /**
+     * Doomheim (1000001) — EVE's graveyard corporation that no live character belongs to.
+     * Used as a sentinel criterion meaning "everyone is eligible" (open to all): membership
+     * criteria containing this corporation match every user regardless of their affiliation.
+     */
+    public const int EVERYONE_CORPORATION_ID = 1_000_001;
+
     public function __construct(
         protected Role $role,
         private readonly IsUserCompliantService $isUserCompliantService = new IsUserCompliantService(false),
@@ -70,6 +77,7 @@ abstract class AbstractRoleService implements RoleServiceInterface
     private function revokeTheRolesFromUsersThatAreNotInMembers(\Illuminate\Support\Collection $member_ids): void
     {
         User::query()
+            ->with('roles')
             ->whereHas('roles', fn (Builder $query) => $query->where('id', $this->role->id))
             ->whereNotIn('id', $member_ids)
             ->each(fn (User $user) => $user->removeRole($this->role));
@@ -86,6 +94,7 @@ abstract class AbstractRoleService implements RoleServiceInterface
     private function assignTheRolesToUsersThatAreInMembers(\Illuminate\Support\Collection $member_ids): void
     {
         User::query()
+            ->with('roles')
             ->whereDoesntHave('roles', fn (Builder $query) => $query->where('id', $this->role->id))
             ->whereIn('id', $member_ids)
             ->each(fn (User $user) => $user->assignRole($this->role));
@@ -158,6 +167,11 @@ abstract class AbstractRoleService implements RoleServiceInterface
         $members = RoleMembership::query()
             ->where('role_id', $this->role->id)
             ->where('entity_type', User::class);
+
+        // open-to-all roles never remove anyone based on criteria
+        if ($this->isOpenToAll()) {
+            return new Collection;
+        }
 
         $character_ids = $this->getAssignedCharacterIds();
 
@@ -246,8 +260,25 @@ abstract class AbstractRoleService implements RoleServiceInterface
             ->exists();
     }
 
+    /**
+     * Whether the role is open to all — a criterion for the Doomheim sentinel corporation
+     * ({@see self::EVERYONE_CORPORATION_ID}) marks every user as eligible.
+     */
+    protected function isOpenToAll(): bool
+    {
+        return $this->role->refresh()->loadMissing('roleMemberships')
+            ->roleMemberships
+            ->contains(fn (RoleMembership $role_membership) => $role_membership->entity_type === CorporationInfo::class
+                && (int) $role_membership->entity_id === self::EVERYONE_CORPORATION_ID);
+    }
+
     protected function meetsCriteria(User $user): bool
     {
+
+        // open-to-all roles consider every user eligible
+        if ($this->isOpenToAll()) {
+            return true;
+        }
 
         $assigned_character_ids = $this->getAssignedCharacterIds();
 
