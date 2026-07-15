@@ -33,10 +33,12 @@ class AutomaticRoleService extends AbstractRoleService implements RoleServiceInt
 
     private function addAssignedMembers(): void
     {
-        $assigned_character_ids = $this->getAssignedCharacterIds();
-        $users = User::query()
-            ->whereHas('characters', fn (Builder $query) => $query->whereIn('character_infos.character_id', $assigned_character_ids))
-            ->get();
+        // open-to-all roles assign every user; Doomheim yields no character ids to match on
+        $users = $this->isOpenToAll()
+            ? User::query()->get()
+            : User::query()
+                ->whereHas('characters', fn (Builder $query) => $query->whereIn('character_infos.character_id', $this->getAssignedCharacterIds()))
+                ->get();
 
         $users->each(fn (User $user) => $this->setRoleMembership(
             entity_id: $user->id,

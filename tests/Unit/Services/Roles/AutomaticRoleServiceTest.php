@@ -91,6 +91,44 @@ describe('handling Members', function () {
     });
 });
 
+describe('open to all', function () {
+    it('assigns the role to every user, including unaffiliated ones', function () {
+        $other_user = User::factory()->create();
+
+        expect($other_user->refresh()->hasRole($this->role->name))->toBeFalse();
+
+        $this->service->automaticallyAssignRoleTo(
+            new CriteriaData(AutomaticRoleService::EVERYONE_CORPORATION_ID, 'corporation'),
+        );
+
+        expect(test()->test_user->refresh()->hasRole($this->role->name))->toBeTrue()
+            ->and($other_user->refresh()->hasRole($this->role->name))->toBeTrue();
+    });
+
+    it('can view for any user', function () {
+        $other_user = User::factory()->create();
+
+        $this->service->automaticallyAssignRoleTo(
+            new CriteriaData(AutomaticRoleService::EVERYONE_CORPORATION_ID, 'corporation'),
+        );
+
+        expect($this->service->canView($other_user))->toBeTrue();
+    });
+
+    it('keeps existing members when re-syncing', function () {
+        $this->service->automaticallyAssignRoleTo(
+            new CriteriaData(AutomaticRoleService::EVERYONE_CORPORATION_ID, 'corporation'),
+        );
+
+        expect(test()->test_user->refresh()->hasRole($this->role->name))->toBeTrue();
+
+        // a second sync must not strip existing members
+        $this->service->handleMembers();
+
+        expect(test()->test_user->refresh()->hasRole($this->role->name))->toBeTrue();
+    });
+});
+
 it('sets role type to automatic', function () {
 
     expect($this->role->type)->toBe(RoleType::MANUAL);
