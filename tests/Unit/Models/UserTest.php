@@ -63,3 +63,12 @@ it('has search scope', function () {
 
     expect($user->id)->toEqual($test_user->id);
 });
+
+it('has case-insensitive search scope', function () {
+    $test_user = User::factory()->create();
+
+    $character = $test_user->characters->first();
+
+    expect(User::search(mb_strtolower($character->name))->first()?->id)->toEqual($test_user->id);
+    expect(User::search(mb_strtoupper($character->name))->first()?->id)->toEqual($test_user->id);
+});
