@@ -106,7 +106,7 @@ class User extends Authenticatable
     protected function search(Builder $query, string $query_string): Builder
     {
         return $query->whereHas('characters', function (Builder $query) use ($query_string) {
-            $query->where('name', 'like', '%'.$query_string.'%');
+            $query->whereLike('name', '%'.$query_string.'%');
         });
     }
 
