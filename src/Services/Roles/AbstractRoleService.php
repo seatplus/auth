@@ -102,11 +102,21 @@ abstract class AbstractRoleService implements RoleServiceInterface
 
     protected function removeRoleMembership(User $user): void
     {
-        RoleMembership::query()
+        $query = RoleMembership::query()
             ->where('role_id', $this->role->id)
             ->where('entity_id', $user->id)
-            ->where('entity_type', User::class)
-            ->delete();
+            ->where('entity_type', User::class);
+
+        // Removing someone's membership (member kick / leave / denied application) must not strip
+        // their moderator role: a moderator who is also a member stays a moderator. Clear only the
+        // membership status in that case; otherwise remove the row entirely.
+        if ((clone $query)->where('can_moderate', true)->exists()) {
+            $query->update(['status' => null]);
+
+            return;
+        }
+
+        $query->delete();
     }
 
     public function setRoleType(RoleType $roleType): void
