@@ -128,13 +128,20 @@ abstract class AbstractRoleService implements RoleServiceInterface
     protected function setRoleMembership(
         int|string $entity_id,
         string $entity_type,
-        bool $can_moderate = false,
+        ?bool $can_moderate = null,
         ?RoleMembershipStatus $status = null
     ): void {
 
-        $values_to_update = ['can_moderate' => $can_moderate];
+        $values_to_update = [];
 
-        // if $status is set, we add it to the values to update
+        // Only write the columns the caller actually provided, so a status-only call (e.g.
+        // addMember/approve/join) does not reset can_moderate — otherwise adding an existing
+        // moderator as a member would silently strip their moderator flag. On a fresh row the
+        // DB defaults apply (can_moderate = false, status = null).
+        if ($can_moderate !== null) {
+            $values_to_update['can_moderate'] = $can_moderate;
+        }
+
         if ($status) {
             $values_to_update['status'] = $status->value;
         }

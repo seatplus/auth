@@ -52,6 +52,28 @@ it('can add user as moderator and does not change status', function () {
         ->can_moderate->toBeFalse();
 });
 
+it('keeps a moderator when they are later added as a member', function () {
+    $test_user = test()->test_user;
+
+    // Moderator first (no membership status yet).
+    $this->service->setModerator($test_user);
+
+    expect(RoleMembership::first())->can_moderate->toBeTrue();
+
+    // Adding them as a member must not strip the moderator flag (regression).
+    $this->service->addMember($test_user);
+
+    expect(RoleMembership::first())
+        ->can_moderate->toBeTrue()
+        ->status->toBe(RoleMembershipStatus::ACTIVE->value);
+});
+
+it('a newly added member is not a moderator by default', function () {
+    $this->service->addMember(test()->test_user);
+
+    expect(RoleMembership::first())->can_moderate->toBeFalse();
+});
+
 it('syncs members', function () {
     $test_user = test()->test_user;
 
