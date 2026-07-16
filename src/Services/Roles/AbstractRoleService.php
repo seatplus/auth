@@ -209,8 +209,19 @@ abstract class AbstractRoleService implements RoleServiceInterface
 
     protected function removeUnassignedMembers(): void
     {
-        $unassigned_members = $this->getUnassignedMembers();
-        $unassigned_members->each(fn (RoleMembership $role_membership) => $role_membership->delete());
+        $this->getUnassignedMembers()->each(function (RoleMembership $role_membership): void {
+            // A moderator who no longer meets the criteria loses their membership but keeps the
+            // moderator role — same rule as removeRoleMembership(). Without this, the periodic
+            // syncMembers() of on-request/opt-in roles would silently strip moderators whose own
+            // characters fall outside the role's criteria.
+            if ($role_membership->can_moderate) {
+                $role_membership->update(['status' => null]);
+
+                return;
+            }
+
+            $role_membership->delete();
+        });
     }
 
     public function handleMembers(): void
