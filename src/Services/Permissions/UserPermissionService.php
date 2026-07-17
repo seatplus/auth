@@ -23,7 +23,10 @@ class UserPermissionService
     public function get(User $user): array
     {
 
-        $user = $user->loadMissing(['characters.roles', 'roles.permissions']);
+        // `characters.characterAffiliation` is eager-loaded because buildCorporationRoles() reads
+        // each character's `corporation_id` accessor, which resolves the characterAffiliation
+        // relation — without this it lazy-loads and throws under Model::preventLazyLoading().
+        $user = $user->loadMissing(['characters.roles', 'characters.characterAffiliation', 'roles.permissions']);
 
         $this->buildCorporationRoles($user);
         $this->buildPermissions($user);
