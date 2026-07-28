@@ -6,6 +6,7 @@ namespace Seatplus\Auth\Services\Roles;
 
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Seatplus\Auth\Enums\AffiliationType;
 use Seatplus\Auth\Models\Permissions\Affiliation;
 use Seatplus\Auth\Models\Permissions\Role;
@@ -17,8 +18,19 @@ class RoleAffiliatedIdsService
 {
     public static function get(Role $role): array
     {
-
-        return (new self)->buildAffiliatedIds($role);
+        // The affiliated-id set is expensive to build: inverse affiliations scan the whole
+        // character/corporation/alliance tables and allowed/forbidden entities expand their full
+        // member lists. Many users share the same (automatic) role, so this set is rebuilt once per
+        // user_permissions refresh. Cache it per role for a short window so the cold rebuild runs
+        // once rather than per user. The set computation itself is unchanged: for a given database
+        // state this returns exactly (allowed ∪ inverse) ∖ forbidden. Affiliation/membership edits
+        // already propagate only via the ≤5-minute user_permissions TTL (no observer invalidates it),
+        // so this cache adds at most one extra minute to that existing eventual-consistency window.
+        return Cache::remember(
+            "role_affiliated_ids_{$role->id}",
+            now()->addMinute(),
+            fn (): array => (new self)->buildAffiliatedIds($role),
+        );
     }
 
     private function buildInverse(Collection $inverted): Collection
