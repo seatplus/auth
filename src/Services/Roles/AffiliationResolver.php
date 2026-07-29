@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Seatplus\Auth\Services\Roles;
 
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 use Seatplus\Auth\Enums\AffiliationType;
@@ -17,18 +18,24 @@ use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
  * Resolves a role's affiliated entity ids — `(allowed ∪ inverse) ∖ forbidden` with transitive
  * corp/alliance member inclusion — as set-based SQL, never materialising whole tables into PHP.
  *
- * It exposes the same result through two façades over one engine: composable single-column
- * subqueries per id-space (for query-scoping consumers) and a bounded predicate that tests only
- * a handful of requested ids (for authorisation checks). The "everyone except X" inverse case is
- * expressed as a `NOT EXISTS` anti-join against the small inverted seed, so it never enumerates
- * the universe in memory.
+ * Two façades over one engine:
+ *  - {@see coveredIds()} — a bounded predicate that tests ONLY the requested ids. The requested set is
+ *    pushed into the inverse-complement's entity read, so the "everyone except X" universe is never
+ *    enumerated regardless of the query planner.
+ *  - {@see characterIdsSubquery()} / {@see corporationIdsSubquery()} / {@see allianceIdsSubquery()} —
+ *    composable single-column subqueries per id-space (for query-scoping consumers).
  *
- * Parity with the previous relation-based expansion is deliberate and pinned by
+ * Leaf reads use `Model::query()`; the models are scope-free, so this is row-for-row equivalent to a raw
+ * query. The set-operation wrappers (union / forbidden anti-join) are query-builder derived tables, so the
+ * composed façades return {@see Builder}.
+ *
+ * Parity with the previous relation-based expansion is pinned by
  * tests/Feature/Services/RoleAffiliatedIdsServiceTest.php + AffiliationResolverTest.php:
- *  - corp → members and alliance → members go through character_affiliations, INNER-joined to
- *    character_infos (matching CorporationInfo::characters()/AllianceInfo::characters() HasManyThrough);
+ *  - corp/alliance → members go through character_affiliations, INNER-joined to character_infos
+ *    (matching CorporationInfo::characters()/AllianceInfo::characters() HasManyThrough);
  *  - alliance → corporations uses corporation_infos.alliance_id (matching AllianceInfo::corporations() HasMany);
- *  - forbidden always wins; the inverse complement is only emitted when the role has an inverse affiliation.
+ *  - forbidden always wins (NOT EXISTS anti-join); the inverse complement is emitted only when the role has
+ *    an inverse affiliation.
  */
 class AffiliationResolver
 {
@@ -63,8 +70,8 @@ class AffiliationResolver
     }
 
     /**
-     * Of the requested ids, those covered by the role's affiliations. Binds only the requested
-     * handful, so the cost scales with the request, not the database.
+     * Of the requested ids, those covered by the role's affiliations. The requested set bounds every arm —
+     * including the inverse complement's entity read — so the universe is never enumerated.
      *
      * @param  array<int, int>  $roleIds
      * @param  array<int, int>  $requestedIds
@@ -76,8 +83,12 @@ class AffiliationResolver
             return [];
         }
 
+        $union = $this->characterSpace($roleIds, $requestedIds);
+        $union->union($this->corporationSpace($roleIds, $requestedIds));
+        $union->union($this->allianceSpace($roleIds, $requestedIds));
+
         return array_map('intval', DB::query()
-            ->fromSub($this->allSpaces($roleIds), 'affiliated')
+            ->fromSub($union, 'affiliated')
             ->whereIn('affiliated.affiliated_id', $requestedIds)
             ->pluck('affiliated.affiliated_id')
             ->all());
@@ -88,15 +99,56 @@ class AffiliationResolver
      */
     public function characterIdsSubquery(array $roleIds): Builder
     {
+        return $this->characterSpace($roleIds, null);
+    }
+
+    /**
+     * @param  array<int, int>  $roleIds
+     */
+    public function corporationIdsSubquery(array $roleIds): Builder
+    {
+        return $this->corporationSpace($roleIds, null);
+    }
+
+    /**
+     * @param  array<int, int>  $roleIds
+     */
+    public function allianceIdsSubquery(array $roleIds): Builder
+    {
+        return $this->allianceSpace($roleIds, null);
+    }
+
+    /**
+     * @param  array<int, int>  $roleIds
+     */
+    private function allSpaces(array $roleIds): Builder
+    {
+        $union = $this->characterSpace($roleIds, null);
+        $union->union($this->corporationSpace($roleIds, null));
+        $union->union($this->allianceSpace($roleIds, null));
+
+        return $union;
+    }
+
+    /**
+     * @param  array<int, int>  $roleIds
+     * @param  array<int, int>|null  $restrictTo  bound the inverse complement to these ids (null = full enumeration)
+     */
+    private function characterSpace(array $roleIds, ?array $restrictTo): Builder
+    {
         $positive = $this->expandedCharacterIds($roleIds, AffiliationType::ALLOWED);
 
         if ($this->hasInverse($roleIds)) {
-            $complement = DB::table($this->characterInfos)
+            $complement = CharacterInfo::query()
                 ->select("{$this->characterInfos}.character_id as affiliated_id")
                 ->whereNotExists($this->correlatedExclusion(
                     $this->expandedCharacterIds($roleIds, AffiliationType::INVERSE),
                     "{$this->characterInfos}.character_id",
                 ));
+
+            if ($restrictTo !== null) {
+                $complement->whereIn("{$this->characterInfos}.character_id", $restrictTo);
+            }
 
             $positive->union($complement);
         }
@@ -106,18 +158,23 @@ class AffiliationResolver
 
     /**
      * @param  array<int, int>  $roleIds
+     * @param  array<int, int>|null  $restrictTo
      */
-    public function corporationIdsSubquery(array $roleIds): Builder
+    private function corporationSpace(array $roleIds, ?array $restrictTo): Builder
     {
         $positive = $this->expandedCorporationIds($roleIds, AffiliationType::ALLOWED);
 
         if ($this->hasInverse($roleIds)) {
-            $complement = DB::table($this->corporationInfos)
+            $complement = CorporationInfo::query()
                 ->select("{$this->corporationInfos}.corporation_id as affiliated_id")
                 ->whereNotExists($this->correlatedExclusion(
                     $this->expandedCorporationIds($roleIds, AffiliationType::INVERSE),
                     "{$this->corporationInfos}.corporation_id",
                 ));
+
+            if ($restrictTo !== null) {
+                $complement->whereIn("{$this->corporationInfos}.corporation_id", $restrictTo);
+            }
 
             $positive->union($complement);
         }
@@ -127,18 +184,23 @@ class AffiliationResolver
 
     /**
      * @param  array<int, int>  $roleIds
+     * @param  array<int, int>|null  $restrictTo
      */
-    public function allianceIdsSubquery(array $roleIds): Builder
+    private function allianceSpace(array $roleIds, ?array $restrictTo): Builder
     {
         $positive = $this->expandedAllianceIds($roleIds, AffiliationType::ALLOWED);
 
         if ($this->hasInverse($roleIds)) {
-            $complement = DB::table($this->allianceInfos)
+            $complement = AllianceInfo::query()
                 ->select("{$this->allianceInfos}.alliance_id as affiliated_id")
                 ->whereNotExists($this->correlatedExclusion(
                     $this->expandedAllianceIds($roleIds, AffiliationType::INVERSE),
                     "{$this->allianceInfos}.alliance_id",
                 ));
+
+            if ($restrictTo !== null) {
+                $complement->whereIn("{$this->allianceInfos}.alliance_id", $restrictTo);
+            }
 
             $positive->union($complement);
         }
@@ -147,28 +209,17 @@ class AffiliationResolver
     }
 
     /**
-     * @param  array<int, int>  $roleIds
-     */
-    private function allSpaces(array $roleIds): Builder
-    {
-        $union = $this->characterIdsSubquery($roleIds);
-        $union->union($this->corporationIdsSubquery($roleIds));
-        $union->union($this->allianceIdsSubquery($roleIds));
-
-        return $union;
-    }
-
-    /**
-     * Affiliated character ids: direct character affiliations, plus members of affiliated
-     * corporations and alliances (through character_affiliations, INNER-joined to character_infos).
+     * Affiliated character ids: direct character affiliations, plus members of affiliated corporations and
+     * alliances (through character_affiliations, INNER-joined to character_infos).
      *
      * @param  array<int, int>  $roleIds
      */
-    private function expandedCharacterIds(array $roleIds, AffiliationType $type): Builder
+    private function expandedCharacterIds(array $roleIds, AffiliationType $type): EloquentBuilder
     {
         $direct = $this->directAffiliations($roleIds, $type, CharacterInfo::class);
 
-        $corporationMembers = DB::table("{$this->affiliations} as a")
+        $corporationMembers = Affiliation::query()
+            ->from("{$this->affiliations} as a")
             ->join("{$this->characterAffiliations} as ca", 'ca.corporation_id', '=', 'a.affiliatable_id')
             ->join("{$this->characterInfos} as ci", 'ci.character_id', '=', 'ca.character_id')
             ->whereIn('a.role_id', $roleIds)
@@ -176,7 +227,8 @@ class AffiliationResolver
             ->where('a.affiliatable_type', CorporationInfo::class)
             ->select('ca.character_id as affiliated_id');
 
-        $allianceMembers = DB::table("{$this->affiliations} as a")
+        $allianceMembers = Affiliation::query()
+            ->from("{$this->affiliations} as a")
             ->join("{$this->characterAffiliations} as ca", 'ca.alliance_id', '=', 'a.affiliatable_id')
             ->join("{$this->characterInfos} as ci", 'ci.character_id', '=', 'ca.character_id')
             ->whereIn('a.role_id', $roleIds)
@@ -191,16 +243,17 @@ class AffiliationResolver
     }
 
     /**
-     * Affiliated corporation ids: direct corporation affiliations, plus corporations belonging to
-     * an affiliated alliance (corporation_infos.alliance_id — matching AllianceInfo::corporations()).
+     * Affiliated corporation ids: direct corporation affiliations, plus corporations belonging to an
+     * affiliated alliance (corporation_infos.alliance_id — matching AllianceInfo::corporations()).
      *
      * @param  array<int, int>  $roleIds
      */
-    private function expandedCorporationIds(array $roleIds, AffiliationType $type): Builder
+    private function expandedCorporationIds(array $roleIds, AffiliationType $type): EloquentBuilder
     {
         $direct = $this->directAffiliations($roleIds, $type, CorporationInfo::class);
 
-        $allianceCorporations = DB::table("{$this->affiliations} as a")
+        $allianceCorporations = Affiliation::query()
+            ->from("{$this->affiliations} as a")
             ->join("{$this->corporationInfos} as ci", 'ci.alliance_id', '=', 'a.affiliatable_id')
             ->whereIn('a.role_id', $roleIds)
             ->whereRaw('a.type::text = ?', [$type->value])
@@ -217,7 +270,7 @@ class AffiliationResolver
      *
      * @param  array<int, int>  $roleIds
      */
-    private function expandedAllianceIds(array $roleIds, AffiliationType $type): Builder
+    private function expandedAllianceIds(array $roleIds, AffiliationType $type): EloquentBuilder
     {
         return $this->directAffiliations($roleIds, $type, AllianceInfo::class);
     }
@@ -225,9 +278,9 @@ class AffiliationResolver
     /**
      * @param  array<int, int>  $roleIds
      */
-    private function directAffiliations(array $roleIds, AffiliationType $type, string $affiliatableType): Builder
+    private function directAffiliations(array $roleIds, AffiliationType $type, string $affiliatableType): EloquentBuilder
     {
-        return DB::table($this->affiliations)
+        return Affiliation::query()
             ->whereIn('role_id', $roleIds)
             ->whereRaw('type::text = ?', [$type->value])
             ->where('affiliatable_type', $affiliatableType)
@@ -239,7 +292,7 @@ class AffiliationResolver
      */
     private function hasInverse(array $roleIds): bool
     {
-        return DB::table($this->affiliations)
+        return Affiliation::query()
             ->whereIn('role_id', $roleIds)
             ->whereRaw('type::text = ?', [AffiliationType::INVERSE->value])
             ->exists();
@@ -249,7 +302,7 @@ class AffiliationResolver
      * Wraps the positive set and removes the forbidden set via a NOT EXISTS anti-join
      * (never NOT IN, which a NULL in the subquery would collapse to the empty set).
      */
-    private function exceptForbidden(Builder $positive, Builder $forbidden): Builder
+    private function exceptForbidden(EloquentBuilder $positive, EloquentBuilder $forbidden): Builder
     {
         return DB::query()
             ->fromSub($positive, 'p')
@@ -260,7 +313,7 @@ class AffiliationResolver
     /**
      * A correlated `NOT EXISTS (... WHERE excluded.affiliated_id = <column>)` builder.
      */
-    private function correlatedExclusion(Builder $excluded, string $column): \Closure
+    private function correlatedExclusion(EloquentBuilder $excluded, string $column): \Closure
     {
         return fn (Builder $query) => $query
             ->fromSub($excluded, 'excluded')

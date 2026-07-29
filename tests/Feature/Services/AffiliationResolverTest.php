@@ -11,6 +11,7 @@ use Seatplus\Auth\Services\Roles\AffiliationResolver;
 use Seatplus\Auth\Services\Roles\RoleAffiliatedIdsService;
 use Seatplus\Eveapi\Models\Alliance\AllianceInfo;
 use Seatplus\Eveapi\Models\Character\CharacterAffiliation;
+use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 
 beforeEach(function () {
@@ -81,13 +82,40 @@ it('covers only the requested ids that are affiliated', function () {
         ->and((new AffiliationResolver)->coveredIds([test()->role->id], []))->toBe([]);
 });
 
-it('exposes a composable subquery for query scoping', function () {
+it('covers requested ids against an inverse role without enumerating the universe', function () {
+    // inverse on the test corporation → "everyone except that corp" is affiliated
+    affiliate(test()->test_character->corporation_id, CorporationInfo::class, AffiliationType::INVERSE);
+
+    $insideInverted = test()->test_character->character_id;      // member of the inverted corp → NOT covered
+    $outsideInverted = CharacterInfo::factory()->create()->character_id; // some other char → covered
+
+    $covered = (new AffiliationResolver)->coveredIds(
+        [test()->role->id],
+        [$insideInverted, $outsideInverted],
+    );
+
+    expect($covered)
+        ->toContain($outsideInverted)
+        ->not()->toContain($insideInverted);
+});
+
+it('exposes a composable subquery per id-space for query scoping', function () {
     $corp = CorporationInfo::factory()->create();
+    $alliance = AllianceInfo::factory()->create();
+    $character = CharacterInfo::factory()->create();
+
     affiliate($corp->corporation_id, CorporationInfo::class, AffiliationType::ALLOWED);
+    affiliate($alliance->alliance_id, AllianceInfo::class, AffiliationType::ALLOWED);
+    affiliate($character->character_id, CharacterInfo::class, AffiliationType::ALLOWED);
 
-    $subquery = (new AffiliationResolver)->corporationIdsSubquery([test()->role->id]);
+    $resolver = new AffiliationResolver;
+    $roleIds = [test()->role->id];
 
-    expect($subquery)->toBeInstanceOf(Builder::class)
-        ->and(CorporationInfo::query()->whereIn('corporation_id', $subquery)->pluck('corporation_id')->all())
-        ->toContain($corp->corporation_id);
+    expect($resolver->corporationIdsSubquery($roleIds))->toBeInstanceOf(Builder::class)
+        ->and(CorporationInfo::query()->whereIn('corporation_id', $resolver->corporationIdsSubquery($roleIds))->pluck('corporation_id')->all())
+        ->toContain($corp->corporation_id)
+        ->and(AllianceInfo::query()->whereIn('alliance_id', $resolver->allianceIdsSubquery($roleIds))->pluck('alliance_id')->all())
+        ->toContain($alliance->alliance_id)
+        ->and(CharacterInfo::query()->whereIn('character_id', $resolver->characterIdsSubquery($roleIds))->pluck('character_id')->all())
+        ->toContain($character->character_id);
 });
