@@ -154,6 +154,11 @@ class CanUserService
 
     public function getUserPermissionObject(User $user): array
     {
-        return Cache::remember("user_permissions_{$user->id}", now()->addMinutes(5), fn () => $this->userPermissionService->get($user));
+        return Cache::remember(self::userPermissionCacheKey($user->id), now()->addMinutes(5), fn () => $this->userPermissionService->get($user));
+    }
+
+    public static function userPermissionCacheKey(int $userId): string
+    {
+        return "user_permissions_{$userId}";
     }
 }
