@@ -14,8 +14,6 @@ class UserPermissionService
 
     private array $permissions = [];
 
-    private array $characterIds = [];
-
     public function __construct(
         private readonly RolePermissionObjectService $rolePermissionObjectService = new RolePermissionObjectService,
     ) {}
@@ -30,12 +28,10 @@ class UserPermissionService
 
         $this->buildCorporationRoles($user);
         $this->buildPermissions($user);
-        $this->buildCharacterIds($user);
 
         return [
             'corporation_roles' => $this->corporationRoles,
             'permissions' => $this->permissions,
-            'character_ids' => $this->characterIds,
             'owned_character_ids' => $user->characters->pluck('character_id')->toArray(),
         ];
 
@@ -71,10 +67,5 @@ class UserPermissionService
                 ->toArray();
 
         });
-    }
-
-    private function buildCharacterIds(User $user): void
-    {
-        $this->characterIds = $user->characters->pluck('character_id')->toArray();
     }
 }
