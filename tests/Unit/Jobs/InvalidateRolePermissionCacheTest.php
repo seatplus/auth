@@ -29,3 +29,8 @@ it('forgets the cached permission object of every user holding the role', functi
 it('is unique per role so a burst of edits coalesces', function () {
     expect((new InvalidateRolePermissionCache(42))->uniqueId())->toBe('42');
 });
+
+it('tags the job with its role id for horizon', function () {
+    expect((new InvalidateRolePermissionCache(7))->tags())
+        ->toBe(['Invalidate Role Permission Cache', 'role_id:7']);
+});
