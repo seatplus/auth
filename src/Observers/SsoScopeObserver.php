@@ -30,6 +30,7 @@ namespace Seatplus\Auth\Observers;
 
 use Illuminate\Support\Facades\Cache;
 use Seatplus\Auth\Models\User;
+use Seatplus\Auth\Services\Permissions\CanUserService;
 use Seatplus\Eveapi\Models\SsoScopes;
 
 class SsoScopeObserver
@@ -54,7 +55,7 @@ class SsoScopeObserver
         $user_ids = User::query()->pluck('id');
 
         foreach ($user_ids as $user_id) {
-            Cache::forget("user_permissions_{$user_id}");
+            Cache::forget(CanUserService::userPermissionCacheKey((int) $user_id));
         }
     }
 }
