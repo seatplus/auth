@@ -13,13 +13,7 @@ class UserPermissionService
 {
     private array $corporationRoles = [];
 
-    private array $permissions = [];
-
     private array $permissionRoles = [];
-
-    public function __construct(
-        private readonly RolePermissionObjectService $rolePermissionObjectService = new RolePermissionObjectService,
-    ) {}
 
     public function get(User $user): array
     {
@@ -30,11 +24,10 @@ class UserPermissionService
         $user = $user->loadMissing(['characters.roles', 'characters.characterAffiliation', 'roles.permissions']);
 
         $this->buildCorporationRoles($user);
-        $this->buildPermissions($user);
+        $this->buildPermissionRoles($user);
 
         return [
             'corporation_roles' => $this->corporationRoles,
-            'permissions' => $this->permissions,
             'permission_roles' => $this->permissionRoles,
             'owned_character_ids' => $user->characters->pluck('character_id')->toArray(),
         ];
@@ -60,18 +53,11 @@ class UserPermissionService
             });
     }
 
-    private function buildPermissions(User $user): void
+    private function buildPermissionRoles(User $user): void
     {
+        // record which of the user's roles grant each permission, so CanUserService can resolve
+        // affiliation live per permission via AffiliationResolver — no materialised id arrays.
         $user->roles->each(function (Role $role) {
-            $role_permissions = $this->rolePermissionObjectService->get($role);
-
-            // merge on permissions. The key might exist, so we extend the array
-            $this->permissions = $role_permissions
-                ->mergeRecursive($this->permissions)
-                ->toArray();
-
-            // record which of the user's roles grant each permission, so the check path can
-            // resolve affiliation live per permission instead of reading the id arrays above.
             $role->permissions->each(function (Permission $permission) use ($role) {
                 $this->permissionRoles[$permission->name][] = $role->id;
             });

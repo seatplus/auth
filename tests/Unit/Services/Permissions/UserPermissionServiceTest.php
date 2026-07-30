@@ -1,9 +1,7 @@
 <?php
 
-use Mockery\MockInterface;
 use Seatplus\Auth\Models\Permissions\Permission;
 use Seatplus\Auth\Models\Permissions\Role;
-use Seatplus\Auth\Services\Permissions\RolePermissionObjectService;
 use Seatplus\Auth\Services\Permissions\UserPermissionService;
 use Seatplus\Eveapi\Models\Character\CharacterRole;
 
@@ -47,7 +45,7 @@ it('builds corporation_roles from user', function () {
         ->and($result['corporation_roles']['Personnel Manager'])->toContain(test()->test_character->corporation_id);
 });
 
-it('builds permissions from user', function () {
+it('builds permission_roles from user', function () {
 
     // Arrange
     $user = test()->test_user;
@@ -62,43 +60,21 @@ it('builds permissions from user', function () {
         Permission::create(['name' => Str::random()]),
     ]);
 
-    // sync first two permissions to role1
+    // permission[0] only on role1; permission[1] on both; permission[2] only on role2
     $role1->syncPermissions($permissions->take(2));
-
-    // sync last 2 permission to role2
     $role2->syncPermissions($permissions->slice(1));
 
     $user->assignRole([$role1, $role2]);
 
-    $role_permission_object_service = mock(RolePermissionObjectService::class, function (MockInterface $mock) use ($permissions) {
-
-        $result1 = collect([
-            $permissions[0]->name => [1, 2, 3],
-            $permissions[1]->name => [4, 5, 6],
-        ]);
-
-        $result2 = collect([
-            $permissions[1]->name => [7, 8, 9],
-            $permissions[2]->name => [10, 11, 12],
-        ]);
-
-        $mock->shouldReceive('get')
-            // ->with($role1)
-            ->andReturn($result1, $result2);
-    });
-
     // Act
-    $user_permission_service = new UserPermissionService($role_permission_object_service);
+    $result = (new UserPermissionService)->get($user);
 
-    $result = $user_permission_service->get($user);
-
-    // Assert
-    expect($result['permissions'])
-        ->toHaveCount(3)
+    // Assert: each permission maps to the ids of the user's roles that grant it
+    expect($result['permission_roles'])
         ->toHaveKeys($permissions->pluck('name')->toArray())
-        ->and($result['permissions'][$permissions[0]->name])->toBe([1, 2, 3])
-        ->and($result['permissions'][$permissions[1]->name])->toContain(4, 5, 6, 7, 8, 9)
-        ->and($result['permissions'][$permissions[2]->name])->toBe([10, 11, 12]);
+        ->and($result['permission_roles'][$permissions[0]->name])->toBe([$role1->id])
+        ->and($result['permission_roles'][$permissions[1]->name])->toContain($role1->id, $role2->id)
+        ->and($result['permission_roles'][$permissions[2]->name])->toBe([$role2->id]);
 });
 
 describe('cache user permissions', function () {})->only();

@@ -3,9 +3,9 @@
 use Illuminate\Support\Facades\Event;
 use Seatplus\Auth\Enums\AffiliationType;
 use Seatplus\Auth\Models\Permissions\Role;
+use Seatplus\Auth\Services\Roles\AffiliationResolver;
 use Seatplus\Auth\Services\Roles\AutomaticRoleService;
 use Seatplus\Auth\Services\Roles\DTO\AffiliationData;
-use Seatplus\Auth\Services\Roles\RoleAffiliatedIdsService;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 
 beforeEach(function () {
@@ -42,6 +42,23 @@ function getId(string $entity_type, int $character_level)
     };
 }
 
+/**
+ * Every id these parity cases assert on — the three fixture characters across all three id-spaces.
+ * Passing them to coveredIds() gives the covered subset among known entities, so the existing
+ * toContain()/not->toContain() assertions hold while exercising the production predicate.
+ *
+ * @return array<int, int>
+ */
+function allCandidateIds(): array
+{
+    return collect([test()->test_character, test()->secondary_character, test()->tertiary_character])
+        ->flatMap(fn (CharacterInfo $character) => [$character->character_id, $character->corporation_id, $character->alliance_id])
+        ->filter()
+        ->unique()
+        ->values()
+        ->all();
+}
+
 describe('allowed only', function () {
     test('primary and secondary are affiliated ', function ($entity_type, $affiliation_type) {
 
@@ -54,7 +71,7 @@ describe('allowed only', function () {
             new AffiliationData($secondary_id, $entity_type, AffiliationType::from($affiliation_type)),
         );
 
-        $affiliated_ids = (new RoleAffiliatedIdsService)->get(test()->role);
+        $affiliated_ids = (new AffiliationResolver)->coveredIds([test()->role->id], allCandidateIds());
 
         expect($affiliated_ids)->toContain($primaray_id)
             ->toContain($secondary_id)
@@ -74,7 +91,7 @@ describe('inverse only', function () {
             new AffiliationData($tertiary_id, $entity_type, AffiliationType::from($affiliation_type)),
         );
 
-        $affiliated_ids = (new RoleAffiliatedIdsService)->get(test()->role);
+        $affiliated_ids = (new AffiliationResolver)->coveredIds([test()->role->id], allCandidateIds());
 
         expect($affiliated_ids)
             ->toContain($primary_id)
@@ -96,7 +113,7 @@ describe('forbidden only', function () {
             new AffiliationData($tertiary_id, $entity_type, AffiliationType::from($affiliation_type)),
         );
 
-        $affiliated_ids = (new RoleAffiliatedIdsService)->get(test()->role);
+        $affiliated_ids = (new AffiliationResolver)->coveredIds([test()->role->id], allCandidateIds());
 
         expect($affiliated_ids)
             ->not()->toContain($primary_id)
@@ -119,7 +136,7 @@ describe('allowed and inverse', function () {
             new AffiliationData($primary_id, $entity_type, AffiliationType::INVERSE),
         );
 
-        $affiliated_ids = (new RoleAffiliatedIdsService)->get(test()->role);
+        $affiliated_ids = (new AffiliationResolver)->coveredIds([test()->role->id], allCandidateIds());
 
         expect($affiliated_ids)
             ->toContain(test()->test_character->character_id)
@@ -141,7 +158,7 @@ describe('allowed and forbidden', function () {
             new AffiliationData($primary_id, $entity_type, AffiliationType::ALLOWED),
         );
 
-        $affiliated_ids = (new RoleAffiliatedIdsService)->get(test()->role);
+        $affiliated_ids = (new AffiliationResolver)->coveredIds([test()->role->id], allCandidateIds());
 
         expect($affiliated_ids)
             ->not()->toContain(test()->test_character->character_id)
@@ -166,7 +183,7 @@ describe('inverse and forbidden', function () {
             new AffiliationData($secondary_id, $entity_type, AffiliationType::INVERSE),
         );
 
-        $affiliated_ids = (new RoleAffiliatedIdsService)->get(test()->role);
+        $affiliated_ids = (new AffiliationResolver)->coveredIds([test()->role->id], allCandidateIds());
 
         expect($affiliated_ids)
             ->not()->toContain(test()->test_character->character_id)
@@ -189,7 +206,7 @@ describe('allowed, inverse and forbidden', function () {
             new AffiliationData($secondary_id, $entity_type, AffiliationType::INVERSE),
         );
 
-        $affiliated_ids = (new RoleAffiliatedIdsService)->get(test()->role);
+        $affiliated_ids = (new AffiliationResolver)->coveredIds([test()->role->id], allCandidateIds());
 
         expect($affiliated_ids)
             ->toContain(test()->tertiary_character->character_id)
