@@ -111,11 +111,21 @@ abstract class AbstractRoleService implements RoleServiceInterface
 
     protected function removeRoleMembership(User $user): void
     {
-        RoleMembership::query()
+        $query = RoleMembership::query()
             ->where('role_id', $this->role->id)
             ->where('entity_id', $user->id)
-            ->where('entity_type', User::class)
-            ->delete();
+            ->where('entity_type', User::class);
+
+        // Removing someone's membership (member kick / leave / denied application) must not strip
+        // their moderator role: a moderator who is also a member stays a moderator. Clear only the
+        // membership status in that case; otherwise remove the row entirely.
+        if ((clone $query)->where('can_moderate', true)->exists()) {
+            $query->update(['status' => null]);
+
+            return;
+        }
+
+        $query->delete();
     }
 
     public function setRoleType(RoleType $roleType): void
@@ -137,13 +147,20 @@ abstract class AbstractRoleService implements RoleServiceInterface
     protected function setRoleMembership(
         int|string $entity_id,
         string $entity_type,
-        bool $can_moderate = false,
+        ?bool $can_moderate = null,
         ?RoleMembershipStatus $status = null
     ): void {
 
-        $values_to_update = ['can_moderate' => $can_moderate];
+        $values_to_update = [];
 
-        // if $status is set, we add it to the values to update
+        // Only write the columns the caller actually provided, so a status-only call (e.g.
+        // addMember/approve/join) does not reset can_moderate — otherwise adding an existing
+        // moderator as a member would silently strip their moderator flag. On a fresh row the
+        // DB defaults apply (can_moderate = false, status = null).
+        if ($can_moderate !== null) {
+            $values_to_update['can_moderate'] = $can_moderate;
+        }
+
         if ($status) {
             $values_to_update['status'] = $status->value;
         }
@@ -201,8 +218,19 @@ abstract class AbstractRoleService implements RoleServiceInterface
 
     protected function removeUnassignedMembers(): void
     {
-        $unassigned_members = $this->getUnassignedMembers();
-        $unassigned_members->each(fn (RoleMembership $role_membership) => $role_membership->delete());
+        $this->getUnassignedMembers()->each(function (RoleMembership $role_membership): void {
+            // A moderator who no longer meets the criteria loses their membership but keeps the
+            // moderator role — same rule as removeRoleMembership(). Without this, the periodic
+            // syncMembers() of on-request/opt-in roles would silently strip moderators whose own
+            // characters fall outside the role's criteria.
+            if ($role_membership->can_moderate) {
+                $role_membership->update(['status' => null]);
+
+                return;
+            }
+
+            $role_membership->delete();
+        });
     }
 
     public function handleMembers(): void

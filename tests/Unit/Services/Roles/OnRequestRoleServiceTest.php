@@ -209,6 +209,29 @@ describe('sync', function () {
 
     });
 
+    it('keeps a moderator outside the criteria and only drops their membership', function () {
+        // Arrange: a moderator who is also an active member but whose own characters are
+        // outside the role's criteria (no criteria set, so nobody meets it).
+        $user = test()->test_user;
+
+        RoleMembership::query()->create([
+            'role_id' => $this->role->id,
+            'entity_id' => $user->id,
+            'entity_type' => User::class,
+            'status' => RoleMembershipStatus::ACTIVE->value,
+            'can_moderate' => true,
+        ]);
+
+        // Act
+        $this->service->syncMembers();
+
+        // Assert: the row survives with the moderator flag intact, membership status cleared.
+        expect(RoleMembership::count())->toBe(1)
+            ->and(RoleMembership::first())
+            ->can_moderate->toBeTrue()
+            ->status->toBeNull();
+    });
+
     it('does not removes members within criteria', function () {
         // Arrange
 
