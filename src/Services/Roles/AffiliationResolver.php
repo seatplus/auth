@@ -140,14 +140,14 @@ class AffiliationResolver
 
         if ($this->hasInverse($roleIds)) {
             $complement = CharacterInfo::query()
-                ->select("{$this->characterInfos}.character_id as affiliated_id")
+                ->select('character_id as affiliated_id')
                 ->whereNotExists($this->correlatedExclusion(
                     $this->expandedCharacterIds($roleIds, AffiliationType::INVERSE),
                     "{$this->characterInfos}.character_id",
                 ));
 
             if ($restrictTo !== null) {
-                $complement->whereIn("{$this->characterInfos}.character_id", $restrictTo);
+                $complement->whereIn('character_id', $restrictTo);
             }
 
             $positive->union($complement);
@@ -166,14 +166,14 @@ class AffiliationResolver
 
         if ($this->hasInverse($roleIds)) {
             $complement = CorporationInfo::query()
-                ->select("{$this->corporationInfos}.corporation_id as affiliated_id")
+                ->select('corporation_id as affiliated_id')
                 ->whereNotExists($this->correlatedExclusion(
                     $this->expandedCorporationIds($roleIds, AffiliationType::INVERSE),
                     "{$this->corporationInfos}.corporation_id",
                 ));
 
             if ($restrictTo !== null) {
-                $complement->whereIn("{$this->corporationInfos}.corporation_id", $restrictTo);
+                $complement->whereIn('corporation_id', $restrictTo);
             }
 
             $positive->union($complement);
@@ -192,14 +192,14 @@ class AffiliationResolver
 
         if ($this->hasInverse($roleIds)) {
             $complement = AllianceInfo::query()
-                ->select("{$this->allianceInfos}.alliance_id as affiliated_id")
+                ->select('alliance_id as affiliated_id')
                 ->whereNotExists($this->correlatedExclusion(
                     $this->expandedAllianceIds($roleIds, AffiliationType::INVERSE),
                     "{$this->allianceInfos}.alliance_id",
                 ));
 
             if ($restrictTo !== null) {
-                $complement->whereIn("{$this->allianceInfos}.alliance_id", $restrictTo);
+                $complement->whereIn('alliance_id', $restrictTo);
             }
 
             $positive->union($complement);
