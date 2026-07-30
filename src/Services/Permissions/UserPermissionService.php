@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Seatplus\Auth\Services\Permissions;
 
+use Seatplus\Auth\Models\Permissions\Permission;
 use Seatplus\Auth\Models\Permissions\Role;
 use Seatplus\Auth\Models\User;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
@@ -14,7 +15,7 @@ class UserPermissionService
 
     private array $permissions = [];
 
-    private array $characterIds = [];
+    private array $permissionRoles = [];
 
     public function __construct(
         private readonly RolePermissionObjectService $rolePermissionObjectService = new RolePermissionObjectService,
@@ -23,16 +24,18 @@ class UserPermissionService
     public function get(User $user): array
     {
 
-        $user = $user->loadMissing(['characters.roles', 'roles.permissions']);
+        // `characters.characterAffiliation` is eager-loaded because buildCorporationRoles() reads
+        // each character's `corporation_id` accessor, which resolves the characterAffiliation
+        // relation — without this it lazy-loads and throws under Model::preventLazyLoading().
+        $user = $user->loadMissing(['characters.roles', 'characters.characterAffiliation', 'roles.permissions']);
 
         $this->buildCorporationRoles($user);
         $this->buildPermissions($user);
-        $this->buildCharacterIds($user);
 
         return [
             'corporation_roles' => $this->corporationRoles,
             'permissions' => $this->permissions,
-            'character_ids' => $this->characterIds,
+            'permission_roles' => $this->permissionRoles,
             'owned_character_ids' => $user->characters->pluck('character_id')->toArray(),
         ];
 
@@ -67,11 +70,11 @@ class UserPermissionService
                 ->mergeRecursive($this->permissions)
                 ->toArray();
 
+            // record which of the user's roles grant each permission, so the check path can
+            // resolve affiliation live per permission instead of reading the id arrays above.
+            $role->permissions->each(function (Permission $permission) use ($role) {
+                $this->permissionRoles[$permission->name][] = $role->id;
+            });
         });
-    }
-
-    private function buildCharacterIds(User $user): void
-    {
-        $this->characterIds = $user->characters->pluck('character_id')->toArray();
     }
 }
