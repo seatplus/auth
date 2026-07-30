@@ -1,5 +1,9 @@
 includes:
     - vendor/larastan/larastan/extension.neon
+    # Pest-aware static analysis. `tests` is intentionally kept out of `paths`
+    # below for now — analysing the suite surfaces Mockery false-positives and
+    # redundant-expectation findings handled in a dedicated follow-up.
+    - vendor/pestphp/pest-plugin-phpstan/extension.neon
 
 parameters:
     editorUrl: 'phpstorm://open?file=%%file%%&line=%%line%%'
