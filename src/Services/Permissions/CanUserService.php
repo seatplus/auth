@@ -10,13 +10,11 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\ValidationException;
 use Seatplus\Auth\Models\User;
 use Seatplus\Auth\Services\Permissions\DTO\ValidateIdsDTO;
-use Seatplus\Auth\Services\Roles\AffiliationResolver;
 
 class CanUserService
 {
     public function __construct(
         private readonly UserPermissionService $userPermissionService = new UserPermissionService,
-        private readonly AffiliationResolver $affiliationResolver = new AffiliationResolver,
     ) {}
 
     /**
@@ -98,17 +96,10 @@ class CanUserService
 
         // check if user has the required permissions
         foreach ($permissions as $permission) {
-            $role_ids = $user_permissions['permission_roles'][$permission] ?? [];
+            $ids_with_permission = $user_permissions['permissions'][$permission] ?? [];
 
-            // a permission granted by none of the user's roles covers nothing
-            if ($role_ids === []) {
-                continue;
-            }
-
-            // resolve live: of the ids under check, which are affiliated to those roles. Bound to the
-            // ids being checked, so it never materialises the full affiliated set (see AffiliationResolver).
-            $covered = $this->affiliationResolver->coveredIds($role_ids, $ids_to_validate);
-            $ids_to_validate = array_diff($ids_to_validate, $covered);
+            // remove ids that are within the ids_with_permission from ids_to_validate
+            $ids_to_validate = array_diff($ids_to_validate, $ids_with_permission);
             $data['ids_to_validate'] = $ids_to_validate;
 
             // if ids are empty, end the loop
@@ -163,11 +154,6 @@ class CanUserService
 
     public function getUserPermissionObject(User $user): array
     {
-        return Cache::remember(self::userPermissionCacheKey($user->id), now()->addMinutes(5), fn () => $this->userPermissionService->get($user));
-    }
-
-    public static function userPermissionCacheKey(int $userId): string
-    {
-        return "user_permissions_{$userId}";
+        return Cache::remember("user_permissions_{$user->id}", now()->addMinutes(5), fn () => $this->userPermissionService->get($user));
     }
 }
