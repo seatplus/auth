@@ -39,22 +39,6 @@ use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
  */
 class AffiliationResolver
 {
-    private string $affiliations;
-
-    private string $characterInfos;
-
-    private string $corporationInfos;
-
-    private string $characterAffiliations;
-
-    public function __construct()
-    {
-        $this->affiliations = (new Affiliation)->getTable();
-        $this->characterInfos = (new CharacterInfo)->getTable();
-        $this->corporationInfos = (new CorporationInfo)->getTable();
-        $this->characterAffiliations = (new CharacterAffiliation)->getTable();
-    }
-
     /**
      * The full resolved set across all three id-spaces (the conflated shape callers expect).
      *
@@ -213,21 +197,25 @@ class AffiliationResolver
      */
     private function expandedCharacterIds(array $roleIds, AffiliationType $type): EloquentBuilder
     {
+        $affiliations = (new Affiliation)->getTable();
+        $characterAffiliations = (new CharacterAffiliation)->getTable();
+        $characterInfos = (new CharacterInfo)->getTable();
+
         $direct = $this->directAffiliations($roleIds, $type, CharacterInfo::class);
 
         $corporationMembers = Affiliation::query()
-            ->from("{$this->affiliations} as a")
-            ->join("{$this->characterAffiliations} as ca", 'ca.corporation_id', '=', 'a.affiliatable_id')
-            ->join("{$this->characterInfos} as ci", 'ci.character_id', '=', 'ca.character_id')
+            ->from("{$affiliations} as a")
+            ->join("{$characterAffiliations} as ca", 'ca.corporation_id', '=', 'a.affiliatable_id')
+            ->join("{$characterInfos} as ci", 'ci.character_id', '=', 'ca.character_id')
             ->whereIn('a.role_id', $roleIds)
             ->whereRaw('a.type::text = ?', [$type->value])
             ->where('a.affiliatable_type', CorporationInfo::class)
             ->select('ca.character_id as affiliated_id');
 
         $allianceMembers = Affiliation::query()
-            ->from("{$this->affiliations} as a")
-            ->join("{$this->characterAffiliations} as ca", 'ca.alliance_id', '=', 'a.affiliatable_id')
-            ->join("{$this->characterInfos} as ci", 'ci.character_id', '=', 'ca.character_id')
+            ->from("{$affiliations} as a")
+            ->join("{$characterAffiliations} as ca", 'ca.alliance_id', '=', 'a.affiliatable_id')
+            ->join("{$characterInfos} as ci", 'ci.character_id', '=', 'ca.character_id')
             ->whereIn('a.role_id', $roleIds)
             ->whereRaw('a.type::text = ?', [$type->value])
             ->where('a.affiliatable_type', AllianceInfo::class)
@@ -247,11 +235,14 @@ class AffiliationResolver
      */
     private function expandedCorporationIds(array $roleIds, AffiliationType $type): EloquentBuilder
     {
+        $affiliations = (new Affiliation)->getTable();
+        $corporationInfos = (new CorporationInfo)->getTable();
+
         $direct = $this->directAffiliations($roleIds, $type, CorporationInfo::class);
 
         $allianceCorporations = Affiliation::query()
-            ->from("{$this->affiliations} as a")
-            ->join("{$this->corporationInfos} as ci", 'ci.alliance_id', '=', 'a.affiliatable_id')
+            ->from("{$affiliations} as a")
+            ->join("{$corporationInfos} as ci", 'ci.alliance_id', '=', 'a.affiliatable_id')
             ->whereIn('a.role_id', $roleIds)
             ->whereRaw('a.type::text = ?', [$type->value])
             ->where('a.affiliatable_type', AllianceInfo::class)
