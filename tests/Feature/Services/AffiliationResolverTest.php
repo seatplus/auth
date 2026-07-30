@@ -38,7 +38,7 @@ it('includes a memberless corporation of an allowed alliance (corporation_infos.
 
     affiliate($alliance->alliance_id, AllianceInfo::class, AffiliationType::ALLOWED);
 
-    expect((new AffiliationResolver)->resolve([test()->role->id]))
+    expect((new AffiliationResolver)->coveredIds([test()->role->id], [$corp->corporation_id, $alliance->alliance_id]))
         ->toContain($corp->corporation_id)
         ->toContain($alliance->alliance_id);
 });
@@ -50,7 +50,7 @@ it('lets forbidden win over a memberless corporation reachable through an allowe
     affiliate($alliance->alliance_id, AllianceInfo::class, AffiliationType::ALLOWED);
     affiliate($corp->corporation_id, CorporationInfo::class, AffiliationType::FORBIDDEN);
 
-    expect((new AffiliationResolver)->resolve([test()->role->id]))
+    expect((new AffiliationResolver)->coveredIds([test()->role->id], [$alliance->alliance_id, $corp->corporation_id]))
         ->toContain($alliance->alliance_id)
         ->not()->toContain($corp->corporation_id);
 });
@@ -64,7 +64,7 @@ it('excludes a character present in character_affiliations but absent from chara
 
     affiliate($corp->corporation_id, CorporationInfo::class, AffiliationType::ALLOWED);
 
-    expect((new AffiliationResolver)->resolve([test()->role->id]))
+    expect((new AffiliationResolver)->coveredIds([test()->role->id], [$corp->corporation_id, $phantom->character_id]))
         ->toContain($corp->corporation_id)
         ->not()->toContain($phantom->character_id);
 });

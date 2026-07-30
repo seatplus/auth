@@ -30,7 +30,7 @@ use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
  * composed façades return {@see Builder}.
  *
  * Parity with the previous relation-based expansion is pinned by
- * tests/Feature/Services/AffiliationResolverResolveTest.php + AffiliationResolverTest.php:
+ * tests/Feature/Services/AffiliationResolverParityTest.php + AffiliationResolverTest.php:
  *  - corp/alliance → members go through character_affiliations, INNER-joined to character_infos
  *    (matching CorporationInfo::characters()/AllianceInfo::characters() HasManyThrough);
  *  - alliance → corporations uses corporation_infos.alliance_id (matching AllianceInfo::corporations() HasMany);
@@ -39,17 +39,6 @@ use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
  */
 class AffiliationResolver
 {
-    /**
-     * The full resolved set across all three id-spaces (the conflated shape callers expect).
-     *
-     * @param  array<int, int>  $roleIds
-     * @return array<int, int>
-     */
-    public function resolve(array $roleIds): array
-    {
-        return array_map('intval', $this->allSpaces($roleIds)->pluck('affiliated_id')->all());
-    }
-
     /**
      * Of the requested ids, those covered by the role's affiliations. The requested set bounds every arm —
      * including the inverse complement's entity read — so the universe is never enumerated.
@@ -97,18 +86,6 @@ class AffiliationResolver
     public function allianceIdsSubquery(array $roleIds): Builder
     {
         return $this->allianceSpace($roleIds, null);
-    }
-
-    /**
-     * @param  array<int, int>  $roleIds
-     */
-    private function allSpaces(array $roleIds): Builder
-    {
-        $union = $this->characterSpace($roleIds, null);
-        $union->union($this->corporationSpace($roleIds, null));
-        $union->union($this->allianceSpace($roleIds, null));
-
-        return $union;
     }
 
     /**
