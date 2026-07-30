@@ -8,7 +8,6 @@ use Seatplus\Auth\Enums\AffiliationType;
 use Seatplus\Auth\Models\Permissions\Affiliation;
 use Seatplus\Auth\Models\Permissions\Role;
 use Seatplus\Auth\Services\Roles\AffiliationResolver;
-use Seatplus\Auth\Services\Roles\RoleAffiliatedIdsService;
 use Seatplus\Eveapi\Models\Alliance\AllianceInfo;
 use Seatplus\Eveapi\Models\Character\CharacterAffiliation;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
@@ -39,7 +38,7 @@ it('includes a memberless corporation of an allowed alliance (corporation_infos.
 
     affiliate($alliance->alliance_id, AllianceInfo::class, AffiliationType::ALLOWED);
 
-    expect(RoleAffiliatedIdsService::get(test()->role))
+    expect((new AffiliationResolver)->resolve([test()->role->id]))
         ->toContain($corp->corporation_id)
         ->toContain($alliance->alliance_id);
 });
@@ -51,7 +50,7 @@ it('lets forbidden win over a memberless corporation reachable through an allowe
     affiliate($alliance->alliance_id, AllianceInfo::class, AffiliationType::ALLOWED);
     affiliate($corp->corporation_id, CorporationInfo::class, AffiliationType::FORBIDDEN);
 
-    expect(RoleAffiliatedIdsService::get(test()->role))
+    expect((new AffiliationResolver)->resolve([test()->role->id]))
         ->toContain($alliance->alliance_id)
         ->not()->toContain($corp->corporation_id);
 });
@@ -65,7 +64,7 @@ it('excludes a character present in character_affiliations but absent from chara
 
     affiliate($corp->corporation_id, CorporationInfo::class, AffiliationType::ALLOWED);
 
-    expect(RoleAffiliatedIdsService::get(test()->role))
+    expect((new AffiliationResolver)->resolve([test()->role->id]))
         ->toContain($corp->corporation_id)
         ->not()->toContain($phantom->character_id);
 });

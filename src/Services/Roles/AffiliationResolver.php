@@ -30,7 +30,7 @@ use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
  * composed façades return {@see Builder}.
  *
  * Parity with the previous relation-based expansion is pinned by
- * tests/Feature/Services/RoleAffiliatedIdsServiceTest.php + AffiliationResolverTest.php:
+ * tests/Feature/Services/AffiliationResolverResolveTest.php + AffiliationResolverTest.php:
  *  - corp/alliance → members go through character_affiliations, INNER-joined to character_infos
  *    (matching CorporationInfo::characters()/AllianceInfo::characters() HasManyThrough);
  *  - alliance → corporations uses corporation_infos.alliance_id (matching AllianceInfo::corporations() HasMany);
