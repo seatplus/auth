@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Seatplus\Auth\Services\Permissions;
 
+use Seatplus\Auth\Models\Permissions\Permission;
 use Seatplus\Auth\Models\Permissions\Role;
 use Seatplus\Auth\Models\User;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
@@ -13,6 +14,8 @@ class UserPermissionService
     private array $corporationRoles = [];
 
     private array $permissions = [];
+
+    private array $permissionRoles = [];
 
     public function __construct(
         private readonly RolePermissionObjectService $rolePermissionObjectService = new RolePermissionObjectService,
@@ -32,6 +35,7 @@ class UserPermissionService
         return [
             'corporation_roles' => $this->corporationRoles,
             'permissions' => $this->permissions,
+            'permission_roles' => $this->permissionRoles,
             'owned_character_ids' => $user->characters->pluck('character_id')->toArray(),
         ];
 
@@ -66,6 +70,11 @@ class UserPermissionService
                 ->mergeRecursive($this->permissions)
                 ->toArray();
 
+            // record which of the user's roles grant each permission, so the check path can
+            // resolve affiliation live per permission instead of reading the id arrays above.
+            $role->permissions->each(function (Permission $permission) use ($role) {
+                $this->permissionRoles[$permission->name][] = $role->id;
+            });
         });
     }
 }
