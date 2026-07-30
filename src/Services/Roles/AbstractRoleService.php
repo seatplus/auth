@@ -7,16 +7,13 @@ namespace Seatplus\Auth\Services\Roles;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Support\Facades\Cache;
 use Seatplus\Auth\Enums\AffiliationType;
 use Seatplus\Auth\Enums\RoleMembershipStatus;
 use Seatplus\Auth\Enums\RoleType;
-use Seatplus\Auth\Jobs\InvalidateRolePermissionCache;
 use Seatplus\Auth\Models\AccessControl\RoleMembership;
 use Seatplus\Auth\Models\Permissions\Affiliation;
 use Seatplus\Auth\Models\Permissions\Role;
 use Seatplus\Auth\Models\User;
-use Seatplus\Auth\Services\Permissions\CanUserService;
 use Seatplus\Auth\Services\Roles\DTO\AffiliationData;
 use Seatplus\Auth\Services\Roles\DTO\CriteriaData;
 use Seatplus\Auth\Services\SsoScopes\IsUserCompliantService;
@@ -83,10 +80,7 @@ abstract class AbstractRoleService implements RoleServiceInterface
             ->with('roles')
             ->whereHas('roles', fn (Builder $query) => $query->where('id', $this->role->id))
             ->whereNotIn('id', $member_ids)
-            ->each(function (User $user): void {
-                $user->removeRole($this->role);
-                Cache::forget(CanUserService::userPermissionCacheKey($user->id));
-            });
+            ->each(fn (User $user) => $user->removeRole($this->role));
     }
 
     private function getActiveMembers(): \Illuminate\Support\Collection
@@ -103,10 +97,7 @@ abstract class AbstractRoleService implements RoleServiceInterface
             ->with('roles')
             ->whereDoesntHave('roles', fn (Builder $query) => $query->where('id', $this->role->id))
             ->whereIn('id', $member_ids)
-            ->each(function (User $user): void {
-                $user->assignRole($this->role);
-                Cache::forget(CanUserService::userPermissionCacheKey($user->id));
-            });
+            ->each(fn (User $user) => $user->assignRole($this->role));
     }
 
     protected function removeRoleMembership(User $user): void
@@ -235,11 +226,6 @@ abstract class AbstractRoleService implements RoleServiceInterface
         foreach ($entity_sets as $entity_set) {
             $this->affiliateEntity($entity_set->entity_id, $entity_set->entityClass(), $entity_set->affiliation_type);
         }
-
-        // The affiliation set feeds every holder's cached permission object. resetAffiliation()
-        // is a query-builder delete that fires no model events, so invalidate explicitly here
-        // rather than via an observer.
-        InvalidateRolePermissionCache::dispatch($this->role->id);
     }
 
     public function updateMemberStatusBasedOnUserCompliance(): void
