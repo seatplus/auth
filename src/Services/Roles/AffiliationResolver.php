@@ -45,8 +45,6 @@ class AffiliationResolver
 
     private string $corporationInfos;
 
-    private string $allianceInfos;
-
     private string $characterAffiliations;
 
     public function __construct()
@@ -54,7 +52,6 @@ class AffiliationResolver
         $this->affiliations = (new Affiliation)->getTable();
         $this->characterInfos = (new CharacterInfo)->getTable();
         $this->corporationInfos = (new CorporationInfo)->getTable();
-        $this->allianceInfos = (new AllianceInfo)->getTable();
         $this->characterAffiliations = (new CharacterAffiliation)->getTable();
     }
 
@@ -143,7 +140,7 @@ class AffiliationResolver
                 ->select('character_id as affiliated_id')
                 ->whereNotExists($this->correlatedExclusion(
                     $this->expandedCharacterIds($roleIds, AffiliationType::INVERSE),
-                    "{$this->characterInfos}.character_id",
+                    'character_id',
                 ));
 
             if ($restrictTo !== null) {
@@ -169,7 +166,7 @@ class AffiliationResolver
                 ->select('corporation_id as affiliated_id')
                 ->whereNotExists($this->correlatedExclusion(
                     $this->expandedCorporationIds($roleIds, AffiliationType::INVERSE),
-                    "{$this->corporationInfos}.corporation_id",
+                    'corporation_id',
                 ));
 
             if ($restrictTo !== null) {
@@ -195,7 +192,7 @@ class AffiliationResolver
                 ->select('alliance_id as affiliated_id')
                 ->whereNotExists($this->correlatedExclusion(
                     $this->expandedAllianceIds($roleIds, AffiliationType::INVERSE),
-                    "{$this->allianceInfos}.alliance_id",
+                    'alliance_id',
                 ));
 
             if ($restrictTo !== null) {
