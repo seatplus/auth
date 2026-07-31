@@ -37,6 +37,7 @@
         "pestphp/pest": "^5.0",
         "pestphp/pest-plugin-laravel": "^5.0",
         "pestphp/pest-plugin-phpstan": "^5.0",
+        "pestphp/pest-plugin-rector": "^5.0",
         "pestphp/pest-plugin-type-coverage": "^5.0",
         "phpstan/phpstan": "^2.0",
         "rector/rector": "^2.0",
@@ -55,8 +56,9 @@
         "lint": "vendor/bin/pint",
         "test:lint": "vendor/bin/pint --test",
         "test:types": "vendor/bin/phpstan --ansi",
+        "test:refactor": "vendor/bin/rector process --dry-run",
         "test:type-coverage": "vendor/bin/pest --type-coverage --min=100",
-        "test:unit": "vendor/bin/pest --colors=always",
+        "test:unit": "vendor/bin/pest --tia --colors=always",
         "test:unit-coverage": "vendor/bin/pest --coverage --colors=always",
         "test": [
             "@test:lint",
