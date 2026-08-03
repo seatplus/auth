@@ -7,24 +7,28 @@ use Seatplus\Auth\Services\Roles\BaseRoleService;
 use Spatie\Permission\Exceptions\RoleDoesNotExist;
 
 beforeEach(function () {
-    $this->role = Role::create(['name' => faker()->name()]);
-    $this->role = $this->role->refresh();
+    // Spatie annotates Role::create() as RoleContract|SpatieRole, so the subclass is lost.
+    /** @var Role $role */
+    $role = Role::create(['name' => faker()->name()]);
+    $this->role = $role->refresh();
     $this->service = new BaseRoleService;
 });
 
 describe('make', function () {
+    // make() is declared : self, so asserting the return type proves nothing — assert
+    // instead that for() actually resolved the role behind the service.
     test('service can be made role', function () {
 
         $service = BaseRoleService::make($this->role);
 
-        expect($service)->toBeInstanceOf(BaseRoleService::class);
+        expect($service->getType())->toBe($this->role->type);
     });
 
     test('service can be made role by id', function () {
 
         $service = BaseRoleService::make($this->role->id);
 
-        expect($service)->toBeInstanceOf(BaseRoleService::class);
+        expect($service->getType())->toBe($this->role->type);
     });
 
     it('throws exception if role not found', function () {
@@ -37,7 +41,11 @@ it('can get automatic role service', function () {
 
     $service = BaseRoleService::make($this->role)->automatic();
 
-    expect($service)->toBeInstanceOf(AutomaticRoleService::class);
+    // automatic() is declared : AutomaticRoleService, so assert the service is actually
+    // bound to our role rather than re-asserting its return type.
+    $service->setRoleType(RoleType::AUTOMATIC);
+
+    expect($this->role->refresh()->type)->toBe(RoleType::AUTOMATIC);
 });
 
 it('work with the various role types', function (RoleType $role_type) {

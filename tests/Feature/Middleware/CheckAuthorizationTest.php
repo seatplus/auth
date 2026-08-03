@@ -72,12 +72,14 @@ describe('middleware checks permission and affiliation', function () {
 
         $response = match ($method) {
             'post' => post(route($route, $route_param)),
-            'get' => get(route($route, $route_param))
+            'get' => get(route($route, $route_param)),
+            default => throw new InvalidArgumentException("Unsupported method [$method]"),
         };
 
         match ($status) {
             'forbidden' => $response->assertForbidden(), // 403
-            'ok' => $response->assertOk()
+            'ok' => $response->assertOk(),
+            default => throw new InvalidArgumentException("Unsupported status [$status]"),
         };
     })
         ->with([
@@ -121,14 +123,16 @@ describe('middleware checks permission and affiliation', function () {
         // Act
         $response = match ($method) {
             'post' => post(route($route, $route_param)),
-            'get' => get(route($route, $route_param))
+            'get' => get(route($route, $route_param)),
+            default => throw new InvalidArgumentException("Unsupported method [$method]"),
         };
 
         // Assert
 
         match ($status) {
             'forbidden' => $response->assertForbidden(), // 403
-            'ok' => $response->assertOk()
+            'ok' => $response->assertOk(),
+            default => throw new InvalidArgumentException("Unsupported status [$status]"),
         };
     })
         ->with([
@@ -167,7 +171,8 @@ describe('middleware checks permission and affiliation', function () {
 
         match ($method) {
             'post' => post(route($route, $route_param))->assertOk(),
-            'get' => get(route($route, $route_param))->assertOk()
+            'get' => get(route($route, $route_param))->assertOk(),
+            default => throw new InvalidArgumentException("Unsupported method [$method]"),
         };
     })
         ->with([
@@ -191,7 +196,8 @@ describe('middleware checks permission and affiliation', function () {
         // Act
         $response = match ($method) {
             'post' => post(route($route), $route_param),
-            'get' => get(route($route, $route_param))
+            'get' => get(route($route, $route_param)),
+            default => throw new InvalidArgumentException("Unsupported method [$method]"),
         };
 
         // Assert
@@ -200,7 +206,8 @@ describe('middleware checks permission and affiliation', function () {
 
         match ($status) {
             'forbidden' => $response->assertForbidden(), // 403
-            'ok' => $response->assertOk()
+            'ok' => $response->assertOk(),
+            default => throw new InvalidArgumentException("Unsupported status [$status]"),
         };
     })
         ->with([
@@ -239,12 +246,14 @@ describe('middleware checks permission and affiliation', function () {
 
         $response = match ($method) {
             'post' => post(route($route), $route_param),
-            'get' => get(route($route, $route_param))
+            'get' => get(route($route, $route_param)),
+            default => throw new InvalidArgumentException("Unsupported method [$method]"),
         };
 
         match ($status) {
             'forbidden' => $response->assertForbidden(), // 403
-            'ok' => $response->assertOk()
+            'ok' => $response->assertOk(),
+            default => throw new InvalidArgumentException("Unsupported status [$status]"),
         };
     })
         ->with([
@@ -293,7 +302,7 @@ describe('middleware checks permission or corporation role test', function () {
         $response->assertStatus(200);
     })->with([
         'superuser' => 'superuser',
-        'accountant' => fn () => $this->permission_name,
+        'accountant' => fn () => test()->permission_name,
     ]);
 
     it('has corporation_role', function (string $corporation_role) {

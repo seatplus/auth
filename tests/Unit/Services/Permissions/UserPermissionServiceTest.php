@@ -76,5 +76,3 @@ it('builds permission_roles from user', function () {
         ->and($result['permission_roles'][$permissions[1]->name])->toContain($role1->id, $role2->id)
         ->and($result['permission_roles'][$permissions[2]->name])->toBe([$role2->id]);
 });
-
-describe('cache user permissions', function () {})->only();

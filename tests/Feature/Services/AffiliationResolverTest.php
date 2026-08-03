@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\Event;
 use Seatplus\Auth\Enums\AffiliationType;
 use Seatplus\Auth\Models\Permissions\Affiliation;
@@ -110,8 +109,7 @@ it('exposes a composable subquery per id-space for query scoping', function () {
     $resolver = new AffiliationResolver;
     $roleIds = [test()->role->id];
 
-    expect($resolver->corporationIdsSubquery($roleIds))->toBeInstanceOf(Builder::class)
-        ->and(CorporationInfo::query()->whereIn('corporation_id', $resolver->corporationIdsSubquery($roleIds))->pluck('corporation_id')->all())
+    expect(CorporationInfo::query()->whereIn('corporation_id', $resolver->corporationIdsSubquery($roleIds))->pluck('corporation_id')->all())
         ->toContain($corp->corporation_id)
         ->and(AllianceInfo::query()->whereIn('alliance_id', $resolver->allianceIdsSubquery($roleIds))->pluck('alliance_id')->all())
         ->toContain($alliance->alliance_id)

@@ -1,5 +1,7 @@
 includes:
     - vendor/larastan/larastan/extension.neon
+    - vendor/phpstan/phpstan-mockery/extension.neon
+    - vendor/pestphp/pest-plugin-phpstan/extension.neon
 
 parameters:
     editorUrl: 'phpstorm://open?file=%%file%%&line=%%line%%'
@@ -10,8 +12,34 @@ parameters:
     paths:
         - src
         - database
+        - tests
     tmpDir: build/phpstan
     checkOctaneCompatibility: true
     checkModelProperties: true
 
+    # pest-plugin-phpstan types `$this` inside test closures, but not the bare
+    # `test()` accessor — its return type stays `TestCall|HigherOrderTapProxy`.
+    # This suite uses `test()->prop` throughout, so treat the two proxies as
+    # property bags and ignore method calls on them.
+    universalObjectCratesClasses:
+        - Pest\PendingCalls\TestCall
+        - Pest\Support\HigherOrderTapProxy
 
+    ignoreErrors:
+        -
+            identifier: method.notFound
+            message: '#^Call to an undefined method Pest\\(PendingCalls\\TestCall|Support\\HigherOrderTapProxy)#'
+            path: tests
+
+        # Cache::spy() turns the facade into a Mockery spy, but larastan only models the
+        # facade's real accessor class, so the spy assertion API is invisible to it.
+        -
+            identifier: staticMethod.notFound
+            message: '#^Call to an undefined static method Illuminate\\Support\\Facades\\[A-Za-z]+::shouldHaveReceived\(\)\.$#'
+            path: tests
+
+        # Deliberate: the guard has to read the raw env, because the whole point is to
+        # catch the case where the phpunit DB_DATABASE override did not hold.
+        -
+            identifier: larastan.noEnvCallsOutsideOfConfig
+            path: tests/TestCase.php

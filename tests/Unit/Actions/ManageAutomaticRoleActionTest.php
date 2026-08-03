@@ -6,6 +6,7 @@ use Seatplus\Auth\Enums\RoleType;
 use Seatplus\Auth\Http\Actions\Roles\ManageAutomaticRoleAction;
 use Seatplus\Auth\Http\Requests\RoleRequest;
 use Seatplus\Auth\Models\Permissions\Role;
+use Seatplus\Auth\Models\User;
 use Seatplus\Auth\Services\Roles\AutomaticRoleService;
 use Seatplus\Auth\Services\Roles\BaseRoleService;
 use Seatplus\Auth\Services\Roles\DTO\AffiliationData;
@@ -34,9 +35,12 @@ it('invokes role service with valid role id', function () {
 
     $this->actingAs(test()->test_user);
 
-    expect(test()->test_user->hasPermissionTo($admin_permission))->toBeTrue() // ok
-        ->and(auth()->user()->hasPermissionTo($admin_permission))->toBeTrue() // ok
-        ->and(auth()->user()->can($admin_permission))->toBeTrue(); // fails
+    /** @var User $authenticated_user */
+    $authenticated_user = auth()->user();
+
+    expect(test()->test_user->hasPermissionTo($admin_permission))->toBeTrue()
+        ->and($authenticated_user->hasPermissionTo($admin_permission))->toBeTrue()
+        ->and($authenticated_user->can($admin_permission))->toBeTrue();
 
     $action = app(ManageAutomaticRoleAction::class);
     $action->execute($request);

@@ -122,7 +122,7 @@ test('deal with two characters with one changed owner hash', function () {
 
     expect($user->characterUsers->count())->toEqual(1);
 
-    expect(CharacterUser::all()->count())->toEqual(2);
+    expect(CharacterUser::query()->count())->toEqual(2);
 
     test()->assertDatabaseHas('users', [
         'id' => test()->test_user->id,

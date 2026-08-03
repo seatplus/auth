@@ -33,12 +33,14 @@ function getId(string $entity_type, int $character_level)
         1 => test()->test_character,
         2 => test()->secondary_character,
         3 => test()->tertiary_character,
+        default => throw new InvalidArgumentException("Unsupported character level [$character_level]"),
     };
 
     return match ($entity_type) {
         'character' => $character->character_id,
         'corporation' => $character->corporation_id,
         'alliance' => $character->alliance_id,
+        default => throw new InvalidArgumentException("Unsupported entity type [$entity_type]"),
     };
 }
 

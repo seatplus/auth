@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Http\RedirectResponse;
 use Laravel\Socialite\Contracts\Factory as Socialite;
 use Mockery\MockInterface;
 use Seatplus\Auth\Http\Actions\Sso\FindOrCreateUserAction;
@@ -12,11 +11,12 @@ use SocialiteProviders\Manager\OAuth2\User as SocialiteUser;
 
 it('redirects back with error message on login failure', function () {
 
+    /** @var SocialiteUser&MockInterface $socialite_user */
     $socialite_user = mock(SocialiteUser::class, function (MockInterface $mock) {
         $mock->makePartial();
     });
 
-    $socialite_user->attributes = (object) [
+    $socialite_user->attributes = [
         'character_id' => '1', // EVE SSO provider returns this as a string
         'character_owner_hash' => faker()->sha256,
     ];
@@ -47,18 +47,18 @@ it('redirects back with error message on login failure', function () {
 
     $controller = new CallbackController($authenticationService);
 
-    $response = $controller($social, $find_or_create_user_action, $update_refresh_token_action);
+    $controller($social, $find_or_create_user_action, $update_refresh_token_action);
 
-    expect($response)->toBeInstanceOf(RedirectResponse::class)
-        ->and(session('error'))->toBe('Login failed. Please contact your administrator.');
+    expect(session('error'))->toBe('Login failed. Please contact your administrator.');
 });
 
 it('redirects back if different character id is provided', function () {
+    /** @var SocialiteUser&MockInterface $socialite_user */
     $socialite_user = mock(SocialiteUser::class, function (MockInterface $mock) {
         $mock->makePartial();
     });
 
-    $socialite_user->attributes = (object) [
+    $socialite_user->attributes = [
         'character_id' => '1', // EVE SSO provider returns this as a string
         'character_owner_hash' => faker()->sha256,
     ];
@@ -93,19 +93,20 @@ it('redirects back if different character id is provided', function () {
 
     $controller = new CallbackController($authenticationService);
 
-    $response = $controller($social, $find_or_create_user_action, $update_refresh_token_action);
-
-    expect($response)->toBeInstanceOf(RedirectResponse::class);
+    // The assertion is the flashMessage()/setIntendedUrl() Mockery expectation above;
+    // __invoke() has a declared return type, so asserting it proves nothing.
+    $controller($social, $find_or_create_user_action, $update_refresh_token_action);
 });
 
 it('sets the stored return url as the intended url on a fresh login', function () {
     session(['rurl' => '/some/return/path']);
 
+    /** @var SocialiteUser&MockInterface $socialite_user */
     $socialite_user = mock(SocialiteUser::class, function (MockInterface $mock) {
         $mock->makePartial();
     });
 
-    $socialite_user->attributes = (object) [
+    $socialite_user->attributes = [
         'character_id' => '1', // EVE SSO provider returns this as a string
         'character_owner_hash' => faker()->sha256,
     ];
@@ -140,7 +141,7 @@ it('sets the stored return url as the intended url on a fresh login', function (
 
     $controller = new CallbackController($authenticationService);
 
-    $response = $controller($social, $find_or_create_user_action, $update_refresh_token_action);
-
-    expect($response)->toBeInstanceOf(RedirectResponse::class);
+    // The assertion is the flashMessage()/setIntendedUrl() Mockery expectation above;
+    // __invoke() has a declared return type, so asserting it proves nothing.
+    $controller($social, $find_or_create_user_action, $update_refresh_token_action);
 });

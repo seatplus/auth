@@ -168,7 +168,7 @@ test('restore trashed refresh token', function () {
 
     expect(RefreshToken::withoutTrashed()->firstWhere('character_id', $eveUser->character_id))->toBeNull();
     expect(RefreshToken::withTrashed()->firstWhere('character_id', $eveUser->character_id))
-        ->not()->toBeNull()
+        ->not->toBeNull()
         ->toBeInstanceOf(RefreshToken::class);
 
     // Recreate RefreshToken

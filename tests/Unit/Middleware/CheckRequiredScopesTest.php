@@ -356,8 +356,10 @@ it('redirects when user is not compliant', function () {
 
     $response = $middleware->handle($request, $next);
 
-    expect($response)->toBeInstanceOf(RedirectResponse::class)
-        ->and($response->getTargetUrl())->toBe('http://localhost');
+    expect($response)->toBeInstanceOf(RedirectResponse::class);
+    assert($response instanceof RedirectResponse);
+
+    expect($response->getTargetUrl())->toBe('http://localhost');
 });
 
 // Helpers
