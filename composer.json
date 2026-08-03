@@ -42,7 +42,8 @@
         "rector/rector": "^2.0",
         "driftingly/rector-laravel": "^2.0",
         "larastan/larastan": "^3.0",
-        "laravel/pint": "^1.9"
+        "laravel/pint": "^1.9",
+        "phpstan/phpstan-mockery": "^2.0"
     },
     "extra": {
         "laravel": {
