@@ -30,10 +30,12 @@ app, not here.
   required scopes; non-compliant memberships flip to `INACTIVE`.
 
 ## Testing
-Needs PostgreSQL and Redis. The test DB is pinned with `force="true"` in
-`phpunit.xml` so an ambient `DB_DATABASE` (the dev shell exports `seatplus`) can
-never redirect a `migrate:fresh` onto a real database. **Tests must never touch
-`seatplus`.**
+Needs PostgreSQL and Redis. The test DB is **`laravel_auth`** — a per-package name
+so this suite runs in parallel with other packages' suites without collisions.
+It's pinned with `force="true"` in `phpunit.xml` so an ambient `DB_DATABASE` (the
+dev shell exports `seatplus`) can never redirect a `migrate:fresh` onto a real
+database. **Tests must never touch `seatplus`.** Create it once:
+`createdb laravel_auth`.
 
 ```bash
 composer run test        # Pint + PHPStan + type-coverage + Pest
@@ -43,9 +45,8 @@ vendor/bin/pest --filter "test name"
 `tests/Architecture/ArchitectureTest.php` asserts no `dd()`/`dump()` — keep it
 passing.
 
-> Per-package test-DB names (e.g. `laravel_auth`) — which let each package's suite
-> run in parallel without collisions — are introduced by a companion change; see
-> the "Working in Orca" section of core's `CLAUDE.md`.
+> See the "Working in Orca" section of core's `CLAUDE.md` for the per-package
+> test-DB rationale. Limit: two worktrees of *this* package share `laravel_auth`.
 
 ## Code style
 Spatie PHP guidelines / PSR-12; new PHP files omit the license header (match the
