@@ -14,7 +14,7 @@ use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 it('reflects a role affiliation change on the next check without flushing the permission cache', function () {
     Event::fake();
 
-    $user = test()->test_user;
+    $user = $this->test_user;
     $role = Role::create(['name' => 'auditor']);
     $role->givePermissionTo(Permission::create(['name' => 'view something']));
     $user->assignRole($role);
@@ -42,7 +42,7 @@ it('reflects a role affiliation change on the next check without flushing the pe
 it('denies an id outside the role affiliations even when the permission is held', function () {
     Event::fake();
 
-    $user = test()->test_user;
+    $user = $this->test_user;
     $role = Role::create(['name' => 'auditor']);
     $role->givePermissionTo(Permission::create(['name' => 'view something']));
     $user->assignRole($role);
@@ -66,7 +66,7 @@ it('denies an id outside the role affiliations even when the permission is held'
 it('does not strip ids for a permission none of the user roles grant', function () {
     Event::fake();
 
-    $user = test()->test_user;
+    $user = $this->test_user;
     $role = Role::create(['name' => 'auditor']);
     $role->givePermissionTo(Permission::create(['name' => 'view something']));
     $user->assignRole($role);

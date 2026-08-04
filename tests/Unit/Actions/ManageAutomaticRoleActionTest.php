@@ -15,7 +15,7 @@ use Seatplus\Auth\Services\Roles\DTO\CriteriaData;
 it('throws exception when user is missing permission', function () {
     $request = mock(RoleRequest::class);
 
-    $this->actingAs(test()->test_user);
+    $this->actingAs($this->test_user);
 
     $action = app(ManageAutomaticRoleAction::class);
     $action->execute($request);
@@ -33,12 +33,12 @@ it('invokes role service with valid role id', function () {
     // give the user the permission to administrate access control groups
     assignPermissionToTestUser($admin_permission);
 
-    $this->actingAs(test()->test_user);
+    $this->actingAs($this->test_user);
 
     /** @var User $authenticated_user */
     $authenticated_user = auth()->user();
 
-    expect(test()->test_user->hasPermissionTo($admin_permission))->toBeTrue()
+    expect($this->test_user->hasPermissionTo($admin_permission))->toBeTrue()
         ->and($authenticated_user->hasPermissionTo($admin_permission))->toBeTrue()
         ->and($authenticated_user->can($admin_permission))->toBeTrue();
 
@@ -62,7 +62,7 @@ it('invokes role service with affiliated entities', function () {
         }));
     });
 
-    $this->actingAs(test()->test_user);
+    $this->actingAs($this->test_user);
     // give the user the permission to administrate access control groups
     assignPermissionToTestUser('administrate access control groups');
 
@@ -86,7 +86,7 @@ it('invokes role service with assigned entities', function () {
         }));
     });
 
-    $this->actingAs(test()->test_user);
+    $this->actingAs($this->test_user);
     // give the user the permission to administrate access control groups
     assignPermissionToTestUser('administrate access control groups');
 
@@ -111,7 +111,7 @@ it('updates name of role', function () {
         }));
     });
 
-    $this->actingAs(test()->test_user);
+    $this->actingAs($this->test_user);
     // give the user the permission to administrate access control groups
     assignPermissionToTestUser('administrate access control groups');
 

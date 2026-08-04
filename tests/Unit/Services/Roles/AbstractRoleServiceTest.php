@@ -40,7 +40,7 @@ beforeEach(function () {
 it('affiliates role to corporation and getting role on test user', function () {
 
     // Arrange
-    $test_character = test()->test_character;
+    $test_character = $this->test_character;
     $corporation_id = $test_character->corporation_id;
     $alliance_id = $test_character->alliance_id;
 

@@ -16,12 +16,12 @@ use function Pest\Laravel\post;
 
 describe('middleware checks permission and affiliation', function () {
     beforeEach(function () {
-        test()->role = Role::create(['name' => faker()->name]);
+        $this->role = Role::create(['name' => faker()->name]);
         $this->permission_name = faker()->name;
-        test()->permission = Permission::create(['name' => $this->permission_name]);
-        test()->role->givePermissionTo(test()->permission);
+        $this->permission = Permission::create(['name' => $this->permission_name]);
+        $this->role->givePermissionTo($this->permission);
 
-        test()->test_user->assignRole(test()->role);
+        $this->test_user->assignRole($this->role);
 
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
@@ -51,24 +51,24 @@ describe('middleware checks permission and affiliation', function () {
                 Route::get('/alliance_ids', fn () => response('Hello World'))->name('alliance_ids');
             });
 
-        test()->secondary_character = CharacterInfo::factory()->create();
+        $this->secondary_character = CharacterInfo::factory()->create();
     });
 
     it('returns forbidden when conflicting id parameters are provided', function () {
         assignPermissionToTestUser(['superuser']);
 
-        test()->actingAs(test()->test_user);
+        $this->actingAs($this->test_user);
 
         post(route('character.post'), [
-            'character_id' => test()->test_character->character_id,
-            'corporation_id' => test()->test_character->corporation->corporation_id,
+            'character_id' => $this->test_character->character_id,
+            'corporation_id' => $this->test_character->corporation->corporation_id,
         ])->assertForbidden();
     });
 
     it('it validates parameters for superuser', function (string $method, string $route, int|array $route_param, string $status = 'ok') {
         assignPermissionToTestUser(['superuser']);
 
-        test()->actingAs(test()->test_user);
+        $this->actingAs($this->test_user);
 
         $response = match ($method) {
             'post' => post(route($route, $route_param)),
@@ -112,13 +112,13 @@ describe('middleware checks permission and affiliation', function () {
         ]);
 
     it('checks owned character ids', function (string $method, string $route, array|int $route_param, string $status = 'ok') {
-        expect(test()->test_user->can('superuser'))->toBeFalse();
+        expect($this->test_user->can('superuser'))->toBeFalse();
 
         // Ensure no stale character roles from other test runs pollute the permission check.
         // This test verifies that owning a character does NOT grant corporation-level access.
         CharacterRole::query()->delete();
 
-        test()->actingAs(test()->test_user);
+        $this->actingAs($this->test_user);
 
         // Act
         $response = match ($method) {
@@ -158,16 +158,16 @@ describe('middleware checks permission and affiliation', function () {
         ]);
 
     it('checks owned corporation id', function (string $method, string $route, array|int $route_param) {
-        expect(test()->test_user->can('superuser'))->toBeFalse();
+        expect($this->test_user->can('superuser'))->toBeFalse();
 
         CharacterRole::query()->delete();
 
         CharacterRole::factory()->create([
-            'character_id' => test()->test_character->character_id,
+            'character_id' => $this->test_character->character_id,
             'roles' => ['Director'],
         ]);
 
-        test()->actingAs(test()->test_user);
+        $this->actingAs($this->test_user);
 
         match ($method) {
             'post' => post(route($route, $route_param))->assertOk(),
@@ -182,16 +182,16 @@ describe('middleware checks permission and affiliation', function () {
         ]);
 
     it('checks affiliated ids', function (string $method, string $route, array|int $route_param, string $status = 'ok') {
-        expect(test()->test_user->can('superuser'))->toBeFalse();
+        expect($this->test_user->can('superuser'))->toBeFalse();
 
         createAffiliation(
-            test()->role,
-            test()->secondary_character->alliance->alliance_id,
+            $this->role,
+            $this->secondary_character->alliance->alliance_id,
             AllianceInfo::class,
             AffiliationType::ALLOWED
         );
 
-        test()->actingAs(test()->test_user);
+        $this->actingAs($this->test_user);
 
         // Act
         $response = match ($method) {
@@ -201,8 +201,14 @@ describe('middleware checks permission and affiliation', function () {
         };
 
         // Assert
-        expect(test()->test_user->roles)->toHaveCount(1)
-            ->and(test()->test_user->roles->first()->permissions->first()->name)->toBe($this->permission_name);
+        // Spatie types the roles relation against its own contract, so pin the subclass.
+        /** @var Role $assigned_role */
+        $assigned_role = $this->test_user->roles->first();
+        /** @var Permission $granted_permission */
+        $granted_permission = $assigned_role->permissions->first();
+
+        expect($this->test_user->roles)->toHaveCount(1)
+            ->and($granted_permission->name)->toBe($this->permission_name);
 
         match ($status) {
             'forbidden' => $response->assertForbidden(), // 403
@@ -233,16 +239,16 @@ describe('middleware checks permission and affiliation', function () {
         ]);
 
     it('returns forbidden for non affiliated ids', function (string $method, string $route, array|int $route_param, string $status = 'ok') {
-        expect(test()->test_user->can('superuser'))->toBeFalse();
+        expect($this->test_user->can('superuser'))->toBeFalse();
 
         createAffiliation(
-            test()->role,
-            test()->secondary_character->character_id,
+            $this->role,
+            $this->secondary_character->character_id,
             CharacterInfo::class,
             AffiliationType::FORBIDDEN
         );
 
-        test()->actingAs(test()->test_user);
+        $this->actingAs($this->test_user);
 
         $response = match ($method) {
             'post' => post(route($route), $route_param),
@@ -272,22 +278,22 @@ describe('middleware checks permission and affiliation', function () {
         ]);
 
     it('works with duplication of params', function () {
-        expect(test()->test_user->can('superuser'))->toBeFalse();
+        expect($this->test_user->can('superuser'))->toBeFalse();
 
-        test()->actingAs(test()->test_user);
+        $this->actingAs($this->test_user);
 
         get(route('character.character', [
-            'character_id' => test()->test_character->character_id,
-            '0' => test()->test_character->character_id,
+            'character_id' => $this->test_character->character_id,
+            '0' => $this->test_character->character_id,
         ]))->assertOk();
     });
 });
 
 describe('middleware checks permission or corporation role test', function () {
     beforeEach(function () {
-        test()->role = Role::create(['name' => faker()->name]);
+        $this->role = Role::create(['name' => faker()->name]);
         $this->permission_name = faker()->streetName();
-        test()->permission = Permission::create(['name' => $this->permission_name]);
+        $this->permission = Permission::create(['name' => $this->permission_name]);
 
         Route::middleware([CheckAuthorization::class.":$this->permission_name,Accountant"])
             ->prefix('test')
@@ -295,8 +301,8 @@ describe('middleware checks permission or corporation role test', function () {
     });
 
     it('user has permission', function (string $permission) {
-        test()->actingAs(test()->test_user);
-        test()->assignPermissionToTestUser($permission);
+        $this->actingAs($this->test_user);
+        assignPermissionToTestUser($permission);
 
         $response = $this->get(route('test'));
         $response->assertStatus(200);
@@ -306,11 +312,11 @@ describe('middleware checks permission or corporation role test', function () {
     ]);
 
     it('has corporation_role', function (string $corporation_role) {
-        test()->actingAs(test()->test_user);
+        $this->actingAs($this->test_user);
         CharacterRole::query()->delete();
 
         CharacterRole::factory()->create([
-            'character_id' => test()->test_character->character_id,
+            'character_id' => $this->test_character->character_id,
             'roles' => [$corporation_role],
         ]);
 
@@ -322,7 +328,7 @@ describe('middleware checks permission or corporation role test', function () {
     ]);
 
     it('is missing corporation_role', function () {
-        test()->actingAs(test()->test_user);
+        $this->actingAs($this->test_user);
         CharacterRole::query()->delete();
 
         $response = $this->get(route('test'));

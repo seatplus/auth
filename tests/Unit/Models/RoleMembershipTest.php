@@ -11,7 +11,7 @@ it('has role relationship', function () {
 
     RoleMembership::query()->create([
         'role_id' => $role->id,
-        'entity_id' => test()->test_character->corporation_id,
+        'entity_id' => $this->test_character->corporation_id,
         'entity_type' => CorporationInfo::class,
     ]);
 

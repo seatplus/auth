@@ -41,11 +41,11 @@ it('has main character relationship', function () {
 it('has characters relationship', function () {
     $test_user = User::factory()->create();
 
-    test()->assertDatabaseHas('character_users', [
+    $this->assertDatabaseHas('character_users', [
         'character_id' => $test_user->characterUsers->first()->character_id,
     ]);
 
-    test()->assertDatabaseHas('character_infos', [
+    $this->assertDatabaseHas('character_infos', [
         'character_id' => $test_user->characterUsers->first()->character_id,
     ]);
 

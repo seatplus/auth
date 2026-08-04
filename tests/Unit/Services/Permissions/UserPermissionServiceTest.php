@@ -8,7 +8,7 @@ use Seatplus\Eveapi\Models\Character\CharacterRole;
 it('builds owned_character_ids from user', function () {
 
     // Arrange
-    $user = test()->test_user;
+    $user = $this->test_user;
 
     // Act
     $user_permission_service = new UserPermissionService;
@@ -22,12 +22,12 @@ it('builds owned_character_ids from user', function () {
 it('builds corporation_roles from user', function () {
 
     // Arrange
-    $user = test()->test_user;
+    $user = $this->test_user;
 
     CharacterRole::query()->delete();
 
     CharacterRole::factory()->create([
-        'character_id' => test()->test_character->character_id,
+        'character_id' => $this->test_character->character_id,
         'roles' => ['Director', 'Personnel Manager'],
     ]);
 
@@ -41,14 +41,14 @@ it('builds corporation_roles from user', function () {
         ->toHaveCount(2)
         ->toHaveKey('Director')
         ->toHaveKey('Personnel Manager')
-        ->and($result['corporation_roles']['Director'])->toContain(test()->test_character->corporation_id)
-        ->and($result['corporation_roles']['Personnel Manager'])->toContain(test()->test_character->corporation_id);
+        ->and($result['corporation_roles']['Director'])->toContain($this->test_character->corporation_id)
+        ->and($result['corporation_roles']['Personnel Manager'])->toContain($this->test_character->corporation_id);
 });
 
 it('builds permission_roles from user', function () {
 
     // Arrange
-    $user = test()->test_user;
+    $user = $this->test_user;
 
     $role1 = Role::create(['name' => Str::random()]);
     $role2 = Role::create(['name' => Str::random()]);

@@ -15,7 +15,7 @@ use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 beforeEach(function () {
     Event::fake();
 
-    test()->role = Role::create(['name' => 'resolver-test']);
+    $this->role = Role::create(['name' => 'resolver-test']);
 });
 
 function affiliate(int $entityId, string $type, AffiliationType $affiliationType): void
@@ -37,7 +37,7 @@ it('includes a memberless corporation of an allowed alliance (corporation_infos.
 
     affiliate($alliance->alliance_id, AllianceInfo::class, AffiliationType::ALLOWED);
 
-    expect((new AffiliationResolver)->coveredIds([test()->role->id], [$corp->corporation_id, $alliance->alliance_id]))
+    expect((new AffiliationResolver)->coveredIds([$this->role->id], [$corp->corporation_id, $alliance->alliance_id]))
         ->toContain($corp->corporation_id)
         ->toContain($alliance->alliance_id);
 });
@@ -49,7 +49,7 @@ it('lets forbidden win over a memberless corporation reachable through an allowe
     affiliate($alliance->alliance_id, AllianceInfo::class, AffiliationType::ALLOWED);
     affiliate($corp->corporation_id, CorporationInfo::class, AffiliationType::FORBIDDEN);
 
-    expect((new AffiliationResolver)->coveredIds([test()->role->id], [$alliance->alliance_id, $corp->corporation_id]))
+    expect((new AffiliationResolver)->coveredIds([$this->role->id], [$alliance->alliance_id, $corp->corporation_id]))
         ->toContain($alliance->alliance_id)
         ->not()->toContain($corp->corporation_id);
 });
@@ -63,7 +63,7 @@ it('excludes a character present in character_affiliations but absent from chara
 
     affiliate($corp->corporation_id, CorporationInfo::class, AffiliationType::ALLOWED);
 
-    expect((new AffiliationResolver)->coveredIds([test()->role->id], [$corp->corporation_id, $phantom->character_id]))
+    expect((new AffiliationResolver)->coveredIds([$this->role->id], [$corp->corporation_id, $phantom->character_id]))
         ->toContain($corp->corporation_id)
         ->not()->toContain($phantom->character_id);
 });
@@ -72,23 +72,23 @@ it('covers only the requested ids that are affiliated', function () {
     $corp = CorporationInfo::factory()->create();
     affiliate($corp->corporation_id, CorporationInfo::class, AffiliationType::ALLOWED);
 
-    $covered = (new AffiliationResolver)->coveredIds([test()->role->id], [$corp->corporation_id, 123456]);
+    $covered = (new AffiliationResolver)->coveredIds([$this->role->id], [$corp->corporation_id, 123456]);
 
     expect($covered)
         ->toContain($corp->corporation_id)
         ->not()->toContain(123456)
-        ->and((new AffiliationResolver)->coveredIds([test()->role->id], []))->toBe([]);
+        ->and((new AffiliationResolver)->coveredIds([$this->role->id], []))->toBe([]);
 });
 
 it('covers requested ids against an inverse role without enumerating the universe', function () {
     // inverse on the test corporation → "everyone except that corp" is affiliated
-    affiliate(test()->test_character->corporation_id, CorporationInfo::class, AffiliationType::INVERSE);
+    affiliate($this->test_character->corporation_id, CorporationInfo::class, AffiliationType::INVERSE);
 
-    $insideInverted = test()->test_character->character_id;      // member of the inverted corp → NOT covered
+    $insideInverted = $this->test_character->character_id;      // member of the inverted corp → NOT covered
     $outsideInverted = CharacterInfo::factory()->create()->character_id; // some other char → covered
 
     $covered = (new AffiliationResolver)->coveredIds(
-        [test()->role->id],
+        [$this->role->id],
         [$insideInverted, $outsideInverted],
     );
 
@@ -107,7 +107,7 @@ it('exposes a composable subquery per id-space for query scoping', function () {
     affiliate($character->character_id, CharacterInfo::class, AffiliationType::ALLOWED);
 
     $resolver = new AffiliationResolver;
-    $roleIds = [test()->role->id];
+    $roleIds = [$this->role->id];
 
     expect(CorporationInfo::query()->whereIn('corporation_id', $resolver->corporationIdsSubquery($roleIds))->pluck('corporation_id')->all())
         ->toContain($corp->corporation_id)

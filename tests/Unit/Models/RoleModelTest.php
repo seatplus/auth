@@ -32,25 +32,28 @@ use Seatplus\Auth\Models\Permissions\Role;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 
 beforeEach(function () {
-    test()->role = Role::create(['name' => 'derp']);
+    // Spatie annotates Role::create() as RoleContract|SpatieRole, so the subclass is lost.
+    /** @var Role $role */
+    $role = Role::create(['name' => 'derp']);
+    $this->role = $role;
 });
 
 it('deletes affiliation after model deletion', function () {
     $affiliation = Affiliation::create([
-        'role_id' => test()->role->id,
-        'affiliatable_id' => test()->test_character->corporation_id,
+        'role_id' => $this->role->id,
+        'affiliatable_id' => $this->test_character->corporation_id,
         'affiliatable_type' => CorporationInfo::class,
         'type' => 'allowed',
     ]);
 
-    test()->assertDatabaseHas('affiliations', [
-        'role_id' => test()->role->id,
+    $this->assertDatabaseHas('affiliations', [
+        'role_id' => $this->role->id,
     ]);
 
-    test()->role->delete();
+    $this->role->delete();
 
-    test()->assertDatabaseMissing('affiliations', [
-        'role_id' => test()->role->id,
+    $this->assertDatabaseMissing('affiliations', [
+        'role_id' => $this->role->id,
     ]);
 });
 
@@ -59,43 +62,43 @@ it('deletes permission pivot after model deletion', function () {
 
     $permission = Permission::create(['name' => $permission_name]);
 
-    test()->role->givePermissionTo($permission_name);
+    $this->role->givePermissionTo($permission_name);
 
-    test()->assertDatabaseHas('role_has_permissions', [
-        'role_id' => test()->role->id,
+    $this->assertDatabaseHas('role_has_permissions', [
+        'role_id' => $this->role->id,
         'permission_id' => $permission->id,
     ]);
 
-    test()->role->delete();
+    $this->role->delete();
 
-    test()->assertDatabaseMissing('role_has_permissions', [
-        'role_id' => test()->role->id,
+    $this->assertDatabaseMissing('role_has_permissions', [
+        'role_id' => $this->role->id,
         'permission_id' => $permission->id,
     ]);
 });
 
 it('has polymorphic relation', function () {
     $affiliation = Affiliation::create([
-        'role_id' => test()->role->id,
-        'affiliatable_id' => test()->test_character->corporation_id,
+        'role_id' => $this->role->id,
+        'affiliatable_id' => $this->test_character->corporation_id,
         'affiliatable_type' => CorporationInfo::class,
         'type' => 'allowed',
     ]);
 
-    expect(test()->role->affiliations->first()->affiliatable::class)->toEqual(CorporationInfo::class);
+    expect($this->role->affiliations->first()->affiliatable::class)->toEqual(CorporationInfo::class);
 });
 
 it('has default type attribute', function () {
-    expect(test()->role->fresh()->type)->toEqual(RoleType::MANUAL);
+    expect($this->role->fresh()->type)->toEqual(RoleType::MANUAL);
 });
 
 it('has role memberships', function () {
 
     RoleMembership::query()->create([
-        'role_id' => test()->role->id,
-        'entity_id' => test()->test_character->corporation_id,
+        'role_id' => $this->role->id,
+        'entity_id' => $this->test_character->corporation_id,
         'entity_type' => CorporationInfo::class,
     ]);
 
-    expect(test()->role->roleMemberships->first()->entity)->toBeInstanceOf(CorporationInfo::class);
+    expect($this->role->roleMemberships->first()->entity)->toBeInstanceOf(CorporationInfo::class);
 });

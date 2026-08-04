@@ -17,7 +17,7 @@ it('dispatches cache invalidation when a role\'s affiliations change', function 
     $role = Role::create(['name' => 'test'])->refresh();
 
     (new AutomaticRoleService($role))->syncAffiliateManyEntities(
-        new AffiliationData(test()->test_character->corporation_id, 'corporation', AffiliationType::ALLOWED),
+        new AffiliationData($this->test_character->corporation_id, 'corporation', AffiliationType::ALLOWED),
     );
 
     Queue::assertPushed(
@@ -29,7 +29,7 @@ it('dispatches cache invalidation when a role\'s affiliations change', function 
 it('forgets a holder\'s cached permissions when their role is revoked', function () {
     $role = Role::create(['name' => 'test'])->refresh();
 
-    $user = test()->test_user;
+    $user = $this->test_user;
     $user->assignRole($role);
 
     $service = new class($role) extends AbstractRoleService

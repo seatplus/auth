@@ -37,7 +37,7 @@ use Seatplus\Eveapi\Models\RefreshToken;
 use Seatplus\Eveapi\Models\SsoScopes;
 
 beforeEach(function () {
-    // test()->actingAs(test()->test_user);
+    // $this->actingAs($this->test_user);
 
     mockRequest();
 
@@ -57,14 +57,14 @@ describe('redirect request', function () {
 
         // TestingTime
 
-        test()->actingAs(test()->test_user);
+        $this->actingAs($this->test_user);
 
         mockMiddleware();
 
         // Expect redirect
-        test()->middleware->shouldReceive('redirectTo')->times(1);
+        $this->middleware->shouldReceive('redirectTo')->times(1);
 
-        test()->middleware->handle(test()->request, test()->next);
+        $this->middleware->handle($this->request, $this->next);
     });
 
     it('if required corporation role scopes is missing', function () {
@@ -76,14 +76,14 @@ describe('redirect request', function () {
 
         // TestingTime
 
-        test()->actingAs(test()->test_user);
+        $this->actingAs($this->test_user);
 
         mockMiddleware();
 
         // Expect redirect
-        test()->middleware->shouldReceive('redirectTo')->times(1);
+        $this->middleware->shouldReceive('redirectTo')->times(1);
 
-        test()->middleware->handle(test()->request, test()->next);
+        $this->middleware->handle($this->request, $this->next);
     });
 
     it('if user scopes is missing', function () {
@@ -98,16 +98,16 @@ describe('redirect request', function () {
         // Create secondary character
         $secondary_character = Event::fakeFor(function () {
             $character_user = CharacterUser::factory()->make();
-            test()->test_user->characterUsers()->save($character_user);
+            $this->test_user->characterUsers()->save($character_user);
 
             return CharacterInfo::find($character_user->character_id);
         });
 
         // test that the test user owns both characters
-        expect(test()->test_user->refresh()->characters)->toHaveCount(2);
+        expect($this->test_user->refresh()->characters)->toHaveCount(2);
 
         // test that primary and secondary character has different corporations
-        test()->assertNotEquals(test()->test_character->corporation->corporation_id, $secondary_character->corporation->corporation_id);
+        $this->assertNotEquals($this->test_character->corporation->corporation_id, $secondary_character->corporation->corporation_id);
 
         // create refresh_token for secondary character
         Event::fakeFor(function () use ($secondary_character) {
@@ -123,14 +123,14 @@ describe('redirect request', function () {
 
         // TestingTime
 
-        test()->actingAs(test()->test_user);
+        $this->actingAs($this->test_user);
 
         mockMiddleware();
 
         // Expect redirect
-        test()->middleware->shouldReceive('redirectTo')->times(1);
+        $this->middleware->shouldReceive('redirectTo')->times(1);
 
-        test()->middleware->handle(test()->request, test()->next);
+        $this->middleware->handle($this->request, $this->next);
     });
 
     it('if user misses global scopes', function () {
@@ -142,14 +142,14 @@ describe('redirect request', function () {
 
         // TestingTime
 
-        test()->actingAs(test()->test_user);
+        $this->actingAs($this->test_user);
 
         mockMiddleware();
 
         // Expect redirect
-        test()->middleware->shouldReceive('redirectTo')->times(1);
+        $this->middleware->shouldReceive('redirectTo')->times(1);
 
-        test()->middleware->handle(test()->request, test()->next);
+        $this->middleware->handle($this->request, $this->next);
     });
 
     it('if user application has not required scopes', function () {
@@ -157,21 +157,21 @@ describe('redirect request', function () {
         createRefreshTokenWithScopes(['a', 'b']);
 
         // 2. create user application
-        test()->test_user->application()->create(['id' => Str::uuid(), 'corporation_id' => test()->test_character->corporation->corporation_id]);
+        $this->test_user->application()->create(['id' => Str::uuid(), 'corporation_id' => $this->test_character->corporation->corporation_id]);
 
         // 3. create required corp scopes
         createCorporationSsoScope(['c']);
 
         // TestingTime
 
-        test()->actingAs(test()->test_user);
+        $this->actingAs($this->test_user);
 
         mockMiddleware();
 
         // Expect redirect
-        test()->middleware->shouldReceive('redirectTo')->times(1);
+        $this->middleware->shouldReceive('redirectTo')->times(1);
 
-        test()->middleware->handle(test()->request, test()->next);
+        $this->middleware->handle($this->request, $this->next);
     });
 });
 
@@ -179,14 +179,14 @@ describe('passes middleware', function () {
     it('lets request through if no scopes are required', function () {
         createRefreshTokenWithScopes(['a', 'b']);
 
-        test()->actingAs(test()->test_user);
+        $this->actingAs($this->test_user);
 
         mockMiddleware();
 
-        // test()->middleware->shouldReceive('redirectTo')->once();
-        test()->request->shouldReceive('forward')->times(1);
+        // $this->middleware->shouldReceive('redirectTo')->once();
+        $this->request->shouldReceive('forward')->times(1);
 
-        test()->middleware->handle(test()->request, test()->next);
+        $this->middleware->handle($this->request, $this->next);
     });
 
     it('if required scopes are present', function () {
@@ -201,14 +201,14 @@ describe('passes middleware', function () {
 
         // TestingTime
 
-        test()->actingAs(test()->test_user);
+        $this->actingAs($this->test_user);
 
         mockMiddleware();
 
         // Expect 1 forward
-        test()->request->shouldReceive('forward')->times(1);
+        $this->request->shouldReceive('forward')->times(1);
 
-        test()->middleware->handle(test()->request, test()->next);
+        $this->middleware->handle($this->request, $this->next);
     });
 
     it('if required corporation role scopes is present', function () {
@@ -223,14 +223,14 @@ describe('passes middleware', function () {
 
         // TestingTime
 
-        test()->actingAs(test()->test_user);
+        $this->actingAs($this->test_user);
 
         mockMiddleware();
 
         // Expect redirect
-        test()->request->shouldReceive('forward')->times(1);
+        $this->request->shouldReceive('forward')->times(1);
 
-        test()->middleware->handle(test()->request, test()->next);
+        $this->middleware->handle($this->request, $this->next);
     });
 
     it('if required global scopes are present', function () {
@@ -242,14 +242,14 @@ describe('passes middleware', function () {
 
         // TestingTime
 
-        test()->actingAs(test()->test_user);
+        $this->actingAs($this->test_user);
 
         mockMiddleware();
 
         // Expect 1 forward
-        test()->request->shouldReceive('forward')->times(1);
+        $this->request->shouldReceive('forward')->times(1);
 
-        test()->middleware->handle(test()->request, test()->next);
+        $this->middleware->handle($this->request, $this->next);
     });
 
     it('if user scopes is present', function () {
@@ -264,16 +264,16 @@ describe('passes middleware', function () {
         // Create secondary character
         $secondary_character = Event::fakeFor(function () {
             $character_user = CharacterUser::factory()->make();
-            test()->test_user->characterUsers()->save($character_user);
+            $this->test_user->characterUsers()->save($character_user);
 
             return CharacterInfo::find($character_user->character_id);
         });
 
         // test that the test user owns both characters
-        expect(test()->test_user->refresh()->characters)->toHaveCount(2);
+        expect($this->test_user->refresh()->characters)->toHaveCount(2);
 
         // test that primary and secondary character has different corporations
-        test()->assertNotEquals(test()->test_character->corporation->corporation_id, $secondary_character->corporation->corporation_id);
+        $this->assertNotEquals($this->test_character->corporation->corporation_id, $secondary_character->corporation->corporation_id);
 
         // update refresh_token for secondary character
         Event::fakeFor(function () use ($secondary_character) {
@@ -290,14 +290,14 @@ describe('passes middleware', function () {
 
         // TestingTime
 
-        test()->actingAs(test()->test_user);
+        $this->actingAs($this->test_user);
 
         mockMiddleware();
 
         // Expect redirect
-        test()->request->shouldReceive('forward')->times(1);
+        $this->request->shouldReceive('forward')->times(1);
 
-        test()->middleware->handle(test()->request, test()->next);
+        $this->middleware->handle($this->request, $this->next);
     });
 
     it('if user application has no required scopes', function () {
@@ -305,18 +305,18 @@ describe('passes middleware', function () {
         createRefreshTokenWithScopes(['a', 'b']);
 
         // 2. create user application
-        test()->test_user->application()->create(['id' => Str::uuid(), 'corporation_id' => test()->test_character->corporation->corporation_id]);
+        $this->test_user->application()->create(['id' => Str::uuid(), 'corporation_id' => $this->test_character->corporation->corporation_id]);
 
         // TestingTime
 
-        test()->actingAs(test()->test_user);
+        $this->actingAs($this->test_user);
 
         mockMiddleware();
 
         // Expect 1 forward
-        test()->request->shouldReceive('forward')->times(1);
+        $this->request->shouldReceive('forward')->times(1);
 
-        test()->middleware->handle(test()->request, test()->next);
+        $this->middleware->handle($this->request, $this->next);
     });
 
     it('lets request through if user application has required scopes', function () {
@@ -324,21 +324,21 @@ describe('passes middleware', function () {
         createRefreshTokenWithScopes(['a', 'b']);
 
         // 2. create user application
-        test()->test_user->application()->create(['id' => Str::uuid(), 'corporation_id' => test()->test_character->corporation->corporation_id]);
+        $this->test_user->application()->create(['id' => Str::uuid(), 'corporation_id' => $this->test_character->corporation->corporation_id]);
 
         // 3. create required corp scopes
         createCorporationSsoScope(['a']);
 
         // TestingTime
 
-        test()->actingAs(test()->test_user);
+        $this->actingAs($this->test_user);
 
         mockMiddleware();
 
         // Expect 1 forward
-        test()->request->shouldReceive('forward')->times(1);
+        $this->request->shouldReceive('forward')->times(1);
 
-        test()->middleware->handle(test()->request, test()->next);
+        $this->middleware->handle($this->request, $this->next);
     });
 });
 

@@ -17,20 +17,15 @@ parameters:
     checkOctaneCompatibility: true
     checkModelProperties: true
 
-    # pest-plugin-phpstan types `$this` inside test closures, but not the bare
-    # `test()` accessor — its return type stays `TestCall|HigherOrderTapProxy`.
-    # This suite uses `test()->prop` throughout, so treat the two proxies as
-    # property bags and ignore method calls on them.
+    # Test bodies and hooks use `$this`, which pest-plugin-phpstan types as the real
+    # TestCase. The bare `test()` accessor is still needed in dataset closures and in
+    # the global helpers in tests/Pest.php, where `$this` is not bound — and there the
+    # return type stays `TestCall|HigherOrderTapProxy`, so treat those as property bags.
     universalObjectCratesClasses:
         - Pest\PendingCalls\TestCall
         - Pest\Support\HigherOrderTapProxy
 
     ignoreErrors:
-        -
-            identifier: method.notFound
-            message: '#^Call to an undefined method Pest\\(PendingCalls\\TestCall|Support\\HigherOrderTapProxy)#'
-            path: tests
-
         # Cache::spy() turns the facade into a Mockery spy, but larastan only models the
         # facade's real accessor class, so the spy assertion API is invisible to it.
         -

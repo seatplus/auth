@@ -14,7 +14,7 @@ beforeEach(function () {
 });
 
 it('can add a member', function () {
-    $test_user = test()->test_user;
+    $test_user = $this->test_user;
 
     $this->service->addMember($test_user);
 
@@ -23,7 +23,7 @@ it('can add a member', function () {
 });
 
 it('can remove a member', function () {
-    $test_user = test()->test_user;
+    $test_user = $this->test_user;
 
     $this->service->addMember($test_user);
 
@@ -35,7 +35,7 @@ it('can remove a member', function () {
 });
 
 it('can add user as moderator and does not change status', function () {
-    $test_user = test()->test_user;
+    $test_user = $this->test_user;
 
     $this->service->addMember($test_user);
 
@@ -53,7 +53,7 @@ it('can add user as moderator and does not change status', function () {
 });
 
 it('keeps a moderator when they are later added as a member', function () {
-    $test_user = test()->test_user;
+    $test_user = $this->test_user;
 
     // Moderator first (no membership status yet).
     $this->service->setModerator($test_user);
@@ -69,13 +69,13 @@ it('keeps a moderator when they are later added as a member', function () {
 });
 
 it('a newly added member is not a moderator by default', function () {
-    $this->service->addMember(test()->test_user);
+    $this->service->addMember($this->test_user);
 
     expect(RoleMembership::first())->can_moderate->toBeFalse();
 });
 
 it('keeps a moderator when their membership is removed', function () {
-    $test_user = test()->test_user;
+    $test_user = $this->test_user;
 
     $this->service->addMember($test_user);
     $this->service->setModerator($test_user);
@@ -94,7 +94,7 @@ it('keeps a moderator when their membership is removed', function () {
 });
 
 it('syncs members', function () {
-    $test_user = test()->test_user;
+    $test_user = $this->test_user;
 
     $this->service->addMember($test_user);
 
@@ -106,16 +106,16 @@ it('syncs members', function () {
 });
 
 it('can view', function () {
-    expect($this->service->canView(test()->test_user))->toBeFalse();
+    expect($this->service->canView($this->test_user))->toBeFalse();
 });
 
 it('can join', function () {
-    expect($this->service->canJoin(test()->test_user))->toBeFalse();
+    expect($this->service->canJoin($this->test_user))->toBeFalse();
 });
 
 it('can moderate', function () {
 
-    $this->service->setModerator(test()->test_user);
+    $this->service->setModerator($this->test_user);
 
-    expect($this->service->canModerate(test()->test_user))->toBeTrue();
+    expect($this->service->canModerate($this->test_user))->toBeTrue();
 });

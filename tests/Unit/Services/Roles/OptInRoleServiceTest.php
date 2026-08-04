@@ -26,10 +26,10 @@ it('can add criteria', function () {
 });
 
 it('can join role', function () {
-    $test_user = test()->test_user;
+    $test_user = $this->test_user;
 
     $this->service->addCriteriaForRole(
-        new CriteriaData(test()->test_character->corporation_id, 'corporation'),
+        new CriteriaData($this->test_character->corporation_id, 'corporation'),
     );
 
     $this->service->joinRole($test_user);
@@ -56,9 +56,9 @@ it('lets a non-affiliated user join when open to all', function () {
 });
 
 it('can leave role', function () {
-    $test_user = test()->test_user;
+    $test_user = $this->test_user;
     $this->service->addCriteriaForRole(
-        new CriteriaData(test()->test_character->corporation_id, 'corporation'),
+        new CriteriaData($this->test_character->corporation_id, 'corporation'),
     );
 
     $this->service->joinRole($test_user);
@@ -71,9 +71,9 @@ it('can leave role', function () {
 });
 
 it('syncs members', function () {
-    $test_user = test()->test_user;
+    $test_user = $this->test_user;
     $this->service->addCriteriaForRole(
-        new CriteriaData(test()->test_character->corporation_id, 'corporation'),
+        new CriteriaData($this->test_character->corporation_id, 'corporation'),
     );
 
     $this->service->joinRole($test_user);
@@ -97,31 +97,31 @@ it('syncs members', function () {
 describe('it can', function () {
     beforeEach(function () {
         $this->service->addCriteriaForRole(
-            new CriteriaData(test()->test_character->corporation_id, 'corporation'),
+            new CriteriaData($this->test_character->corporation_id, 'corporation'),
         );
     });
 
     it('can view', function () {
-        $test_user = test()->test_user;
+        $test_user = $this->test_user;
 
         expect($this->service->canView($test_user))->toBeTrue();
     });
 
     it('can join', function () {
-        $test_user = test()->test_user;
+        $test_user = $this->test_user;
 
         expect($this->service->canJoin($test_user))->toBeTrue();
     });
 });
 
 it('cannot moderate', function () {
-    $test_user = test()->test_user;
+    $test_user = $this->test_user;
 
     expect($this->service->canModerate($test_user))->toBeFalse();
 });
 
 it('sets moderator status for user', function (bool $can_moderate) {
-    $user = test()->test_user;
+    $user = $this->test_user;
 
     $this->service->setModerator($user, $can_moderate);
 

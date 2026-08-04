@@ -34,7 +34,7 @@ describe('make', function () {
     it('throws exception if role not found', function () {
 
         BaseRoleService::make('abc');
-    })->expectException(RoleDoesNotExist::class);
+    })->throws(RoleDoesNotExist::class);
 });
 
 it('can get automatic role service', function () {
@@ -59,9 +59,9 @@ it('work with the various role types', function (RoleType $role_type) {
     // act
     $service->handleMembers();
 
-    $can_view = $service->canView(test()->test_user);
-    $can_join = $service->canJoin(test()->test_user);
-    $can_moderate = $service->canModerate(test()->test_user);
+    $can_view = $service->canView($this->test_user);
+    $can_join = $service->canJoin($this->test_user);
+    $can_moderate = $service->canModerate($this->test_user);
 
     // assert
     expect($can_view)->toBeFalse()

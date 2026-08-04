@@ -37,42 +37,42 @@ test('one can request another scope', function () {
     // 1. Create refresh_token
     createRefreshTokenWithScopes(['a', 'b']);
 
-    expect(test()->test_character->refreshToken->scopes)
+    expect($this->test_character->refreshToken->scopes)
         ->toBeArray()
         ->toBe(['a', 'b']);
 
     $add_scopes = implode(',', ['1', '2']);
 
-    $response = test()->actingAs(test()->test_user)->get(route('auth.eve.step_up', [
-        'character_id' => test()->test_character->character_id,
+    $response = $this->actingAs($this->test_user)->get(route('auth.eve.step_up', [
+        'character_id' => $this->test_character->character_id,
         'add_scopes' => $add_scopes,
     ]));
 
-    expect(session('step_up'))->toEqual(test()->test_character->character_id)
+    expect(session('step_up'))->toEqual($this->test_character->character_id)
         ->and(session('sso_scopes'))->toEqual(['a', 'b', '1', '2']);
 });
 
 test('one can request another scope for a deleted token', function () {
     // Delete the token
-    $token = test()->test_character->refreshToken;
+    $token = $this->test_character->refreshToken;
     $token->delete();
 
-    expect(test()->test_character->refresh()->refreshToken)
+    expect($this->test_character->refresh()->refreshToken)
         ->toBeNull();
 
     $add_scopes = implode(',', ['1', '2']);
 
-    $response = test()->actingAs(test()->test_user)->get(route('auth.eve.step_up', [
-        'character_id' => test()->test_character->character_id,
+    $response = $this->actingAs($this->test_user)->get(route('auth.eve.step_up', [
+        'character_id' => $this->test_character->character_id,
         'add_scopes' => $add_scopes,
     ]));
 
-    expect(session('step_up'))->toEqual(test()->test_character->character_id)
+    expect(session('step_up'))->toEqual($this->test_character->character_id)
         ->and(session('sso_scopes'))->toEqual(['1', '2']);
 });
 
 test('one can not request another scope for a character not associated to the user', function () {
-    $response = test()->actingAs(test()->test_user)->get(route('auth.eve.step_up', [
+    $response = $this->actingAs($this->test_user)->get(route('auth.eve.step_up', [
         'character_id' => 123,
     ]));
 
@@ -82,8 +82,8 @@ test('one can not request another scope for a character not associated to the us
 test('step-up stores the explicit redirect origin as the return url', function () {
     createRefreshTokenWithScopes(['a', 'b']);
 
-    test()->actingAs(test()->test_user)->get(route('auth.eve.step_up', [
-        'character_id' => test()->test_character->character_id,
+    $this->actingAs($this->test_user)->get(route('auth.eve.step_up', [
+        'character_id' => $this->test_character->character_id,
         'add_scopes' => '1,2',
         'redirect' => '/character/wallet',
     ]));
@@ -94,8 +94,8 @@ test('step-up stores the explicit redirect origin as the return url', function (
 test('step-up rejects a non-local redirect origin and falls back to /', function (string $redirect) {
     createRefreshTokenWithScopes(['a', 'b']);
 
-    test()->actingAs(test()->test_user)->get(route('auth.eve.step_up', [
-        'character_id' => test()->test_character->character_id,
+    $this->actingAs($this->test_user)->get(route('auth.eve.step_up', [
+        'character_id' => $this->test_character->character_id,
         'add_scopes' => '1,2',
         'redirect' => $redirect,
     ]));
