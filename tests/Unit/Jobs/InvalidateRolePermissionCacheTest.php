@@ -11,7 +11,7 @@ use Seatplus\Auth\Services\Permissions\CanUserService;
 it('forgets the cached permission object of every user holding the role', function () {
     $role = Role::create(['name' => 'test'])->refresh();
 
-    $holder = test()->test_user;
+    $holder = $this->test_user;
     $holder->assignRole($role);
 
     // a user without the role must be left untouched

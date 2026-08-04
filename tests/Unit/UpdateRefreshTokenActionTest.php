@@ -30,18 +30,18 @@ use Seatplus\Auth\Http\Actions\Sso\UpdateRefreshTokenAction;
 use Seatplus\Eveapi\Models\RefreshToken;
 
 test('create refresh token', function () {
-    $eve_data = createEveUser(test()->test_user->id);
+    $eve_data = createEveUser($this->test_user->id);
 
     $action = new UpdateRefreshTokenAction;
     Event::fakeFor(fn () => $action($eve_data));
 
-    test()->assertDatabaseHas('refresh_tokens', [
-        'character_id' => test()->test_user->id,
+    $this->assertDatabaseHas('refresh_tokens', [
+        'character_id' => $this->test_user->id,
     ]);
 });
 
 it('does update refresh token active sessions', function () {
-    test()->actingAs(test()->test_user);
+    $this->actingAs($this->test_user);
 
     // create RefreshToken
     $eveUser = createEveUser();
@@ -49,7 +49,7 @@ it('does update refresh token active sessions', function () {
     $action = new UpdateRefreshTokenAction;
     Event::fakeFor(fn () => $action($eveUser));
 
-    test()->assertDatabaseHas('refresh_tokens', [
+    $this->assertDatabaseHas('refresh_tokens', [
         'character_id' => $eveUser->character_id,
         'refresh_token' => $eveUser->refreshToken,
     ]);
@@ -62,7 +62,7 @@ it('does update refresh token active sessions', function () {
 
     Event::fakeFor(fn () => $action($eveUser_changedRefreshToken));
 
-    test()->assertDatabaseHas('refresh_tokens', [
+    $this->assertDatabaseHas('refresh_tokens', [
         'character_id' => $eveUser->character_id,
         'refresh_token' => $eveUser_changedRefreshToken->refreshToken,
     ]);
@@ -124,7 +124,7 @@ it('does not update refresh token for new session of a valid refresh token user'
     $action = new UpdateRefreshTokenAction;
     Event::fakeFor(fn () => $action($eveUser));
 
-    test()->assertDatabaseHas('refresh_tokens', [
+    $this->assertDatabaseHas('refresh_tokens', [
         'character_id' => $eveUser->character_id,
         'refresh_token' => $eveUser->refreshToken,
     ]);
@@ -138,7 +138,7 @@ it('does not update refresh token for new session of a valid refresh token user'
 
     Event::fakeFor(fn () => $action($eveUser));
 
-    test()->assertDatabaseMissing('refresh_tokens', [
+    $this->assertDatabaseMissing('refresh_tokens', [
         'character_id' => $eveUser->character_id,
         'refresh_token' => $eveUser_changedRefreshToken->refreshToken,
     ]);
@@ -151,7 +151,7 @@ test('restore trashed refresh token', function () {
     $action = new UpdateRefreshTokenAction;
     Event::fakeFor(fn () => $action($eveUser));
 
-    test()->assertDatabaseHas('refresh_tokens', [
+    $this->assertDatabaseHas('refresh_tokens', [
         'character_id' => $eveUser->character_id,
         'refresh_token' => $eveUser->refreshToken,
     ]);
@@ -168,7 +168,7 @@ test('restore trashed refresh token', function () {
 
     expect(RefreshToken::withoutTrashed()->firstWhere('character_id', $eveUser->character_id))->toBeNull();
     expect(RefreshToken::withTrashed()->firstWhere('character_id', $eveUser->character_id))
-        ->not()->toBeNull()
+        ->not->toBeNull()
         ->toBeInstanceOf(RefreshToken::class);
 
     // Recreate RefreshToken
@@ -181,7 +181,7 @@ test('restore trashed refresh token', function () {
 
     expect(RefreshToken::find($eveUser->character_id))->not()->toBeEmpty();
 
-    test()->assertDatabaseHas('refresh_tokens', [
+    $this->assertDatabaseHas('refresh_tokens', [
         'character_id' => $eveUser->character_id,
         'refresh_token' => $eveUser_changedRefreshToken->refreshToken,
     ]);

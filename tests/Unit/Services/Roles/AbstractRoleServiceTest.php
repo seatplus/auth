@@ -12,8 +12,10 @@ use Seatplus\Auth\Services\Roles\DTO\CriteriaData;
 use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 
 beforeEach(function () {
-    $this->role = Role::create(['name' => 'test']);
-    $this->role = $this->role->refresh();
+    // Spatie annotates Role::create() as RoleContract|SpatieRole, so the subclass is lost.
+    /** @var Role $role */
+    $role = Role::create(['name' => 'test']);
+    $this->role = $role->refresh();
     $this->service = new class($this->role) extends AbstractRoleService
     {
         public function syncMembers(): void {}
@@ -38,7 +40,7 @@ beforeEach(function () {
 it('affiliates role to corporation and getting role on test user', function () {
 
     // Arrange
-    $test_character = test()->test_character;
+    $test_character = $this->test_character;
     $corporation_id = $test_character->corporation_id;
     $alliance_id = $test_character->alliance_id;
 

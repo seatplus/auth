@@ -29,9 +29,9 @@ use Seatplus\Auth\Models\Permissions\Permission;
 test('superuser got any permission', function () {
     $superuser_permission = Permission::create(['name' => 'superuser']);
 
-    test()->test_user->givePermissionTo('superuser');
+    $this->test_user->givePermissionTo('superuser');
 
     $another_permission = Permission::create(['name' => 'another permission']);
 
-    expect(test()->test_user->can($another_permission->name))->toBeTrue();
+    expect($this->test_user->can($another_permission->name))->toBeTrue();
 });

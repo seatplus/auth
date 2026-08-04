@@ -5,7 +5,7 @@ use Seatplus\Auth\Models\CharacterUser;
 use Seatplus\Eveapi\Models\RefreshToken;
 
 it('forgets user permission object when a new character is added', function () {
-    $user_id = test()->test_user->id;
+    $user_id = $this->test_user->id;
 
     Cache::spy();
 
@@ -22,11 +22,11 @@ it('forgets user permission object when a new character is added', function () {
 });
 
 it('forgets user permission object when refresh_token scopes are updated', function () {
-    $user_id = test()->test_user->id;
+    $user_id = $this->test_user->id;
 
     Cache::spy();
 
-    $refresh_token = test()->test_character->refreshToken;
+    $refresh_token = $this->test_character->refreshToken;
     $refresh_token->token = createSocialiteUser($refresh_token->character_id, ['foo', 'bar'])->token;
 
     $refresh_token->save();

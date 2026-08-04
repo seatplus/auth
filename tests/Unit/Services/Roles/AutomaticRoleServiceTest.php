@@ -8,43 +8,45 @@ use Seatplus\Auth\Services\Roles\AutomaticRoleService;
 use Seatplus\Auth\Services\Roles\DTO\CriteriaData;
 
 beforeEach(function () {
-    $this->role = Role::create(['name' => 'test']);
-    $this->role = $this->role->refresh();
+    // Spatie annotates Role::create() as RoleContract|SpatieRole, so the subclass is lost.
+    /** @var Role $role */
+    $role = Role::create(['name' => 'test']);
+    $this->role = $role->refresh();
     $this->service = new AutomaticRoleService($this->role);
 });
 
 describe('assigning', function () {
     it('role to corporation and getting role on test user', function () {
 
-        $test_character = test()->test_character;
+        $test_character = $this->test_character;
         $corporation_id = $test_character->corporation_id;
 
-        expect(test()->test_user->refresh()->hasRole($this->role->name))->toBeFalse();
+        expect($this->test_user->refresh()->hasRole($this->role->name))->toBeFalse();
 
         $this->service->automaticallyAssignRoleTo(
             new CriteriaData($corporation_id, 'corporation'),
         );
 
         expect(RoleMembership::get())->toHaveCount(2) // User and Corporation
-            ->and(test()->test_user->refresh()->hasRole($this->role->name))->toBeTrue();
+            ->and($this->test_user->refresh()->hasRole($this->role->name))->toBeTrue();
 
     });
 
     it('role to alliance', function () {
 
-        $test_character = test()->test_character;
+        $test_character = $this->test_character;
         $alliance_id = $test_character->alliance_id;
 
         $this->service->automaticallyAssignRoleTo(
             new CriteriaData($alliance_id, 'alliance'),
         );
 
-        expect(test()->test_user->refresh()->hasRole($this->role->name))->toBeTrue();
+        expect($this->test_user->refresh()->hasRole($this->role->name))->toBeTrue();
     });
 
     it('role to corporation and alliance', function () {
 
-        $test_character = test()->test_character;
+        $test_character = $this->test_character;
         $corporation_id = $test_character->corporation_id;
         $alliance_id = $test_character->alliance_id;
 
@@ -54,22 +56,22 @@ describe('assigning', function () {
         );
 
         expect(RoleMembership::get())->toHaveCount(3) // User, Corporation and Alliance
-            ->and(test()->test_user->refresh()->hasRole($this->role->name))->toBeTrue();
+            ->and($this->test_user->refresh()->hasRole($this->role->name))->toBeTrue();
     });
 });
 
 describe('handling Members', function () {
     it('removes role from user if nothing is assigned', function () {
 
-        $test_user = test()->test_user;
+        $test_user = $this->test_user;
 
         $test_user->assignRole($this->role);
 
-        expect(test()->test_user->refresh()->hasRole($this->role->name))->toBeTrue();
+        expect($this->test_user->refresh()->hasRole($this->role->name))->toBeTrue();
 
         $this->service->automaticallyAssignRoleTo();
 
-        expect(test()->test_user->refresh()->hasRole($this->role->name))->toBeFalse()
+        expect($this->test_user->refresh()->hasRole($this->role->name))->toBeFalse()
             ->and(RoleMembership::query()->count())->toBe(0);
     });
 
@@ -79,7 +81,7 @@ describe('handling Members', function () {
 
         $service = new AutomaticRoleService($role);
 
-        $test_character = test()->test_character;
+        $test_character = $this->test_character;
         $corporation_id = $test_character->corporation_id;
 
         $service->automaticallyAssignRoleTo(
@@ -87,7 +89,7 @@ describe('handling Members', function () {
         );
 
         expect(RoleMembership::get())->toHaveCount(2) // User and Corporation
-            ->and(test()->test_user->refresh()->hasRole($role->name))->toBeTrue();
+            ->and($this->test_user->refresh()->hasRole($role->name))->toBeTrue();
     });
 });
 
@@ -101,7 +103,7 @@ describe('open to all', function () {
             new CriteriaData(AutomaticRoleService::EVERYONE_CORPORATION_ID, 'corporation'),
         );
 
-        expect(test()->test_user->refresh()->hasRole($this->role->name))->toBeTrue()
+        expect($this->test_user->refresh()->hasRole($this->role->name))->toBeTrue()
             ->and($other_user->refresh()->hasRole($this->role->name))->toBeTrue();
     });
 
@@ -120,12 +122,12 @@ describe('open to all', function () {
             new CriteriaData(AutomaticRoleService::EVERYONE_CORPORATION_ID, 'corporation'),
         );
 
-        expect(test()->test_user->refresh()->hasRole($this->role->name))->toBeTrue();
+        expect($this->test_user->refresh()->hasRole($this->role->name))->toBeTrue();
 
         // a second sync must not strip existing members
         $this->service->handleMembers();
 
-        expect(test()->test_user->refresh()->hasRole($this->role->name))->toBeTrue();
+        expect($this->test_user->refresh()->hasRole($this->role->name))->toBeTrue();
     });
 });
 
@@ -139,24 +141,24 @@ it('sets role type to automatic', function () {
 });
 
 it('cannot view', function () {
-    expect($this->service->canView(test()->test_user))->toBeFalse();
+    expect($this->service->canView($this->test_user))->toBeFalse();
 });
 
 it('can view when meets criteria', function () {
-    $test_character = test()->test_character;
+    $test_character = $this->test_character;
     $corporation_id = $test_character->corporation_id;
 
     $this->service->automaticallyAssignRoleTo(
         new CriteriaData($corporation_id, 'corporation'),
     );
 
-    expect($this->service->canView(test()->test_user))->toBeTrue();
+    expect($this->service->canView($this->test_user))->toBeTrue();
 });
 
 it('cannot join', function () {
-    expect($this->service->canJoin(test()->test_user))->toBeFalse();
+    expect($this->service->canJoin($this->test_user))->toBeFalse();
 });
 
 it('cannot moderate', function () {
-    expect($this->service->canModerate(test()->test_user))->toBeFalse();
+    expect($this->service->canModerate($this->test_user))->toBeFalse();
 });

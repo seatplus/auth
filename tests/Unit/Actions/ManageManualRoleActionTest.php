@@ -13,6 +13,8 @@ use Seatplus\Auth\Services\Roles\DTO\AffiliationData;
 use Seatplus\Auth\Services\Roles\ManualRoleService;
 
 it('sets the role type to manual', function () {
+    // Spatie annotates Role::create() as RoleContract|SpatieRole, so the subclass is lost.
+    /** @var Role $role */
     $role = Role::create(['name' => 'test_role']);
 
     $role_request = mock(RoleRequest::class, function (MockInterface $mock) use ($role) {

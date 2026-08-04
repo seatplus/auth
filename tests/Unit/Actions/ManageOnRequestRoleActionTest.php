@@ -46,8 +46,6 @@ it('executes manage on request role action successfully', function () {
 
     $action = app(ManageOnRequestRoleAction::class);
     $action->execute($request);
-
-    expect(true)->toBeTrue(); // Just to ensure the test runs without exceptions
 });
 
 it('throws exception if user does not have permission', function () {

@@ -20,8 +20,8 @@ beforeEach(function () {
 describe('adding criteria for role application', function () {
     it('adds criteria for role application with valid entities', function () {
         // Arrange
-        $corporation_id = test()->test_character->corporation_id;
-        $alliance_id = test()->test_character->alliance_id;
+        $corporation_id = $this->test_character->corporation_id;
+        $alliance_id = $this->test_character->alliance_id;
 
         // Act
         $this->service->addCriteriaForRoleApplication(
@@ -36,8 +36,8 @@ describe('adding criteria for role application', function () {
     it('throws validation exception for invalid entities', function () {
         // Act
         $this->service->addCriteriaForRoleApplication(
-            new CriteriaData(test()->test_character->corporation_id, 'corporation'),
-            new CriteriaData(test()->test_character->alliance_id, 'invalid'),
+            new CriteriaData($this->test_character->corporation_id, 'corporation'),
+            new CriteriaData($this->test_character->alliance_id, 'invalid'),
         );
     })->throws(ValueError::class);
 
@@ -54,14 +54,14 @@ describe('adding criteria for role application', function () {
         // create user role membership that acts as member and should not be deleted
         RoleMembership::query()->create([
             'role_id' => $this->role->id,
-            'entity_id' => test()->test_user->id,
+            'entity_id' => $this->test_user->id,
             'entity_type' => User::class,
         ]);
 
         // Act
         $this->service->addCriteriaForRoleApplication(
-            new CriteriaData(test()->test_character->corporation_id, 'corporation'),
-            new CriteriaData(test()->test_character->alliance_id, 'alliance'),
+            new CriteriaData($this->test_character->corporation_id, 'corporation'),
+            new CriteriaData($this->test_character->alliance_id, 'alliance'),
         );
 
         // Assert
@@ -73,7 +73,7 @@ describe('adding criteria for role application', function () {
 
 it('cannot submit application if no criteria is set', function () {
     // arrange
-    $user = test()->test_user;
+    $user = $this->test_user;
 
     // act
     $this->service->submitApplicationForRole($user);
@@ -84,10 +84,10 @@ it('cannot submit application if no criteria is set', function () {
 
 it('submits application for role', function () {
     // arrange
-    $user = test()->test_user;
+    $user = $this->test_user;
 
     $this->service->addCriteriaForRoleApplication(
-        new CriteriaData(test()->test_character->corporation_id, 'corporation'),
+        new CriteriaData($this->test_character->corporation_id, 'corporation'),
     );
 
     // act
@@ -115,9 +115,9 @@ it('lets a non-affiliated user apply when open to all', function () {
 
 it('approving application for role', function () {
     // arrange
-    $user = test()->test_user;
+    $user = $this->test_user;
     $this->service->addCriteriaForRoleApplication(
-        new CriteriaData(test()->test_character->corporation_id, 'corporation'),
+        new CriteriaData($this->test_character->corporation_id, 'corporation'),
     );
 
     // act
@@ -132,7 +132,7 @@ it('approving application for role', function () {
 
 it('throws exception when approving application for role with no criteria', function () {
     // arrange
-    $user = test()->test_user;
+    $user = $this->test_user;
 
     // act
     $this->service->approveApplicationForRole($user);
@@ -142,7 +142,7 @@ it('throws exception when approving application for role with no criteria', func
 
 it('denies application for role', function () {
     // arrange
-    $user = test()->test_user;
+    $user = $this->test_user;
     RoleMembership::query()->create([
         'role_id' => $this->role->id,
         'entity_id' => $user->id,
@@ -159,7 +159,7 @@ it('denies application for role', function () {
 
 it('removes application for role', function () {
     // arrange
-    $user = test()->test_user;
+    $user = $this->test_user;
     RoleMembership::query()->create([
         'role_id' => $this->role->id,
         'entity_id' => $user->id,
@@ -176,7 +176,7 @@ it('removes application for role', function () {
 
 it('sets moderator status for user', function (bool $can_moderate) {
     // arrange
-    $user = test()->test_user;
+    $user = $this->test_user;
 
     // act
     $this->service->setModerator($user, $can_moderate);
@@ -192,7 +192,7 @@ it('sets moderator status for user', function (bool $can_moderate) {
 describe('sync', function () {
     it('removes members outside criteria', function () {
         // Arrange
-        $user = test()->test_user;
+        $user = $this->test_user;
 
         RoleMembership::query()->create([
             'role_id' => $this->role->id,
@@ -212,7 +212,7 @@ describe('sync', function () {
     it('keeps a moderator outside the criteria and only drops their membership', function () {
         // Arrange: a moderator who is also an active member but whose own characters are
         // outside the role's criteria (no criteria set, so nobody meets it).
-        $user = test()->test_user;
+        $user = $this->test_user;
 
         RoleMembership::query()->create([
             'role_id' => $this->role->id,
@@ -236,8 +236,8 @@ describe('sync', function () {
         // Arrange
 
         // set criteria
-        $test_character = test()->test_character;
-        $test_character = test()->test_character;
+        $test_character = $this->test_character;
+        $test_character = $this->test_character;
         RoleMembership::query()->create([
             'role_id' => $this->role->id,
             'entity_id' => $test_character->corporation_id,
@@ -245,7 +245,7 @@ describe('sync', function () {
         ]);
 
         // Add Member
-        $user = test()->test_user;
+        $user = $this->test_user;
         RoleMembership::query()->create([
             'role_id' => $this->role->id,
             'entity_id' => $user->id,
@@ -268,14 +268,14 @@ describe('can', function () {
 
     beforeEach(function () {
         $this->service->addCriteriaForRoleApplication(
-            new CriteriaData(test()->test_character->corporation_id, 'corporation'),
-            new CriteriaData(test()->test_character->alliance_id, 'alliance'),
+            new CriteriaData($this->test_character->corporation_id, 'corporation'),
+            new CriteriaData($this->test_character->alliance_id, 'alliance'),
         );
     });
 
     it('can view', function () {
         // Act
-        $result = $this->service->canView(test()->test_user);
+        $result = $this->service->canView($this->test_user);
 
         // Assert
         expect($result)->toBeTrue();
@@ -283,7 +283,7 @@ describe('can', function () {
 
     it('can join', function () {
         // Act
-        $result = $this->service->canJoin(test()->test_user);
+        $result = $this->service->canJoin($this->test_user);
 
         // Assert
         expect($result)->toBeTrue();
@@ -293,7 +293,7 @@ describe('can', function () {
 
 it('cannot moderate', function () {
     // Act
-    $result = $this->service->canModerate(test()->test_user);
+    $result = $this->service->canModerate($this->test_user);
 
     // Assert
     expect($result)->toBeFalse();
@@ -301,7 +301,7 @@ it('cannot moderate', function () {
 
 it('can moderate', function () {
     // Arrange
-    $user = test()->test_user;
+    $user = $this->test_user;
     $this->service->setModerator($user);
 
     // Act

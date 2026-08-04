@@ -89,12 +89,12 @@ function createSocialiteUser($character_id = null, array $scopes = ['esi-skills.
 
     $socialiteUser = Mockery::mock(SocialiteUser::class)->makePartial();
 
-    $attributes = (object) [
+    // Socialite's AbstractUser::map() merges into an array, so the real provider
+    // hands us an array here — mirror that shape.
+    $socialiteUser->attributes = [
         'character_id' => $character_id ?? $refresh_token->character_id,
         'character_owner_hash' => faker()->sha256,
     ];
-
-    $socialiteUser->attributes = $attributes;
     $socialiteUser->token = $refresh_token->token;
     $socialiteUser->refreshToken = $refresh_token->refresh_token;
     $socialiteUser->expiresIn = 12 * 60; // let's just say 12 minutes

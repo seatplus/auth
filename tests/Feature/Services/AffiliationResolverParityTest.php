@@ -12,11 +12,11 @@ beforeEach(function () {
 
     Event::fake();
 
-    test()->secondary_character = CharacterInfo::factory()->create();
+    $this->secondary_character = CharacterInfo::factory()->create();
 
-    test()->tertiary_character = CharacterInfo::factory()->create();
+    $this->tertiary_character = CharacterInfo::factory()->create();
 
-    test()->role = Role::create(['name' => 'derp']);
+    $this->role = Role::create(['name' => 'derp']);
 
     $this->service = new AutomaticRoleService($this->role);
 });
@@ -33,12 +33,14 @@ function getId(string $entity_type, int $character_level)
         1 => test()->test_character,
         2 => test()->secondary_character,
         3 => test()->tertiary_character,
+        default => throw new InvalidArgumentException("Unsupported character level [$character_level]"),
     };
 
     return match ($entity_type) {
         'character' => $character->character_id,
         'corporation' => $character->corporation_id,
         'alliance' => $character->alliance_id,
+        default => throw new InvalidArgumentException("Unsupported entity type [$entity_type]"),
     };
 }
 
@@ -71,11 +73,11 @@ describe('allowed only', function () {
             new AffiliationData($secondary_id, $entity_type, AffiliationType::from($affiliation_type)),
         );
 
-        $affiliated_ids = (new AffiliationResolver)->coveredIds([test()->role->id], allCandidateIds());
+        $affiliated_ids = (new AffiliationResolver)->coveredIds([$this->role->id], allCandidateIds());
 
         expect($affiliated_ids)->toContain($primaray_id)
             ->toContain($secondary_id)
-            ->not()->toContain(test()->tertiary_character->character_id);
+            ->not()->toContain($this->tertiary_character->character_id);
 
     })->with('entity_types')->with([AffiliationType::ALLOWED->value]);
 });
@@ -91,12 +93,12 @@ describe('inverse only', function () {
             new AffiliationData($tertiary_id, $entity_type, AffiliationType::from($affiliation_type)),
         );
 
-        $affiliated_ids = (new AffiliationResolver)->coveredIds([test()->role->id], allCandidateIds());
+        $affiliated_ids = (new AffiliationResolver)->coveredIds([$this->role->id], allCandidateIds());
 
         expect($affiliated_ids)
             ->toContain($primary_id)
             ->toContain($secondary_id)
-            ->not()->toContain(test()->tertiary_character->character_id)
+            ->not()->toContain($this->tertiary_character->character_id)
             ->not()->toContain($tertiary_id);
 
     })->with('entity_types')->with([AffiliationType::INVERSE->value]);
@@ -113,12 +115,12 @@ describe('forbidden only', function () {
             new AffiliationData($tertiary_id, $entity_type, AffiliationType::from($affiliation_type)),
         );
 
-        $affiliated_ids = (new AffiliationResolver)->coveredIds([test()->role->id], allCandidateIds());
+        $affiliated_ids = (new AffiliationResolver)->coveredIds([$this->role->id], allCandidateIds());
 
         expect($affiliated_ids)
             ->not()->toContain($primary_id)
             ->not()->toContain($secondary_id)
-            ->not()->toContain(test()->tertiary_character->character_id)
+            ->not()->toContain($this->tertiary_character->character_id)
             ->not()->toContain($tertiary_id);
 
     })->with('entity_types')->with([AffiliationType::FORBIDDEN->value]);
@@ -132,18 +134,18 @@ describe('allowed and inverse', function () {
         $tertiary_id = getId($entity_type, 3);
 
         $this->service->syncAffiliateManyEntities(
-            new AffiliationData(test()->test_character->character_id, 'character', AffiliationType::ALLOWED),
+            new AffiliationData($this->test_character->character_id, 'character', AffiliationType::ALLOWED),
             new AffiliationData($primary_id, $entity_type, AffiliationType::INVERSE),
         );
 
-        $affiliated_ids = (new AffiliationResolver)->coveredIds([test()->role->id], allCandidateIds());
+        $affiliated_ids = (new AffiliationResolver)->coveredIds([$this->role->id], allCandidateIds());
 
         expect($affiliated_ids)
-            ->toContain(test()->test_character->character_id)
+            ->toContain($this->test_character->character_id)
             ->toContain($secondary_id)
             ->toContain($tertiary_id)
-            ->toContain(test()->secondary_character->character_id)
-            ->toContain(test()->tertiary_character->character_id);
+            ->toContain($this->secondary_character->character_id)
+            ->toContain($this->tertiary_character->character_id);
 
     })->with('entity_types');
 });
@@ -154,14 +156,14 @@ describe('allowed and forbidden', function () {
         $primary_id = getId($entity_type, 1);
 
         $this->service->syncAffiliateManyEntities(
-            new AffiliationData(test()->test_character->character_id, 'character', AffiliationType::FORBIDDEN),
+            new AffiliationData($this->test_character->character_id, 'character', AffiliationType::FORBIDDEN),
             new AffiliationData($primary_id, $entity_type, AffiliationType::ALLOWED),
         );
 
-        $affiliated_ids = (new AffiliationResolver)->coveredIds([test()->role->id], allCandidateIds());
+        $affiliated_ids = (new AffiliationResolver)->coveredIds([$this->role->id], allCandidateIds());
 
         expect($affiliated_ids)
-            ->not()->toContain(test()->test_character->character_id)
+            ->not()->toContain($this->test_character->character_id)
             ->when($entity_type === 'character', function ($collection) {
                 $collection->toHaveCount(0);
             })
@@ -179,14 +181,14 @@ describe('inverse and forbidden', function () {
         $secondary_id = getId($entity_type, 2);
 
         $this->service->syncAffiliateManyEntities(
-            new AffiliationData(test()->test_character->character_id, 'character', AffiliationType::FORBIDDEN),
+            new AffiliationData($this->test_character->character_id, 'character', AffiliationType::FORBIDDEN),
             new AffiliationData($secondary_id, $entity_type, AffiliationType::INVERSE),
         );
 
-        $affiliated_ids = (new AffiliationResolver)->coveredIds([test()->role->id], allCandidateIds());
+        $affiliated_ids = (new AffiliationResolver)->coveredIds([$this->role->id], allCandidateIds());
 
         expect($affiliated_ids)
-            ->not()->toContain(test()->test_character->character_id)
+            ->not()->toContain($this->test_character->character_id)
             ->when($entity_type !== 'character', function ($collection) use ($primary_id) {
                 $collection->toContain($primary_id);
             });
@@ -201,16 +203,16 @@ describe('allowed, inverse and forbidden', function () {
         $secondary_id = getId($entity_type, 2);
 
         $this->service->syncAffiliateManyEntities(
-            new AffiliationData(test()->test_character->character_id, 'character', AffiliationType::FORBIDDEN),
+            new AffiliationData($this->test_character->character_id, 'character', AffiliationType::FORBIDDEN),
             new AffiliationData($primary_id, $entity_type, AffiliationType::ALLOWED),
             new AffiliationData($secondary_id, $entity_type, AffiliationType::INVERSE),
         );
 
-        $affiliated_ids = (new AffiliationResolver)->coveredIds([test()->role->id], allCandidateIds());
+        $affiliated_ids = (new AffiliationResolver)->coveredIds([$this->role->id], allCandidateIds());
 
         expect($affiliated_ids)
-            ->toContain(test()->tertiary_character->character_id)
-            ->not()->toContain(test()->test_character->character_id)
+            ->toContain($this->tertiary_character->character_id)
+            ->not()->toContain($this->test_character->character_id)
             ->not()->toContain($secondary_id);
 
     })->with('entity_types');

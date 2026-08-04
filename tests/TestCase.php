@@ -63,6 +63,10 @@ abstract class TestCase extends OrchestraTestCase
             fn (string $modelName) => match (true) {
                 Str::startsWith($modelName, 'Seatplus\Auth') => 'Seatplus\\Auth\\Database\\Factories\\'.class_basename($modelName).'Factory',
                 Str::startsWith($modelName, 'Seatplus\Eveapi') => 'Seatplus\\Eveapi\\Database\\Factories\\'.class_basename($modelName).'Factory',
+                // Only the two seatplus namespaces have factories here. Fail loudly rather
+                // than guessing a namespace (this arm was previously an implicit
+                // UnhandledMatchError).
+                default => throw new \InvalidArgumentException("No factory namespace known for model [$modelName]."),
             }
         );
 

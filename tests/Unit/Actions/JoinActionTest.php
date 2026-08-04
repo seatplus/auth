@@ -18,8 +18,6 @@ it('executes join action successfully', function () {
 
     $action = app(JoinAction::class);
     $action->execute(1, $user->id);
-
-    expect(true)->toBeTrue(); // Just to ensure the test runs without exceptions
 });
 
 it('throws exception if user not found during join', function () {

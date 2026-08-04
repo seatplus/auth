@@ -10,7 +10,7 @@ use Seatplus\Eveapi\Models\Corporation\CorporationInfo;
 beforeEach(function () {
     Event::fake();
 
-    test()->role = Role::create(['name' => 'derp']);
+    $this->role = Role::create(['name' => 'derp']);
 });
 
 dataset('primary entities', [
@@ -30,19 +30,19 @@ it('has affiliated_ids attribute', function ($primary_entities, $affiliation_typ
     [$entity_id, $entity_type] = $primary_entities();
     // Arrange
     $affiliation = Affiliation::query()->create([
-        'role_id' => test()->role->id,
+        'role_id' => $this->role->id,
         'affiliatable_id' => $entity_id,
         'affiliatable_type' => $entity_type,
         'type' => $affiliation_type,
     ]);
 
     // Assert
-    expect($affiliation->affiliated_ids)->toContain(test()->test_character->character_id)
+    expect($affiliation->affiliated_ids)->toContain($this->test_character->character_id)
         ->when($entity_type === CorporationInfo::class, function ($collection) {
-            $collection->toContain(test()->test_character->corporation_id);
+            $collection->toContain($this->test_character->corporation_id);
         })
         ->when($entity_type === AllianceInfo::class, function ($collection) {
-            $collection->toContain(test()->test_character->alliance_id);
+            $collection->toContain($this->test_character->alliance_id);
         });
 
 })->with('primary entities')->with('affiliation types');
@@ -51,8 +51,8 @@ describe('relationship tests', function () {
 
     beforeEach(function () {
         Affiliation::query()->create([
-            'role_id' => test()->role->id,
-            'affiliatable_id' => test()->test_character->character_id,
+            'role_id' => $this->role->id,
+            'affiliatable_id' => $this->test_character->character_id,
             'affiliatable_type' => CharacterInfo::class,
             'type' => AffiliationType::ALLOWED->value,
         ]);

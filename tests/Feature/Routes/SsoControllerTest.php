@@ -39,17 +39,17 @@ it('works for non authed users', function () {
 
     Socialite::shouldReceive('driver')->with('eveonline')->andReturn($provider);
 
-    test()->assertDatabaseMissing('refresh_tokens', [
+    $this->assertDatabaseMissing('refresh_tokens', [
         'character_id' => $character_id,
     ]);
 
     Event::fakeFor(function () {
-        $response = test()->get(route('auth.eve.callback'));
+        $response = $this->get(route('auth.eve.callback'));
 
         $response->assertRedirect();
     });
 
-    test()->assertDatabaseHas('refresh_tokens', [
+    $this->assertDatabaseHas('refresh_tokens', [
         'character_id' => $character_id,
     ]);
 });
@@ -62,14 +62,14 @@ it('returns error if scopes changed', function () {
 
     Socialite::shouldReceive('driver')->with('eveonline')->andReturn($provider);
 
-    test()->actingAs(test()->test_user);
+    $this->actingAs($this->test_user);
 
     session([
         'sso_scopes' => ['test'],
         'rurl' => '/home',
     ]);
 
-    test()->get(route('auth.eve.callback'));
+    $this->get(route('auth.eve.callback'));
 
     expect(session('error'))->toBe('Something might have gone wrong. You might have changed the requested scopes on esi, please refer from doing so.');
 });
@@ -86,7 +86,7 @@ test('one can add another character', function () {
 
     // Mock Esi Response
 
-    test()->actingAs(test()->test_user);
+    $this->actingAs($this->test_user);
 
     session([
         'sso_scopes' => config('eveapi.scopes.minimum'),
@@ -94,12 +94,12 @@ test('one can add another character', function () {
     ]);
 
     // expect test_user only to have one character
-    expect(test()->test_user->characterUsers)->toHaveCount(1);
+    expect($this->test_user->characterUsers)->toHaveCount(1);
 
     // assert no UserRolesSync job has been dispatched
     Queue::assertNothingPushed();
 
-    $result = test()->get(route('auth.eve.callback'));
+    $result = $this->get(route('auth.eve.callback'));
 
     // adding a character always lands on the dashboard, not the page the button was on (rurl)
     $result->assertRedirect('/');
@@ -112,5 +112,5 @@ test('one can add another character', function () {
 
     expect(session('success'))->toBe('Character added/updated successfully');
 
-    expect(test()->test_user->refresh()->characterUsers)->toHaveCount(2);
+    expect($this->test_user->refresh()->characterUsers)->toHaveCount(2);
 });

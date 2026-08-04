@@ -6,7 +6,7 @@ use Seatplus\Eveapi\Models\SsoScopes;
 
 it('flushes cache after creation', function () {
 
-    $user_id = test()->test_user->id;
+    $user_id = $this->test_user->id;
 
     Cache::spy();
 
@@ -20,7 +20,7 @@ it('flushes cache after creation', function () {
 it('flushes cache after updated', function () {
     Event::fakeFor(fn () => SsoScopes::factory()->create());
 
-    $user_id = test()->test_user->id;
+    $user_id = $this->test_user->id;
 
     Cache::spy();
 
@@ -36,7 +36,7 @@ it('flushes cache after updated', function () {
 it('flushes cache after deleted', function () {
     Event::fakeFor(fn () => SsoScopes::factory()->create());
 
-    $user_id = test()->test_user->id;
+    $user_id = $this->test_user->id;
 
     Cache::spy();
 
