@@ -344,8 +344,16 @@ describe('passes middleware', function () {
 
 it('redirects when user is not compliant', function () {
     $this->mock(IsUserCompliantService::class, function ($mock) {
-        $mock->shouldReceive('check')->with(Mockery::type(User::class))->andReturn(false);
-        $mock->shouldReceive('getMissingScopes')->with(Mockery::type(User::class))->andReturn(['scope1', 'scope2']);
+        // One resolution now serves both the decision and redirectTo(), and it keeps the character each
+        // missing scope belongs to.
+        $mock->shouldReceive('getMissingCharacterScopes')
+            ->once()
+            ->with(Mockery::type(User::class))
+            ->andReturn([[
+                'character' => CharacterInfo::factory()->make(),
+                'required_scopes' => ['scope1', 'scope2'],
+                'missing_scopes' => ['scope1', 'scope2'],
+            ]]);
     });
 
     $middleware = new CheckRequiredScopes(app(IsUserCompliantService::class));

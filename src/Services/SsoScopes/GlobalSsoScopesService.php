@@ -16,11 +16,27 @@ class GlobalSsoScopesService
         ]);
     }
 
+    /**
+     * The installation-wide required scopes, as a flat list.
+     *
+     * `selected_scopes` is itself an array, so plucking the column yields one nested array per row.
+     * Callers that diff scopes flattened defensively; RedirectSSOController merges the value straight
+     * into Socialite's scope list, where formatScopes() does implode(' ', $scopes) — a nested array
+     * there raises "Array to string conversion", which Laravel promotes to an ErrorException. So any
+     * installation that configured an instance-wide requirement got a 500 on sign-in and on
+     * add-character.
+     *
+     * @return array<int, string>
+     */
     public function get(): array
     {
         return SsoScopes::query()
             ->where('type', 'global')
             ->pluck('selected_scopes')
-            ->toArray();
+            ->flatten()
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
     }
 }
