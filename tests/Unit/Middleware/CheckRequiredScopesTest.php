@@ -342,6 +342,18 @@ describe('passes middleware', function () {
     });
 });
 
+it('lets an unauthenticated request through', function () {
+    // There is nobody to judge, and the compliance service takes a non-nullable User — so this would
+    // otherwise be a TypeError on any route reached before authentication.
+    $middleware = new CheckRequiredScopes;
+    $request = Mockery::mock(Request::class);
+    $request->shouldReceive('user')->andReturnNull();
+
+    $response = $middleware->handle($request, fn ($req) => response('OK'));
+
+    expect($response->getContent())->toBe('OK');
+});
+
 it('redirects when user is not compliant', function () {
     $this->mock(IsUserCompliantService::class, function ($mock) {
         // One resolution now serves both the decision and redirectTo(), and it keeps the character each
