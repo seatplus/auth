@@ -42,11 +42,14 @@ class CheckRequiredScopes
 
     public function handle(Request $request, Closure $next): Response
     {
-        /** @var User|null $user */
         $user = $request->user();
 
-        if ($user === null) {
-            return $next($request);
+        // Consumers are expected to mount this behind the 'auth' middleware, but nothing in this class
+        // can enforce that. Deny rather than pass if they have not: letting an unauthenticated request
+        // through would skip the scope check entirely, which is the opposite of the point. 403 matches
+        // SwitchMainCharacterController, the other place in this package that guards a null user.
+        if (! $user instanceof User) {
+            abort(403);
         }
 
         // Resolved once: this used to call check() and then getMissingScopes(), running the whole scope

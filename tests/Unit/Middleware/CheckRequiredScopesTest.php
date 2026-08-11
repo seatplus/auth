@@ -35,6 +35,7 @@ use Seatplus\Auth\Services\SsoScopes\IsUserCompliantService;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\RefreshToken;
 use Seatplus\Eveapi\Models\SsoScopes;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 beforeEach(function () {
     // $this->actingAs($this->test_user);
@@ -342,16 +343,20 @@ describe('passes middleware', function () {
     });
 });
 
-it('lets an unauthenticated request through', function () {
-    // There is nobody to judge, and the compliance service takes a non-nullable User — so this would
-    // otherwise be a TypeError on any route reached before authentication.
+it('denies an unauthenticated request rather than skipping the check', function () {
     $middleware = new CheckRequiredScopes;
     $request = Mockery::mock(Request::class);
     $request->shouldReceive('user')->andReturnNull();
 
-    $response = $middleware->handle($request, fn ($req) => response('OK'));
+    // Consumers are expected to mount this behind 'auth', but the class cannot enforce that — and the
+    // failure direction matters: passing the request on would skip scope enforcement altogether.
+    try {
+        $middleware->handle($request, fn ($req) => response('OK'));
 
-    expect($response->getContent())->toBe('OK');
+        test()->fail('An unauthenticated request should not have been allowed through.');
+    } catch (HttpException $exception) {
+        expect($exception->getStatusCode())->toBe(403);
+    }
 });
 
 it('redirects when user is not compliant', function () {
