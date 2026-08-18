@@ -11,3 +11,4 @@ build/
 .phpunit.cache
 .php-cs-fixer.cache
 
+.claude/skills
