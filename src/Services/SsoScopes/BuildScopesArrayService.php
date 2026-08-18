@@ -79,12 +79,13 @@ class BuildScopesArrayService
 
                 $required_scopes = [...$user_required_scopes, ...$this->getCharacterRequiredScopes($character)];
                 $token_scopes = $character->refreshToken->scopes ?? [];
-                $missing_scopes = array_diff($required_scopes, $token_scopes);
 
                 return [
                     'character' => $character,
                     'required_scopes' => $required_scopes,
-                    'missing_scopes' => $missing_scopes,
+                    // Reindexed: array_diff preserves keys, so a gap made this a sparse array that
+                    // json_encode emits as an object rather than a list.
+                    'missing_scopes' => array_values(array_diff($required_scopes, $token_scopes)),
                 ];
             })
             ->toArray();
@@ -120,19 +121,23 @@ class BuildScopesArrayService
 
     public function get(User|CharacterInfo $entity): array
     {
-        $user = User::query()
-            ->when($entity instanceof CharacterInfo, fn (Builder $query) => $query
+        // A User identifies itself; only a CharacterInfo has to be resolved to its owner. Constraining
+        // the query only in the CharacterInfo case left the User case unfiltered, so ->first() returned
+        // whichever user sorted first and every caller passing a User — IsUserCompliantService::check()
+        // always does — evaluated somebody else's tokens.
+        $user = $entity instanceof User
+            ? $entity
+            : User::query()
                 ->whereHas('characters', fn (Builder $query) => $query
                     ->where('character_infos.character_id', $entity->character_id)
                 )
-            )
-            ->with(self::USER_RELATIONS)
-            ->first();
+                ->first();
 
         if ($user === null) {
             return [];
         }
 
+        // build() -> getUserRequiredScopes() already loadMissing()es USER_RELATIONS.
         return $this->build($user);
     }
 }

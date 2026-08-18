@@ -42,14 +42,31 @@ class CheckRequiredScopes
 
     public function handle(Request $request, Closure $next): Response
     {
+        $user = $request->user();
 
-        return $this->isUserCompliantService->check($request->user())
+        // Consumers are expected to mount this behind the 'auth' middleware, but nothing in this class
+        // can enforce that. Deny rather than pass if they have not: letting an unauthenticated request
+        // through would skip the scope check entirely, which is the opposite of the point. 403 matches
+        // SwitchMainCharacterController, the other place in this package that guards a null user.
+        if (! $user instanceof User) {
+            abort(403);
+        }
+
+        // Resolved once: this used to call check() and then getMissingScopes(), running the whole scope
+        // build twice per request.
+        $missing_character_scopes = $this->isUserCompliantService->getMissingCharacterScopes($user);
+
+        return $missing_character_scopes === []
             ? $next($request)
-            : $this->redirectTo($this->isUserCompliantService->getMissingScopes($request->user()));
+            : $this->redirectTo($missing_character_scopes);
     }
 
     /*
-     * This method should return the user to a view where he needs to handle the addition of required scopes
+     * This method should return the user to a view where he needs to handle the addition of required scopes.
+     *
+     * Each entry is ['character' => CharacterInfo, 'required_scopes' => [...], 'missing_scopes' => [...]]
+     * — previously this received getMissingScopes(), which had already dropped the character, so an
+     * override could not tell which character needed which scope.
      */
     protected function redirectTo(array $missing_character_scopes): Response
     {

@@ -35,6 +35,7 @@ use Seatplus\Auth\Services\SsoScopes\IsUserCompliantService;
 use Seatplus\Eveapi\Models\Character\CharacterInfo;
 use Seatplus\Eveapi\Models\RefreshToken;
 use Seatplus\Eveapi\Models\SsoScopes;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 beforeEach(function () {
     // $this->actingAs($this->test_user);
@@ -342,10 +343,34 @@ describe('passes middleware', function () {
     });
 });
 
+it('denies an unauthenticated request rather than skipping the check', function () {
+    $middleware = new CheckRequiredScopes;
+    $request = Mockery::mock(Request::class);
+    $request->shouldReceive('user')->andReturnNull();
+
+    // Consumers are expected to mount this behind 'auth', but the class cannot enforce that — and the
+    // failure direction matters: passing the request on would skip scope enforcement altogether.
+    try {
+        $middleware->handle($request, fn ($req) => response('OK'));
+
+        test()->fail('An unauthenticated request should not have been allowed through.');
+    } catch (HttpException $exception) {
+        expect($exception->getStatusCode())->toBe(403);
+    }
+});
+
 it('redirects when user is not compliant', function () {
     $this->mock(IsUserCompliantService::class, function ($mock) {
-        $mock->shouldReceive('check')->with(Mockery::type(User::class))->andReturn(false);
-        $mock->shouldReceive('getMissingScopes')->with(Mockery::type(User::class))->andReturn(['scope1', 'scope2']);
+        // One resolution now serves both the decision and redirectTo(), and it keeps the character each
+        // missing scope belongs to.
+        $mock->shouldReceive('getMissingCharacterScopes')
+            ->once()
+            ->with(Mockery::type(User::class))
+            ->andReturn([[
+                'character' => CharacterInfo::factory()->make(),
+                'required_scopes' => ['scope1', 'scope2'],
+                'missing_scopes' => ['scope1', 'scope2'],
+            ]]);
     });
 
     $middleware = new CheckRequiredScopes(app(IsUserCompliantService::class));
